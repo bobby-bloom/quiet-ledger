@@ -221,6 +221,11 @@ class _PhoneHeader extends ConsumerWidget {
               icon: const Icon(Icons.bar_chart),
               onPressed: () => context.push('/reports'),
             ),
+            IconButton(
+              tooltip: l.dashEdit,
+              icon: const Icon(Icons.dashboard_customize_outlined),
+              onPressed: () => context.push('/home/edit'),
+            ),
           ],
         ),
       ),
@@ -294,17 +299,16 @@ class _WideHeader extends ConsumerWidget {
                 onPressed: () =>
                     ref.read(privacyModeProvider.notifier).toggle(),
               ),
-              const SizedBox(width: 4),
-              OutlinedButton.icon(
-                onPressed: () => context.push('/home/edit'),
+              IconButton(
+                tooltip: l.dashEdit,
                 icon: const Icon(Icons.dashboard_customize_outlined),
-                label: Text(l.dashEdit),
+                onPressed: () => context.push('/home/edit'),
               ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: () => showQuickAdd(context),
+              const SizedBox(width: 4),
+              IconButton.filled(
+                tooltip: l.dashNewTransaction,
                 icon: const Icon(Icons.add),
-                label: Text(l.dashNewTransaction),
+                onPressed: () => showQuickAdd(context),
               ),
             ],
           ),

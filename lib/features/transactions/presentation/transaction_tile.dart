@@ -34,6 +34,7 @@ class TransactionTile extends ConsumerWidget {
     this.showBalance = false,
     this.showDate = false,
     this.divider = false,
+    this.inset = Space.listInset,
   });
 
   final TxnListItem item;
@@ -59,6 +60,9 @@ class TransactionTile extends ConsumerWidget {
 
   /// Hairline on top (between rows of one group).
   final bool divider;
+
+  /// Horizontal padding of the row (0 inside a card that already pads).
+  final double inset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -137,7 +141,7 @@ class TransactionTile extends ConsumerWidget {
                       border: Border.all(color: cs.primary, width: 2),
                     )
                   : null,
-              padding: const EdgeInsets.symmetric(horizontal: Space.listInset),
+              padding: EdgeInsets.symmetric(horizontal: inset),
               child: Row(
                 children: [
                   leading,

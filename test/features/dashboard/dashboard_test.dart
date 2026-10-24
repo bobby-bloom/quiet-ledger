@@ -111,6 +111,7 @@ void main() {
       expect(find.textContaining('4,395'), findsWidgets);
       expect(find.text('Income'), findsOneWidget);
       expect(find.byType(DashboardGrid), findsOneWidget);
+      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
       expect(tester.takeException(), isNull);
     } finally {
       await teardown(tester);
@@ -123,7 +124,7 @@ void main() {
       await pumpAt(tester, const Size(1440, 1000));
       final grid = tester.widget<DashboardGrid>(find.byType(DashboardGrid));
       expect(grid.columns, 3);
-      expect(find.text('Edit dashboard'), findsOneWidget);
+      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
       expect(find.text('Recent transactions'), findsOneWidget);
       expect(find.text('Corner Grocer'), findsWidgets);
       expect(tester.takeException(), isNull);
