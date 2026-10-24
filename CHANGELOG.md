@@ -49,6 +49,8 @@ a dated release section.
 ### Fixed
 
 - Restoring a backup over existing transactions failed.
+- A scheduled backup to a folder on a drive that was not connected
+  recreated the folder on the system disk; it is now reported instead.
 - A newer database file could be stamped down to an older schema version.
 - macOS: added the sandbox entitlements for user-selected files and
   bookmarks, which saving a backup and backing up to a picked folder need.
