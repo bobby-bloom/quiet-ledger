@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/budgets/data/budget_providers.dart';
+import 'package:personal_finance/features/budgets/presentation/budget_actions.dart';
 import 'package:personal_finance/features/budgets/presentation/budgets_tab.dart';
 import 'package:personal_finance/features/goals/presentation/goals_tab.dart';
 import 'package:personal_finance/features/recurring/presentation/recurring_tab.dart';
@@ -92,6 +94,13 @@ class _PlanScreenState extends ConsumerState<PlanScreen>
       appBar: AppBar(
         title: Text(l.navPlan),
         actions: [
+          if (active == PlanTab.budgets)
+            IconButton(
+              tooltip: l.budgetsAdd,
+              icon: const Icon(Icons.add),
+              onPressed: () =>
+                  addBudget(context, ref, ref.read(shownBudgetPeriodProvider)),
+            ),
           if (active == PlanTab.recurring)
             IconButton(
               tooltip: l.recurringNew,

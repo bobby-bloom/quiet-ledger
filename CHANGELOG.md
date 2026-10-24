@@ -83,6 +83,8 @@ a dated release section.
   is remembered on this device.
 - Desktop sidebar can be collapsed to icons with the button at its
   bottom; the choice is remembered on this device.
+- Plan › Budgets adds a budget with the + in the header, like Recurring
+  and Goals, instead of a button below the list.
 
 ### Removed
 
