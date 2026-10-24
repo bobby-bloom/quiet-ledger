@@ -955,6 +955,192 @@ abstract class AppLocalizations {
   /// **'{count} receipt files were already missing when this backup was made and cannot be restored.'**
   String backupRestoreMissing(int count);
 
+  /// No description provided for @backupChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups'**
+  String get backupChannel;
+
+  /// No description provided for @backupHealthBackUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get backupHealthBackUp;
+
+  /// No description provided for @backupHealthDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get backupHealthDetails;
+
+  /// No description provided for @backupHealthFailing.
+  ///
+  /// In en, this message translates to:
+  /// **'The automatic backup failed: {message}'**
+  String backupHealthFailing(String message);
+
+  /// No description provided for @backupHealthInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'The last automatic backup did not finish.'**
+  String get backupHealthInterrupted;
+
+  /// No description provided for @backupHealthNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data has not been backed up yet.'**
+  String get backupHealthNever;
+
+  /// No description provided for @backupHealthStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}. Back up again so recent changes are safe.'**
+  String backupHealthStale(String date);
+
+  /// No description provided for @backupNotifyFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get backupNotifyFailedTitle;
+
+  /// No description provided for @backupNotifyFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your automatic backup could not be written. Open the app to fix it.'**
+  String get backupNotifyFailedBody;
+
+  /// No description provided for @backupResetKeepCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a safety copy on this device'**
+  String get backupResetKeepCopy;
+
+  /// No description provided for @backupResetKeepCopyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.'**
+  String get backupResetKeepCopyDesc;
+
+  /// No description provided for @backupSafetyActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get backupSafetyActions;
+
+  /// No description provided for @backupSafetyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get backupSafetyDelete;
+
+  /// No description provided for @backupSafetyDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the safety copy from {date}?'**
+  String backupSafetyDeleteConfirm(String date);
+
+  /// No description provided for @backupSafetyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.'**
+  String get backupSafetyDesc;
+
+  /// No description provided for @backupSafetyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety copies yet.'**
+  String get backupSafetyEmpty;
+
+  /// No description provided for @backupSafetyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety copy could be taken, so nothing was changed: {message}'**
+  String backupSafetyFailed(String message);
+
+  /// No description provided for @backupSafetyReasonImportUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Before undoing an import'**
+  String get backupSafetyReasonImportUndo;
+
+  /// No description provided for @backupSafetyReasonMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Before merging'**
+  String get backupSafetyReasonMerge;
+
+  /// No description provided for @backupSafetyReasonPurge.
+  ///
+  /// In en, this message translates to:
+  /// **'Before removing old deleted entries'**
+  String get backupSafetyReasonPurge;
+
+  /// No description provided for @backupSafetyReasonReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Before resetting the app'**
+  String get backupSafetyReasonReset;
+
+  /// No description provided for @backupSafetyReasonRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before restoring a backup'**
+  String get backupSafetyReasonRestore;
+
+  /// No description provided for @backupSafetyReasonRestoreCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Before restoring a safety copy'**
+  String get backupSafetyReasonRestoreCopy;
+
+  /// No description provided for @backupSafetyRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupSafetyRestore;
+
+  /// No description provided for @backupSafetyRestoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all current data with the safety copy from {date}? A safety copy of the current data is taken first, so you can go back.'**
+  String backupSafetyRestoreConfirm(String date);
+
+  /// No description provided for @backupSafetyRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety copy restored ({count} rows)'**
+  String backupSafetyRestored(int count);
+
+  /// No description provided for @backupSafetyRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{rows} rows · {size}'**
+  String backupSafetyRows(String rows, String size);
+
+  /// No description provided for @backupSafetySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save elsewhere'**
+  String get backupSafetySave;
+
+  /// No description provided for @backupSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety copies'**
+  String get backupSafetyTitle;
+
+  /// No description provided for @backupStaleDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Warn when the last backup is older than'**
+  String get backupStaleDays;
+
+  /// No description provided for @backupStaleDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String backupStaleDaysValue(int days);
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:
@@ -2938,13 +3124,13 @@ abstract class AppLocalizations {
   /// No description provided for @exportRestoreWarning.
   ///
   /// In en, this message translates to:
-  /// **'This replaces all data and settings on this device with the backup. It cannot be undone.'**
+  /// **'This replaces all data and settings on this device with the backup. A safety copy of the current data is kept on this device first (Export & backup › Safety copies).'**
   String get exportRestoreWarning;
 
   /// No description provided for @exportRestoreBackupFirst.
   ///
   /// In en, this message translates to:
-  /// **'Save a backup of the current data first'**
+  /// **'Also save a backup of the current data elsewhere'**
   String get exportRestoreBackupFirst;
 
   /// No description provided for @exportRestoreConfirm.
@@ -9639,7 +9825,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsUiResetAppMessage.
   ///
   /// In en, this message translates to:
-  /// **'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.'**
+  /// **'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type {word} to confirm.'**
   String settingsUiResetAppMessage(String word);
 
   /// No description provided for @settingsUiResetAppWord.

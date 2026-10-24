@@ -1,6 +1,29 @@
 import 'package:drift/drift.dart';
 import 'package:personal_finance/core/db/database.dart';
 
+/// Number of rows [purgeTombstones] would remove.
+Future<int> countPurgeableTombstones(
+  AppDatabase db,
+  Duration olderThan, {
+  DateTime? now,
+}) async {
+  final cutoffMs = (now ?? DateTime.now())
+      .subtract(olderThan)
+      .millisecondsSinceEpoch;
+  var total = 0;
+  for (final name in syncedTableNames) {
+    final r = await db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM "$name" '
+          'WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+          variables: [Variable<int>(cutoffMs)],
+        )
+        .getSingle();
+    total += r.data['n']! as int;
+  }
+  return total;
+}
+
 /// Hard-deletes soft-deleted rows whose `deleted_at` is older than
 /// [olderThan] in every synced table, together with their `change_log`
 /// entries (and stale full-text index rows). Returns the number of rows

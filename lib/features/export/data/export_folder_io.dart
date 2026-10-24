@@ -27,6 +27,12 @@ class IoExportFolder implements ExportFolder {
   }
 
   @override
+  Future<Uint8List?> readFile(String name) async {
+    final f = File(p.join(path, name));
+    return f.existsSync() ? await f.readAsBytes() : null;
+  }
+
+  @override
   Future<List<String>> listFiles() async {
     if (!_dir.existsSync()) return const [];
     return await _dir

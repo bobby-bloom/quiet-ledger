@@ -12,6 +12,10 @@ abstract interface class ExportFolder {
   /// Writes [name] (overwriting), atomically where the platform allows.
   Future<void> writeFile(String name, Uint8List bytes);
 
+  /// The content of [name], null when it does not exist. Used to verify a
+  /// backup after writing it.
+  Future<Uint8List?> readFile(String name);
+
   /// File names (not paths) directly inside the folder.
   Future<List<String>> listFiles();
 
@@ -33,6 +37,9 @@ class MemoryExportFolder implements ExportFolder {
   @override
   Future<void> writeFile(String name, Uint8List bytes) async =>
       files[name] = bytes;
+
+  @override
+  Future<Uint8List?> readFile(String name) async => files[name];
 
   @override
   Future<List<String>> listFiles() async => files.keys.toList();

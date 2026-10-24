@@ -553,6 +553,125 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get backupChannel => 'Backups';
+
+  @override
+  String get backupHealthBackUp => 'Back up now';
+
+  @override
+  String get backupHealthDetails => 'Details';
+
+  @override
+  String backupHealthFailing(String message) {
+    return 'The automatic backup failed: $message';
+  }
+
+  @override
+  String get backupHealthInterrupted =>
+      'The last automatic backup did not finish.';
+
+  @override
+  String get backupHealthNever => 'Your data has not been backed up yet.';
+
+  @override
+  String backupHealthStale(String date) {
+    return 'Last backup: $date. Back up again so recent changes are safe.';
+  }
+
+  @override
+  String get backupNotifyFailedTitle => 'Backup failed';
+
+  @override
+  String get backupNotifyFailedBody =>
+      'Your automatic backup could not be written. Open the app to fix it.';
+
+  @override
+  String get backupResetKeepCopy => 'Keep a safety copy on this device';
+
+  @override
+  String get backupResetKeepCopyDesc =>
+      'Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.';
+
+  @override
+  String get backupSafetyActions => 'Actions';
+
+  @override
+  String get backupSafetyDelete => 'Delete';
+
+  @override
+  String backupSafetyDeleteConfirm(String date) {
+    return 'Delete the safety copy from $date?';
+  }
+
+  @override
+  String get backupSafetyDesc =>
+      'Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.';
+
+  @override
+  String get backupSafetyEmpty => 'No safety copies yet.';
+
+  @override
+  String backupSafetyFailed(String message) {
+    return 'No safety copy could be taken, so nothing was changed: $message';
+  }
+
+  @override
+  String get backupSafetyReasonImportUndo => 'Before undoing an import';
+
+  @override
+  String get backupSafetyReasonMerge => 'Before merging';
+
+  @override
+  String get backupSafetyReasonPurge => 'Before removing old deleted entries';
+
+  @override
+  String get backupSafetyReasonReset => 'Before resetting the app';
+
+  @override
+  String get backupSafetyReasonRestore => 'Before restoring a backup';
+
+  @override
+  String get backupSafetyReasonRestoreCopy => 'Before restoring a safety copy';
+
+  @override
+  String get backupSafetyRestore => 'Restore';
+
+  @override
+  String backupSafetyRestoreConfirm(String date) {
+    return 'Replace all current data with the safety copy from $date? A safety copy of the current data is taken first, so you can go back.';
+  }
+
+  @override
+  String backupSafetyRestored(int count) {
+    return 'Safety copy restored ($count rows)';
+  }
+
+  @override
+  String backupSafetyRows(String rows, String size) {
+    return '$rows rows · $size';
+  }
+
+  @override
+  String get backupSafetySave => 'Save elsewhere';
+
+  @override
+  String get backupSafetyTitle => 'Safety copies';
+
+  @override
+  String get backupStaleDays => 'Warn when the last backup is older than';
+
+  @override
+  String backupStaleDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -1776,11 +1895,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportRestoreWarning =>
-      'This replaces all data and settings on this device with the backup. It cannot be undone.';
+      'This replaces all data and settings on this device with the backup. A safety copy of the current data is kept on this device first (Export & backup › Safety copies).';
 
   @override
   String get exportRestoreBackupFirst =>
-      'Save a backup of the current data first';
+      'Also save a backup of the current data elsewhere';
 
   @override
   String get exportRestoreConfirm => 'Replace all data';
@@ -5818,7 +5937,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsUiResetAppMessage(String word) {
-    return 'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type $word to confirm.';
+    return 'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type $word to confirm.';
   }
 
   @override

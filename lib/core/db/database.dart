@@ -36,9 +36,15 @@ const syncedTableNames = <String>[
 ];
 
 /// Tables deliberately left out of backups: sync bookkeeping (reset by a
-/// restore) and the full-text index (rebuilt from `transactions`). Every
-/// other table must be in [syncedTableNames]; a test enforces this.
-const backupExcludedTables = <String>{'change_log', 'sync_state', 'txn_search'};
+/// restore), the full-text index (rebuilt from `transactions`) and the
+/// on-device safety copies. Every other table must be in
+/// [syncedTableNames]; a test enforces this.
+const backupExcludedTables = <String>{
+  'change_log',
+  'sync_state',
+  'txn_search',
+  'safety_copies',
+};
 
 /// The database file was written by a newer app version (schema [found] >
 /// [supported]). Opening is refused so the file is never downgraded.
@@ -79,6 +85,7 @@ class NewerDatabaseException implements Exception {
     Settings,
     ChangeLog,
     SyncState,
+    SafetyCopies,
   ],
   include: {'search.drift'},
 )
@@ -86,7 +93,10 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => currentSchemaVersion;
+
+  /// Schema version this build creates and migrates to.
+  static const currentSchemaVersion = 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -104,6 +114,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createIndex(changeLogEntity);
         await m.createTrigger(txnSearchCatAu);
         await m.createTrigger(txnSearchTagnameAu);
+      }
+      if (from < 3) {
+        // v3: on-device safety copies.
+        await m.createTable(safetyCopies);
       }
     },
     beforeOpen: (details) async {

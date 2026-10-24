@@ -12,6 +12,7 @@ import 'package:personal_finance/core/csv/csv_writer.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
 import 'package:personal_finance/core/sync/raw_rows.dart';
+import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 
 // Full backup bundle (PLAN.md §2.6): a zip with one CSV per synced table
@@ -29,11 +30,12 @@ const restoreMarkerEntity = '_restore';
 
 /// Settings that describe this device rather than the data set. A restore
 /// keeps the current device's values for these.
-const deviceLocalSettingKeys = {
+final deviceLocalSettingKeys = {
   'export.autoExportFolder',
   'export.lastAutoExport',
   'data.storageLocation',
   'data.lastTombstonePurge',
+  ...BackupSettings.deviceLocalKeys,
 };
 
 /// A parsed table of a bundle: column names and raw SQL rows.
@@ -62,12 +64,15 @@ String _sha256(List<int> bytes) => sha256.convert(bytes).toString();
 /// Writes all synced tables (including soft-deleted rows and all sync
 /// columns) and the receipt files of all attachments (also soft-deleted
 /// ones, so undo keeps working after a restore) into a bundle zip.
+/// [includeReceiptFiles] false leaves the files out (on-device safety
+/// copies, whose receipt files stay where they are).
 Future<Uint8List> exportBundle(
   AppDatabase db, {
   required String deviceId,
   String appVersion = app.appVersion,
   DateTime? now,
   ReceiptStore receipts = const PlatformReceiptStore(),
+  bool includeReceiptFiles = true,
 }) async {
   final writer = CsvWriter(CsvOptions.bundle);
   final archive = Archive();
@@ -98,7 +103,8 @@ Future<Uint8List> exportBundle(
   final files = <String, BundleFileInfo>{};
   final written = <String>{};
   final missing = <String>[];
-  for (final a in attachments) {
+  for (final a
+      in includeReceiptFiles ? attachments : const <Map<String, Object?>>[]) {
     final path = a['file_path'] as String?;
     if (path == null || a['data'] != null) continue;
     final id = a['id']! as String;

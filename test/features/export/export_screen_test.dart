@@ -144,12 +144,20 @@ void main() {
       ),
     );
     expect(runNow.onPressed, isNull);
-    await tester.tap(find.byTooltip('Decrease'));
+    // Keep last N, then the stale-backup warning threshold.
+    await tester.tap(find.byTooltip('Decrease').first);
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
     await tester.pumpAndSettle();
     expect(find.text('9'), findsOneWidget);
+    expect(find.text('7 days'), findsOneWidget);
+    await tester.tap(find.byTooltip('Increase').last);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('8 days'), findsOneWidget);
     await unmount(tester);
   });
 

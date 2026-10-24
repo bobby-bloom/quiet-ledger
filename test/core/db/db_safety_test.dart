@@ -58,6 +58,35 @@ void main() {
       expect(db(second!).readAsBytesSync(), [2]);
     });
 
+    test(
+      'pre-migration copy is byte-identical and keeps the newest 3',
+      () async {
+        db(tmp.path).writeAsBytesSync([9, 8, 7]);
+        db(tmp.path, '-wal').writeAsBytesSync([6]);
+        String? last;
+        for (var m = 0; m < 5; m++) {
+          last = await copyDatabaseBeforeMigration(
+            label: 'v2',
+            supportDirectory: tmp.path,
+            now: DateTime(2026, 10, 24, 9, m),
+          );
+        }
+        expect(db(last!).readAsBytesSync(), [9, 8, 7]);
+        expect(db(last, '-wal').readAsBytesSync(), [6]);
+        // The original stays in place.
+        expect(db(tmp.path).readAsBytesSync(), [9, 8, 7]);
+        final copies = [
+          for (final d in Directory(p.join(tmp.path, 'safety')).listSync())
+            p.basename(d.path),
+        ]..sort();
+        expect(copies, [
+          'pre-migration-v2-20261024-090200',
+          'pre-migration-v2-20261024-090300',
+          'pre-migration-v2-20261024-090400',
+        ]);
+      },
+    );
+
     test('no database file: nothing to do', () async {
       expect(await quarantineDatabaseFiles(supportDirectory: tmp.path), isNull);
     });

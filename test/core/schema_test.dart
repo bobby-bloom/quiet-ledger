@@ -65,7 +65,7 @@ void main() {
     expect(await _matches(db, 'trip'), 0);
   });
 
-  test('a v1 database upgrades to v2', () async {
+  test('a v1 database upgrades to the current schema', () async {
     // Create a v1 database: full schema, then drop the v2 additions and set
     // user_version = 1.
     final raw = sqlite3.openInMemory();
@@ -79,6 +79,7 @@ void main() {
       'DROP INDEX change_log_entity',
       'DROP TRIGGER txn_search_cat_au',
       'DROP TRIGGER txn_search_tagname_au',
+      'DROP TABLE safety_copies',
       'PRAGMA user_version = 1',
     ]) {
       await v1.customStatement(s);
@@ -104,6 +105,24 @@ void main() {
       ]),
     );
     final version = await v2.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 2);
+    expect(version.data.values.first, AppDatabase.currentSchemaVersion);
+    await v2.customSelect('SELECT count(*) FROM safety_copies').get();
+  });
+
+  test('a v2 database upgrades to v3 and keeps its data', () async {
+    final raw = sqlite3.openInMemory();
+    final v2 = AppDatabase(
+      NativeDatabase.opened(raw, closeUnderlyingOnClose: false),
+    );
+    final w = SyncWriter(v2, testClock(), 'd');
+    await w.insert(v2.tags, const TagsCompanion(name: Value('kept')));
+    await v2.customStatement('DROP TABLE safety_copies');
+    await v2.customStatement('PRAGMA user_version = 2');
+    await v2.close();
+
+    final v3 = AppDatabase(NativeDatabase.opened(raw));
+    addTearDown(v3.close);
+    expect((await v3.select(v3.tags).get()).single.name, 'kept');
+    expect(await v3.select(v3.safetyCopies).get(), isEmpty);
   });
 }

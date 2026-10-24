@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _prefDeviceId = 'sync.deviceId';
 const _prefDbEncrypted = 'db.encrypted';
 const _secureDbKey = 'db.key';
+const _prefSchemaVersion = 'db.schemaVersion';
 
 /// Everything opened before `runApp`.
 class BootstrapResult {
@@ -48,6 +49,15 @@ Future<BootstrapResult> bootstrap() async {
 
   final key = await _encryptionKey(prefs);
   final storage = bootstrapSnapshot(prefs).get(DataSettings.storageLocation);
+  // Copy the file aside before a schema migration (or once, when the
+  // version this device last opened is unknown).
+  final opened = prefs.getInt(_prefSchemaVersion);
+  if (opened == null || opened < AppDatabase.currentSchemaVersion) {
+    await copyDatabaseBeforeMigration(
+      label: 'v${opened ?? 'unknown'}',
+      directory: storage.isEmpty ? null : storage,
+    );
+  }
   final db = AppDatabase(
     openAppConnection(
       name: appDbName,
@@ -60,6 +70,9 @@ Future<BootstrapResult> bootstrap() async {
   try {
     clock = await restoreClock(db, deviceId);
     settings = await loadSettings(db);
+    if (opened != AppDatabase.currentSchemaVersion) {
+      await prefs.setInt(_prefSchemaVersion, AppDatabase.currentSchemaVersion);
+    }
   } on Object {
     // Release the file so it can be retried or moved aside.
     await db.close();

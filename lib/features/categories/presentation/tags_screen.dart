@@ -11,6 +11,7 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/categories/data/tags_repository.dart';
 import 'package:personal_finance/features/categories/presentation/appearance_pickers.dart';
 import 'package:personal_finance/features/categories/presentation/module_notice.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 
 /// `/more/tags`: create, edit, archive, merge and delete tags.
 class TagsScreen extends ConsumerStatefulWidget {
@@ -244,7 +245,18 @@ class _TagRow extends ConsumerWidget {
       confirmLabel: l.categoriesMergeAction,
     );
     if (!ok) return;
-    await ref.read(tagsRepositoryProvider).merge(tag.id, target.id);
+    try {
+      await withSafetyCopy(
+        ref.read,
+        SafetyReason.merge,
+        () => ref.read(tagsRepositoryProvider).merge(tag.id, target.id),
+      );
+    } on SafetyCopyException catch (e) {
+      if (context.mounted) {
+        showSnack(context, l.backupSafetyFailed('${e.cause}'));
+      }
+      return;
+    }
     if (context.mounted) {
       showSnack(context, l.categoriesMerged('#${tag.name}', '#${target.name}'));
     }

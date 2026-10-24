@@ -12,6 +12,7 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/categories/data/categories_repository.dart';
 import 'package:personal_finance/features/categories/domain/drafts.dart';
 import 'package:personal_finance/features/categories/presentation/appearance_pickers.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Opens the category editor (sheet on phones, dialog otherwise). Pass
@@ -391,12 +392,18 @@ Future<void> mergeCategoryFlow(
   );
   if (!ok || !context.mounted) return;
   try {
-    await ref.read(categoriesRepositoryProvider).merge(source.id, target.id);
+    await withSafetyCopy(
+      ref.read,
+      SafetyReason.merge,
+      () => ref.read(categoriesRepositoryProvider).merge(source.id, target.id),
+    );
     if (context.mounted) {
       showSnack(context, l.categoriesMerged(source.name, target.name));
     }
   } on CategoryException catch (e) {
     if (context.mounted) showSnack(context, categoryErrorText(l, e.error));
+  } on SafetyCopyException catch (e) {
+    if (context.mounted) showSnack(context, l.backupSafetyFailed('${e.cause}'));
   }
 }
 

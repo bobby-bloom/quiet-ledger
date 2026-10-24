@@ -10,6 +10,9 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/auto_export.dart';
+import 'package:personal_finance/features/export/domain/backup_health.dart';
+import 'package:personal_finance/features/export/domain/backup_settings.dart';
+import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 
 /// Automatic backup settings (`/more/export/folder`): schedule, folder,
@@ -61,6 +64,10 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
       .read(settingsProvider.notifier)
       .set(ImportExportSettings.autoExportKeep, v.clamp(1, 100));
 
+  Future<void> _setStaleDays(int v) => ref
+      .read(settingsProvider.notifier)
+      .set(BackupSettings.staleDays, v.clamp(1, 90));
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -88,6 +95,9 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
     final last = DateTime.tryParse(
       s.get(ImportExportSettings.lastAutoExport) ?? '',
     );
+    final error = s.get(BackupSettings.lastError);
+    final staleDays = s.get(BackupSettings.staleDays);
+    final health = ref.watch(backupHealthProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l.exportAutoTitle)),
@@ -197,6 +207,40 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                       const Divider(height: 1),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.notifications_outlined),
+                        title: Text(l.backupStaleDays),
+                        subtitle: Text(l.backupStaleDaysValue(staleDays)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: l.exportDecrease,
+                              onPressed: staleDays > 1
+                                  ? () => _setStaleDays(staleDays - 1)
+                                  : null,
+                              icon: const Icon(Icons.remove),
+                            ),
+                            SizedBox(
+                              width: Space.xl,
+                              child: Text(
+                                '$staleDays',
+                                textAlign: TextAlign.center,
+                                style: context.text.titleMedium,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: l.exportIncrease,
+                              onPressed: staleDays < 90
+                                  ? () => _setStaleDays(staleDays + 1)
+                                  : null,
+                              icon: const Icon(Icons.add),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.event_available_outlined),
                         title: Text(
                           last == null
@@ -207,6 +251,19 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                                 ),
                         ),
                       ),
+                      if (error != null ||
+                          health.status == BackupStatus.interrupted)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: Space.xs),
+                          child: Text(
+                            error == null
+                                ? l.backupHealthInterrupted
+                                : l.backupHealthFailing(error),
+                            style: context.text.bodySmall?.copyWith(
+                              color: context.colors.error,
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: Space.xs),
                       Align(
                         alignment: AlignmentDirectional.centerEnd,

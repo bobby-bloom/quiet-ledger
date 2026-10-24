@@ -71,7 +71,7 @@
   "settingsUiResetApp": "App zurücksetzen",
   "settingsUiResetAppDesc": "Alle Daten auf diesem Gerät löschen und neu beginnen",
   "settingsUiResetAppTitle": "Alle Daten löschen?",
-  "settingsUiResetAppMessage": "Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Das lässt sich nicht rückgängig machen – exportiere vorher eine Sicherung, falls du die Daten noch brauchst. Gib zur Bestätigung {word} ein.",
+  "settingsUiResetAppMessage": "Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Gib zur Bestätigung {word} ein.",
   "settingsUiResetAppWord": "LÖSCHEN",
   "settingsUiTypeToConfirm": "{word} eingeben",
   "settingsUiResetAppConfirm": "Alles löschen",

@@ -559,6 +559,131 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get backupChannel => 'Sicherungen';
+
+  @override
+  String get backupHealthBackUp => 'Jetzt sichern';
+
+  @override
+  String get backupHealthDetails => 'Details';
+
+  @override
+  String backupHealthFailing(String message) {
+    return 'Die automatische Sicherung ist fehlgeschlagen: $message';
+  }
+
+  @override
+  String get backupHealthInterrupted =>
+      'Die letzte automatische Sicherung wurde nicht abgeschlossen.';
+
+  @override
+  String get backupHealthNever => 'Deine Daten wurden noch nicht gesichert.';
+
+  @override
+  String backupHealthStale(String date) {
+    return 'Letzte Sicherung: $date. Sichere erneut, damit auch neue Änderungen sicher sind.';
+  }
+
+  @override
+  String get backupNotifyFailedTitle => 'Sicherung fehlgeschlagen';
+
+  @override
+  String get backupNotifyFailedBody =>
+      'Deine automatische Sicherung konnte nicht geschrieben werden. Öffne die App, um das zu beheben.';
+
+  @override
+  String get backupResetKeepCopy =>
+      'Sicherheitskopie auf diesem Gerät behalten';
+
+  @override
+  String get backupResetKeepCopyDesc =>
+      'Damit lässt sich das Zurücksetzen unter Mehr › Export & Sicherung › Sicherheitskopien rückgängig machen. Abwählen, um auch die Sicherheitskopien zu löschen.';
+
+  @override
+  String get backupSafetyActions => 'Aktionen';
+
+  @override
+  String get backupSafetyDelete => 'Löschen';
+
+  @override
+  String backupSafetyDeleteConfirm(String date) {
+    return 'Sicherheitskopie vom $date löschen?';
+  }
+
+  @override
+  String get backupSafetyDesc =>
+      'Werden automatisch erstellt vor dem Wiederherstellen, dem Zurücksetzen, dem Rückgängigmachen eines Imports, dem Zusammenführen von Kategorien oder Tags und dem Entfernen alter gelöschter Einträge. Sie bleiben auf diesem Gerät und enthalten alle Daten außer Belegdateien, die diese Aktionen nie löschen. Die neuesten 10 werden behalten.';
+
+  @override
+  String get backupSafetyEmpty => 'Noch keine Sicherheitskopien.';
+
+  @override
+  String backupSafetyFailed(String message) {
+    return 'Es konnte keine Sicherheitskopie erstellt werden, deshalb wurde nichts geändert: $message';
+  }
+
+  @override
+  String get backupSafetyReasonImportUndo =>
+      'Vor dem Rückgängigmachen eines Imports';
+
+  @override
+  String get backupSafetyReasonMerge => 'Vor dem Zusammenführen';
+
+  @override
+  String get backupSafetyReasonPurge =>
+      'Vor dem Entfernen alter gelöschter Einträge';
+
+  @override
+  String get backupSafetyReasonReset => 'Vor dem Zurücksetzen der App';
+
+  @override
+  String get backupSafetyReasonRestore =>
+      'Vor dem Wiederherstellen einer Sicherung';
+
+  @override
+  String get backupSafetyReasonRestoreCopy =>
+      'Vor dem Wiederherstellen einer Sicherheitskopie';
+
+  @override
+  String get backupSafetyRestore => 'Wiederherstellen';
+
+  @override
+  String backupSafetyRestoreConfirm(String date) {
+    return 'Alle aktuellen Daten durch die Sicherheitskopie vom $date ersetzen? Vorher wird eine Sicherheitskopie der aktuellen Daten erstellt, damit du zurück kannst.';
+  }
+
+  @override
+  String backupSafetyRestored(int count) {
+    return 'Sicherheitskopie wiederhergestellt ($count Zeilen)';
+  }
+
+  @override
+  String backupSafetyRows(String rows, String size) {
+    return '$rows Zeilen · $size';
+  }
+
+  @override
+  String get backupSafetySave => 'Woanders speichern';
+
+  @override
+  String get backupSafetyTitle => 'Sicherheitskopien';
+
+  @override
+  String get backupStaleDays =>
+      'Warnen, wenn die letzte Sicherung älter ist als';
+
+  @override
+  String backupStaleDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tage',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -1788,11 +1913,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exportRestoreWarning =>
-      'Alle Daten und Einstellungen auf diesem Gerät werden durch die Sicherung ersetzt. Das kann nicht rückgängig gemacht werden.';
+      'Alle Daten und Einstellungen auf diesem Gerät werden durch die Sicherung ersetzt. Vorher wird eine Sicherheitskopie der aktuellen Daten auf diesem Gerät behalten (Export & Sicherung › Sicherheitskopien).';
 
   @override
   String get exportRestoreBackupFirst =>
-      'Vorher eine Sicherung der aktuellen Daten speichern';
+      'Zusätzlich eine Sicherung der aktuellen Daten woanders speichern';
 
   @override
   String get exportRestoreConfirm => 'Alle Daten ersetzen';
@@ -5844,7 +5969,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String settingsUiResetAppMessage(String word) {
-    return 'Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Das lässt sich nicht rückgängig machen – exportiere vorher eine Sicherung, falls du die Daten noch brauchst. Gib zur Bestätigung $word ein.';
+    return 'Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Gib zur Bestätigung $word ein.';
   }
 
   @override

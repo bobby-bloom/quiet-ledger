@@ -49,3 +49,56 @@ Future<String?> quarantineDatabaseFiles({
   }
   return to.path;
 }
+
+/// Copies the database files in [directory] (default: app support) to
+/// `<app support>/safety/pre-migration-<label>-<yyyyMMdd-HHmmss>/` before a
+/// schema migration runs. The copy is byte-identical (an encrypted file
+/// stays encrypted with the same key). Keeps the newest [keep] copies.
+/// Returns the folder, or null when there is no database file yet. Throws
+/// when the copy fails, so the migration does not run.
+Future<String?> copyDatabaseBeforeMigration({
+  required String label,
+  String? directory,
+  DateTime? now,
+  String? supportDirectory,
+  int keep = 3,
+}) async {
+  final support =
+      supportDirectory ?? (await getApplicationSupportDirectory()).path;
+  final from = directory ?? support;
+  if (!File(p.join(from, '$appDbName.sqlite')).existsSync()) return null;
+  final stamp = DateFormat('yyyyMMdd-HHmmss').format(now ?? DateTime.now());
+  final safety = Directory(p.join(support, 'safety'));
+  var to = Directory(p.join(safety.path, 'pre-migration-$label-$stamp'));
+  for (var n = 2; to.existsSync(); n++) {
+    to = Directory(p.join(safety.path, 'pre-migration-$label-$stamp-$n'));
+  }
+  await to.create(recursive: true);
+  for (final s in _suffixes) {
+    final f = File(p.join(from, '$appDbName.sqlite$s'));
+    if (!f.existsSync()) continue;
+    final target = File(p.join(to.path, '$appDbName.sqlite$s'));
+    await f.copy(target.path);
+    if (target.lengthSync() != f.lengthSync()) {
+      throw FileSystemException('Incomplete copy', target.path);
+    }
+  }
+  // Newest first by the timestamp in the name (`…-<stamp>[-n]`).
+  final stampOf = RegExp(r'(\d{8}-\d{6})(?:-(\d+))?$');
+  String key(Directory d) {
+    final m = stampOf.firstMatch(p.basename(d.path));
+    return m == null ? '' : '${m[1]}-${(m[2] ?? '1').padLeft(4, '0')}';
+  }
+
+  final old =
+      safety
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => p.basename(d.path).startsWith('pre-migration-'))
+          .toList()
+        ..sort((a, b) => key(b).compareTo(key(a)));
+  for (final d in old.skip(keep)) {
+    if (d.path != to.path) await d.delete(recursive: true);
+  }
+  return to.path;
+}

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/import/data/import_repository.dart';
 import 'package:personal_finance/features/import/data/import_service.dart';
 import 'package:personal_finance/features/import/data/profile_repository.dart';
@@ -592,7 +593,16 @@ class ImportWizardController extends Notifier<ImportWizardState> {
     final c = state.committed;
     if (c == null) return;
     state = state.copyWith(busy: true);
-    await ref.read(importRepositoryProvider).undo(c.batchId);
+    try {
+      await withSafetyCopy(
+        ref.read,
+        SafetyReason.importUndo,
+        () => ref.read(importRepositoryProvider).undo(c.batchId),
+      );
+    } on SafetyCopyException catch (e) {
+      state = state.copyWith(busy: false, error: e);
+      return;
+    }
     state = state.copyWith(busy: false, committed: null, preparation: null);
     await _reinitConfigKeepingChoices();
   }

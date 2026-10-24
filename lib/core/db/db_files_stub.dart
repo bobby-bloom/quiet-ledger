@@ -6,5 +6,13 @@ Future<String?> quarantineDatabaseFiles({
   String? directory,
   DateTime? now,
   String? supportDirectory,
-}) =>
-    throw UnsupportedError('No file system on this platform');
+}) => throw UnsupportedError('No file system on this platform');
+
+/// See the io implementation. The web has no database file to copy.
+Future<String?> copyDatabaseBeforeMigration({
+  required String label,
+  String? directory,
+  DateTime? now,
+  String? supportDirectory,
+  int keep = 3,
+}) async => null;

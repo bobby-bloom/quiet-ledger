@@ -42,5 +42,95 @@
         "type": "int"
       }
     }
+  },
+  "backupChannel": "Backups",
+  "backupHealthBackUp": "Back up now",
+  "backupHealthDetails": "Details",
+  "backupHealthFailing": "The automatic backup failed: {message}",
+  "@backupHealthFailing": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "backupHealthInterrupted": "The last automatic backup did not finish.",
+  "backupHealthNever": "Your data has not been backed up yet.",
+  "backupHealthStale": "Last backup: {date}. Back up again so recent changes are safe.",
+  "@backupHealthStale": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNotifyFailedTitle": "Backup failed",
+  "backupNotifyFailedBody": "Your automatic backup could not be written. Open the app to fix it.",
+  "backupResetKeepCopy": "Keep a safety copy on this device",
+  "backupResetKeepCopyDesc": "Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.",
+  "backupSafetyActions": "Actions",
+  "backupSafetyDelete": "Delete",
+  "backupSafetyDeleteConfirm": "Delete the safety copy from {date}?",
+  "@backupSafetyDeleteConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyDesc": "Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.",
+  "backupSafetyEmpty": "No safety copies yet.",
+  "backupSafetyFailed": "No safety copy could be taken, so nothing was changed: {message}",
+  "@backupSafetyFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyReasonImportUndo": "Before undoing an import",
+  "backupSafetyReasonMerge": "Before merging",
+  "backupSafetyReasonPurge": "Before removing old deleted entries",
+  "backupSafetyReasonReset": "Before resetting the app",
+  "backupSafetyReasonRestore": "Before restoring a backup",
+  "backupSafetyReasonRestoreCopy": "Before restoring a safety copy",
+  "backupSafetyRestore": "Restore",
+  "backupSafetyRestoreConfirm": "Replace all current data with the safety copy from {date}? A safety copy of the current data is taken first, so you can go back.",
+  "@backupSafetyRestoreConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyRestored": "Safety copy restored ({count} rows)",
+  "@backupSafetyRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupSafetyRows": "{rows} rows · {size}",
+  "@backupSafetyRows": {
+    "placeholders": {
+      "rows": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetySave": "Save elsewhere",
+  "backupSafetyTitle": "Safety copies",
+  "backupStaleDays": "Warn when the last backup is older than",
+  "backupStaleDaysValue": "{days, plural, =1{1 day} other{{days} days}}",
+  "@backupStaleDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   }
 }

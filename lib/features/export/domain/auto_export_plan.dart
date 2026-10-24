@@ -38,9 +38,15 @@ String autoExportFileName(DateTime now) =>
 bool isAutoExportFile(String name) => _fileName.hasMatch(name);
 
 /// Automatic backup files to delete so that only the newest [keep] remain.
-/// Other files in the folder are never touched.
-List<String> autoExportFilesToPrune(Iterable<String> names, int keep) {
-  final ours = names.where(isAutoExportFile).toList()
+/// Other files in the folder are never touched, and neither is [protect]
+/// (the backup just written: after a clock change it may sort as oldest).
+List<String> autoExportFilesToPrune(
+  Iterable<String> names,
+  int keep, {
+  String? protect,
+}) {
+  final ours = names.where((n) => isAutoExportFile(n) && n != protect).toList()
     ..sort((a, b) => b.compareTo(a));
-  return ours.length <= keep ? const [] : ours.sublist(keep);
+  final rest = protect == null ? keep : keep - 1;
+  return ours.length <= rest ? const [] : ours.sublist(rest.clamp(0, keep));
 }

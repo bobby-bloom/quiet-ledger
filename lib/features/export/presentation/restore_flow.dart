@@ -13,8 +13,10 @@ import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/auto_export.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 
@@ -41,6 +43,7 @@ Future<SaveResult?> createBackup(
       sharePositionOrigin: origin,
     );
     if (r.ok) {
+      await recordVerifiedBackup(ref.read);
       messenger?.showSnackBar(
         SnackBar(
           content: Text(
@@ -58,8 +61,9 @@ Future<SaveResult?> createBackup(
   }
 }
 
-/// Pick → validate → summary → confirm (destructive, optional safety
-/// backup) → restore in one transaction → refresh.
+/// Pick → validate → summary → confirm (destructive, optional backup saved
+/// elsewhere) → safety copy on this device → restore in one transaction →
+/// refresh. Without a safety copy nothing is restored.
 Future<void> startRestore(
   BuildContext context,
   WidgetRef ref, {
@@ -135,15 +139,24 @@ Future<void> startRestore(
     ),
   ).ignore();
   try {
-    final rows = await restoreBundle(
-      db,
-      contents,
-      clock: ref.read(hlcClockProvider),
-      receipts: ref.read(receiptStoreProvider),
+    final rows = await withSafetyCopy(
+      ref.read,
+      SafetyReason.restore,
+      () => restoreBundle(
+        db,
+        contents,
+        clock: ref.read(hlcClockProvider),
+        receipts: ref.read(receiptStoreProvider),
+      ),
     );
     navigator.pop();
     await refreshAfterDataReplace(ref);
     messenger?.showSnackBar(SnackBar(content: Text(l.exportRestoreDone(rows))));
+  } on SafetyCopyException catch (e) {
+    navigator.pop();
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l.backupSafetyFailed('${e.cause}'))),
+    );
   } on Object catch (e) {
     navigator.pop();
     messenger?.showSnackBar(

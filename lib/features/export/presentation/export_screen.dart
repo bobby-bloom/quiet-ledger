@@ -16,6 +16,7 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/transaction_export.dart';
 import 'package:personal_finance/features/export/domain/export_period.dart';
 import 'package:personal_finance/features/export/domain/txn_export.dart';
+import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/export/presentation/csv_options_sheet.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
@@ -230,10 +231,15 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       }),
     );
     final auto = caps.chooseFolder ? const _AutoExportCard() : null;
+    final banner = BackupHealthBanner(
+      onBackUp: () => _run(() async {
+        await createBackup(context, ref);
+      }),
+    );
 
     final Widget body;
     if (size.isExpanded) {
-      body = Row(
+      final columns = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
@@ -252,10 +258,15 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           Expanded(flex: 6, child: preview),
         ],
       );
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [banner, columns],
+      );
     } else {
       body = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          banner,
           txnCard,
           const SizedBox(height: Space.md),
           preview,
@@ -601,6 +612,13 @@ class _BackupCard extends StatelessWidget {
             spacing: Space.xs,
             runSpacing: Space.xs,
             children: [
+              TextButton.icon(
+                onPressed: busy
+                    ? null
+                    : () => context.push('/more/export/safety'),
+                icon: const Icon(Icons.shield_outlined),
+                label: Text(l.backupSafetyTitle),
+              ),
               Builder(
                 builder: (btn) => OutlinedButton.icon(
                   onPressed: busy ? null : () => onRestore(btn),

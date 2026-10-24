@@ -1,10 +1,12 @@
 import 'package:go_router/go_router.dart';
 import 'package:personal_finance/features/export/presentation/auto_export_screen.dart';
 import 'package:personal_finance/features/export/presentation/export_screen.dart';
+import 'package:personal_finance/features/export/presentation/safety_copies_screen.dart';
 
 /// Routes of the export feature: `/more/export` (CSV export, backup,
 /// restore) and `/more/export/folder` (automatic backup settings; also the
-/// editor of `ImportExportSettings.autoExportFolder`).
+/// editor of `ImportExportSettings.autoExportFolder`) and
+/// `/more/export/safety` (on-device safety copies).
 final exportRoutes = <RouteBase>[
   GoRoute(
     path: '/more/export',
@@ -13,6 +15,10 @@ final exportRoutes = <RouteBase>[
       GoRoute(
         path: 'folder',
         builder: (context, state) => const AutoExportScreen(),
+      ),
+      GoRoute(
+        path: 'safety',
+        builder: (context, state) => const SafetyCopiesScreen(),
       ),
     ],
   ),
