@@ -58,10 +58,17 @@ final class BackupFolderChannel: NSObject, UIDocumentPickerDelegate {
     }
     DispatchQueue.global(qos: .utility).async {
       do {
-        let value: Any? = try self.withFolder(ref) { dir in
+        let value: Any? = try self.withFolder(ref) { dir, stale in
           switch call.method {
           case "check":
             return true
+          case "refresh":
+            // An outdated bookmark still resolves for a while; save a new
+            // one now, while it does (Dart stores it as the folder, like a pick).
+            guard stale else { return nil }
+            let bookmark = try dir.bookmarkData(
+              options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+            return ["folder": "bookmark:" + bookmark.base64EncodedString(), "name": dir.lastPathComponent]
           case "write":
             guard let name = args["name"] as? String,
               let bytes = args["bytes"] as? FlutterStandardTypedData
@@ -107,8 +114,9 @@ final class BackupFolderChannel: NSObject, UIDocumentPickerDelegate {
     }
   }
 
-  /// Resolves the bookmark and runs [body] inside its security scope.
-  private func withFolder(_ ref: String, _ body: (URL) throws -> Any?) throws -> Any? {
+  /// Resolves the bookmark and runs [body] inside its security scope, with
+  /// whether the bookmark is outdated and should be recreated.
+  private func withFolder(_ ref: String, _ body: (URL, Bool) throws -> Any?) throws -> Any? {
     guard ref.hasPrefix("bookmark:"), let data = Data(base64Encoded: String(ref.dropFirst(9)))
     else { throw Failure.access("Not a bookmark") }
     var stale = false
@@ -122,7 +130,7 @@ final class BackupFolderChannel: NSObject, UIDocumentPickerDelegate {
       throw Failure.access("Access denied")
     }
     defer { url.stopAccessingSecurityScopedResource() }
-    return try body(url)
+    return try body(url, stale)
   }
 
   private func write(_ target: URL, _ data: Data) throws {

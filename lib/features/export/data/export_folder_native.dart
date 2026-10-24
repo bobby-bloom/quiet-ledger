@@ -57,6 +57,20 @@ Future<PickedFolder?> pickNativeFolder() async {
 Future<bool> nativeFolderAccessible(String ref) async =>
     await _call<bool>('check', {'folder': ref}) ?? false;
 
+/// A renewed [PickedFolder] for [ref] when the platform reports the saved
+/// access as outdated (iOS/macOS: the folder was moved or renamed, and the
+/// bookmark stops resolving later), else null. Android folders never need
+/// this. Throws [BackupFolderAccessException] when access is gone.
+Future<PickedFolder?> refreshNativeFolder(String ref) async {
+  try {
+    final r = await _call<Map<Object?, Object?>>('refresh', {'folder': ref});
+    if (r == null) return null;
+    return PickedFolder(r['folder']! as String, r['name']! as String);
+  } on MissingPluginException {
+    return null;
+  }
+}
+
 /// [ExportFolder] over [backupFolderChannel].
 class NativeExportFolder implements ExportFolder {
   const NativeExportFolder(this.ref);

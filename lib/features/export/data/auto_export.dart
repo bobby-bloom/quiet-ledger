@@ -98,10 +98,11 @@ Future<AutoExportResult> _runAutoExport(
   try {
     await settings.set(BackupSettings.lastAttempt, stamp);
     final s = await loadSettings(read(databaseProvider));
-    final path = s.get(ImportExportSettings.autoExportFolder);
-    if (path == null || path.isEmpty) {
+    final saved = s.get(ImportExportSettings.autoExportFolder);
+    if (saved == null || saved.isEmpty) {
       throw StateError('No export folder');
     }
+    final path = await renewBackupFolderAccess(read, saved);
     final backup = await createVerifiedBackup(read);
     final folder = read(exportFolderFactoryProvider)(path);
     final name = autoExportFileName(at, backup.extension);
@@ -187,9 +188,33 @@ Future<void> checkBackupFolderAccess(ProviderReader read) async {
     }
     if (!await nativeFolderAccessible(folder)) {
       await _recordFailure(read, const BackupFolderAccessException());
+      return;
     }
+    await renewBackupFolderAccess(read, folder);
   } on Object catch (e) {
     debugPrint('Backup folder check failed: $e');
+  }
+}
+
+/// Saves renewed access to the platform folder [folder] when the platform
+/// reports the saved one as outdated ([refreshNativeFolder]) and returns
+/// the folder to use. Never throws: on any problem [folder] is returned
+/// and the backup itself reports a lost access.
+Future<String> renewBackupFolderAccess(
+  ProviderReader read,
+  String folder,
+) async {
+  if (!isNativeFolderRef(folder)) return folder;
+  try {
+    final renewed = await refreshNativeFolder(folder);
+    if (renewed == null || renewed.ref == folder) return folder;
+    final settings = read(settingsProvider.notifier);
+    await settings.set(ImportExportSettings.autoExportFolder, renewed.ref);
+    await settings.set(BackupSettings.folderName, renewed.name);
+    return renewed.ref;
+  } on Object catch (e) {
+    debugPrint('Could not renew access to the backup folder: $e');
+    return folder;
   }
 }
 

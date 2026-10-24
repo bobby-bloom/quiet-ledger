@@ -53,6 +53,11 @@ class BackupFolderChannel(private val activity: Activity, messenger: BinaryMesse
             try {
                 val value: Any? = when (call.method) {
                     "check" -> hasPermission(tree)
+                    // SAF permissions do not go out of date; nothing to renew.
+                    "refresh" -> {
+                        requireAccess(tree)
+                        null
+                    }
                     "write" -> {
                         requireAccess(tree)
                         write(tree, call.argument<String>("name")!!, call.argument<ByteArray>("bytes")!!)

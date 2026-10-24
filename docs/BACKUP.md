@@ -135,6 +135,11 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
     because iOS moves the app container on updates.
   - A revoked permission is detected at start and shown as "Choose the
     folder again".
+  - An outdated bookmark (folder moved or renamed) still resolves for a
+    while. At start and before every scheduled backup the channel's
+    `refresh` creates a new one, which is saved as the folder
+    (`renewBackupFolderAccess`). Android SAF permissions do not go out of
+    date. Not yet tested on a device.
 - **Health** (`backupHealth`, shown by `BackupHealthBanner` on the
   dashboard and the export screen). The states, in order: password needed,
   failing (with the error), interrupted (started more than 10 minutes ago,

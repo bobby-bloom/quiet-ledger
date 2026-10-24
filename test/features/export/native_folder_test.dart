@@ -22,6 +22,9 @@ class _FakeNative {
   bool access = true;
   final calls = <String>[];
 
+  /// Set when the saved access is outdated: the renewed ref (iOS/macOS).
+  String? renewTo;
+
   Future<Object?> handle(MethodCall call) async {
     calls.add(call.method);
     final args = (call.arguments as Map?)?.cast<String, Object?>() ?? {};
@@ -34,6 +37,9 @@ class _FakeNative {
     }
     final name = args['name'] as String?;
     switch (call.method) {
+      case 'refresh':
+        final to = renewTo;
+        return to == null ? null : {'folder': to, 'name': 'Moved backups'};
       case 'write':
         files[name!] = args['bytes']! as Uint8List;
         return null;
@@ -128,6 +134,40 @@ void main() {
       expect(native.files, hasLength(1));
       // Written, then read back for verification.
       expect(native.calls, containsAllInOrder(['write', 'read']));
+    });
+
+    test('outdated access is renewed and saved before writing', () async {
+      native.renewTo = 'bookmark:renewed';
+      final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
+      expect(r.written, isTrue);
+      final s = c.read(settingsProvider);
+      expect(s.get(ImportExportSettings.autoExportFolder), 'bookmark:renewed');
+      expect(s.get(BackupSettings.folderName), 'Moved backups');
+      expect(native.calls.take(2), ['refresh', 'write']);
+    });
+
+    test('the startup check renews outdated access too', () async {
+      native.renewTo = 'bookmark:renewed';
+      await checkBackupFolderAccess(c.read);
+      expect(
+        c.read(settingsProvider).get(ImportExportSettings.autoExportFolder),
+        'bookmark:renewed',
+      );
+      expect(c.read(settingsProvider).get(BackupSettings.lastError), isNull);
+    });
+
+    test('a platform without refresh keeps the saved folder', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(backupFolderChannel, (call) {
+            if (call.method == 'refresh') throw MissingPluginException();
+            return native.handle(call);
+          });
+      final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
+      expect(r.written, isTrue);
+      expect(
+        c.read(settingsProvider).get(ImportExportSettings.autoExportFolder),
+        'content://tree/backups',
+      );
     });
 
     test('a lost permission is reported at startup in plain words', () async {
