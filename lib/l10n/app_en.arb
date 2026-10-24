@@ -1374,7 +1374,6 @@
   "dashNextPeriod": "Next period",
   "dashToday": "Back to today",
   "dashSearchHint": "Search transactions",
-  "dashNewTransaction": "New transaction",
   "dashAutoPost": "auto-post",
   "dashConfirm": "confirm",
   "dashConfirmDaysBefore": "confirm {days} days before",
@@ -4076,7 +4075,6 @@
   "txnSearchLabel": "Search transactions",
   "txnSearchHintWide": "Payee, note, tag, category",
   "txnSelectMultiple": "Select multiple",
-  "txnNew": "New",
   "txnCtrl": "Ctrl",
   "txnEntries": "{count, plural, =1{1 entry} other{{count} entries}}",
   "@txnEntries": {

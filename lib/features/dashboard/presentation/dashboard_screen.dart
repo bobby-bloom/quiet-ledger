@@ -18,7 +18,6 @@ import 'package:personal_finance/features/dashboard/presentation/dashboard_perio
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
-import 'package:personal_finance/features/transactions/presentation/quick_add.dart';
 
 DashboardBreakpoint breakpointOf(WindowSize s) =>
     s.isCompact ? DashboardBreakpoint.compact : DashboardBreakpoint.expanded;
@@ -242,7 +241,8 @@ class _WideHeader extends ConsumerWidget {
     final l = context.l10n;
     final privacy = ref.watch(privacyModeProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 20, 32, 20),
+      // The last icon's circle ends on the 32 px content margin.
+      padding: const EdgeInsets.fromLTRB(32, 20, 28, 20),
       child: Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -304,12 +304,6 @@ class _WideHeader extends ConsumerWidget {
                 tooltip: l.dashEdit,
                 icon: const Icon(Icons.dashboard_customize_outlined),
                 onPressed: () => context.push('/home/edit'),
-              ),
-              const SizedBox(width: 4),
-              IconButton.filled(
-                tooltip: l.dashNewTransaction,
-                icon: const Icon(Icons.add),
-                onPressed: () => showQuickAdd(context),
               ),
             ],
           ),

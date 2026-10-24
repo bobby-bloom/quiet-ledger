@@ -3,7 +3,6 @@
   "txnSearchLabel": "Buchungen durchsuchen",
   "txnSearchHintWide": "Empfänger, Notiz, Tag, Kategorie",
   "txnSelectMultiple": "Mehrere auswählen",
-  "txnNew": "Neu",
   "txnCtrl": "Strg",
   "txnEntries": "{count, plural, =1{1 Eintrag} other{{count} Einträge}}",
   "txnIn": "Ein",
