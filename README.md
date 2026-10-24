@@ -8,6 +8,7 @@ Linux. Your data stays on your device in an encrypted database: no account,
 no telemetry, no cloud dependency.
 
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 ![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
@@ -211,4 +212,14 @@ hard-coded strings (add both EN and DE), and `dart format` plus
 
 ## License
 
-No license has been chosen yet. Until one is added, all rights are reserved.
+Quiet Ledger is free software: you can redistribute it and/or modify it
+under the terms of the [GNU General Public License](LICENSE) as published by
+the Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+It is distributed in the hope that it will be useful, but **without any
+warranty**; without even the implied warranty of merchantability or fitness
+for a particular purpose. See [`LICENSE`](LICENSE) for details.
+
+Bundled fonts (Manrope, IBM Plex Mono) are licensed under the SIL Open Font
+License; see `assets/fonts/`.
