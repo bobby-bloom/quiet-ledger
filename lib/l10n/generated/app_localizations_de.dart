@@ -692,6 +692,144 @@ class AppLocalizationsDe extends AppLocalizations {
       '„Auf meinem iPhone“ in Dateien verwenden';
 
   @override
+  String get backupErrDamaged =>
+      'Die Sicherungsdatei ist beschädigt oder wurde verändert. Sie kann nicht wiederhergestellt werden.';
+
+  @override
+  String get backupHealthCheckPassword =>
+      'Kennst du dein Sicherungspasswort noch? Gib es einmal ein, um sicherzugehen.';
+
+  @override
+  String get backupPasswordChange => 'Passwort ändern';
+
+  @override
+  String get backupPasswordCheck => 'Passwort prüfen';
+
+  @override
+  String get backupPasswordCorrect =>
+      'Richtig. Dein Sicherungspasswort ist bestätigt.';
+
+  @override
+  String get backupPasswordDesc =>
+      'Sicherungen, die dieses Gerät verlassen, werden mit einem Passwort deiner Wahl verschlüsselt. Ohne das Passwort oder den Wiederherstellungsschlüssel sieht man nur unlesbare Daten – auch du. Bewahre beides sicher auf.';
+
+  @override
+  String get backupPasswordField => 'Sicherungspasswort';
+
+  @override
+  String get backupPasswordFinish => 'Fertig';
+
+  @override
+  String get backupPasswordHide => 'Passwort verbergen';
+
+  @override
+  String backupPasswordLastChecked(String date) {
+    return 'Zuletzt bestätigt am $date';
+  }
+
+  @override
+  String backupPasswordMinLength(int count) {
+    return 'Mindestens $count Zeichen';
+  }
+
+  @override
+  String get backupPasswordMismatch => 'Die Passwörter stimmen nicht überein';
+
+  @override
+  String get backupPasswordMissing =>
+      'Sicherungen sind pausiert, bis du ein Sicherungspasswort festlegst.';
+
+  @override
+  String get backupPasswordNewRecovery => 'Neuer Wiederherstellungsschlüssel';
+
+  @override
+  String get backupPasswordOn => 'Sicherungen sind verschlüsselt';
+
+  @override
+  String get backupPasswordRepeat => 'Passwort wiederholen';
+
+  @override
+  String get backupPasswordRequired =>
+      'Erforderlich: Die App-Sperre oder die Datenbankverschlüsselung ist aktiv, und eine unverschlüsselte Sicherung würde sie umgehen.';
+
+  @override
+  String get backupPasswordSet => 'Sicherungspasswort festlegen';
+
+  @override
+  String get backupPasswordShow => 'Passwort anzeigen';
+
+  @override
+  String backupPasswordSince(String date) {
+    return 'Passwort festgelegt am $date';
+  }
+
+  @override
+  String get backupPasswordStepIntro =>
+      'Wähle ein Passwort für deine Sicherungen. Es ist unabhängig von der App-Sperre und wird gebraucht, um eine Sicherung auf einem anderen Gerät wiederherzustellen.';
+
+  @override
+  String get backupPasswordTitle => 'Sicherungspasswort';
+
+  @override
+  String get backupPasswordWrong => 'Falsches Passwort';
+
+  @override
+  String get backupPasswordWrongDesc =>
+      'Das ist nicht das Sicherungspasswort. Wenn du es nicht mehr weißt, lege jetzt ein neues fest: Neue Sicherungen verwenden es, ältere lassen sich weiter mit dem alten Passwort oder dem Wiederherstellungsschlüssel öffnen.';
+
+  @override
+  String get backupRecoveryConfirmIntro =>
+      'Gib zwei Gruppen des Wiederherstellungsschlüssels ein, um sicherzugehen, dass du ihn hast.';
+
+  @override
+  String get backupRecoveryCopy => 'Kopieren';
+
+  @override
+  String get backupRecoveryFileIntro =>
+      'Wiederherstellungsschlüssel für die Sicherungen von Quiet Ledger. Wer diesen Schlüssel hat, kann deine Sicherungen öffnen; bewahre ihn privat und sicher auf.';
+
+  @override
+  String backupRecoveryGroup(int number) {
+    return 'Gruppe $number';
+  }
+
+  @override
+  String get backupRecoveryIntro =>
+      'Das ist dein Wiederherstellungsschlüssel. Er öffnet deine Sicherungen, wenn du das Passwort vergisst. Schreib ihn auf oder speichere ihn außerhalb dieses Geräts, z. B. in einem Passwortmanager.';
+
+  @override
+  String get backupRecoveryKey => 'Wiederherstellungsschlüssel';
+
+  @override
+  String get backupRecoverySave => 'Als Datei speichern';
+
+  @override
+  String get backupRecoveryShowAgain =>
+      'Wiederherstellungsschlüssel noch einmal anzeigen';
+
+  @override
+  String get backupRecoveryStored =>
+      'Ich habe den Wiederherstellungsschlüssel sicher aufbewahrt';
+
+  @override
+  String get backupRecoveryWarning =>
+      'Er wird nur jetzt angezeigt. Ohne Passwort und Wiederherstellungsschlüssel kann niemand deine verschlüsselten Sicherungen öffnen.';
+
+  @override
+  String get backupUnlockDesc =>
+      'Diese Sicherung ist verschlüsselt. Gib ihr Sicherungspasswort oder den Wiederherstellungsschlüssel ein.';
+
+  @override
+  String get backupUnlockOpen => 'Öffnen';
+
+  @override
+  String get backupUnlockTitle => 'Verschlüsselte Sicherung';
+
+  @override
+  String get backupUnlockWrong =>
+      'Damit lässt sich diese Sicherung nicht öffnen. Versuche es noch einmal.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

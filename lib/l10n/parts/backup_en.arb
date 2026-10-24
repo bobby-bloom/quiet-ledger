@@ -134,5 +134,71 @@
     }
   },
   "backupFolderAccessLost": "The app no longer has access to the backup folder. Choose the folder again.",
-  "backupUseAppDocuments": "Use “On My iPhone” in Files"
+  "backupUseAppDocuments": "Use “On My iPhone” in Files",
+  "backupErrDamaged": "The backup file is damaged or was changed. It cannot be restored.",
+  "backupHealthCheckPassword": "Do you still know your backup password? Type it once to make sure.",
+  "backupPasswordChange": "Change password",
+  "backupPasswordCheck": "Check password",
+  "backupPasswordCorrect": "That's right. Your backup password is confirmed.",
+  "backupPasswordDesc": "Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.",
+  "backupPasswordField": "Backup password",
+  "backupPasswordFinish": "Finish",
+  "backupPasswordHide": "Hide password",
+  "backupPasswordLastChecked": "Last confirmed on {date}",
+  "@backupPasswordLastChecked": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPasswordMinLength": "At least {count} characters",
+  "@backupPasswordMinLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupPasswordMismatch": "The passwords do not match",
+  "backupPasswordMissing": "Backups are paused until you set a backup password.",
+  "backupPasswordNewRecovery": "New recovery key",
+  "backupPasswordOn": "Backups are encrypted",
+  "backupPasswordRepeat": "Repeat the password",
+  "backupPasswordRequired": "Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.",
+  "backupPasswordSet": "Set backup password",
+  "backupPasswordShow": "Show password",
+  "backupPasswordSince": "Password set on {date}",
+  "@backupPasswordSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPasswordStepIntro": "Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.",
+  "backupPasswordTitle": "Backup password",
+  "backupPasswordWrong": "Wrong password",
+  "backupPasswordWrongDesc": "That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.",
+  "backupRecoveryConfirmIntro": "To make sure you have the recovery key, type two of its groups.",
+  "backupRecoveryCopy": "Copy",
+  "backupRecoveryFileIntro": "Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.",
+  "backupRecoveryGroup": "Group {number}",
+  "@backupRecoveryGroup": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "backupRecoveryIntro": "This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.",
+  "backupRecoveryKey": "Recovery key",
+  "backupRecoverySave": "Save as file",
+  "backupRecoveryShowAgain": "Show the recovery key again",
+  "backupRecoveryStored": "I have stored the recovery key in a safe place",
+  "backupRecoveryWarning": "It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.",
+  "backupUnlockDesc": "This backup is encrypted. Enter its backup password or the recovery key.",
+  "backupUnlockOpen": "Open",
+  "backupUnlockTitle": "Encrypted backup",
+  "backupUnlockWrong": "That does not open this backup. Try again."
 }

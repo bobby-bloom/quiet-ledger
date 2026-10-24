@@ -12,8 +12,8 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/sync_providers.dart';
 import 'package:personal_finance/core/sync/tombstone_purge.dart'
     show countPurgeableTombstones;
+import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
-import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/data/export_folder_native.dart';
@@ -102,20 +102,20 @@ Future<AutoExportResult> _runAutoExport(
     if (path == null || path.isEmpty) {
       throw StateError('No export folder');
     }
-    final db = read(databaseProvider);
     final backup = await createVerifiedBackup(read);
     final folder = read(exportFolderFactoryProvider)(path);
-    final name = autoExportFileName(at);
+    final name = autoExportFileName(at, backup.extension);
     await folder.writeFile(name, backup.bytes);
 
-    // Verify what actually landed in the folder.
+    // Verify what actually landed in the folder: same bytes, and it opens
+    // (decrypts) and validates.
     final stored = await folder.readFile(name);
     if (!listEquals(stored, backup.bytes)) {
       throw StateError(
         'The backup in the folder differs from what was written',
       );
     }
-    readBundle(db, stored!);
+    await openBackup(read, stored!);
 
     final prune = autoExportFilesToPrune(
       await folder.listFiles(),
@@ -141,12 +141,11 @@ Future<void> _recordFailure(ProviderReader read, Object error) async {
     final settings = read(settingsProvider.notifier);
     final first = read(settingsProvider).get(BackupSettings.lastError) == null;
     final l = lookupAppLocalizations(Locale(read(languageCodeProvider)));
-    await settings.set(
-      BackupSettings.lastError,
-      error is BackupFolderAccessException
-          ? l.backupFolderAccessLost
-          : '$error',
-    );
+    await settings.set(BackupSettings.lastError, switch (error) {
+      BackupFolderAccessException() => l.backupFolderAccessLost,
+      BackupPasswordMissingException() => l.backupPasswordMissing,
+      _ => '$error',
+    });
     if (!first) return;
     final service = read(notificationServiceProvider);
     if (await service.init()) {

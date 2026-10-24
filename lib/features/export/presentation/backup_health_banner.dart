@@ -7,6 +7,7 @@ import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
 
@@ -24,11 +25,22 @@ final hasLedgerDataProvider = StreamProvider<bool>((ref) {
       .map((r) => r.read<bool>('e'));
 });
 
-/// Current [BackupHealth] from the backup settings.
+/// Current [BackupHealth] from the backup settings and the backup
+/// password state.
 final backupHealthProvider = Provider<BackupHealth>((ref) {
   final s = ref.watch(settingsProvider);
   DateTime? at(String? v) => v == null ? null : DateTime.tryParse(v);
+  final ring = ref.watch(backupKeyringProvider);
+  final hasKeys = ring.value != null;
   return backupHealth(
+    needsPassword:
+        ring.hasValue &&
+        !hasKeys &&
+        ref.watch(backupEncryptionRequiredProvider),
+    passwordCheckedAt: hasKeys
+        ? at(s.get(BackupSettings.passwordCheckedAt)) ??
+              ring.value!.current.createdAt
+        : null,
     now: DateTime.now(),
     hasData: ref.watch(hasLedgerDataProvider).value ?? false,
     staleDays: s.get(BackupSettings.staleDays),
@@ -57,8 +69,11 @@ class BackupHealthBanner extends ConsumerWidget {
     final last = health.lastVerified?.toLocal();
     final failing =
         health.status == BackupStatus.failing ||
-        health.status == BackupStatus.interrupted;
+        health.status == BackupStatus.interrupted ||
+        health.status == BackupStatus.needsPassword;
     final text = switch (health.status) {
+      BackupStatus.needsPassword => l.backupPasswordMissing,
+      BackupStatus.checkPassword => l.backupHealthCheckPassword,
       BackupStatus.never => l.backupHealthNever,
       BackupStatus.stale => l.backupHealthStale(
         last == null ? '' : dates.medium(last),
@@ -104,12 +119,18 @@ class BackupHealthBanner extends ConsumerWidget {
               const SizedBox(width: Space.xs),
               TextButton(
                 style: TextButton.styleFrom(foregroundColor: fg),
-                onPressed: failing
-                    ? () => context.push('/more/export/folder')
-                    : onBackUp ?? () => context.push('/more/export'),
-                child: Text(
-                  failing ? l.backupHealthDetails : l.backupHealthBackUp,
-                ),
+                onPressed: switch (health.status) {
+                  BackupStatus.needsPassword || BackupStatus.checkPassword =>
+                    () => context.push('/more/export/encryption'),
+                  _ when failing => () => context.push('/more/export/folder'),
+                  _ => onBackUp ?? () => context.push('/more/export'),
+                },
+                child: Text(switch (health.status) {
+                  BackupStatus.needsPassword => l.backupPasswordSet,
+                  BackupStatus.checkPassword => l.backupPasswordCheck,
+                  _ when failing => l.backupHealthDetails,
+                  _ => l.backupHealthBackUp,
+                }),
               ),
             ],
           ),

@@ -1153,6 +1153,234 @@ abstract class AppLocalizations {
   /// **'Use “On My iPhone” in Files'**
   String get backupUseAppDocuments;
 
+  /// No description provided for @backupErrDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup file is damaged or was changed. It cannot be restored.'**
+  String get backupErrDamaged;
+
+  /// No description provided for @backupHealthCheckPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you still know your backup password? Type it once to make sure.'**
+  String get backupHealthCheckPassword;
+
+  /// No description provided for @backupPasswordChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get backupPasswordChange;
+
+  /// No description provided for @backupPasswordCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check password'**
+  String get backupPasswordCheck;
+
+  /// No description provided for @backupPasswordCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s right. Your backup password is confirmed.'**
+  String get backupPasswordCorrect;
+
+  /// No description provided for @backupPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.'**
+  String get backupPasswordDesc;
+
+  /// No description provided for @backupPasswordField.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPasswordField;
+
+  /// No description provided for @backupPasswordFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get backupPasswordFinish;
+
+  /// No description provided for @backupPasswordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get backupPasswordHide;
+
+  /// No description provided for @backupPasswordLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last confirmed on {date}'**
+  String backupPasswordLastChecked(String date);
+
+  /// No description provided for @backupPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters'**
+  String backupPasswordMinLength(int count);
+
+  /// No description provided for @backupPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match'**
+  String get backupPasswordMismatch;
+
+  /// No description provided for @backupPasswordMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are paused until you set a backup password.'**
+  String get backupPasswordMissing;
+
+  /// No description provided for @backupPasswordNewRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'New recovery key'**
+  String get backupPasswordNewRecovery;
+
+  /// No description provided for @backupPasswordOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are encrypted'**
+  String get backupPasswordOn;
+
+  /// No description provided for @backupPasswordRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat the password'**
+  String get backupPasswordRepeat;
+
+  /// No description provided for @backupPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.'**
+  String get backupPasswordRequired;
+
+  /// No description provided for @backupPasswordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set backup password'**
+  String get backupPasswordSet;
+
+  /// No description provided for @backupPasswordShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get backupPasswordShow;
+
+  /// No description provided for @backupPasswordSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Password set on {date}'**
+  String backupPasswordSince(String date);
+
+  /// No description provided for @backupPasswordStepIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.'**
+  String get backupPasswordStepIntro;
+
+  /// No description provided for @backupPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPasswordTitle;
+
+  /// No description provided for @backupPasswordWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get backupPasswordWrong;
+
+  /// No description provided for @backupPasswordWrongDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.'**
+  String get backupPasswordWrongDesc;
+
+  /// No description provided for @backupRecoveryConfirmIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'To make sure you have the recovery key, type two of its groups.'**
+  String get backupRecoveryConfirmIntro;
+
+  /// No description provided for @backupRecoveryCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get backupRecoveryCopy;
+
+  /// No description provided for @backupRecoveryFileIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.'**
+  String get backupRecoveryFileIntro;
+
+  /// No description provided for @backupRecoveryGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {number}'**
+  String backupRecoveryGroup(int number);
+
+  /// No description provided for @backupRecoveryIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.'**
+  String get backupRecoveryIntro;
+
+  /// No description provided for @backupRecoveryKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key'**
+  String get backupRecoveryKey;
+
+  /// No description provided for @backupRecoverySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as file'**
+  String get backupRecoverySave;
+
+  /// No description provided for @backupRecoveryShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the recovery key again'**
+  String get backupRecoveryShowAgain;
+
+  /// No description provided for @backupRecoveryStored.
+  ///
+  /// In en, this message translates to:
+  /// **'I have stored the recovery key in a safe place'**
+  String get backupRecoveryStored;
+
+  /// No description provided for @backupRecoveryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.'**
+  String get backupRecoveryWarning;
+
+  /// No description provided for @backupUnlockDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is encrypted. Enter its backup password or the recovery key.'**
+  String get backupUnlockDesc;
+
+  /// No description provided for @backupUnlockOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get backupUnlockOpen;
+
+  /// No description provided for @backupUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup'**
+  String get backupUnlockTitle;
+
+  /// No description provided for @backupUnlockWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That does not open this backup. Try again.'**
+  String get backupUnlockWrong;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:

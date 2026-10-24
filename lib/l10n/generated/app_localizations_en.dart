@@ -679,6 +679,142 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupUseAppDocuments => 'Use “On My iPhone” in Files';
 
   @override
+  String get backupErrDamaged =>
+      'The backup file is damaged or was changed. It cannot be restored.';
+
+  @override
+  String get backupHealthCheckPassword =>
+      'Do you still know your backup password? Type it once to make sure.';
+
+  @override
+  String get backupPasswordChange => 'Change password';
+
+  @override
+  String get backupPasswordCheck => 'Check password';
+
+  @override
+  String get backupPasswordCorrect =>
+      'That\'s right. Your backup password is confirmed.';
+
+  @override
+  String get backupPasswordDesc =>
+      'Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.';
+
+  @override
+  String get backupPasswordField => 'Backup password';
+
+  @override
+  String get backupPasswordFinish => 'Finish';
+
+  @override
+  String get backupPasswordHide => 'Hide password';
+
+  @override
+  String backupPasswordLastChecked(String date) {
+    return 'Last confirmed on $date';
+  }
+
+  @override
+  String backupPasswordMinLength(int count) {
+    return 'At least $count characters';
+  }
+
+  @override
+  String get backupPasswordMismatch => 'The passwords do not match';
+
+  @override
+  String get backupPasswordMissing =>
+      'Backups are paused until you set a backup password.';
+
+  @override
+  String get backupPasswordNewRecovery => 'New recovery key';
+
+  @override
+  String get backupPasswordOn => 'Backups are encrypted';
+
+  @override
+  String get backupPasswordRepeat => 'Repeat the password';
+
+  @override
+  String get backupPasswordRequired =>
+      'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.';
+
+  @override
+  String get backupPasswordSet => 'Set backup password';
+
+  @override
+  String get backupPasswordShow => 'Show password';
+
+  @override
+  String backupPasswordSince(String date) {
+    return 'Password set on $date';
+  }
+
+  @override
+  String get backupPasswordStepIntro =>
+      'Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.';
+
+  @override
+  String get backupPasswordTitle => 'Backup password';
+
+  @override
+  String get backupPasswordWrong => 'Wrong password';
+
+  @override
+  String get backupPasswordWrongDesc =>
+      'That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.';
+
+  @override
+  String get backupRecoveryConfirmIntro =>
+      'To make sure you have the recovery key, type two of its groups.';
+
+  @override
+  String get backupRecoveryCopy => 'Copy';
+
+  @override
+  String get backupRecoveryFileIntro =>
+      'Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.';
+
+  @override
+  String backupRecoveryGroup(int number) {
+    return 'Group $number';
+  }
+
+  @override
+  String get backupRecoveryIntro =>
+      'This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.';
+
+  @override
+  String get backupRecoveryKey => 'Recovery key';
+
+  @override
+  String get backupRecoverySave => 'Save as file';
+
+  @override
+  String get backupRecoveryShowAgain => 'Show the recovery key again';
+
+  @override
+  String get backupRecoveryStored =>
+      'I have stored the recovery key in a safe place';
+
+  @override
+  String get backupRecoveryWarning =>
+      'It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.';
+
+  @override
+  String get backupUnlockDesc =>
+      'This backup is encrypted. Enter its backup password or the recovery key.';
+
+  @override
+  String get backupUnlockOpen => 'Open';
+
+  @override
+  String get backupUnlockTitle => 'Encrypted backup';
+
+  @override
+  String get backupUnlockWrong => 'That does not open this backup. Try again.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

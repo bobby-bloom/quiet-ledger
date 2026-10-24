@@ -9,6 +9,8 @@ import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
+import 'package:personal_finance/features/export/data/backup_keys.dart';
+import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
@@ -82,15 +84,19 @@ class _SafetyCopiesScreenState extends ConsumerState<SafetyCopiesScreen> {
     final l = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final bytes = await safetyCopyBytes(ref.read(databaseProvider), c.id);
+      final zip = await safetyCopyBytes(ref.read(databaseProvider), c.id);
+      // Leaving the device: encrypted like any other backup.
+      final backup = await createVerifiedBackup(ref.read, zip: zip);
       final stamp = DateFormat('yyyyMMdd-HHmmss').format(c.createdAt.toLocal());
       await saveOrShareBytes(
-        bytes: bytes,
-        fileName: 'personal-finance-safety-$stamp.zip',
-        mimeType: 'application/zip',
+        bytes: backup.bytes,
+        fileName: 'personal-finance-safety-$stamp${backup.extension}',
+        mimeType: backup.mimeType,
         capabilities: ref.read(platformCapabilitiesProvider),
         sharePositionOrigin: origin,
       );
+    } on BackupPasswordMissingException {
+      messenger.showSnackBar(SnackBar(content: Text(l.backupPasswordMissing)));
     } on Object catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(l.exportFailed('$e'))));
     }

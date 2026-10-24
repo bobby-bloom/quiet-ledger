@@ -52,9 +52,19 @@ abstract final class BackupSettings {
     hidden: true,
   );
 
+  /// ISO timestamp of the last time the backup password was typed
+  /// correctly (set, checked or changed).
+  static final passwordCheckedAt = SettingDef.optionalString(
+    key: 'export.backupPasswordCheckedAt',
+    section: SettingSection.importExport,
+    label: (l) => l.exportAutoTitle,
+    hidden: true,
+  );
+
   /// Keys that describe this device; a restore keeps the current values.
   static final deviceLocalKeys = {
     folderName.key,
+    passwordCheckedAt.key,
     lastAttempt.key,
     lastError.key,
     lastVerified.key,

@@ -6,7 +6,7 @@ import 'package:personal_finance/core/settings/app_settings.dart';
 const autoExportPrefix = 'personal-finance-backup-';
 
 final _fileName = RegExp(
-  r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.zip$',
+  r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.(?:zip|pfbackup)$',
 );
 
 /// Whether an automatic backup is due at [now]. Daily: once per calendar
@@ -30,9 +30,9 @@ bool isAutoExportDue(
 }
 
 /// `personal-finance-backup-20261023-081500.zip` (local time; sorts
-/// chronologically).
-String autoExportFileName(DateTime now) =>
-    '$autoExportPrefix${DateFormat('yyyyMMdd-HHmmss').format(now)}.zip';
+/// chronologically), `.pfbackup` when [extension] says so.
+String autoExportFileName(DateTime now, [String extension = '.zip']) =>
+    '$autoExportPrefix${DateFormat('yyyyMMdd-HHmmss').format(now)}$extension';
 
 /// Whether [name] was written by the automatic backup.
 bool isAutoExportFile(String name) => _fileName.hasMatch(name);

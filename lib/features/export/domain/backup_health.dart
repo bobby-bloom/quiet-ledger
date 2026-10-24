@@ -7,6 +7,14 @@ enum BackupStatus {
   /// A verified backup newer than the threshold exists.
   ok,
 
+  /// Backups must be encrypted but no backup password is set; they are
+  /// paused until one is.
+  needsPassword,
+
+  /// Everything is fine, but the backup password has not been typed for a
+  /// while: ask for it so a forgotten password shows up early.
+  checkPassword,
+
   /// There is data but never was a backup.
   never,
 
@@ -35,6 +43,9 @@ class BackupHealth {
 /// interrupted (shorter: it may still be running).
 const interruptedAfter = Duration(minutes: 10);
 
+/// Ask for the backup password again after this long.
+const passwordCheckEvery = Duration(days: 30);
+
 BackupHealth backupHealth({
   required DateTime now,
   required bool hasData,
@@ -43,7 +54,12 @@ BackupHealth backupHealth({
   DateTime? lastScheduled,
   DateTime? lastAttempt,
   String? lastError,
+  bool needsPassword = false,
+  DateTime? passwordCheckedAt,
 }) {
+  if (needsPassword && hasData) {
+    return BackupHealth(BackupStatus.needsPassword, lastVerified: lastVerified);
+  }
   if (lastError != null && lastError.isNotEmpty) {
     return BackupHealth(
       BackupStatus.failing,
@@ -61,6 +77,10 @@ BackupHealth backupHealth({
   }
   if (now.difference(lastVerified) > Duration(days: staleDays)) {
     return BackupHealth(BackupStatus.stale, lastVerified: lastVerified);
+  }
+  if (passwordCheckedAt != null &&
+      now.difference(passwordCheckedAt) > passwordCheckEvery) {
+    return BackupHealth(BackupStatus.checkPassword, lastVerified: lastVerified);
   }
   return BackupHealth(BackupStatus.ok, lastVerified: lastVerified);
 }

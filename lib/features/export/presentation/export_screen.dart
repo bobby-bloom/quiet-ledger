@@ -616,6 +616,13 @@ class _BackupCard extends StatelessWidget {
               TextButton.icon(
                 onPressed: busy
                     ? null
+                    : () => context.push('/more/export/encryption'),
+                icon: const Icon(Icons.lock_outline),
+                label: Text(l.backupPasswordTitle),
+              ),
+              TextButton.icon(
+                onPressed: busy
+                    ? null
                     : () => context.push('/more/export/safety'),
                 icon: const Icon(Icons.shield_outlined),
                 label: Text(l.backupSafetyTitle),

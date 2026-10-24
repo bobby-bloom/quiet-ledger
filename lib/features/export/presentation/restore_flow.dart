@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,18 +15,23 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/auto_export.dart';
+import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
+import 'package:personal_finance/features/export/domain/backup_crypto.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
+import 'package:personal_finance/features/export/presentation/backup_password_screen.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 
-/// File name for a manual backup.
-String backupFileName(DateTime now) =>
-    'personal-finance-backup-${DateFormat('yyyyMMdd-HHmmss').format(now)}.zip';
+/// File name for a manual backup (`.zip`, or `.pfbackup` when encrypted).
+String backupFileName(DateTime now, [String extension = '.zip']) =>
+    'personal-finance-backup-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
+    '$extension';
 
 /// Creates a verified backup and hands it to save/share/download. Returns
-/// the save outcome, or null on error (a snackbar is shown).
+/// the save outcome, or null on error (a snackbar is shown). When a backup
+/// password is required but missing, the password setup opens instead.
 Future<SaveResult?> createBackup(
   BuildContext context,
   WidgetRef ref, {
@@ -37,8 +43,8 @@ Future<SaveResult?> createBackup(
     final backup = await createVerifiedBackup(ref.read);
     final r = await saveOrShareBytes(
       bytes: backup.bytes,
-      fileName: backupFileName(DateTime.now()),
-      mimeType: 'application/zip',
+      fileName: backupFileName(DateTime.now(), backup.extension),
+      mimeType: backup.mimeType,
       capabilities: ref.read(platformCapabilitiesProvider),
       sharePositionOrigin: origin,
     );
@@ -55,9 +61,68 @@ Future<SaveResult?> createBackup(
       );
     }
     return r;
+  } on BackupPasswordMissingException {
+    messenger?.showSnackBar(SnackBar(content: Text(l.backupPasswordMissing)));
+    if (context.mounted) await startBackupPasswordSetup(context, ref);
+    return null;
   } on Object catch (e) {
     messenger?.showSnackBar(SnackBar(content: Text(l.exportFailed('$e'))));
     return null;
+  }
+}
+
+/// Opens a picked backup: plain bundles directly, encrypted ones with the
+/// keys on this device or, failing that, the password / recovery key the
+/// user types (asked again after a wrong one). Shows errors; null when it
+/// cannot be opened or the user gives up.
+Future<BundleContents?> openPickedBackup(
+  BuildContext context,
+  WidgetRef ref,
+  Uint8List bytes,
+) async {
+  final l = context.l10n;
+  Future<void> fail(String message) => showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      icon: Icon(Icons.error_outline, color: ctx.colors.error),
+      title: Text(l.exportErrTitle),
+      content: Text(message),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l.commonClose),
+        ),
+      ],
+    ),
+  );
+
+  BackupUnlock? unlock;
+  String? wrong;
+  for (;;) {
+    try {
+      return await openBackup(
+        ref.read,
+        bytes,
+        password: unlock?.password,
+        recoveryKey: unlock?.recoveryKey,
+      );
+    } on BundleException catch (e) {
+      if (context.mounted) await fail(bundleErrorMessage(l, e));
+      return null;
+    } on BackupCryptoException catch (e) {
+      if (!context.mounted) return null;
+      if (e.error != BackupCryptoError.wrongKey) {
+        await fail(switch (e.error) {
+          BackupCryptoError.newerVersion => l.exportErrNewerFormat,
+          BackupCryptoError.damaged => l.backupErrDamaged,
+          _ => l.exportErrNotBundle,
+        });
+        return null;
+      }
+      unlock = await askBackupUnlock(context, error: wrong);
+      if (unlock == null) return null;
+      wrong = l.backupUnlockWrong;
+    }
   }
 }
 
@@ -71,32 +136,17 @@ Future<void> startRestore(
 }) async {
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
-  final picked = await pickFileBytes(extensions: const ['zip']);
+  // Mobile pickers know no MIME type for `.pfbackup`; the content decides.
+  final picked = await pickFileBytes(
+    extensions: ref.read(platformCapabilitiesProvider).isMobile
+        ? null
+        : const ['zip', 'pfbackup'],
+  );
   if (picked == null || !context.mounted) return;
 
   final db = ref.read(databaseProvider);
-  BundleContents contents;
-  try {
-    contents = readBundle(db, picked.bytes);
-  } on BundleException catch (e) {
-    if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: Icon(Icons.error_outline, color: ctx.colors.error),
-        title: Text(l.exportErrTitle),
-        content: Text(bundleErrorMessage(l, e)),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l.commonClose),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
-  if (!context.mounted) return;
+  final contents = await openPickedBackup(context, ref, picked.bytes);
+  if (contents == null || !context.mounted) return;
 
   final backupFirst = await showDialog<bool>(
     context: context,
