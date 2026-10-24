@@ -535,6 +535,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String backupMissingReceipts(int count) {
+    return 'Backup saved. $count receipt files were already missing on this device and are not in it.';
+  }
+
+  @override
+  String get backupReceipts => 'Receipts';
+
+  @override
+  String backupReceiptsValue(int count, String size) {
+    return '$count files, $size';
+  }
+
+  @override
+  String backupRestoreMissing(int count) {
+    return '$count receipt files were already missing when this backup was made and cannot be restored.';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

@@ -67,6 +67,25 @@ void main() {
     }
   });
 
+  test('restore over a database that has transactions', () async {
+    // Regression: the FTS index kept the old rowids and the re-inserted
+    // transactions collided with them.
+    final other = newTestDb();
+    final db = newTestDb();
+    addTearDown(other.close);
+    addTearDown(db.close);
+    await seed(other);
+    await seed(db);
+    final zip = await exportBundle(other, deviceId: 'dev-1');
+    await restoreBundle(db, readBundle(db, zip));
+    final hits = await db
+        .customSelect(
+          "SELECT rowid FROM txn_search WHERE txn_search MATCH 'Korn'",
+        )
+        .get();
+    expect(hits, hasLength(1));
+  });
+
   group('every released backup format restores', () {
     final dir = Directory('test/fixtures/bundles');
     final fixtures =

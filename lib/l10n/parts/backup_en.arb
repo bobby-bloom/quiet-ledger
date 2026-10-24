@@ -14,5 +14,33 @@
         "type": "String"
       }
     }
+  },
+  "backupMissingReceipts": "Backup saved. {count} receipt files were already missing on this device and are not in it.",
+  "@backupMissingReceipts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupReceipts": "Receipts",
+  "backupReceiptsValue": "{count} files, {size}",
+  "@backupReceiptsValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreMissing": "{count} receipt files were already missing when this backup was made and cannot be restored.",
+  "@backupRestoreMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

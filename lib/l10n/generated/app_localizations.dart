@@ -931,6 +931,30 @@ abstract class AppLocalizations {
   /// **'The old database file was moved to:\n{path}'**
   String backupBootMoved(String path);
 
+  /// No description provided for @backupMissingReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved. {count} receipt files were already missing on this device and are not in it.'**
+  String backupMissingReceipts(int count);
+
+  /// No description provided for @backupReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get backupReceipts;
+
+  /// No description provided for @backupReceiptsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files, {size}'**
+  String backupReceiptsValue(int count, String size);
+
+  /// No description provided for @backupRestoreMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} receipt files were already missing when this backup was made and cannot be restored.'**
+  String backupRestoreMissing(int count);
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:

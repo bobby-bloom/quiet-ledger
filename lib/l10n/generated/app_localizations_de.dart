@@ -541,6 +541,24 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String backupMissingReceipts(int count) {
+    return 'Sicherung gespeichert. $count Belegdateien fehlten bereits auf diesem Gerät und sind nicht enthalten.';
+  }
+
+  @override
+  String get backupReceipts => 'Belege';
+
+  @override
+  String backupReceiptsValue(int count, String size) {
+    return '$count Dateien, $size';
+  }
+
+  @override
+  String backupRestoreMissing(int count) {
+    return '$count Belegdateien fehlten bereits beim Erstellen dieser Sicherung und können nicht wiederhergestellt werden.';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

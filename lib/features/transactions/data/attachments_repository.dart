@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
+import 'package:personal_finance/core/attachments/attachment_files.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
-import 'package:personal_finance/features/transactions/data/attachment_store/attachment_store.dart';
 
 final attachmentsRepositoryProvider = Provider<AttachmentsRepository>(
   (ref) => AttachmentsRepository(
@@ -57,8 +57,9 @@ String mimeTypeFor(String fileName) {
 }
 
 /// Receipt attachments. Native: the file is copied to
-/// `<app support>/attachments/` and `filePath` holds its absolute path.
-/// Web: the bytes are stored in `attachments.data`.
+/// `<app support>/attachments/` and `filePath` holds its name there (older
+/// versions stored an absolute path; both are resolved). Web: the bytes are
+/// stored in `attachments.data`.
 class AttachmentsRepository {
   AttachmentsRepository(this.db, this.writer);
 

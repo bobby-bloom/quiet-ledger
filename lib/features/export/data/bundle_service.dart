@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:meta/meta.dart';
 import 'package:personal_finance/core/app_version.dart' as app;
+import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/csv_reader.dart';
 import 'package:personal_finance/core/csv/csv_writer.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -17,7 +19,10 @@ import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 // header = SQL column names, raw SQL values — dates as unix seconds, bools
 // as 0/1, blobs as base64, null as an unquoted empty field) plus
 // `manifest.json` with format/schema/app version, creation time, device id,
-// row counts and the SHA-256 of every file.
+// row counts and the SHA-256 of every file. Native receipt files are stored
+// uncompressed as `files/<sha256>` and listed by attachment id under
+// `files` (web receipts are already in `attachments.data`). See
+// docs/BACKUP.md.
 
 /// `change_log.entity` of the marker written by [restoreBundle].
 const restoreMarkerEntity = '_restore';
@@ -42,32 +47,39 @@ class BundleTable {
 /// A validated bundle ready to restore.
 @immutable
 class BundleContents {
-  const BundleContents(this.manifest, this.tables);
+  const BundleContents(this.manifest, this.tables, [this.files = const {}]);
   final BundleManifest manifest;
 
   /// SQL table name → content. Tables missing from the bundle restore empty.
   final Map<String, BundleTable> tables;
+
+  /// Receipt file name in the bundle (`files/<sha256>`) → bytes, verified.
+  final Map<String, Uint8List> files;
 }
 
 String _sha256(List<int> bytes) => sha256.convert(bytes).toString();
 
 /// Writes all synced tables (including soft-deleted rows and all sync
-/// columns) into a bundle zip.
+/// columns) and the receipt files of all attachments (also soft-deleted
+/// ones, so undo keeps working after a restore) into a bundle zip.
 Future<Uint8List> exportBundle(
   AppDatabase db, {
   required String deviceId,
   String appVersion = app.appVersion,
   DateTime? now,
+  ReceiptStore receipts = const PlatformReceiptStore(),
 }) async {
   final writer = CsvWriter(CsvOptions.bundle);
   final archive = Archive();
   final infos = <String, BundleTableInfo>{};
+  var attachments = const <Map<String, Object?>>[];
   // One read transaction for a consistent snapshot.
   await db.transaction(() async {
     for (final name in syncedTableNames) {
       final table = db.tableByName(name);
       final cols = [for (final c in table.$columns) c.name];
       final rows = await selectRawRows(db, table, orderBy: 'id');
+      if (name == 'attachments') attachments = rows;
       final text = writer.encodeRowsToString([
         cols,
         for (final r in rows) [for (final c in cols) toJsonValue(r[c])],
@@ -82,6 +94,27 @@ Future<Uint8List> exportBundle(
       );
     }
   });
+
+  final files = <String, BundleFileInfo>{};
+  final written = <String>{};
+  final missing = <String>[];
+  for (final a in attachments) {
+    final path = a['file_path'] as String?;
+    if (path == null || a['data'] != null) continue;
+    final id = a['id']! as String;
+    final bytes = await receipts.read(path);
+    if (bytes == null) {
+      missing.add(id);
+      continue;
+    }
+    final hash = _sha256(bytes);
+    final file = 'files/$hash';
+    if (written.add(file)) {
+      archive.add(ArchiveFile.noCompress(file, bytes.length, bytes));
+    }
+    files[id] = BundleFileInfo(file: file, size: bytes.length, sha256: hash);
+  }
+
   final manifest = BundleManifest(
     formatVersion: bundleFormatVersion,
     schemaVersion: db.schemaVersion,
@@ -89,6 +122,8 @@ Future<Uint8List> exportBundle(
     createdAt: (now ?? DateTime.now()).toUtc(),
     deviceId: deviceId,
     tables: infos,
+    files: files,
+    missingFiles: missing,
   );
   archive.add(
     ArchiveFile.string(
@@ -153,7 +188,35 @@ BundleContents readBundle(AppDatabase db, Uint8List bytes) {
     }
     tables[name] = _parseTable(db.tableByName(name), info, content);
   }
-  return BundleContents(manifest, tables);
+
+  // Receipt files: present, intact and referenced by an attachment row.
+  final attachmentIds = <Object?>{};
+  final att = tables['attachments'];
+  if (att != null) {
+    final id = att.columns.indexOf('id');
+    for (final r in att.rows) {
+      attachmentIds.add(r[id]);
+    }
+  }
+  final files = <String, Uint8List>{};
+  for (final e in manifest.files.entries) {
+    final info = e.value;
+    if (!attachmentIds.contains(e.key)) {
+      throw BundleException(BundleErrorKind.invalidContent, info.file);
+    }
+    if (files.containsKey(info.file)) continue;
+    final file = find(info.file);
+    if (file == null) {
+      throw BundleException(BundleErrorKind.checksumMismatch, info.file);
+    }
+    final content = file.content;
+    if (content.length != info.size ||
+        _sha256(content) != info.sha256.toLowerCase()) {
+      throw BundleException(BundleErrorKind.checksumMismatch, info.file);
+    }
+    files[info.file] = content;
+  }
+  return BundleContents(manifest, tables, files);
 }
 
 BundleTable _parseTable(
@@ -222,13 +285,98 @@ Object? _parseValue(GeneratedColumn<Object> col, String v) {
 /// [deviceLocalSettingKeys] and rebuilds the full-text index. [clock] is
 /// advanced past the restored HLCs. Returns the number of rows restored.
 ///
+/// Receipt files are written to [receipts] under new names before the
+/// transaction (existing files are never overwritten or deleted) and the
+/// restored rows point at them; on the web their bytes go into
+/// `attachments.data` instead. If the transaction fails, the files written
+/// here are removed again and nothing else has changed.
+///
 /// Callers must have validated [contents] with [readBundle] and confirmed
 /// with the user; this cannot be undone.
 Future<int> restoreBundle(
   AppDatabase db,
   BundleContents contents, {
   HlcClock? clock,
+  ReceiptStore receipts = const PlatformReceiptStore(),
 }) async {
+  final created = <String>[];
+  final BundleContents restored;
+  try {
+    restored = await _placeReceipts(contents, receipts, created);
+    return await _restoreRows(db, restored, clock);
+  } on Object {
+    for (final f in created) {
+      try {
+        await receipts.delete(f);
+      } on Object catch (e) {
+        // Only an orphaned copy remains; the data itself is unchanged.
+        debugPrint('Could not remove restored receipt $f: $e');
+      }
+    }
+    rethrow;
+  }
+}
+
+/// Writes the bundle's receipt files and returns [contents] with the
+/// attachment rows pointing at them.
+Future<BundleContents> _placeReceipts(
+  BundleContents contents,
+  ReceiptStore receipts,
+  List<String> created,
+) async {
+  final att = contents.tables['attachments'];
+  if (att == null || contents.manifest.files.isEmpty) return contents;
+  final idCol = att.columns.indexOf('id');
+  final nameCol = att.columns.indexOf('file_name');
+  final pathCol = att.columns.indexOf('file_path');
+  final dataCol = att.columns.indexOf('data');
+  if (pathCol < 0 || dataCol < 0) return contents;
+
+  final stored = <String, String>{};
+  final rows = <List<Object?>>[];
+  for (final r in att.rows) {
+    final info = contents.manifest.files[r[idCol]];
+    if (info == null) {
+      rows.add(r);
+      continue;
+    }
+    final bytes = contents.files[info.file]!;
+    final row = List<Object?>.of(r);
+    if (receipts.usesFiles) {
+      var path = stored[info.file];
+      // Same device: the identical file is still there, keep using it.
+      final old = r[pathCol] as String?;
+      if (path == null && old != null) {
+        final current = await receipts.read(old);
+        if (current != null && _sha256(current) == info.sha256.toLowerCase()) {
+          path = stored[info.file] = old;
+        }
+      }
+      if (path == null) {
+        final name = nameCol < 0 ? 'receipt' : (r[nameCol] as String? ?? '');
+        path = await receipts.write(name, bytes);
+        created.add(path);
+        stored[info.file] = path;
+      }
+      row[pathCol] = path;
+    } else {
+      row
+        ..[pathCol] = null
+        ..[dataCol] = bytes;
+    }
+    rows.add(row);
+  }
+  return BundleContents(contents.manifest, {
+    ...contents.tables,
+    'attachments': BundleTable(att.columns, rows),
+  }, contents.files);
+}
+
+Future<int> _restoreRows(
+  AppDatabase db,
+  BundleContents contents,
+  HlcClock? clock,
+) async {
   var total = 0;
   await db.transaction(() async {
     final keep = await selectRawRows(
@@ -239,6 +387,9 @@ Future<int> restoreBundle(
       args: deviceLocalSettingKeys.toList(),
     );
 
+    // The FTS index has no delete trigger; clear it first or re-inserted
+    // transactions collide with the old rowids.
+    await db.customStatement('DELETE FROM txn_search');
     for (final name in syncedTableNames) {
       await db.customStatement('DELETE FROM "$name"');
     }

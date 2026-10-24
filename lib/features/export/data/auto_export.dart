@@ -1,20 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/sync_providers.dart';
-import 'package:personal_finance/features/export/data/bundle_service.dart';
+import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
 import 'package:personal_finance/features/export/domain/export_settings.dart';
-
-/// Reads a provider; both `ProviderContainer.read` and `WidgetRef.read`
-/// fit.
-typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
 
 /// Outcome of an automatic backup run.
 @immutable
@@ -71,10 +66,8 @@ Future<AutoExportResult> runAutoExportNow(
     if (path == null || path.isEmpty) {
       return AutoExportResult(error: StateError('No export folder'));
     }
-    final db = read(databaseProvider);
-    final bytes = await exportBundle(db, deviceId: read(deviceIdProvider));
-    // Verify before writing: a backup that cannot be read is worthless.
-    readBundle(db, bytes);
+    final backup = await createVerifiedBackup(read);
+    final bytes = backup.bytes;
     final folder = read(exportFolderFactoryProvider)(path);
     final name = autoExportFileName(at);
     await folder.writeFile(name, bytes);

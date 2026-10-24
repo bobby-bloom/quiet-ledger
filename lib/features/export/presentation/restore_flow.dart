@@ -6,12 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
+import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
@@ -30,11 +32,9 @@ Future<SaveResult?> createBackup(
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
   try {
-    final db = ref.read(databaseProvider);
-    final bytes = await exportBundle(db, deviceId: ref.read(deviceIdProvider));
-    final check = readBundle(db, bytes);
+    final backup = await createVerifiedBackup(ref.read);
     final r = await saveOrShareBytes(
-      bytes: bytes,
+      bytes: backup.bytes,
       fileName: backupFileName(DateTime.now()),
       mimeType: 'application/zip',
       capabilities: ref.read(platformCapabilitiesProvider),
@@ -42,7 +42,13 @@ Future<SaveResult?> createBackup(
     );
     if (r.ok) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l.exportBackupDone(check.manifest.totalRows))),
+        SnackBar(
+          content: Text(
+            backup.manifest.missingFiles.isEmpty
+                ? l.exportBackupDone(backup.manifest.totalRows)
+                : l.backupMissingReceipts(backup.manifest.missingFiles.length),
+          ),
+        ),
       );
     }
     return r;
@@ -133,6 +139,7 @@ Future<void> startRestore(
       db,
       contents,
       clock: ref.read(hlcClockProvider),
+      receipts: ref.read(receiptStoreProvider),
     );
     navigator.pop();
     await refreshAfterDataReplace(ref);
@@ -200,7 +207,8 @@ class _RestoreSummaryDialogState extends ConsumerState<_RestoreSummaryDialog> {
     final dates = ref.watch(dateFormatsProvider);
     final m = widget.manifest;
     final created = m.createdAt.toLocal();
-    final number = NumberFormat.decimalPattern(ref.watch(formatLocaleProvider));
+    final locale = ref.watch(formatLocaleProvider);
+    final number = NumberFormat.decimalPattern(locale);
 
     Widget row(String label, String value) => Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.xxs),
@@ -259,6 +267,23 @@ class _RestoreSummaryDialogState extends ConsumerState<_RestoreSummaryDialog> {
             row(l.navTransactions, number.format(m.rowsOf('transactions'))),
             row(l.navCategories, number.format(m.rowsOf('categories'))),
             row(l.exportRestoreTotalRows, number.format(m.totalRows)),
+            if (m.fileCount > 0)
+              row(
+                l.backupReceipts,
+                l.backupReceiptsValue(
+                  m.fileCount,
+                  formatBytes(m.fileBytes, locale),
+                ),
+              ),
+            if (m.missingFiles.isNotEmpty) ...[
+              const SizedBox(height: Space.xs),
+              Text(
+                l.backupRestoreMissing(m.missingFiles.length),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.finance.warning,
+                ),
+              ),
+            ],
             const SizedBox(height: Space.md),
             Container(
               padding: const EdgeInsets.all(Space.sm),
