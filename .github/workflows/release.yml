@@ -31,7 +31,7 @@ on:
         type: boolean
         default: true
       web:
-        description: Web (zip)
+        description: Web (zip, WebAssembly with JS fallback)
         type: boolean
         default: true
 
@@ -177,7 +177,9 @@ jobs:
           tar -czf "dist/$NAME-linux-x64.tar.gz" "$NAME"
       - if: matrix.target == 'web'
         run: |
-          flutter build web --release
+          # --wasm also emits the JS build, which browsers that do not run the
+          # WebAssembly build (no WasmGC; Safari and Firefox by default) load.
+          flutter build web --release --wasm
           (cd build/web && zip -qr "../../dist/$NAME-web.zip" .)
       - if: matrix.target == 'android'
         run: |

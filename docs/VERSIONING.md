@@ -58,7 +58,7 @@ a GitHub release with the version's CHANGELOG section as notes:
 | `linux` | `quiet-ledger-X.Y.Z-linux-x64.tar.gz` |
 | `windows` | `quiet-ledger-X.Y.Z-windows-x64.zip`, VC++ runtime included |
 | `macos` | `quiet-ledger-X.Y.Z-macos.zip`, unsigned (right-click › Open) |
-| `web` | `quiet-ledger-X.Y.Z-web.zip`, static files |
+| `web` | `quiet-ledger-X.Y.Z-web.zip`, static files: WebAssembly (Chromium) with a JavaScript fallback for other browsers |
 
 plus `SHA256SUMS.txt`. iOS is not released: it needs an Apple Developer
 account and signing.
