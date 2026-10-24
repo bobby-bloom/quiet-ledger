@@ -217,11 +217,10 @@ class BudgetDetailView extends ConsumerWidget {
           line: line,
           hasBudget: hasBudget,
           tick: board?.todayTick,
-          onEdit: () => hasBudget
-              ? editBudgetAmount(context, ref, period, line)
-              : _setBudget(context, ref, cat),
+          onEdit: () =>
+              editCategoryBudget(context, ref, period, cat.id, name: cat.name),
         ),
-        _OptionsCard(category: cat, line: line),
+        _OptionsCard(category: cat, line: line, period: period),
         _HistoryCard(categoryId: categoryId, period: period),
         if (outstanding.isNotEmpty) ...[
           PlanSectionHeader(l.budgetsOutstanding),
@@ -259,18 +258,6 @@ class BudgetDetailView extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _setBudget(
-    BuildContext context,
-    WidgetRef ref,
-    Category cat,
-  ) async {
-    final r = await showBudgetAmountDialog(context, title: cat.name);
-    if (r == null) return;
-    await ref
-        .read(budgetsRepositoryProvider)
-        .setAmount(cat.id, period.start, r.amount);
   }
 }
 
@@ -430,10 +417,15 @@ class _ProgressCard extends ConsumerWidget {
 }
 
 class _OptionsCard extends ConsumerWidget {
-  const _OptionsCard({required this.category, required this.line});
+  const _OptionsCard({
+    required this.category,
+    required this.line,
+    required this.period,
+  });
 
   final Category category;
   final BudgetLine line;
+  final DateRange period;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -443,11 +435,32 @@ class _OptionsCard extends ConsumerWidget {
     final override = parseRolloverMode(category.rolloverOverride);
     final globalThreshold = settings.get(BudgetSettings.warnThreshold);
     final repo = ref.read(budgetsRepositoryProvider);
+    final rule = line.rule;
+    final periods = ref.watch(budgetPeriodsProvider);
+    final locale = ref.watch(formatLocaleProvider);
+    final dates = ref.watch(dateFormatsProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
       child: Card(
         child: Column(
           children: [
+            if (rule != null)
+              ListTile(
+                leading: const Icon(Icons.repeat),
+                title: Text(l.budgetsRepeatOption),
+                subtitle: Text(
+                  repeatSummary(
+                    l,
+                    rule.repeat,
+                    periodTitle(periods.periodOf(rule.start), locale),
+                    dates.short,
+                  ),
+                ),
+                trailing: TextButton(
+                  onPressed: () => _stopRepeating(context, ref, periods),
+                  child: Text(l.budgetsStopRepeating),
+                ),
+              ),
             ListTile(
               leading: const Icon(Icons.redo),
               title: Text(l.budgetsRolloverOption),
@@ -498,6 +511,28 @@ class _OptionsCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _stopRepeating(
+    BuildContext context,
+    WidgetRef ref,
+    BudgetPeriods periods,
+  ) async {
+    final l = context.l10n;
+    final ok = await confirmDialog(
+      context,
+      title: l.budgetsStopRepeatingTitle(category.name),
+      message: l.budgetsStopRepeatingMessage(category.name),
+      confirmLabel: l.budgetsStopRepeating,
+    );
+    if (!ok) return;
+    await ref
+        .read(budgetsRepositoryProvider)
+        .stopRepeating(category.id, periods.next(period).start);
+    if (!context.mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(l.budgetsStoppedRepeating(category.name))),
     );
   }
 

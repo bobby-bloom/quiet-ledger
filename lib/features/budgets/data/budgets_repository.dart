@@ -11,6 +11,7 @@ import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 
 final budgetsRepositoryProvider = Provider<BudgetsRepository>(
@@ -426,11 +427,15 @@ class BudgetsRepository {
               ),
             );
           } else {
+            // A changed amount is set by hand: the rule leaves it alone.
             if (rows.first.amountMinor != amount) {
               await writer.update(
                 db.budgets,
                 rows.first.id,
-                BudgetsCompanion(amountMinor: Value(amount)),
+                BudgetsCompanion(
+                  amountMinor: Value(amount),
+                  ruleId: const Value(null),
+                ),
               );
             }
             for (final dup in rows.skip(1)) {
@@ -439,6 +444,263 @@ class BudgetsRepository {
           }
         }
       });
+
+  // ------------------------------------------------------------- rules ---
+
+  SimpleSelectStatement<$BudgetRulesTable, BudgetRule> _rulesQuery() =>
+      db.select(db.budgetRules)..where((r) => r.deletedAt.isNull());
+
+  static List<BudgetRulePlan> _plans(List<BudgetRule> rows) => [
+    for (final r in rows) BudgetRulePlan.fromRow(r),
+  ];
+
+  /// Live repeating budgets.
+  Stream<List<BudgetRulePlan>> watchRules() =>
+      _rulesQuery().watch().map(_plans);
+
+  Future<List<BudgetRulePlan>> rules() async =>
+      _plans(await _rulesQuery().get());
+
+  /// Generates the budget rows of every rule for its covered periods after
+  /// its watermark (`generatedUntil`) that start on or before [upTo], then
+  /// moves the watermark. A period that already has a live budget of the
+  /// category (set by hand or by another rule) is left alone, as is one
+  /// whose generated row was removed. Where two rules cover the same
+  /// category and period, the newest one generates. Idempotent; returns the
+  /// number of rows created.
+  Future<int> ensureFromRules(BudgetPeriods periods, DateTime upTo) =>
+      writer.transaction(() async {
+        final all = await rules();
+        var created = 0;
+        for (final r in all) {
+          final due = r.due(periods, upTo);
+          if (due.isEmpty) continue;
+          for (final p in due) {
+            if (ruleFor(all, periods, r.categoryId, p.start)?.id != r.id) {
+              continue;
+            }
+            final live =
+                await (db.select(db.budgets)..where(
+                      (b) =>
+                          b.categoryId.equals(r.categoryId) &
+                          b.periodStart.equals(p.start) &
+                          b.deletedAt.isNull(),
+                    ))
+                    .get();
+            if (live.isNotEmpty) continue;
+            final id = generatedBudgetId(r.id, p.start);
+            final existing = await (db.select(
+              db.budgets,
+            )..where((b) => b.id.equals(id))).getSingleOrNull();
+            if (existing != null) continue; // removed by the user
+            await writer.insert(
+              db.budgets,
+              BudgetsCompanion(
+                categoryId: Value(r.categoryId),
+                periodStart: Value(p.start),
+                amountMinor: Value(r.amountMinor),
+                ruleId: Value(r.id),
+              ),
+              id: id,
+            );
+            created++;
+          }
+          await writer.update(
+            db.budgetRules,
+            r.id,
+            BudgetRulesCompanion(generatedUntil: Value(due.last.start)),
+          );
+        }
+        return created;
+      });
+
+  /// Makes [categoryId] repeat from [period] on with [amountMinor] as set in
+  /// [repeat] (which must repeat).
+  ///
+  /// The category's existing rules end before [period] (rules starting at
+  /// or after it are removed). Their generated, unedited rows from [period]
+  /// on move to the new rule with the new amount, or are removed where the
+  /// new rule does not cover the period; budgets set by hand stay. The row
+  /// of [period] itself gets the new amount. The new rule inherits the old
+  /// watermark, so periods the user removed stay removed. Returns the new
+  /// rule's id.
+  Future<String> repeatFrom({
+    required BudgetPeriods periods,
+    required String categoryId,
+    required DateRange period,
+    required int amountMinor,
+    required BudgetRepeat repeat,
+  }) {
+    if (!repeat.repeats) throw ArgumentError.value(repeat, 'repeat');
+    if (amountMinor < 0) throw ArgumentError.value(amountMinor, 'amountMinor');
+    return writer.transaction(() async {
+      final start = dateOnly(period.start);
+      final old = (await rules()).where((r) => r.categoryId == categoryId);
+      var watermark = start;
+      for (final r in old) {
+        final g = r.generatedUntil;
+        if (g != null && g.isAfter(watermark)) watermark = g;
+      }
+      await _endRules(old, start);
+      final ruleId = await writer.insert(
+        db.budgetRules,
+        BudgetRulesCompanion(
+          categoryId: Value(categoryId),
+          amountMinor: Value(amountMinor),
+          every: Value(repeat.every < 1 ? 1 : repeat.every),
+          startDate: Value(start),
+          endDate: Value(repeat.until == null ? null : dateOnly(repeat.until!)),
+          count: Value(repeat.count),
+          generatedUntil: Value(watermark),
+        ),
+      );
+      final rule = BudgetRulePlan(
+        id: ruleId,
+        categoryId: categoryId,
+        amountMinor: amountMinor,
+        start: start,
+        every: repeat.every < 1 ? 1 : repeat.every,
+        end: repeat.until,
+        count: repeat.count,
+      );
+      final oldIds = {for (final r in old) r.id};
+      if (oldIds.isNotEmpty) {
+        final rows =
+            await (db.select(db.budgets)..where(
+                  (b) =>
+                      b.categoryId.equals(categoryId) &
+                      b.periodStart.isBiggerThanValue(start) &
+                      b.ruleId.isIn(oldIds) &
+                      b.deletedAt.isNull(),
+                ))
+                .get();
+        for (final b in rows) {
+          if (rule.covers(periods, b.periodStart)) {
+            await writer.update(
+              db.budgets,
+              b.id,
+              BudgetsCompanion(
+                amountMinor: Value(amountMinor),
+                ruleId: Value(ruleId),
+              ),
+            );
+          } else {
+            await writer.delete(db.budgets, b.id);
+          }
+        }
+      }
+      final current = await _periodQuery(start).get();
+      final here = current.where((b) => b.categoryId == categoryId).toList();
+      if (here.isEmpty) {
+        await writer.insert(
+          db.budgets,
+          BudgetsCompanion(
+            categoryId: Value(categoryId),
+            periodStart: Value(start),
+            amountMinor: Value(amountMinor),
+            ruleId: Value(ruleId),
+          ),
+          id: generatedBudgetId(ruleId, start),
+        );
+      } else {
+        await writer.update(
+          db.budgets,
+          here.first.id,
+          BudgetsCompanion(
+            amountMinor: Value(amountMinor),
+            ruleId: Value(ruleId),
+          ),
+        );
+        for (final dup in here.skip(1)) {
+          await writer.delete(db.budgets, dup.id);
+        }
+      }
+      return ruleId;
+    });
+  }
+
+  /// Stops [categoryId] repeating from the period starting [from] on: its
+  /// rules end before it (rules starting at or after it are removed) and
+  /// their generated, unedited rows from [from] on are removed. Budgets set
+  /// by hand stay. Returns the ids of the removed rows (for undo).
+  Future<List<String>> stopRepeating(String categoryId, DateTime from) =>
+      writer.transaction(() async {
+        final start = dateOnly(from);
+        final old = (await rules()).where((r) => r.categoryId == categoryId);
+        if (old.isEmpty) return const <String>[];
+        await _endRules(old, start);
+        final rows =
+            await (db.select(db.budgets)..where(
+                  (b) =>
+                      b.categoryId.equals(categoryId) &
+                      b.periodStart.isBiggerOrEqualValue(start) &
+                      b.ruleId.isIn([for (final r in old) r.id]) &
+                      b.deletedAt.isNull(),
+                ))
+                .get();
+        for (final b in rows) {
+          await writer.delete(db.budgets, b.id);
+        }
+        return [for (final b in rows) b.id];
+      });
+
+  /// Removes the budget of [categoryId] in [period] only. Rules generate up
+  /// to [period] first, so their watermark passes it and the removed row
+  /// is not generated again. Returns the removed row ids (for undo).
+  Future<List<String>> removeFromPeriod(
+    BudgetPeriods periods,
+    String categoryId,
+    DateRange period,
+  ) => writer.transaction(() async {
+    await ensureFromRules(periods, period.start);
+    final rows = (await _periodQuery(
+      period.start,
+    ).get()).where((b) => b.categoryId == categoryId).toList();
+    for (final b in rows) {
+      await writer.delete(db.budgets, b.id);
+    }
+    return [for (final b in rows) b.id];
+  });
+
+  /// Undoes [removeFromPeriod] or [stopRepeating] for the rows [ids].
+  Future<void> restoreBudgets(List<String> ids) => writer.transaction(() async {
+    for (final id in ids) {
+      await writer.undelete(db.budgets, id);
+    }
+  });
+
+  /// Turns the budgets of [period] into rules repeating every period from
+  /// it on (Fill menu). Returns the number of budgets converted.
+  Future<int> repeatPeriod(BudgetPeriods periods, DateRange period) =>
+      writer.transaction(() async {
+        final rows = await this.period(period.start);
+        for (final b in rows) {
+          await repeatFrom(
+            periods: periods,
+            categoryId: b.categoryId,
+            period: period,
+            amountMinor: b.amountMinor,
+            repeat: const BudgetRepeat.everyPeriod(),
+          );
+        }
+        return rows.length;
+      });
+
+  /// Ends [old] before [start]; rules starting at or after it are removed.
+  Future<void> _endRules(Iterable<BudgetRulePlan> old, DateTime start) async {
+    final dayBefore = DateTime(start.year, start.month, start.day - 1);
+    for (final r in old) {
+      if (!r.start.isBefore(start)) {
+        await writer.delete(db.budgetRules, r.id);
+      } else if (r.end == null || !r.end!.isBefore(start)) {
+        await writer.update(
+          db.budgetRules,
+          r.id,
+          BudgetRulesCompanion(endDate: Value(dayBefore)),
+        );
+      }
+    }
+  }
 
   /// Removes all budgets of a period.
   Future<void> clearPeriod(DateTime periodStart) =>

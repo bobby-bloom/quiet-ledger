@@ -50,6 +50,11 @@ enum CustomFieldType { text, number, date, select, multiselect, boolean }
 
 enum PostingMode { autoPost, remindConfirm }
 
+/// Window length of a [BudgetRules] row. `period` follows the global budget
+/// period (Settings › Budgets); the others are reserved for budgets with
+/// their own length.
+enum BudgetCadence { period, week, month, quarter, year }
+
 @DataClassName('AccountGroup')
 class AccountGroups extends Table with SyncColumns {
   TextColumn get name => text()();
@@ -261,6 +266,39 @@ class Budgets extends Table with SyncColumns {
   /// Rollover amount carried into this period (computed when the period is
   /// filled; may be adjusted by the user).
   IntColumn get rolloverMinor => integer().withDefault(const Constant(0))();
+
+  /// [BudgetRules] row that generated this budget; null for a budget set by
+  /// hand (which the rule never touches).
+  TextColumn get ruleId => text().nullable()();
+}
+
+/// A repeating budget: generates one [Budgets] row per covered period (see
+/// docs/BUDGETS.md).
+@DataClassName('BudgetRule')
+class BudgetRules extends Table with SyncColumns {
+  TextColumn get categoryId => text()();
+
+  /// Amount per window, >= 0.
+  IntColumn get amountMinor => integer()();
+  TextColumn get cadence => textEnum<BudgetCadence>().withDefault(
+    Constant(BudgetCadence.period.name),
+  )();
+
+  /// Every n-th window, >= 1.
+  IntColumn get every => integer().withDefault(const Constant(1))();
+
+  /// Start of the first window.
+  DateTimeColumn get startDate => dateTime()();
+
+  /// Windows starting after this date are not covered.
+  DateTimeColumn get endDate => dateTime().nullable()();
+
+  /// Number of windows covered (1 = once); null = no limit.
+  IntColumn get count => integer().nullable()();
+
+  /// Start of the last window rows were generated for. Windows up to it
+  /// are never generated again, so a budget the user removed stays removed.
+  DateTimeColumn get generatedUntil => dateTime().nullable()();
 }
 
 @DataClassName('BudgetTemplate')

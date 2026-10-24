@@ -1203,6 +1203,123 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get budgetsRepeat => 'Repeat';
+
+  @override
+  String get budgetsRepeatOnce => 'This period only';
+
+  @override
+  String get budgetsRepeatEvery => 'Every period';
+
+  @override
+  String get budgetsRepeatCount => 'For a number of periods';
+
+  @override
+  String get budgetsRepeatUntil => 'Until a date';
+
+  @override
+  String get budgetsRepeatPeriods => 'Number of periods';
+
+  @override
+  String get budgetsRepeatInterval => 'Every … periods';
+
+  @override
+  String get budgetsRepeatNumberInvalid => 'Enter 1 or more';
+
+  @override
+  String budgetsRepeatUntilDate(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String budgetsEveryN(int every) {
+    String _temp0 = intl.Intl.pluralLogic(
+      every,
+      locale: localeName,
+      other: 'every $every periods',
+      one: 'every period',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsRepeatsEvery(String every, String period) {
+    return 'Repeats $every from $period';
+  }
+
+  @override
+  String budgetsRepeatsCount(int count, String every, String period) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Repeats $every from $period, $count times',
+      one: 'Only in $period',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsRepeatsUntil(String every, String period, String date) {
+    return 'Repeats $every from $period until $date';
+  }
+
+  @override
+  String get budgetsScopeChangeTitle => 'Change a repeating budget';
+
+  @override
+  String get budgetsScopeRemoveTitle => 'Remove a repeating budget';
+
+  @override
+  String get budgetsScopeThis => 'Only this period';
+
+  @override
+  String get budgetsScopeFollowing => 'This and following periods';
+
+  @override
+  String get budgetsScopeHint =>
+      'Budgets you set by hand in later periods stay as they are.';
+
+  @override
+  String budgetsRemoved(String category) {
+    return 'Budget for $category removed';
+  }
+
+  @override
+  String get budgetsRepeatOption => 'Repeats';
+
+  @override
+  String get budgetsStopRepeating => 'Stop repeating';
+
+  @override
+  String budgetsStopRepeatingTitle(String category) {
+    return 'Stop repeating $category?';
+  }
+
+  @override
+  String budgetsStopRepeatingMessage(String category) {
+    return 'The budget of this period stays. Later periods get no budget for $category, except budgets you set by hand.';
+  }
+
+  @override
+  String budgetsStoppedRepeating(String category) {
+    return '$category no longer repeats';
+  }
+
+  @override
+  String get budgetsRepeatAll => 'Repeat these budgets every period';
+
+  @override
+  String budgetsRepeatAllDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets now repeat every period',
+      one: '1 budget now repeats every period',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get categoriesTitle => 'Categories';
 
   @override

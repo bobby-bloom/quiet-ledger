@@ -1939,6 +1939,162 @@ abstract class AppLocalizations {
   /// **'{amount} expected income, not included until it arrives'**
   String budgetsExpectedIncome(String amount);
 
+  /// No description provided for @budgetsRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get budgetsRepeat;
+
+  /// No description provided for @budgetsRepeatOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'This period only'**
+  String get budgetsRepeatOnce;
+
+  /// No description provided for @budgetsRepeatEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every period'**
+  String get budgetsRepeatEvery;
+
+  /// No description provided for @budgetsRepeatCount.
+  ///
+  /// In en, this message translates to:
+  /// **'For a number of periods'**
+  String get budgetsRepeatCount;
+
+  /// No description provided for @budgetsRepeatUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until a date'**
+  String get budgetsRepeatUntil;
+
+  /// No description provided for @budgetsRepeatPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of periods'**
+  String get budgetsRepeatPeriods;
+
+  /// No description provided for @budgetsRepeatInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Every … periods'**
+  String get budgetsRepeatInterval;
+
+  /// No description provided for @budgetsRepeatNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 or more'**
+  String get budgetsRepeatNumberInvalid;
+
+  /// No description provided for @budgetsRepeatUntilDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String budgetsRepeatUntilDate(String date);
+
+  /// No description provided for @budgetsEveryN.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every period} other{every {every} periods}}'**
+  String budgetsEveryN(int every);
+
+  /// No description provided for @budgetsRepeatsEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats {every} from {period}'**
+  String budgetsRepeatsEvery(String every, String period);
+
+  /// No description provided for @budgetsRepeatsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Only in {period}} other{Repeats {every} from {period}, {count} times}}'**
+  String budgetsRepeatsCount(int count, String every, String period);
+
+  /// No description provided for @budgetsRepeatsUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats {every} from {period} until {date}'**
+  String budgetsRepeatsUntil(String every, String period, String date);
+
+  /// No description provided for @budgetsScopeChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change a repeating budget'**
+  String get budgetsScopeChangeTitle;
+
+  /// No description provided for @budgetsScopeRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove a repeating budget'**
+  String get budgetsScopeRemoveTitle;
+
+  /// No description provided for @budgetsScopeThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this period'**
+  String get budgetsScopeThis;
+
+  /// No description provided for @budgetsScopeFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'This and following periods'**
+  String get budgetsScopeFollowing;
+
+  /// No description provided for @budgetsScopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets you set by hand in later periods stay as they are.'**
+  String get budgetsScopeHint;
+
+  /// No description provided for @budgetsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget for {category} removed'**
+  String budgetsRemoved(String category);
+
+  /// No description provided for @budgetsRepeatOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get budgetsRepeatOption;
+
+  /// No description provided for @budgetsStopRepeating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop repeating'**
+  String get budgetsStopRepeating;
+
+  /// No description provided for @budgetsStopRepeatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop repeating {category}?'**
+  String budgetsStopRepeatingTitle(String category);
+
+  /// No description provided for @budgetsStopRepeatingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The budget of this period stays. Later periods get no budget for {category}, except budgets you set by hand.'**
+  String budgetsStopRepeatingMessage(String category);
+
+  /// No description provided for @budgetsStoppedRepeating.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} no longer repeats'**
+  String budgetsStoppedRepeating(String category);
+
+  /// No description provided for @budgetsRepeatAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat these budgets every period'**
+  String get budgetsRepeatAll;
+
+  /// No description provided for @budgetsRepeatAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget now repeats every period} other{{count} budgets now repeat every period}}'**
+  String budgetsRepeatAllDone(int count);
+
   /// No description provided for @categoriesTitle.
   ///
   /// In en, this message translates to:

@@ -843,6 +843,117 @@
       }
     }
   },
+  "budgetsRepeat": "Repeat",
+  "budgetsRepeatOnce": "This period only",
+  "budgetsRepeatEvery": "Every period",
+  "budgetsRepeatCount": "For a number of periods",
+  "budgetsRepeatUntil": "Until a date",
+  "budgetsRepeatPeriods": "Number of periods",
+  "budgetsRepeatInterval": "Every … periods",
+  "budgetsRepeatNumberInvalid": "Enter 1 or more",
+  "budgetsRepeatUntilDate": "Until {date}",
+  "@budgetsRepeatUntilDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEveryN": "{every, plural, =1{every period} other{every {every} periods}}",
+  "@budgetsEveryN": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsRepeatsEvery": "Repeats {every} from {period}",
+  "@budgetsRepeatsEvery": {
+    "placeholders": {
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsCount": "{count, plural, =1{Only in {period}} other{Repeats {every} from {period}, {count} times}}",
+  "@budgetsRepeatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsUntil": "Repeats {every} from {period} until {date}",
+  "@budgetsRepeatsUntil": {
+    "placeholders": {
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsScopeChangeTitle": "Change a repeating budget",
+  "budgetsScopeRemoveTitle": "Remove a repeating budget",
+  "budgetsScopeThis": "Only this period",
+  "budgetsScopeFollowing": "This and following periods",
+  "budgetsScopeHint": "Budgets you set by hand in later periods stay as they are.",
+  "budgetsRemoved": "Budget for {category} removed",
+  "@budgetsRemoved": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatOption": "Repeats",
+  "budgetsStopRepeating": "Stop repeating",
+  "budgetsStopRepeatingTitle": "Stop repeating {category}?",
+  "@budgetsStopRepeatingTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStopRepeatingMessage": "The budget of this period stays. Later periods get no budget for {category}, except budgets you set by hand.",
+  "@budgetsStopRepeatingMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStoppedRepeating": "{category} no longer repeats",
+  "@budgetsStoppedRepeating": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatAll": "Repeat these budgets every period",
+  "budgetsRepeatAllDone": "{count, plural, =1{1 budget now repeats every period} other{{count} budgets now repeat every period}}",
+  "@budgetsRepeatAllDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "categoriesTitle": "Categories",
   "categoriesAdd": "Add category",
   "categoriesAddSub": "Add subcategory",

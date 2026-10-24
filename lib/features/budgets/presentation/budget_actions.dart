@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/app_icons.dart';
+import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
@@ -14,7 +15,10 @@ import 'package:personal_finance/features/budgets/data/budget_period_provider.da
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/plan/presentation/money_text.dart';
+import 'package:personal_finance/features/plan/presentation/plan_widgets.dart';
+import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 void _snack(BuildContext context, String text) {
   if (!context.mounted) return;
@@ -89,21 +93,7 @@ Future<void> addBudget(
   final id = await showCategoryPicker(context, kind: CategoryKind.expense);
   if (id == null || id.isEmpty || !context.mounted) return;
   final cat = ref.read(categoryMapProvider)[id];
-  final existing =
-      (await ref.read(budgetsRepositoryProvider).period(period.start))
-          .where((b) => b.categoryId == id)
-          .firstOrNull;
-  if (!context.mounted) return;
-  final r = await showBudgetAmountDialog(
-    context,
-    title: cat?.name ?? '',
-    initialMinor: existing?.amountMinor,
-    allowRemove: existing != null,
-  );
-  if (r == null) return;
-  await ref
-      .read(budgetsRepositoryProvider)
-      .setAmount(id, period.start, r.amount);
+  await editCategoryBudget(context, ref, period, id, name: cat?.name ?? '');
 }
 
 /// Edits (or removes) the budget of [line].
@@ -112,80 +102,360 @@ Future<void> editBudgetAmount(
   WidgetRef ref,
   DateRange period,
   BudgetLine line,
-) async {
+) => editCategoryBudget(context, ref, period, line.categoryId, name: line.name);
+
+/// Sets, changes or removes the budget of [categoryId] in [period] through
+/// the amount dialog, including how it repeats. Changing or removing a
+/// repeating budget asks whether it applies to this period only or to
+/// this and the following periods.
+Future<void> editCategoryBudget(
+  BuildContext context,
+  WidgetRef ref,
+  DateRange period,
+  String categoryId, {
+  required String name,
+}) async {
+  final l = context.l10n;
+  final repo = ref.read(budgetsRepositoryProvider);
+  final periods = ref.read(budgetPeriodsProvider);
+  final existing = (await repo.period(period.start))
+      .where((b) => b.categoryId == categoryId)
+      .firstOrNull;
+  final rule = ruleFor(await repo.rules(), periods, categoryId, period.start);
+  if (!context.mounted) return;
+  // A count is shown as what is left from this period on.
+  final current = rule == null
+      ? (existing == null
+            ? const BudgetRepeat.everyPeriod()
+            : BudgetRepeat.once)
+      : rule.count == null
+      ? rule.repeat
+      : BudgetRepeat.forPeriods(
+          rule.remainingCountFrom(periods, period.start)!,
+          every: rule.every,
+        );
   final r = await showBudgetAmountDialog(
     context,
-    title: line.name,
-    initialMinor: line.budgetedMinor,
-    allowRemove: true,
+    title: name,
+    period: period,
+    initialMinor: existing?.amountMinor ?? rule?.amountMinor,
+    initialRepeat: current,
+    allowRemove: existing != null,
   );
-  if (r == null) return;
-  await ref
-      .read(budgetsRepositoryProvider)
-      .setAmount(line.categoryId, period.start, r.amount);
+  if (r == null || !context.mounted) return;
+  final amount = r.amount;
+
+  if (amount == null) {
+    var following = false;
+    if (rule != null) {
+      final scope = await _askScope(context, remove: true);
+      if (scope == null) return;
+      following = scope;
+    }
+    final removed = <String>[
+      if (following) ...await repo.stopRepeating(categoryId, period.start),
+      ...await repo.removeFromPeriod(periods, categoryId, period),
+    ];
+    if (!context.mounted || following || removed.isEmpty) return;
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l.budgetsRemoved(name)),
+          action: SnackBarAction(
+            label: l.commonUndo,
+            onPressed: () => unawaited(repo.restoreBudgets(removed)),
+          ),
+        ),
+      );
+    return;
+  }
+
+  final repeat = r.repeat;
+  Future<void> repeatFromHere() => repo.repeatFrom(
+    periods: periods,
+    categoryId: categoryId,
+    period: period,
+    amountMinor: amount,
+    repeat: repeat,
+  );
+  if (rule == null) {
+    if (repeat.repeats) {
+      await repeatFromHere();
+    } else {
+      await repo.setAmount(categoryId, period.start, amount);
+    }
+    return;
+  }
+  if (repeat != current) {
+    // A new repeat setting applies from this period on.
+    if (repeat.repeats) {
+      await repeatFromHere();
+    } else {
+      await repo.stopRepeating(categoryId, periods.next(period).start);
+      await repo.setAmount(categoryId, period.start, amount);
+    }
+    return;
+  }
+  if (amount == existing?.amountMinor) return;
+  final following = await _askScope(context, remove: false);
+  if (following == null) return;
+  if (following) {
+    await repeatFromHere();
+  } else {
+    await repo.setAmount(categoryId, period.start, amount);
+  }
 }
 
-/// Asks for a budget amount. Returns null when cancelled; `amount: null`
-/// means "remove the budget".
-Future<({int? amount})?> showBudgetAmountDialog(
+/// "Only this period" (false) or "This and following periods" (true);
+/// null when cancelled.
+Future<bool?> _askScope(BuildContext context, {required bool remove}) {
+  final l = context.l10n;
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => SimpleDialog(
+      title: Text(
+        remove ? l.budgetsScopeRemoveTitle : l.budgetsScopeChangeTitle,
+      ),
+      children: [
+        SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l.budgetsScopeThis),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l.budgetsScopeFollowing),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
+          child: Text(
+            l.budgetsScopeHint,
+            style: ctx.text.bodySmall?.copyWith(
+              color: ctx.colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// "Repeats every period from November 2026" and friends.
+String repeatSummary(
+  AppLocalizations l,
+  BudgetRepeat repeat,
+  String periodLabel,
+  String Function(DateTime) date,
+) {
+  final every = l.budgetsEveryN(repeat.every);
+  return switch (repeat.kind) {
+    BudgetRepeatKind.once => l.budgetsRepeatOnce,
+    BudgetRepeatKind.every => l.budgetsRepeatsEvery(every, periodLabel),
+    BudgetRepeatKind.count => l.budgetsRepeatsCount(
+      repeat.count ?? 1,
+      every,
+      periodLabel,
+    ),
+    BudgetRepeatKind.until => l.budgetsRepeatsUntil(
+      every,
+      periodLabel,
+      date(repeat.until!),
+    ),
+  };
+}
+
+/// Asks for a budget amount and how it repeats from [period] on. Returns
+/// null when cancelled; `amount: null` means "remove the budget".
+Future<({int? amount, BudgetRepeat repeat})?> showBudgetAmountDialog(
   BuildContext context, {
   required String title,
+  required DateRange period,
   int? initialMinor,
+  BudgetRepeat initialRepeat = const BudgetRepeat.everyPeriod(),
   bool allowRemove = false,
 }) {
-  return showDialog<({int? amount})>(
+  return showDialog<({int? amount, BudgetRepeat repeat})>(
     context: context,
     builder: (ctx) => _AmountDialog(
       title: title,
+      period: period,
       initialMinor: initialMinor,
+      initialRepeat: initialRepeat,
       allowRemove: allowRemove,
     ),
   );
 }
 
-class _AmountDialog extends StatefulWidget {
+class _AmountDialog extends ConsumerStatefulWidget {
   const _AmountDialog({
     required this.title,
+    required this.period,
     required this.allowRemove,
+    required this.initialRepeat,
     this.initialMinor,
   });
 
   final String title;
+  final DateRange period;
   final int? initialMinor;
+  final BudgetRepeat initialRepeat;
   final bool allowRemove;
 
   @override
-  State<_AmountDialog> createState() => _AmountDialogState();
+  ConsumerState<_AmountDialog> createState() => _AmountDialogState();
 }
 
-class _AmountDialogState extends State<_AmountDialog> {
+class _AmountDialogState extends ConsumerState<_AmountDialog> {
   final _form = GlobalKey<FormState>();
   late int? _amount = widget.initialMinor;
+  late BudgetRepeatKind _kind = widget.initialRepeat.kind;
+  late int _every = widget.initialRepeat.every;
+  late int _count = widget.initialRepeat.count ?? 3;
+  late DateTime _until =
+      widget.initialRepeat.until ??
+      DateTime(
+        widget.period.start.year + 1,
+        widget.period.start.month,
+        widget.period.start.day - 1,
+      );
+
+  BudgetRepeat get _repeat => switch (_kind) {
+    BudgetRepeatKind.once => BudgetRepeat.once,
+    BudgetRepeatKind.every => BudgetRepeat.everyPeriod(every: _every),
+    BudgetRepeatKind.count => BudgetRepeat.forPeriods(_count, every: _every),
+    BudgetRepeatKind.until => BudgetRepeat.until(_until, every: _every),
+  };
 
   void _save() {
     if (!(_form.currentState?.validate() ?? false)) return;
-    Navigator.pop(context, (amount: _amount ?? 0));
+    Navigator.pop(context, (amount: _amount ?? 0, repeat: _repeat));
+  }
+
+  String? _positive(String? v) {
+    final n = int.tryParse(v?.trim() ?? '');
+    return n == null || n < 1 ? context.l10n.budgetsRepeatNumberInvalid : null;
+  }
+
+  Future<void> _pickUntil() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _until.isBefore(widget.period.start)
+          ? widget.period.start
+          : _until,
+      firstDate: widget.period.start,
+      lastDate: DateTime(widget.period.start.year + 50),
+    );
+    if (d != null) setState(() => _until = d);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final dates = ref.watch(dateFormatsProvider);
+    final locale = ref.watch(formatLocaleProvider);
+    final repeats = _kind != BudgetRepeatKind.once;
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
         key: _form,
-        child: MoneyField(
-          autofocus: true,
-          label: l.budgetsAmountLabel,
-          initialMinor: widget.initialMinor,
-          onChanged: (v) => _amount = v,
-          validator: (v) => v == null || v < 0 ? l.budgetsAmountInvalid : null,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              MoneyField(
+                autofocus: true,
+                label: l.budgetsAmountLabel,
+                initialMinor: widget.initialMinor,
+                onChanged: (v) => _amount = v,
+                validator: (v) =>
+                    v == null || v < 0 ? l.budgetsAmountInvalid : null,
+              ),
+              const SizedBox(height: Space.md),
+              DropdownButtonFormField<BudgetRepeatKind>(
+                initialValue: _kind,
+                decoration: InputDecoration(labelText: l.budgetsRepeat),
+                items: [
+                  for (final (k, label) in [
+                    (BudgetRepeatKind.once, l.budgetsRepeatOnce),
+                    (BudgetRepeatKind.every, l.budgetsRepeatEvery),
+                    (BudgetRepeatKind.count, l.budgetsRepeatCount),
+                    (BudgetRepeatKind.until, l.budgetsRepeatUntil),
+                  ])
+                    DropdownMenuItem(value: k, child: Text(label)),
+                ],
+                onChanged: (k) => setState(() => _kind = k ?? _kind),
+              ),
+              if (repeats) ...[
+                const SizedBox(height: Space.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        key: const ValueKey('budget-repeat-every'),
+                        initialValue: '$_every',
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: l.budgetsRepeatInterval,
+                        ),
+                        validator: _positive,
+                        onChanged: (v) => setState(
+                          () => _every = int.tryParse(v.trim()) ?? _every,
+                        ),
+                      ),
+                    ),
+                    if (_kind == BudgetRepeatKind.count) ...[
+                      const SizedBox(width: Space.sm),
+                      Expanded(
+                        child: TextFormField(
+                          key: const ValueKey('budget-repeat-count'),
+                          initialValue: '$_count',
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l.budgetsRepeatPeriods,
+                          ),
+                          validator: _positive,
+                          onChanged: (v) => setState(
+                            () => _count = int.tryParse(v.trim()) ?? _count,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (_kind == BudgetRepeatKind.until)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.event_outlined),
+                      label: Text(
+                        l.budgetsRepeatUntilDate(dates.short(_until)),
+                      ),
+                      onPressed: _pickUntil,
+                    ),
+                  ),
+              ],
+              const SizedBox(height: Space.xs),
+              Text(
+                repeatSummary(
+                  l,
+                  _repeat,
+                  periodTitle(widget.period, locale),
+                  dates.short,
+                ),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         if (widget.allowRemove)
           TextButton(
-            onPressed: () => Navigator.pop(context, (amount: null)),
+            onPressed: () =>
+                Navigator.pop(context, (amount: null, repeat: _repeat)),
             child: Text(l.budgetsRemove),
           ),
         TextButton(
@@ -205,6 +475,7 @@ enum _FillAction {
   average12,
   template,
   saveTemplate,
+  repeatAll,
   editAll,
   clear,
 }
@@ -259,6 +530,7 @@ class BudgetFillMenu extends ConsumerWidget {
             Icons.bookmark_add_outlined,
             l.budgetsSaveTemplate,
           ),
+          item(_FillAction.repeatAll, Icons.repeat, l.budgetsRepeatAll),
           item(_FillAction.editAll, Icons.edit_note, l.budgetsEditAll),
           item(
             _FillAction.clear,
@@ -324,6 +596,11 @@ class BudgetFillMenu extends ConsumerWidget {
             .read(budgetsRepositoryProvider)
             .saveTemplate(name, period.start);
         if (context.mounted) _snack(context, l.budgetsTemplateSaved(name));
+      case _FillAction.repeatAll:
+        final n = await ref
+            .read(budgetsRepositoryProvider)
+            .repeatPeriod(ref.read(budgetPeriodsProvider), period);
+        if (context.mounted) _snack(context, l.budgetsRepeatAllDone(n));
       case _FillAction.editAll:
         await showAdaptiveSheet<void>(
           context,

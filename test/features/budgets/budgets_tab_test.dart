@@ -201,6 +201,96 @@ void main() {
     await dispose(tester);
   });
 
+  testWidgets('budgets repeat: Fill menu, this and following, new budgets', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await seed(tester);
+    await tester.pumpWidget(app());
+    await settle(tester);
+
+    await tester.tap(find.text('Fill'));
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1)); // menu animation
+    await tester.tap(find.text('Repeat these budgets every period'));
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1)); // menu closes
+    expect(find.text('3 budgets now repeat every period'), findsOneWidget);
+    expect(find.byIcon(Icons.repeat), findsNWidgets(3));
+
+    await tester.tap(find.byTooltip('Next period'));
+    await settle(tester);
+    expect(find.text('November 2026'), findsOneWidget);
+    expect(find.text('€400.00 left'), findsOneWidget); // generated
+
+    // Change Groceries from November on.
+    await tester.longPress(find.text('Groceries'));
+    await settle(tester);
+    expect(
+      find.text('Repeats every period from November 2026'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byType(TextField).first, '450');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('Change a repeating budget'), findsOneWidget);
+    await tester.tap(find.text('This and following periods'));
+    await settle(tester);
+    expect(find.text('€450.00 left'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next period'));
+    await settle(tester);
+    expect(find.text('December 2026'), findsOneWidget);
+    expect(find.text('€450.00 left'), findsOneWidget);
+
+    // Only this period: December becomes an override, January keeps 450.
+    await tester.longPress(find.text('Groceries'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).first, '500');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    await tester.tap(find.text('Only this period'));
+    await settle(tester);
+    expect(find.text('€500.00 left'), findsOneWidget);
+    await tester.tap(find.byTooltip('Next period'));
+    await settle(tester);
+    expect(find.text('€450.00 left'), findsOneWidget);
+
+    // Back in October nothing changed.
+    await tester.tap(find.text('Today'));
+    await settle(tester);
+    expect(find.text('€87.60 left'), findsOneWidget);
+
+    await dispose(tester);
+  });
+
+  testWidgets('a new budget repeats every period by default', (tester) async {
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      await f.account('Checking');
+      await f.category('Pets');
+    });
+    await tester.pumpWidget(app());
+    await settle(tester);
+    await tester.tap(find.text('Add budget').first);
+    await settle(tester);
+    await tester.tap(find.text('Pets'));
+    await settle(tester);
+    expect(find.text('Every period'), findsOneWidget);
+    expect(find.text('Repeats every period from October 2026'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, '60');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.byIcon(Icons.repeat), findsOneWidget);
+    await tester.tap(find.byTooltip('Next period'));
+    await settle(tester);
+    expect(find.text('€60.00 left'), findsOneWidget);
+
+    await dispose(tester);
+  });
+
   testWidgets('envelope mode shows money left to assign', (tester) async {
     await seed(tester);
     await tester.runAsync(() async {

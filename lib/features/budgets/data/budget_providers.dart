@@ -7,6 +7,7 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/budgets/data/budget_period_provider.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 import 'package:personal_finance/features/plan/plan_providers.dart';
 import 'package:personal_finance/features/recurring/data/recurring_providers.dart';
@@ -76,6 +77,26 @@ final periodPlannedProvider = FutureProvider.autoDispose
       );
     });
 
+/// Live repeating budgets.
+final budgetRulesProvider = StreamProvider<List<BudgetRulePlan>>(
+  (ref) => ref.watch(budgetsRepositoryProvider).watchRules(),
+);
+
+/// Generates the rows of repeating budgets up to the period (and at least up
+/// to the next period) before a board reads it; resolves to the live rules.
+final budgetRulesSyncProvider = FutureProvider.autoDispose
+    .family<List<BudgetRulePlan>, DateRange>((ref, period) async {
+      // Salary-based periods are only right once the salary dates loaded.
+      await ref.watch(salaryDatesProvider.future);
+      final periods = ref.watch(budgetPeriodsProvider);
+      final next = periods.next(ref.watch(currentBudgetPeriodProvider));
+      final rules = await ref.watch(budgetRulesProvider.future);
+      if (rules.isEmpty) return rules;
+      final upTo = period.start.isAfter(next.start) ? period.start : next.start;
+      await ref.read(budgetsRepositoryProvider).ensureFromRules(periods, upTo);
+      return rules;
+    });
+
 /// Budget templates, sorted by name.
 final budgetTemplatesProvider = StreamProvider<List<BudgetTemplate>>(
   (ref) => ref.watch(budgetsRepositoryProvider).watchTemplates(),
@@ -132,6 +153,8 @@ BudgetSummary buildBudgetSummary({
   required BudgetChain chain,
   required SettingsSnapshot settings,
   PeriodPlanned planned = PeriodPlanned.empty,
+  List<BudgetRulePlan> rules = const [],
+  BudgetPeriods? periods,
 }) {
   final children = <String, List<String>>{};
   for (final c in categories.values) {
@@ -162,6 +185,10 @@ BudgetSummary buildBudgetSummary({
         thresholdPercent: warnThresholdFor(c, settings),
         rolloverMode: rolloverModeFor(c, settings),
         isRoot: c.parentId == null || !budgeted.contains(c.parentId),
+        rule: periods == null || rules.isEmpty
+            ? null
+            : ruleFor(rules, periods, c.id, period.start),
+        generated: b.ruleId != null,
       ),
     );
   }
@@ -195,6 +222,8 @@ final budgetBoardProvider = FutureProvider.autoDispose
       final categoriesF = ref.watch(categoriesProvider.future);
       final chainF = ref.watch(budgetChainProvider(period).future);
       final plannedF = ref.watch(periodPlannedProvider(period).future);
+      final rulesF = ref.watch(budgetRulesSyncProvider(period).future);
+      final periods = ref.watch(budgetPeriodsProvider);
       final categories = await categoriesF;
       return buildBudgetSummary(
         period: period,
@@ -206,6 +235,8 @@ final budgetBoardProvider = FutureProvider.autoDispose
         chain: await chainF,
         settings: settings,
         planned: await plannedF,
+        rules: await rulesF,
+        periods: periods,
       );
     });
 

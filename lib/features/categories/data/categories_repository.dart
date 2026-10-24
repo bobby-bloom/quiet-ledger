@@ -190,6 +190,8 @@ class CategoriesRepository {
           '(SELECT COUNT(*) FROM transaction_splits WHERE category_id = ?1 '
           'AND deleted_at IS NULL) AS splits, '
           '(SELECT COUNT(*) FROM budgets WHERE category_id = ?1 '
+          'AND deleted_at IS NULL) + '
+          '(SELECT COUNT(*) FROM budget_rules WHERE category_id = ?1 '
           'AND deleted_at IS NULL) AS budgets, '
           '(SELECT COUNT(*) FROM categories WHERE parent_id = ?1 '
           'AND deleted_at IS NULL) AS children',
@@ -198,6 +200,7 @@ class CategoriesRepository {
             db.transactions,
             db.transactionSplits,
             db.budgets,
+            db.budgetRules,
             db.categories,
           },
         )
@@ -296,6 +299,8 @@ class CategoriesRepository {
               BudgetsCompanion(
                 amountMinor: Value(existing.amountMinor + b.amountMinor),
                 rolloverMinor: Value(existing.rolloverMinor + b.rolloverMinor),
+                // The sum is no rule's amount: keep it as set by hand.
+                ruleId: const Value(null),
               ),
             );
             await writer.delete(db.budgets, b.id);
@@ -305,6 +310,45 @@ class CategoriesRepository {
               b.id,
               BudgetsCompanion(categoryId: Value(targetId)),
             );
+          }
+        }
+
+        // Repeating budgets: moved to the target, or, where the target has
+        // its own, the source's newest amount is added to them (like the
+        // amounts of a period above).
+        final targetRules =
+            await (db.select(db.budgetRules)..where(
+                  (r) => r.categoryId.equals(targetId) & r.deletedAt.isNull(),
+                ))
+                .get();
+        final sourceRules =
+            await (db.select(db.budgetRules)..where(
+                  (r) => r.categoryId.equals(sourceId) & r.deletedAt.isNull(),
+                ))
+                .get();
+        if (targetRules.isEmpty) {
+          for (final r in sourceRules) {
+            await writer.update(
+              db.budgetRules,
+              r.id,
+              BudgetRulesCompanion(categoryId: Value(targetId)),
+            );
+          }
+        } else if (sourceRules.isNotEmpty) {
+          final newest = sourceRules.reduce(
+            (a, b) => b.updatedAt.compareTo(a.updatedAt) > 0 ? b : a,
+          );
+          for (final t in targetRules) {
+            await writer.update(
+              db.budgetRules,
+              t.id,
+              BudgetRulesCompanion(
+                amountMinor: Value(t.amountMinor + newest.amountMinor),
+              ),
+            );
+          }
+          for (final r in sourceRules) {
+            await writer.delete(db.budgetRules, r.id);
           }
         }
 

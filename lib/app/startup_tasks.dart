@@ -1,4 +1,5 @@
 import 'package:personal_finance/app/startup.dart';
+import 'package:personal_finance/features/budgets/budgets_startup.dart';
 import 'package:personal_finance/features/export/export_startup.dart';
 import 'package:personal_finance/features/plan/plan_startup.dart';
 import 'package:personal_finance/features/transactions/transactions_startup.dart';
@@ -7,6 +8,7 @@ import 'package:personal_finance/features/transactions/transactions_startup.dart
 final startupTasks = StartupTasks([
   attachmentPathsStartupTask,
   planPostDueRecurringTask,
+  budgetRulesStartupTask,
   planRemindersTask,
   planAlertsTask,
   autoExportStartupTask,

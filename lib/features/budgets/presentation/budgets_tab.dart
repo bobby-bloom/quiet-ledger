@@ -499,6 +499,7 @@ class BudgetLineTile extends ConsumerWidget {
       label,
       ?plannedLabel,
       ?rolloverLabel,
+      if (line.repeats) l.budgetsRepeatOption,
     ].join(', ');
 
     return Semantics(
@@ -541,12 +542,28 @@ class BudgetLineTile extends ConsumerWidget {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Expanded(
-                            child: Text(
-                              line.name,
-                              style: context.text.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    line.name,
+                                    style: context.text.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (line.repeats) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.repeat,
+                                    size: 14,
+                                    color: context.colors.onSurfaceVariant,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           AmountText(
