@@ -898,7 +898,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupBootGeneric.
   ///
   /// In en, this message translates to:
-  /// **'The database file could not be opened.'**
+  /// **'The app could not start. This can be temporary, for example when storage is full or the device is still locked. Try again; the database file was not changed.'**
   String get backupBootGeneric;
 
   /// No description provided for @backupBootKept.
@@ -1434,6 +1434,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This browser keeps the app\'s data and does not clear it on its own.'**
   String get backupWebStoragePersistent;
+
+  /// No description provided for @backupBootUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The database file is damaged or cannot be unlocked with the key on this device.'**
+  String get backupBootUnreadable;
+
+  /// No description provided for @backupBootCopyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy details'**
+  String get backupBootCopyDetails;
 
   /// No description provided for @budgetsTitle.
   ///

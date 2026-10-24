@@ -201,10 +201,14 @@ automatic-backup screen.
 
 ## Database that cannot be opened
 
-When bootstrap fails, `BootErrorApp` explains why: missing key, newer
-schema or other. It says nothing was deleted and offers **Retry**. On
-native platforms it also offers **Start with an empty database**, which
-does the following:
+When bootstrap fails, `BootErrorApp` explains why (`classifyBootError`):
+missing key, a file that is damaged or cannot be unlocked (SQLite
+`CORRUPT`/`NOTADB`), newer schema, or other. It says nothing was deleted
+and offers **Retry**. Only for the first two, and only on native
+platforms, it also offers **Start with an empty database**. A newer schema
+asks for an app update; any other error (secure storage, disk full, ...)
+may be temporary, so the file is never moved aside for it. Start with an
+empty database does the following:
 
 - moves the database files to `<app support>/unreadable/<time>/` (all of
   them are copied and checked before any original is removed);

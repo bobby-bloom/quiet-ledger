@@ -519,7 +519,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupBootGeneric =>
-      'Die Datenbankdatei konnte nicht geöffnet werden.';
+      'Die App konnte nicht starten. Das kann vorübergehend sein, etwa wenn der Speicher voll oder das Gerät noch gesperrt ist. Versuche es erneut; die Datenbankdatei wurde nicht verändert.';
 
   @override
   String get backupBootKept =>
@@ -869,6 +869,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get backupWebStoragePersistent =>
       'Dieser Browser behält die Daten der App und löscht sie nicht von selbst.';
+
+  @override
+  String get backupBootUnreadable =>
+      'Die Datenbankdatei ist beschädigt oder lässt sich mit dem Schlüssel auf diesem Gerät nicht entsperren.';
+
+  @override
+  String get backupBootCopyDetails => 'Details kopieren';
 
   @override
   String get budgetsTitle => 'Budgets';

@@ -1,5 +1,8 @@
 import 'dart:math';
 
+// Only for the exception type; `drift/isolate.dart` would pull in dart:isolate.
+// ignore: experimental_member_use
+import 'package:drift/remote.dart' show DriftRemoteException;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -13,6 +16,7 @@ import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlite3/common.dart' show SqliteException;
 
 const _prefDeviceId = 'sync.deviceId';
 const _prefDbEncrypted = 'db.encrypted';
@@ -129,6 +133,37 @@ class MissingDatabaseKeyException implements Exception {
 
   @override
   String toString() => 'Database key missing from secure storage';
+}
+
+/// What a [bootstrap] failure means for the database file.
+enum BootFailure {
+  /// The key is missing, or the file is not a database for this key or is
+  /// damaged. Only here may the file be moved aside ([startWithEmptyDatabase]).
+  unreadable,
+
+  /// Written by a newer app version: update the app, never move the file.
+  newer,
+
+  /// Anything else (secure storage, disk full, ...). The file may be fine,
+  /// so only a retry is offered.
+  other,
+}
+
+/// SQLite result codes that mean the file itself cannot be used.
+const _sqliteCorrupt = 11;
+const _sqliteNotADatabase = 26;
+
+BootFailure classifyBootError(Object error) {
+  final cause = error is DriftRemoteException ? error.remoteCause : error;
+  return switch (cause) {
+    MissingDatabaseKeyException() => BootFailure.unreadable,
+    NewerDatabaseException() => BootFailure.newer,
+    SqliteException(:final resultCode)
+        when resultCode == _sqliteCorrupt ||
+            resultCode == _sqliteNotADatabase =>
+      BootFailure.unreadable,
+    _ => BootFailure.other,
+  };
 }
 
 /// Recovery after [bootstrap] failed: moves the unreadable database files to

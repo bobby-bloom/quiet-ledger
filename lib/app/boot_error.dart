@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:personal_finance/app/bootstrap.dart';
 import 'package:personal_finance/app/theme/app_theme.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
-import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/db_files.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Shown when [bootstrap] fails. Never deletes anything: it offers to retry
-/// or, on native platforms, to move the unreadable database aside
-/// ([onStartFresh]) and start empty so a backup can be restored.
+/// or, on native platforms and only when the database itself is unreadable
+/// ([BootFailure.unreadable]), to move it aside ([onStartFresh]) and start
+/// empty so a backup can be restored.
 class BootErrorApp extends StatelessWidget {
   const BootErrorApp({
     required this.error,
@@ -106,11 +107,18 @@ class _BootErrorScreenState extends State<_BootErrorScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cause = switch (widget.error) {
-      MissingDatabaseKeyException() => l.backupBootMissingKey,
-      NewerDatabaseException() => l.backupBootNewer,
-      _ => l.backupBootGeneric,
+    final failure = classifyBootError(widget.error);
+    final cause = switch (failure) {
+      BootFailure.unreadable when widget.error is MissingDatabaseKeyException =>
+        l.backupBootMissingKey,
+      BootFailure.unreadable => l.backupBootUnreadable,
+      BootFailure.newer => l.backupBootNewer,
+      BootFailure.other => l.backupBootGeneric,
     };
+    final canStartFresh =
+        failure == BootFailure.unreadable &&
+        widget.onStartFresh != null &&
+        canQuarantineDatabase;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -148,6 +156,16 @@ class _BootErrorScreenState extends State<_BootErrorScreen> {
                     title: Text(l.backupBootDetails),
                     children: [
                       SelectableText('${widget.error}', style: context.mono),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.copy_outlined),
+                          label: Text(l.backupBootCopyDetails),
+                          onPressed: () => Clipboard.setData(
+                            ClipboardData(text: '${widget.error}'),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: Space.md),
@@ -155,7 +173,7 @@ class _BootErrorScreenState extends State<_BootErrorScreen> {
                     onPressed: _busy ? null : widget.onRetry,
                     child: Text(l.commonRetry),
                   ),
-                  if (widget.onStartFresh != null && canQuarantineDatabase) ...[
+                  if (canStartFresh) ...[
                     const SizedBox(height: Space.sm),
                     OutlinedButton(
                       onPressed: _busy ? null : _startFresh,

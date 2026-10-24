@@ -513,7 +513,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'The database was created by a newer version of the app. Install the latest version to open it.';
 
   @override
-  String get backupBootGeneric => 'The database file could not be opened.';
+  String get backupBootGeneric =>
+      'The app could not start. This can be temporary, for example when storage is full or the device is still locked. Try again; the database file was not changed.';
 
   @override
   String get backupBootKept =>
@@ -853,6 +854,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupWebStoragePersistent =>
       'This browser keeps the app\'s data and does not clear it on its own.';
+
+  @override
+  String get backupBootUnreadable =>
+      'The database file is damaged or cannot be unlocked with the key on this device.';
+
+  @override
+  String get backupBootCopyDetails => 'Copy details';
 
   @override
   String get budgetsTitle => 'Budgets';
