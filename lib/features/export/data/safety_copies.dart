@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/core/attachments/receipt_store.dart';
@@ -6,6 +7,7 @@ import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
+import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 
 // On-device safety copies (docs/BACKUP.md, "copy before destroy"): a full
 // backup bundle *without* receipt files, stored in the `safety_copies`
@@ -19,6 +21,15 @@ enum SafetyReason { restore, reset, importUndo, merge, purge, restoreCopy }
 /// Copies kept; older ones are removed when a new one is taken.
 const maxSafetyCopies = 10;
 
+/// Reasons whose operation replaces all data. The newest copy of each is
+/// kept on top of [maxSafetyCopies], so later small operations can never
+/// push out the state before the last restore or reset.
+const protectedSafetyReasons = {
+  SafetyReason.restore,
+  SafetyReason.reset,
+  SafetyReason.restoreCopy,
+};
+
 /// The safety copy could not be taken, so the operation was not run.
 class SafetyCopyException implements Exception {
   const SafetyCopyException(this.cause);
@@ -30,6 +41,11 @@ class SafetyCopyException implements Exception {
 
 /// Takes a verified safety copy and returns its id. Throws
 /// [SafetyCopyException] on any failure.
+///
+/// When the data is unchanged since the newest copy (same table hashes)
+/// that copy's id is returned instead of storing another one, so repeated
+/// operations on unchanged data do not push older copies out. Copies for
+/// [protectedSafetyReasons] are always stored.
 Future<String> takeSafetyCopy(
   AppDatabase db,
   SafetyReason reason, {
@@ -44,7 +60,22 @@ Future<String> takeSafetyCopy(
       now: at,
       includeReceiptFiles: false,
     );
-    final rows = readBundle(db, bytes).manifest.totalRows;
+    final manifest = readBundle(db, bytes).manifest;
+    if (!protectedSafetyReasons.contains(reason)) {
+      final newest =
+          await (db.select(db.safetyCopies)
+                ..orderBy([
+                  (c) => OrderingTerm.desc(c.createdAt),
+                  (c) => OrderingTerm.desc(c.id),
+                ])
+                ..limit(1))
+              .getSingleOrNull();
+      if (newest != null &&
+          _sameTables(readBundle(db, newest.data).manifest, manifest)) {
+        return newest.id;
+      }
+    }
+    final rows = manifest.totalRows;
     final id = newId();
     await db.transaction(() async {
       await db
@@ -58,9 +89,14 @@ Future<String> takeSafetyCopy(
               data: bytes,
             ),
           );
+      final newestOf = [
+        for (final r in protectedSafetyReasons)
+          "SELECT id FROM (SELECT id FROM safety_copies WHERE reason = '${r.name}' ORDER BY created_at DESC, id DESC LIMIT 1)",
+      ];
       await db.customStatement(
         'DELETE FROM safety_copies WHERE id NOT IN (SELECT id FROM '
-        'safety_copies ORDER BY created_at DESC, id DESC LIMIT ?)',
+        'safety_copies ORDER BY created_at DESC, id DESC LIMIT ?) '
+        'AND id NOT IN (${newestOf.join(' UNION ')})',
         [maxSafetyCopies],
       );
     });
@@ -76,6 +112,11 @@ Future<String> takeSafetyCopy(
     throw SafetyCopyException(e);
   }
 }
+
+bool _sameTables(BundleManifest a, BundleManifest b) =>
+    a.schemaVersion == b.schemaVersion &&
+    a.tables.length == b.tables.length &&
+    a.tables.entries.every((e) => b.tables[e.key]?.sha256 == e.value.sha256);
 
 /// Runs [operation] only after a safety copy was taken. If the copy fails
 /// the operation does not run and [SafetyCopyException] is thrown.

@@ -151,8 +151,13 @@ A safety copy is a full bundle **without** receipt files, stored in the
 the database and works on the web. Receipt files are never deleted by the
 guarded operations (restore writes new files and keeps the old ones), so
 the copy's rows still find them. Restore and reset leave the table alone.
-The newest 10 copies are kept. Saving a copy elsewhere adds the receipt
-files from disk (`withReceiptFiles`), and encrypts it like any backup.
+The newest 10 copies are kept, plus the newest copy taken before a
+restore, a reset and restoring a safety copy (`protectedSafetyReasons`),
+so later small operations cannot push out the state before the last
+restore or reset. When nothing changed since the newest copy (same table
+hashes), other operations reuse that copy instead of storing a new one.
+Saving a copy elsewhere adds the receipt files from disk
+(`withReceiptFiles`), and encrypts it like any backup.
 
 Taken before:
 - restoring a backup or another safety copy;
@@ -160,8 +165,8 @@ Taken before:
   safety copies for a real wipe);
 - undoing an import;
 - merging categories or tags;
-- purging tombstones older than `data.tombstoneDays` (weekly at start,
-  when there are any, and from Settings › Data).
+- purging tombstones older than `data.tombstoneDays` (weekly at start and
+  from Settings › Data, in both cases only when there are any).
 
 Bulk deletes are soft deletes with undo. The rows stay as tombstones until
 the purge, which is guarded.

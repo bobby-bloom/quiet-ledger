@@ -4,6 +4,7 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/setting_def.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/settings/presentation/section_view.dart';
 import 'package:personal_finance/features/settings/presentation/setting_tiles.dart';
 import 'package:personal_finance/features/settings/presentation/settings_catalog.dart';
@@ -110,6 +111,33 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hit-entry.calculatorKeypad')));
     await settle(tester);
     expect(find.text('Quick-add field order'), findsOneWidget);
+    await tearDownApp(tester, db);
+  });
+
+  testWidgets('purge with nothing to purge takes no safety copy', (
+    tester,
+  ) async {
+    setWindow(tester, const Size(1280, 900));
+    await seed(tester);
+    await tester.pumpWidget(
+      testApp(
+        const Scaffold(
+          body: SettingsSectionView(
+            page: SettingsPage.section(SettingSection.data),
+          ),
+        ),
+        db: db,
+      ),
+    );
+    await settle(tester);
+    await tester.ensureVisible(find.text('Purge deleted items'));
+    await tester.tap(find.text('Purge deleted items'));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Purge'));
+    await settle(tester);
+    expect(find.text('Nothing to purge'), findsOneWidget);
+    final copies = await tester.runAsync(() => watchSafetyCopies(db).first);
+    expect(copies, isEmpty);
     await tearDownApp(tester, db);
   });
 

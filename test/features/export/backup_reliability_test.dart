@@ -251,8 +251,12 @@ void main() {
       expect(ran, isFalse);
     });
 
+    Future<void> changeData(int i) =>
+        db.customStatement("UPDATE accounts SET name = 'Account $i'");
+
     test('keeps the newest $maxSafetyCopies', () async {
       for (var i = 0; i < maxSafetyCopies + 3; i++) {
+        await changeData(i);
         await takeSafetyCopy(
           db,
           SafetyReason.merge,
@@ -264,6 +268,85 @@ void main() {
       expect(copies, hasLength(maxSafetyCopies));
       expect(copies.first.createdAt, DateTime(2026, 10, 1, 8, 12));
     });
+
+    test('unchanged data reuses the newest copy', () async {
+      final first = await takeSafetyCopy(
+        db,
+        SafetyReason.merge,
+        deviceId: 'd',
+        now: DateTime(2026, 10, 1, 8),
+      );
+      for (var i = 1; i < 15; i++) {
+        final id = await takeSafetyCopy(
+          db,
+          SafetyReason.purge,
+          deviceId: 'd',
+          now: DateTime(2026, 10, 1, 8, i),
+        );
+        expect(id, first);
+      }
+      expect(await watchSafetyCopies(db).first, hasLength(1));
+
+      // A change gets its own copy again.
+      await changeData(1);
+      final next = await takeSafetyCopy(db, SafetyReason.merge, deviceId: 'd');
+      expect(next, isNot(first));
+      expect(await watchSafetyCopies(db).first, hasLength(2));
+    });
+
+    test('the copy before a restore or reset survives later copies', () async {
+      await takeSafetyCopy(
+        db,
+        SafetyReason.restore,
+        deviceId: 'd',
+        now: DateTime(2026, 10, 1, 7),
+      );
+      await changeData(0);
+      await takeSafetyCopy(
+        db,
+        SafetyReason.reset,
+        deviceId: 'd',
+        now: DateTime(2026, 10, 1, 7, 30),
+      );
+      for (var i = 1; i <= maxSafetyCopies + 2; i++) {
+        await changeData(i);
+        await takeSafetyCopy(
+          db,
+          SafetyReason.merge,
+          deviceId: 'd',
+          now: DateTime(2026, 10, 1, 8, i),
+        );
+      }
+      final copies = await watchSafetyCopies(db).first;
+      expect(copies, hasLength(maxSafetyCopies + 2));
+      expect(
+        copies.map((c) => c.reason),
+        containsAll([SafetyReason.restore, SafetyReason.reset]),
+      );
+      expect(
+        copies.where((c) => c.reason == SafetyReason.merge),
+        hasLength(maxSafetyCopies),
+      );
+
+      // Only the newest restore copy is kept on top.
+      await changeData(99);
+      await takeSafetyCopy(db, SafetyReason.restore, deviceId: 'd');
+      final after = await watchSafetyCopies(db).first;
+      expect(
+        after.where((c) => c.reason == SafetyReason.restore),
+        hasLength(1),
+      );
+      expect(after, hasLength(maxSafetyCopies + 1));
+    });
+
+    test(
+      'a restore always gets its own copy, even of unchanged data',
+      () async {
+        final a = await takeSafetyCopy(db, SafetyReason.merge, deviceId: 'd');
+        final b = await takeSafetyCopy(db, SafetyReason.restore, deviceId: 'd');
+        expect(b, isNot(a));
+      },
+    );
 
     test('purging old tombstones takes a copy first', () async {
       final later = DateTime.now().add(const Duration(days: 365));

@@ -12,6 +12,8 @@ import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/core/sync/tombstone_purge.dart'
+    show countPurgeableTombstones;
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
@@ -116,11 +118,16 @@ Future<void> _purge(BuildContext context, WidgetRef ref) async {
   );
   if (!ok || !context.mounted) return;
   try {
-    final n = await withSafetyCopy(
-      ref.read,
-      SafetyReason.purge,
-      () => purgeTombstones(ref.read(databaseProvider), Duration(days: days)),
-    );
+    final db = ref.read(databaseProvider);
+    final age = Duration(days: days);
+    // Nothing to purge: no safety copy, which would push an older one out.
+    final n = await countPurgeableTombstones(db, age) == 0
+        ? 0
+        : await withSafetyCopy(
+            ref.read,
+            SafetyReason.purge,
+            () => purgeTombstones(db, age),
+          );
     ref.invalidate(dbStatisticsProvider);
     if (context.mounted) _snack(context, l.settingsUiPurgeDone(n));
   } on SafetyCopyException catch (e) {
