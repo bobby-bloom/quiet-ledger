@@ -165,8 +165,10 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                             setState(() => _replaced = null);
                             unawaited(
                               _change(
+                                // Back to Auto with the saved order, as
+                                // before the move.
                                 (s) => s.copyWith(
-                                  mode: LayoutMode.custom,
+                                  mode: LayoutMode.auto,
                                   order: replaced,
                                 ),
                               ),

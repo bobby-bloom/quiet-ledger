@@ -404,7 +404,13 @@ class _GroupEntryState extends State<_GroupEntry> {
 /// One line of a peek where `PeekText.slot(i)` in [text] is replaced by
 /// [amounts]`[i]`, shown with [AmountText] so privacy mode masks it.
 class PeekText extends StatelessWidget {
-  const PeekText(this.text, {super.key, this.amounts = const [], this.style});
+  const PeekText(
+    this.text, {
+    super.key,
+    this.amounts = const [],
+    this.style,
+    this.explicitPlus = false,
+  });
 
   /// Marker for the [i]th amount; pass it to the l10n message as the
   /// amount argument.
@@ -415,6 +421,9 @@ class PeekText extends StatelessWidget {
   final String text;
   final List<int> amounts;
   final TextStyle? style;
+
+  /// Whether a positive amount shows its "+" (a change, not a balance).
+  final bool explicitPlus;
 
   @override
   Widget build(BuildContext context) {
@@ -437,6 +446,7 @@ class PeekText extends StatelessWidget {
             child: AmountText(
               amounts[i],
               colored: false,
+              explicitPlus: explicitPlus,
               style: base?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: context.colors.onSurface,

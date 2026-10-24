@@ -155,8 +155,10 @@ Future<void> pickLayout(
     if (equalRowColumns(s.rows) == columns) {
       return s.normalized(view).copyWith(mode: LayoutMode.custom);
     }
-    final placed = [for (final r in layout.placed) ...r.cardIds];
-    final dealt = dealRow(layout.order, columns);
+    // From the state as it is now, not as the menu last drew it.
+    final now = wideLayout(s, layout.fits);
+    final placed = [for (final r in now.placed) ...r.cardIds];
+    final dealt = dealRow(now.order, columns);
     return s
         .normalized(view)
         .copyWith(

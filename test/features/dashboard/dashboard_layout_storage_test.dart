@@ -400,7 +400,107 @@ void main() {
       final live = await (db.select(
         db.dashboardLayouts,
       )..where((r) => r.deletedAt.isNull())).get();
-      expect(live.single.id, 'other-device');
+      expect(
+        live.singleWhere((r) => r.breakpoint == storageKey(expanded)).id,
+        'other-device',
+      );
+      // The other row is kept, out of the way.
+      expect(
+        live.singleWhere((r) => r.breakpoint == conflictKey(expanded)).id,
+        first.id,
+      );
     });
+
+    Future<void> insertRaw(String id, String updatedAt, String widgets) => db
+        .into(db.dashboardLayouts)
+        .insert(
+          DashboardLayoutsCompanion.insert(
+            id: id,
+            createdAt: 1,
+            updatedAt: updatedAt,
+            originDeviceId: 'x',
+            breakpoint: storageKey(expanded),
+            widgets: widgets,
+          ),
+        );
+
+    Future<List<DashboardLayout>> live() => (db.select(
+      db.dashboardLayouts,
+    )..where((r) => r.deletedAt.isNull())).get();
+
+    test('a readable row counts before a newer unreadable one, and neither '
+        'is lost', () async {
+      final custom = encodeViewState(
+        expanded,
+        DashboardViewState(mode: LayoutMode.custom, rows: defaultRows(2)),
+      );
+      await insertRaw('mine', '1', custom);
+      await insertRaw('broken', '2', '{"v": 3, oops');
+      expect((await repo.read(expanded)).mode, LayoutMode.custom);
+
+      // A change that alters nothing writes nothing and moves nothing.
+      await repo.update(expanded, (s) => s);
+      expect((await live()).length, 2);
+
+      await repo.update(
+        expanded,
+        (s) =>
+            s.withVisible(expanded, DashboardWidgetType.goals, visible: false),
+      );
+      final rows = await live();
+      final current = rows.singleWhere(
+        (r) => r.breakpoint == storageKey(expanded),
+      );
+      expect(current.id, 'mine');
+      expect(decodeViewState(expanded, current.widgets).rows, defaultRows(2));
+      expect(
+        rows.singleWhere((r) => r.breakpoint == conflictKey(expanded)).widgets,
+        '{"v": 3, oops',
+      );
+    });
+
+    test(
+      'a value read only in part is kept aside, each distinct one once',
+      () async {
+        String partly(int n) => jsonEncode({
+          'v': 2,
+          'mode': 'custom',
+          'items': {'goals': true},
+          'rows': [
+            {
+              'split': [2.0, 1],
+              'columns': [
+                ['goals'],
+                ['netWorth'],
+              ],
+            },
+          ],
+          'seen': [n],
+        });
+        expect(readsInFull(partly(1)), isFalse);
+        expect(
+          readsInFull(encodeViewState(expanded, DashboardViewState.empty)),
+          isTrue,
+        );
+
+        await insertRaw('row', '1', partly(1));
+        await repo.update(expanded, (s) => s.copyWith(mode: LayoutMode.auto));
+        final kept = [
+          for (final r in await live())
+            if (r.breakpoint == unreadableKey(expanded)) r.widgets,
+        ];
+        expect(kept, [partly(1)]);
+
+        // Another value read only in part, later: kept too.
+        await (db.update(db.dashboardLayouts)..where((r) => r.id.equals('row')))
+            .write(DashboardLayoutsCompanion(widgets: Value(partly(2))));
+        await repo.update(expanded, (s) => s.copyWith(mode: LayoutMode.custom));
+        await repo.update(expanded, (s) => s.copyWith(mode: LayoutMode.auto));
+        expect([
+          for (final r in await live())
+            if (r.breakpoint == unreadableKey(expanded)) r.widgets,
+        ], unorderedEquals([partly(1), partly(2)]));
+      },
+    );
   });
 }

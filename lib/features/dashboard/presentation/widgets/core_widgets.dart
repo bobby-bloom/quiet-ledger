@@ -178,6 +178,7 @@ class NetWorthWidget extends ConsumerWidget {
                     child: PeekText(
                       l.dashIn12Months(PeekText.slot()),
                       amounts: [net - yearAgo],
+                      explicitPlus: true,
                       style: context.text.bodySmall?.copyWith(
                         color: context.colors.onSurfaceVariant,
                       ),

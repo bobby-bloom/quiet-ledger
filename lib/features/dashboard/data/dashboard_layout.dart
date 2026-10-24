@@ -30,8 +30,13 @@ class DashboardItem {
 /// reads them and would fail on the new shape.
 String storageKey(DashboardView view) => '${view.name}.v2';
 
-/// Where a view's unreadable v2 row is kept before a save replaces it.
+/// Where a stored value this build cannot read in full is kept before a
+/// save replaces it (one row per distinct value).
 String unreadableKey(DashboardView view) => '${storageKey(view)}.unreadable';
+
+/// Where the other v2 rows of a view go when two devices each started one
+/// before they synced: kept, out of the way.
+String conflictKey(DashboardView view) => '${storageKey(view)}.conflict';
 
 /// The dashboard's saved views, synced and backed up like any table.
 class DashboardLayoutRepository {
@@ -85,24 +90,19 @@ class DashboardLayoutRepository {
         );
         return (before, after);
       }
-      // Two devices each started a v2 row before they synced: the newest
-      // one wins and the others go, so every device settles on one.
+      if (v2.widgets == json) return (before, after);
+
+      // Nothing this build cannot read in full is lost: a copy of each such
+      // value stays before the save replaces it.
+      if (!readsInFull(v2.widgets)) await _keepAside(view, v2.widgets);
+      // Two devices each started a v2 row before they synced: the one that
+      // counts takes the change, the others move aside with their data.
       for (final other in rows.where((r) => r.breakpoint == key)) {
         if (other.id != v2.id) {
-          await writer.delete(_db.dashboardLayouts, other.id);
-        }
-      }
-      if (v2.widgets == json) return (before, after);
-      if (!isReadableViewState(v2.widgets)) {
-        // Nothing of an unreadable row is lost: the first one is kept aside.
-        final kept = await _rows([unreadableKey(view)]).get();
-        if (kept.isEmpty) {
-          await writer.insert(
+          await writer.update(
             _db.dashboardLayouts,
-            DashboardLayoutsCompanion(
-              breakpoint: Value(unreadableKey(view)),
-              widgets: Value(v2.widgets),
-            ),
+            other.id,
+            DashboardLayoutsCompanion(breakpoint: Value(conflictKey(view))),
           );
         }
       }
@@ -113,6 +113,20 @@ class DashboardLayoutRepository {
       );
       return (before, after);
     });
+  }
+
+  Future<void> _keepAside(DashboardView view, String widgets) async {
+    final kept = await _rows([unreadableKey(view)]).get();
+    if (kept.any((r) => r.widgets == widgets)) return;
+    await _ref
+        .read(syncWriterProvider)
+        .insert(
+          _db.dashboardLayouts,
+          DashboardLayoutsCompanion(
+            breakpoint: Value(unreadableKey(view)),
+            widgets: Value(widgets),
+          ),
+        );
   }
 
   static DashboardViewState _decode(
@@ -126,13 +140,20 @@ class DashboardLayoutRepository {
     return DashboardViewState.empty;
   }
 
-  /// The row that counts among [rows] of one key: the last written (HLC
+  /// The row that counts among [rows] of one key: one that reads as a
+  /// state at all before one that does not, then the last written (HLC
   /// stamps sort as text), then the smallest id.
   static DashboardLayout? _current(Iterable<DashboardLayout> rows) {
     DashboardLayout? best;
+    var bestReadable = false;
     for (final r in rows) {
+      final readable = isReadableViewState(r.widgets);
       if (best == null) {
-        best = r;
+        (best, bestReadable) = (r, readable);
+        continue;
+      }
+      if (readable != bestReadable) {
+        if (readable) (best, bestReadable) = (r, readable);
         continue;
       }
       final byTime = r.updatedAt.compareTo(best.updatedAt);
@@ -189,14 +210,77 @@ String encodeViewState(DashboardView view, DashboardViewState state) {
   });
 }
 
-/// Whether [json] is a v2 state at all (a JSON object); anything else is
-/// kept aside before a save replaces it.
+/// Whether [json] is a v2 state at all (a JSON object).
 bool isReadableViewState(String json) {
   try {
     return jsonDecode(json) is Map;
   } on FormatException {
     return false;
   }
+}
+
+/// Whether this build reads all of [json] — nothing skipped, nothing it
+/// does not know (another version, more fields) — so writing over it loses
+/// nothing.
+bool readsInFull(String json) {
+  final Object? raw;
+  try {
+    raw = jsonDecode(json);
+  } on FormatException {
+    return false;
+  }
+  bool strings(Object? list) =>
+      list is List && list.every((id) => id is String);
+  bool onlyKeys(Map<Object?, Object?> map, Set<String> keys) =>
+      map.keys.every(keys.contains);
+  if (raw is! Map ||
+      !onlyKeys(raw, const {'v', 'mode', 'items', 'rows', 'order'}) ||
+      raw['v'] != 2 ||
+      !const {null, 'auto', 'custom'}.contains(raw['mode'])) {
+    return false;
+  }
+  final items = raw['items'];
+  if (items != null) {
+    if (items is! Map) return false;
+    for (final MapEntry(:key, :value) in items.entries) {
+      if (key is! String ||
+          value is! Map ||
+          !onlyKeys(value, const {'visible', 'options'}) ||
+          (value['visible'] != null && value['visible'] is! bool) ||
+          (value['options'] != null &&
+              (value['options'] is! Map ||
+                  (value['options'] as Map).keys.any((k) => k is! String)))) {
+        return false;
+      }
+    }
+  }
+  final rows = raw['rows'];
+  final ids = <String>[];
+  if (rows != null) {
+    if (rows is! List) return false;
+    for (final r in rows) {
+      if (r is! Map || !onlyKeys(r, const {'split', 'columns'})) return false;
+      final split = r['split'];
+      final columns = r['columns'];
+      if (split is! List ||
+          split.isEmpty ||
+          split.any((w) => w is! int || w < 1) ||
+          columns is! List ||
+          columns.length != split.length ||
+          !columns.every(strings)) {
+        return false;
+      }
+      for (final c in columns) {
+        ids.addAll((c as List).cast<String>());
+      }
+    }
+  }
+  final order = raw['order'];
+  if (order != null) {
+    if (!strings(order)) return false;
+    ids.addAll((order as List).cast<String>());
+  }
+  return ids.length == ids.toSet().length;
 }
 
 var _loggedMalformed = false;

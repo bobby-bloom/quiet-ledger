@@ -51,7 +51,8 @@ equal columns, or deals the widgets on screen into one such row — with
 
 Phones have Auto · Custom in the editor sheet (Custom only once an order is
 saved). The first move on Auto copies the default order; when that replaces
-a saved order, the sheet offers "Your earlier order was replaced · Undo".
+a saved order, the sheet offers "Your earlier order was replaced · Undo",
+which goes back to Auto with that order kept.
 
 Switching to Custom (a number, Custom, Done, a phone move) first writes an
 entry for every type as it shows on Auto, so a type that shipped after the
@@ -145,13 +146,18 @@ situational, never synced, and a restore keeps the device's own.
   transaction, so two changes in quick succession never undo each other.
 - Reading skips only what is malformed — an item, a row with an unusable
   split, a non-string id — and keeps the rest; columns beyond a split join
-  its last column. A value that is not a JSON object reads as nothing saved,
-  and before a save replaces it the first such row is kept aside under
-  `<key>.unreadable`. All skips are logged once.
+  its last column. A value that is not a JSON object reads as nothing saved.
+  All skips are logged once.
+- Nothing this build cannot read in full is lost: before a save replaces a
+  stored value that is malformed, of another version (`v` ≠ 2) or carries
+  fields this build does not know, a copy goes to a `<key>.unreadable` row
+  (one per distinct value).
 - Ids and items of types this build does not know (a newer build's) are
   kept and written back unchanged; they never show.
-- Two `*.v2` rows of one key (two devices before they synced): the last
-  written one counts, and the next save deletes the others.
+- Two `*.v2` rows of one key (two devices before they synced): a row that
+  reads as a state counts before one that does not, then the last written.
+  The next save that changes something moves the others to
+  `<key>.conflict`, data and all; nothing is deleted.
 - The 0.1 rows `compact` / `expanded` (a flat list of `{type, size, options}`)
   stay as they are, because a 0.1 build would fail on the new shape. While no
   `*.v2` row exists they are migrated on read: a list equal to the old

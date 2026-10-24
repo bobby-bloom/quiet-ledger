@@ -723,8 +723,49 @@ void main() {
         await tester.tap(find.text('Undo'));
         await settle(tester);
         final state = await saved(tester, repo, DashboardView.compact);
-        expect(state.mode, LayoutMode.custom);
+        expect(state.mode, LayoutMode.auto);
         expect(state.order!.take(2), ['recentTransactions', 'netWorth']);
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    testWidgets('Undo of a Remove keeps a change made meanwhile', (
+      tester,
+    ) async {
+      try {
+        final repo = await pumpAt(tester, wide);
+        final forecast = find.ancestor(
+          of: find.textContaining('Forecast').first,
+          matching: find.byType(Card),
+        );
+        await tester.tap(
+          find.descendant(of: forecast, matching: find.byIcon(Icons.more_vert)),
+        );
+        await settle(tester);
+        await tester.tap(find.text('Remove').last);
+        await settle(tester);
+        await tester.runAsync(
+          () => repo.update(
+            DashboardView.expanded,
+            (s) => s.withOptions(
+              DashboardView.expanded,
+              DashboardWidgetType.recentTransactions,
+              {'limit': 10},
+            ),
+          ),
+        );
+        await settle(tester);
+        await tester.tap(find.text('Undo'));
+        await settle(tester);
+        final state = await saved(tester, repo, DashboardView.expanded);
+        expect(
+          state.shows(DashboardView.expanded, DashboardWidgetType.forecast),
+          isTrue,
+        );
+        expect(state.optionsOf(DashboardWidgetType.recentTransactions), {
+          'limit': 10,
+        });
       } finally {
         await teardown(tester);
       }
