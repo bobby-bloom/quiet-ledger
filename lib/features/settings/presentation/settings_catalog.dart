@@ -114,6 +114,7 @@ bool isSettingVisible(
   }
   if (_notificationDefs.contains(def) && !caps.notifications) return false;
   if (def == AppearanceSettings.dynamicColor) return caps.dynamicColor;
+  if (def == AppearanceSettings.accentAppIcon) return caps.isMobile;
   if (def == AppearanceSettings.customAccent) {
     return s.get(AppearanceSettings.accentScheme) == AccentScheme.custom;
   }

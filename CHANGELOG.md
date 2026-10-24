@@ -13,6 +13,13 @@ a dated release section.
 
 ### Added
 
+- An app icon of its own, a tick over a double rule, in your accent
+  colour: in the app, on the window, taskbar and Dock while the app runs
+  (Linux, Windows, macOS), as the web app's tab icon, and as the tint of
+  Android notifications. On Android and iOS the home-screen icon switches
+  to the preset closest to the accent (Settings › Appearance › App icon in
+  accent colour; iOS confirms each change). Installer and file icons stay
+  in the default spruce.
 - Budgets show planned entries and recurring items that are not booked
   yet as outstanding: a striped part of the bar, "€80 planned" or
   "Planned: €30 over" on the row, the planned total on the summary card

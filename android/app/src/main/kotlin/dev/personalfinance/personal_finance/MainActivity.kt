@@ -15,13 +15,18 @@ import io.flutter.plugin.common.MethodChannel
  *
  * [BackupFolderChannel] gives scheduled backups access to a folder picked
  * through the Storage Access Framework.
+ *
+ * [AppIconChannel] switches the home-screen icon to the accent's preset
+ * when the app goes to the background.
  */
 class MainActivity : FlutterFragmentActivity() {
     private var backupFolder: BackupFolderChannel? = null
+    private var appIcon: AppIconChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         backupFolder = BackupFolderChannel(this, flutterEngine.dartExecutor.binaryMessenger)
+        appIcon = AppIconChannel(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRIVACY_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -39,6 +44,11 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        appIcon?.applyPending()
     }
 
     @Deprecated("Activity result API; FlutterFragmentActivity forwards it")

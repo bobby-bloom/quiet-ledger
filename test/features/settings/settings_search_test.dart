@@ -43,6 +43,17 @@ void main() {
     PlatformCapabilities? c,
   }) => searchSettings(q, l, s ?? empty, c ?? caps()).map((e) => e.id).toList();
 
+  test('the accent app icon setting is only offered on phones', () {
+    expect(
+      ids('app icon', en, c: caps(mobile: true)),
+      contains(AppearanceSettings.accentAppIcon.key),
+    );
+    expect(
+      ids('app icon', en),
+      isNot(contains(AppearanceSettings.accentAppIcon.key)),
+    );
+  });
+
   test('folding handles umlauts and ß', () {
     expect(foldSearchText('Schriftgröße'), 'schriftgrosse');
     expect(foldSearchText('  Über   die  App '), 'uber die app');
