@@ -92,11 +92,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         : AppBar(
             title: Text(l.accountsTitle, style: context.text.titleLarge),
             actions: [
-              IconButton(
-                tooltip: l.accountsReconcileBalances,
-                icon: const Icon(Icons.balance_outlined),
-                onPressed: accounts.isEmpty ? null : () => _reconcile(detailId),
-              ),
+              // With the detail pane, reconcile lives in the pane.
+              if (!listDetail)
+                IconButton(
+                  tooltip: l.accountsReconcileBalances,
+                  icon: const Icon(Icons.balance_outlined),
+                  onPressed: accounts.isEmpty ? null : _reconcile,
+                ),
               IconButton(
                 tooltip: l.accountsAdd,
                 icon: const Icon(Icons.add),
@@ -135,8 +137,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     );
   }
 
-  Future<void> _reconcile(String? preselected) async {
-    final id = preselected ?? await showAccountPicker(context);
+  Future<void> _reconcile() async {
+    final id = await showAccountPicker(context);
     if (id == null || !mounted) return;
     await context.push('/accounts/$id/reconcile');
   }

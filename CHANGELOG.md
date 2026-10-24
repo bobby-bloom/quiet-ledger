@@ -85,6 +85,8 @@ a dated release section.
   bottom; the choice is remembered on this device.
 - Plan › Budgets adds a budget with the + in the header, like Recurring
   and Goals, instead of a button below the list.
+- Accounts on wide screens offer Reconcile once, as the button in the
+  account's pane, instead of also in the app bar and the pane's header.
 
 ### Removed
 

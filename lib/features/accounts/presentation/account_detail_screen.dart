@@ -89,10 +89,12 @@ class AccountDetailView extends ConsumerWidget {
                   ),
                 ),
               ),
+              // Reconcile is the button in the body.
               ..._actions(
                 context,
                 ref,
                 account,
+                reconcile: false,
                 onDeleted: () =>
                     ref.read(selectedAccountProvider.notifier).select(null),
               ),
@@ -112,6 +114,7 @@ List<Widget> _actions(
   WidgetRef ref,
   Account account, {
   required VoidCallback onDeleted,
+  bool reconcile = true,
 }) {
   final l = context.l10n;
   return [
@@ -120,11 +123,12 @@ List<Widget> _actions(
       icon: const Icon(Icons.edit_outlined),
       onPressed: () => context.push('/accounts/${account.id}/edit'),
     ),
-    IconButton(
-      tooltip: l.accountsReconcile,
-      icon: const Icon(Icons.balance_outlined),
-      onPressed: () => context.push('/accounts/${account.id}/reconcile'),
-    ),
+    if (reconcile)
+      IconButton(
+        tooltip: l.accountsReconcile,
+        icon: const Icon(Icons.balance_outlined),
+        onPressed: () => context.push('/accounts/${account.id}/reconcile'),
+      ),
     PopupMenuButton<String>(
       tooltip: l.accountsMoreActions,
       onSelected: (v) async {
