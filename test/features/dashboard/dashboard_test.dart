@@ -136,4 +136,22 @@ void main() {
       await teardown(tester);
     }
   });
+
+  testWidgets('privacy mode masks the net worth change and the forecast '
+      'chart label', (tester) async {
+    await tester.runAsync(seed);
+    final handle = tester.ensureSemantics();
+    try {
+      await pumpAt(tester, const Size(1440, 1000));
+      // The amount is an AmountText in the line, never plain text in it.
+      expect(find.textContaining('in 12 months'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'\d in 12 months')), findsNothing);
+      await tester.tap(find.byTooltip('Hide amounts'));
+      await settle(tester);
+      expect(find.bySemanticsLabel(RegExp('Lowest .*€')), findsNothing);
+    } finally {
+      handle.dispose();
+      await teardown(tester);
+    }
+  });
 }

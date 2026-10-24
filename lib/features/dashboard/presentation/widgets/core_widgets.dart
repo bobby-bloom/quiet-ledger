@@ -9,7 +9,6 @@ import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/money/money.dart';
-import 'package:personal_finance/core/money/money_format.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/accounts/data/net_worth.dart';
@@ -19,7 +18,6 @@ import 'package:personal_finance/features/dashboard/presentation/widgets/dash_ca
 import 'package:personal_finance/features/forecast/domain/forecast_models.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/reports/data/report_queries.dart';
-import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Hero amount with the cents in a lighter step (design: displaySmall).
 class HeroAmount extends ConsumerWidget {
@@ -145,17 +143,6 @@ class NetWorthWidget extends ConsumerWidget {
                 color: context.colors.onSurfaceVariant,
               ),
             ),
-            if (card && yearAgo != null)
-              Text(
-                l.dashIn12Months(
-                  ref
-                      .watch(moneyFormatterProvider)
-                      .format(Money(net - yearAgo), explicitPlus: true),
-                ),
-                style: context.text.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ),
           ],
         ),
       ],
@@ -184,6 +171,18 @@ class NetWorthWidget extends ConsumerWidget {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Part of the body, not the peek, and masked like any amount.
+                if (yearAgo != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: PeekText(
+                      l.dashIn12Months(PeekText.slot()),
+                      amounts: [net - yearAgo],
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 Sparkline(
                   values: [for (final p in series.skip(1)) p.netWorthMinor],
                   height: 96,
@@ -456,7 +455,6 @@ class MiniForecastWidget extends ConsumerWidget {
     final id =
         accountId ?? (accounts.containsKey(defaultId) ? defaultId : null);
     final mini = ref.watch(miniForecastProvider(id));
-    final fmt = ref.watch(moneyFormatterProvider);
     final dates = ref.watch(dateFormatsProvider);
     final name = id == null ? l.dashAllAccounts : accounts[id]?.name ?? '';
 
@@ -518,32 +516,12 @@ class MiniForecastWidget extends ConsumerWidget {
           values: [for (final p in m.points) p.balanceMinor],
           threshold: m.thresholdMinor,
           markLowest: true,
-          semanticLabel: _lowestSentence(l, fmt, dates, m),
+          // The peek above reads the lowest point, masked in privacy mode;
+          // the chart only names itself.
+          semanticLabel: l.navForecast,
         ),
       ),
     );
-  }
-
-  /// The lowest point in words, for the chart's semantics label.
-  static String _lowestSentence(
-    AppLocalizations l,
-    MoneyFormatter fmt,
-    DateFormats dates,
-    MiniForecast m,
-  ) {
-    final low = fmt.format(Money(m.lowest.amountMinor));
-    final date = dates.medium(m.lowest.date);
-    if (m.warning == WarningKind.belowZero) {
-      return l.forecastLowestBelowZero(low, date);
-    }
-    if (m.warning == WarningKind.belowThreshold && m.thresholdMinor != null) {
-      return l.forecastLowestBelowThreshold(
-        low,
-        date,
-        fmt.format(Money(m.thresholdMinor!)),
-      );
-    }
-    return l.forecastLowestOk(low, date);
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,33 +9,48 @@ import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
+import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 // What the dashboard's controls do to its saved views (docs/DASHBOARD.md):
 // every change is one write of the whole view, and the ones that replace
 // something offer Undo, which writes the view back as it was.
 
-/// Shows [message] with Undo, which writes [before] back for [view].
-void showLayoutUndo(
-  BuildContext context,
-  WidgetRef ref,
-  String message,
-  DashboardView view,
-  DashboardViewState before,
-) {
-  final repo = ref.read(dashboardLayoutRepositoryProvider);
-  ScaffoldMessenger.maybeOf(context)
-    ?..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 6),
-        action: SnackBarAction(
-          label: context.l10n.commonUndo,
-          onPressed: () => unawaited(repo.save(view, before)),
+/// The Undo toast of a layout change, taken before the change is awaited:
+/// the control that started it (the arrange bar, a menu) may be gone by the
+/// time the write is done, the app's messenger is not.
+class LayoutUndo {
+  LayoutUndo.of(BuildContext context, WidgetRef ref)
+    : l = context.l10n,
+      _messenger = ScaffoldMessenger.maybeOf(context),
+      _repo = ref.read(dashboardLayoutRepositoryProvider);
+
+  final AppLocalizations l;
+  final ScaffoldMessengerState? _messenger;
+  final DashboardLayoutRepository _repo;
+
+  /// Shows [message] with Undo, which changes [view] by [undo]: each Undo
+  /// puts back only what its action changed, on the state as it is then.
+  void show(
+    String message,
+    DashboardView view,
+    DashboardViewState Function(DashboardViewState current) undo,
+  ) {
+    final messenger = _messenger;
+    if (messenger == null || !messenger.mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: l.commonUndo,
+            onPressed: () => unawaited(_repo.update(view, undo)),
+          ),
         ),
-      ),
-    );
+      );
+  }
 }
 
 /// The widgets that show in [view], in reading order, for the wide board.
@@ -81,16 +97,13 @@ Future<void> removeWidget(
   DashboardView view,
   DashboardWidgetType type,
 ) async {
+  final undo = LayoutUndo.of(context, ref);
   final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final before = await repo.read(view);
-  await repo.save(view, before.withVisible(view, type, visible: false));
-  if (!context.mounted) return;
-  showLayoutUndo(
-    context,
-    ref,
-    context.l10n.dashLayoutRemoved(widgetTypeLabel(context.l10n, type)),
+  await repo.update(view, (s) => s.withVisible(view, type, visible: false));
+  undo.show(
+    undo.l.dashLayoutRemoved(widgetTypeLabel(undo.l, type)),
     view,
-    before,
+    (s) => s.withVisible(view, type, visible: true),
   );
 }
 
@@ -100,11 +113,9 @@ Future<void> addWidget(
   WidgetRef ref,
   DashboardView view,
   DashboardWidgetType type,
-) async {
-  final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final state = await repo.read(view);
-  await repo.save(view, state.withVisible(view, type, visible: true));
-}
+) => ref
+    .read(dashboardLayoutRepositoryProvider)
+    .update(view, (s) => s.withVisible(view, type, visible: true));
 
 /// Replaces [type]'s options in [view].
 Future<void> setWidgetOptions(
@@ -112,16 +123,15 @@ Future<void> setWidgetOptions(
   DashboardView view,
   DashboardWidgetType type,
   Map<String, Object?> options,
-) async {
-  final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final state = await repo.read(view);
-  await repo.save(view, state.withOptions(view, type, options));
-}
+) => ref
+    .read(dashboardLayoutRepositoryProvider)
+    .update(view, (s) => s.withOptions(view, type, options));
 
 /// The Layout control's pick on the wide board. Auto and Custom switch the
 /// mode (the saved rows stay); a number restores a saved layout of that many
-/// equal columns, or deals the widgets on screen into one — with Undo when
-/// that replaces a different saved layout.
+/// equal columns, or deals the widgets on screen into one — hidden widgets
+/// keep a slot after their neighbour — with Undo when that replaces a
+/// different saved layout.
 Future<void> pickLayout(
   BuildContext context,
   WidgetRef ref,
@@ -129,30 +139,38 @@ Future<void> pickLayout(
   BoardLayout layout,
 ) async {
   const view = DashboardView.expanded;
+  final undo = LayoutUndo.of(context, ref);
   final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final before = await repo.read(view);
   final columns = segment.columns;
-  if (columns == null) {
-    final mode = segment == LayoutSegment.auto
-        ? LayoutMode.auto
-        : LayoutMode.custom;
-    if (mode == LayoutMode.custom && before.rows == null) return;
-    await repo.save(view, before.copyWith(mode: mode));
-    return;
-  }
-  if (equalRowColumns(before.rows) == columns) {
-    await repo.save(view, before.copyWith(mode: LayoutMode.custom));
-    return;
-  }
-  final rows = [dealRow(layout.order, columns)];
-  await repo.save(view, before.copyWith(mode: LayoutMode.custom, rows: rows));
-  if (before.rows != null && context.mounted) {
-    showLayoutUndo(
-      context,
-      ref,
-      context.l10n.dashLayoutFlattened(columns),
+  final (before, after) = await repo.update(view, (s) {
+    if (columns == null) {
+      if (segment == LayoutSegment.auto) {
+        return s.copyWith(mode: LayoutMode.auto);
+      }
+      if (s.rows == null) return s;
+      // Entries written as things show now, so a type that shows on Auto
+      // without one (shipped after the last save) stays shown on Custom.
+      return s.normalized(view).copyWith(mode: LayoutMode.custom);
+    }
+    if (equalRowColumns(s.rows) == columns) {
+      return s.normalized(view).copyWith(mode: LayoutMode.custom);
+    }
+    final placed = [for (final r in layout.placed) ...r.cardIds];
+    final dealt = dealRow(layout.order, columns);
+    return s
+        .normalized(view)
+        .copyWith(
+          mode: LayoutMode.custom,
+          rows: placeNewCards([dealt], placed, placed),
+        );
+  });
+  if (columns != null &&
+      before.rows != null &&
+      !const ListEquality<BoardRow>().equals(before.rows, after.rows)) {
+    undo.show(
+      undo.l.dashLayoutFlattened(columns),
       view,
-      before,
+      (s) => s.withArrangementOf(before),
     );
   }
 }
@@ -164,23 +182,19 @@ Future<void> resetToDefault(
   WidgetRef ref,
   DashboardView view,
 ) async {
+  final undo = LayoutUndo.of(context, ref);
   final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final before = await repo.read(view);
-  await repo.save(
+  final (before, _) = await repo.update(
     view,
-    before.copyWith(
-      mode: LayoutMode.auto,
-      items: {
-        for (final t in DashboardWidgetType.values)
-          t.name: WidgetEntry(
-            visible: defaultTypes(view).contains(t),
-            options: before.optionsOf(t),
-          ),
-      },
-    ),
+    (s) => s
+        .withVisibilityOf(view, DashboardViewState.empty)
+        .copyWith(mode: LayoutMode.auto),
   );
-  if (!context.mounted) return;
-  showLayoutUndo(context, ref, context.l10n.dashLayoutResetDone, view, before);
+  undo.show(
+    undo.l.dashLayoutResetDone,
+    view,
+    (s) => s.withVisibilityOf(view, before).copyWith(mode: before.mode),
+  );
 }
 
 /// An arrange session on the wide board: the saved state when it began
@@ -316,28 +330,39 @@ void cancelArrange(BuildContext context, WidgetRef ref) {
     );
 }
 
-/// Saves the session as the custom layout — except from Auto with nothing
-/// changed, which leaves like Cancel. From Auto over a different saved
-/// layout, Undo puts the board back as it was.
+/// Saves the session as the custom layout: its rows and the widgets it
+/// removed or added, on top of the saved state as it is now (options and
+/// other changes made meanwhile stay). Without a change it leaves like
+/// Cancel. From Auto over a different saved layout, Undo puts the board
+/// back as it was.
 Future<void> finishArrange(BuildContext context, WidgetRef ref) async {
+  final undo = LayoutUndo.of(context, ref);
   final session = ref.read(arrangeSessionProvider.notifier).end();
-  if (session == null) return;
-  final before = session.before;
-  final isAuto = before.mode == LayoutMode.auto;
-  if (isAuto && !session.hasChanges) return;
+  if (session == null || !session.hasChanges) return;
 
   const view = DashboardView.expanded;
   final repo = ref.read(dashboardLayoutRepositoryProvider);
-  final next = session.working.copyWith(
-    mode: LayoutMode.custom,
-    rows: session.rows,
-  );
-  await repo.save(view, next);
-  final saved = await repo.read(view);
-  if (isAuto &&
+  final (before, after) = await repo.update(view, (current) {
+    // Normalized under the mode it had, so a type that showed on Auto
+    // without an entry (shipped after the last save) stays shown.
+    var next = current
+        .normalized(view)
+        .copyWith(mode: LayoutMode.custom, rows: session.rows);
+    for (final t in DashboardWidgetType.values) {
+      final shows = session.working.shows(view, t);
+      if (shows != session.before.shows(view, t)) {
+        next = next.withVisible(view, t, visible: shows);
+      }
+    }
+    return next;
+  });
+  if (before.mode == LayoutMode.auto &&
       before.rows != null &&
-      !listEquals(saved.rows, before.rows) &&
-      context.mounted) {
-    showLayoutUndo(context, ref, context.l10n.dashLayoutReplaced, view, before);
+      !const ListEquality<BoardRow>().equals(after.rows, before.rows)) {
+    undo.show(
+      undo.l.dashLayoutReplaced,
+      view,
+      (s) => s.withArrangementOf(before).withVisibilityOf(view, before),
+    );
   }
 }

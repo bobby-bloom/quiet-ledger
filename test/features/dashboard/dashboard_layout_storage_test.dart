@@ -95,27 +95,69 @@ void main() {
           },
         ],
       });
+      // A newer build's widget: never shown here, but nothing of it is lost.
       final decoded = decodeViewState(expanded, withUnknown);
-      expect(decoded.items, isEmpty);
+      expect(decoded.items.keys, ['spendingPace']);
       expect(decoded.rows!.single.columns, [
-        ['goals'],
+        ['spendingPace', 'goals'],
         <String>[],
+      ]);
+      final again = decodeViewState(
+        expanded,
+        encodeViewState(expanded, decoded),
+      );
+      expect(again.items['spendingPace'], const WidgetEntry());
+      expect(again.rows, decoded.rows);
+      expect(again.shown(expanded), isNot(contains('spendingPace')));
+    });
+
+    test('only what is malformed is skipped', () {
+      final json = jsonEncode({
+        'v': 2,
+        'mode': 'custom',
+        'items': {
+          'goals': 'garbage',
+          'forecast': {
+            'visible': 'yes',
+            'options': {'accountId': 'a'},
+          },
+          'accounts': {'visible': false},
+        },
+        'rows': [
+          {
+            'split': [0],
+            'columns': [
+              ['budgets'],
+            ],
+          },
+          {
+            'split': [1, 1],
+            'columns': [
+              ['netWorth', 3],
+              ['forecast'],
+              ['accounts'],
+            ],
+          },
+        ],
+      });
+      final s = decodeViewState(expanded, json);
+      expect(s.mode, LayoutMode.custom);
+      expect(s.items.containsKey('goals'), isFalse);
+      expect(s.optionsOf(DashboardWidgetType.forecast), {'accountId': 'a'});
+      expect(s.shows(expanded, DashboardWidgetType.accounts), isFalse);
+      // Extra columns join the last one, as a squeezed row does.
+      expect(s.rows!.single.columns, [
+        ['netWorth'],
+        ['forecast', 'accounts'],
       ]);
     });
 
     test('malformed reads as nothing saved', () {
       expect(decodeViewState(expanded, '{nope'), DashboardViewState.empty);
       expect(decodeViewState(expanded, '[1, 2]'), DashboardViewState.empty);
-      expect(
-        decodeViewState(
-          expanded,
-          '{"rows": [{"split": [0], "columns": [[]]}]}',
-        ),
-        DashboardViewState.empty,
-      );
     });
 
-    test('the phone keeps its order, deduplicated', () {
+    test('the phone keeps its order, deduplicated, unknown ids kept', () {
       final json = encodeViewState(
         compact,
         const DashboardViewState(
@@ -123,7 +165,11 @@ void main() {
           order: ['goals', 'netWorth', 'goals', 'gone'],
         ),
       );
-      expect(decodeViewState(compact, json).order, ['goals', 'netWorth']);
+      expect(decodeViewState(compact, json).order, [
+        'goals',
+        'netWorth',
+        'gone',
+      ]);
     });
   });
 
@@ -262,5 +308,99 @@ void main() {
       rows.firstWhere((r) => r.breakpoint == 'compact').widgets,
       legacy([('goals', false)]),
     );
+  });
+
+  group('repository', () {
+    late AppDatabase db;
+    late DashboardLayoutRepository repo;
+
+    setUp(() {
+      db = newTestDb();
+      final c = testContainer(db);
+      addTearDown(c.dispose);
+      addTearDown(db.close);
+      repo = c.read(dashboardLayoutRepositoryProvider);
+    });
+
+    test('two changes at once both land', () async {
+      await Future.wait([
+        repo.update(
+          expanded,
+          (s) => s.withVisible(
+            expanded,
+            DashboardWidgetType.goals,
+            visible: false,
+          ),
+        ),
+        repo.update(
+          expanded,
+          (s) => s.withVisible(
+            expanded,
+            DashboardWidgetType.accounts,
+            visible: false,
+          ),
+        ),
+      ]);
+      final s = await repo.read(expanded);
+      expect(s.shows(expanded, DashboardWidgetType.goals), isFalse);
+      expect(s.shows(expanded, DashboardWidgetType.accounts), isFalse);
+    });
+
+    test('an unreadable row is kept aside before a save replaces it', () async {
+      await repo.save(expanded, DashboardViewState.empty);
+      final row = await db.select(db.dashboardLayouts).getSingle();
+      await (db.update(db.dashboardLayouts)..where((r) => r.id.equals(row.id)))
+          .write(const DashboardLayoutsCompanion(widgets: Value('[oops')));
+      expect(await repo.read(expanded), DashboardViewState.empty);
+      await repo.save(
+        expanded,
+        DashboardViewState.empty.copyWith(mode: LayoutMode.custom),
+      );
+      final rows = await db.select(db.dashboardLayouts).get();
+      final kept = rows.singleWhere(
+        (r) => r.breakpoint == unreadableKey(expanded),
+      );
+      expect(kept.widgets, '[oops');
+    });
+
+    test('two v2 rows after a sync: the newest wins, the other goes', () async {
+      await repo.save(
+        expanded,
+        DashboardViewState.empty.withVisible(
+          expanded,
+          DashboardWidgetType.goals,
+          visible: false,
+        ),
+      );
+      final first = await db.select(db.dashboardLayouts).getSingle();
+      await db
+          .into(db.dashboardLayouts)
+          .insert(
+            DashboardLayoutsCompanion.insert(
+              id: 'other-device',
+              createdAt: 1,
+              updatedAt: '${first.updatedAt}z',
+              originDeviceId: 'b',
+              breakpoint: storageKey(expanded),
+              widgets: encodeViewState(
+                expanded,
+                DashboardViewState.empty.withVisible(
+                  expanded,
+                  DashboardWidgetType.accounts,
+                  visible: false,
+                ),
+              ),
+            ),
+          );
+      final s = await repo.read(expanded);
+      expect(s.shows(expanded, DashboardWidgetType.accounts), isFalse);
+      expect(s.shows(expanded, DashboardWidgetType.goals), isTrue);
+
+      await repo.update(expanded, (s) => s.copyWith(mode: LayoutMode.custom));
+      final live = await (db.select(
+        db.dashboardLayouts,
+      )..where((r) => r.deletedAt.isNull())).get();
+      expect(live.single.id, 'other-device');
+    });
   });
 }

@@ -108,8 +108,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               final arranging = session != null && layout.canArrange;
               _isPaused = session != null && !layout.canArrange;
               final l = context.l10n;
-              String title(String id) =>
-                  widgetTypeLabel(l, DashboardWidgetType.values.byName(id));
+              String title(String id) => widgetName(
+                ref,
+                l,
+                DashboardWidgetType.values.byName(id),
+                session?.working ?? saved,
+              );
               IconData icon(String id) =>
                   widgetIcon(DashboardWidgetType.values.byName(id));
               header = arranging
@@ -340,6 +344,10 @@ class _ArrangeBar extends ConsumerWidget {
   final ArrangeSession session;
   final int fits;
 
+  /// The bar's width, at 1× text, from which the hint and the labels of
+  /// Add widget and Reset show.
+  static const double _roomyWidth = 900;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
@@ -353,60 +361,91 @@ class _ArrangeBar extends ConsumerWidget {
       visibleRows(session.rows, present),
       visibleRows(defaults, present),
     );
+    void addWidget() => unawaited(
+      showAddWidget(
+        context,
+        view: DashboardView.expanded,
+        state: session.working,
+        onAdd: (t) => notifier.add(t, fits),
+      ),
+    );
+    final onReset = isDefault ? null : () => notifier.reset(fits);
     return Container(
       color: context.colors.surfaceContainerHigh,
       padding: const EdgeInsets.fromLTRB(32, 14, 28, 14),
-      child: Wrap(
-        spacing: Space.sm,
-        runSpacing: Space.xs,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        alignment: WrapAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Below this width at the text scale the hint goes and Add widget
+          // and Reset keep only their icons; whatever still does not fit
+          // wraps onto a second line rather than overflow.
+          final roomy =
+              constraints.maxWidth >=
+              MediaQuery.textScalerOf(context).scale(_roomyWidth);
+          return Wrap(
             spacing: Space.sm,
+            runSpacing: Space.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.spaceBetween,
             children: [
-              Text(l.dashLayoutArrangeTitle, style: context.text.titleLarge),
-              Text(
-                l.dashLayoutArrangeHint,
-                style: context.text.bodyMedium?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: Space.xs,
-            children: [
-              TextButton.icon(
-                onPressed: () => unawaited(
-                  showAddWidget(
-                    context,
-                    view: DashboardView.expanded,
-                    state: session.working,
-                    onAdd: (t) => notifier.add(t, fits),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: Text.rich(
+                  TextSpan(
+                    text: l.dashLayoutArrangeTitle,
+                    style: context.text.titleLarge,
+                    children: [
+                      if (roomy)
+                        TextSpan(
+                          text: '  ${l.dashLayoutArrangeHint}',
+                          style: context.text.bodyMedium?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                icon: const Icon(Icons.add),
-                label: Text(l.dashAddWidget),
               ),
-              TextButton.icon(
-                onPressed: isDefault ? null : () => notifier.reset(fits),
-                icon: const Icon(Icons.restart_alt),
-                label: Text(l.dashLayoutReset),
-              ),
-              OutlinedButton(
-                onPressed: () => cancelArrange(context, ref),
-                child: Text(l.commonCancel),
-              ),
-              FilledButton(
-                onPressed: () => unawaited(finishArrange(context, ref)),
-                child: Text(l.commonDone),
+              Wrap(
+                spacing: Space.xs,
+                runSpacing: Space.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (roomy) ...[
+                    TextButton.icon(
+                      onPressed: addWidget,
+                      icon: const Icon(Icons.add),
+                      label: Text(l.dashAddWidget),
+                    ),
+                    TextButton.icon(
+                      onPressed: onReset,
+                      icon: const Icon(Icons.restart_alt),
+                      label: Text(l.dashLayoutReset),
+                    ),
+                  ] else ...[
+                    IconButton(
+                      tooltip: l.dashAddWidget,
+                      onPressed: addWidget,
+                      icon: const Icon(Icons.add),
+                    ),
+                    IconButton(
+                      tooltip: l.dashLayoutReset,
+                      onPressed: onReset,
+                      icon: const Icon(Icons.restart_alt),
+                    ),
+                  ],
+                  OutlinedButton(
+                    onPressed: () => cancelArrange(context, ref),
+                    child: Text(l.commonCancel),
+                  ),
+                  FilledButton(
+                    onPressed: () => unawaited(finishArrange(context, ref)),
+                    child: Text(l.commonDone),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }

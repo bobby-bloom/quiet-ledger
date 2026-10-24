@@ -3901,6 +3901,12 @@ abstract class AppLocalizations {
   /// **'Your latest entries'**
   String get dashLayoutDescrecentTransactions;
 
+  /// No description provided for @dashLayoutOrderReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Your earlier order was replaced'**
+  String get dashLayoutOrderReplaced;
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

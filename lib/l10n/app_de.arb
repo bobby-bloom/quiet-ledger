@@ -631,6 +631,7 @@
   "dashLayoutDescgoals": "Fortschritt deiner Sparziele",
   "dashLayoutDesctopCategories": "Wofür dein Geld in diesem Zeitraum ging",
   "dashLayoutDescrecentTransactions": "Deine neuesten Buchungen",
+  "dashLayoutOrderReplaced": "Deine frühere Reihenfolge wurde ersetzt",
   "exportTitle": "Export & Sicherung",
   "exportTxnTitle": "Buchungen als CSV",
   "exportTxnDesc": "Buchungen eines Zeitraums und ausgewählter Konten exportieren, z. B. für Excel.",

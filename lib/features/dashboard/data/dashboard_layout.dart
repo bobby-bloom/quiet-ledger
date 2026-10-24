@@ -30,6 +30,9 @@ class DashboardItem {
 /// reads them and would fail on the new shape.
 String storageKey(DashboardView view) => '${view.name}.v2';
 
+/// Where a view's unreadable v2 row is kept before a save replaces it.
+String unreadableKey(DashboardView view) => '${storageKey(view)}.unreadable';
+
 /// The dashboard's saved views, synced and backed up like any table.
 class DashboardLayoutRepository {
   DashboardLayoutRepository(this._ref);
@@ -46,29 +49,33 @@ class DashboardLayoutRepository {
 
   /// The saved state of [view]: the v2 row, else the 0.1 row migrated, else
   /// nothing saved (Auto, the defaults).
-  Stream<DashboardViewState> watch(DashboardView view) {
-    final legacy = view.name;
-    return _rows([storageKey(view), legacy]).watch().map((rows) {
-      final v2 = rows.where((r) => r.breakpoint == storageKey(view));
-      if (v2.isNotEmpty) return decodeViewState(view, v2.first.widgets);
-      final v1 = rows.where((r) => r.breakpoint == legacy);
-      if (v1.isNotEmpty) return migrateLegacyLayout(view, v1.first.widgets);
-      return DashboardViewState.empty;
-    });
-  }
+  Stream<DashboardViewState> watch(DashboardView view) =>
+      _rows([storageKey(view), view.name]).watch().map((r) => _decode(view, r));
 
   /// The saved state of [view] now.
-  Future<DashboardViewState> read(DashboardView view) => watch(view).first;
+  Future<DashboardViewState> read(DashboardView view) async =>
+      _decode(view, await _rows([storageKey(view), view.name]).get());
 
-  /// Writes [state] as the saved state of [view] in one write: an entry for
-  /// every known type, rows without unknown ids and empty rows.
-  Future<void> save(DashboardView view, DashboardViewState state) async {
+  /// Writes [state] as the saved state of [view] in one write.
+  Future<void> save(DashboardView view, DashboardViewState state) =>
+      update(view, (_) => state);
+
+  /// Changes the saved state of [view] by [change], reading it inside the
+  /// write's transaction so two changes in quick succession never undo each
+  /// other. Returns the state before and after.
+  Future<(DashboardViewState, DashboardViewState)> update(
+    DashboardView view,
+    DashboardViewState Function(DashboardViewState current) change,
+  ) {
     final writer = _ref.read(syncWriterProvider);
-    final json = encodeViewState(view, state);
     final key = storageKey(view);
-    await writer.transaction(() async {
-      final existing = await _rows([key]).getSingleOrNull();
-      if (existing == null) {
+    return writer.transaction(() async {
+      final rows = await _rows([key, view.name]).get();
+      final before = _decode(view, rows);
+      final after = change(before);
+      final json = encodeViewState(view, after);
+      final v2 = _current(rows.where((r) => r.breakpoint == key));
+      if (v2 == null) {
         await writer.insert(
           _db.dashboardLayouts,
           DashboardLayoutsCompanion(
@@ -76,14 +83,64 @@ class DashboardLayoutRepository {
             widgets: Value(json),
           ),
         );
-      } else if (existing.widgets != json) {
-        await writer.update(
-          _db.dashboardLayouts,
-          existing.id,
-          DashboardLayoutsCompanion(widgets: Value(json)),
-        );
+        return (before, after);
       }
+      // Two devices each started a v2 row before they synced: the newest
+      // one wins and the others go, so every device settles on one.
+      for (final other in rows.where((r) => r.breakpoint == key)) {
+        if (other.id != v2.id) {
+          await writer.delete(_db.dashboardLayouts, other.id);
+        }
+      }
+      if (v2.widgets == json) return (before, after);
+      if (!isReadableViewState(v2.widgets)) {
+        // Nothing of an unreadable row is lost: the first one is kept aside.
+        final kept = await _rows([unreadableKey(view)]).get();
+        if (kept.isEmpty) {
+          await writer.insert(
+            _db.dashboardLayouts,
+            DashboardLayoutsCompanion(
+              breakpoint: Value(unreadableKey(view)),
+              widgets: Value(v2.widgets),
+            ),
+          );
+        }
+      }
+      await writer.update(
+        _db.dashboardLayouts,
+        v2.id,
+        DashboardLayoutsCompanion(widgets: Value(json)),
+      );
+      return (before, after);
     });
+  }
+
+  static DashboardViewState _decode(
+    DashboardView view,
+    List<DashboardLayout> rows,
+  ) {
+    final v2 = _current(rows.where((r) => r.breakpoint == storageKey(view)));
+    if (v2 != null) return decodeViewState(view, v2.widgets);
+    final v1 = _current(rows.where((r) => r.breakpoint == view.name));
+    if (v1 != null) return migrateLegacyLayout(view, v1.widgets);
+    return DashboardViewState.empty;
+  }
+
+  /// The row that counts among [rows] of one key: the last written (HLC
+  /// stamps sort as text), then the smallest id.
+  static DashboardLayout? _current(Iterable<DashboardLayout> rows) {
+    DashboardLayout? best;
+    for (final r in rows) {
+      if (best == null) {
+        best = r;
+        continue;
+      }
+      final byTime = r.updatedAt.compareTo(best.updatedAt);
+      if (byTime > 0 || (byTime == 0 && r.id.compareTo(best.id) < 0)) {
+        best = r;
+      }
+    }
+    return best;
   }
 }
 
@@ -99,15 +156,20 @@ final dashboardViewProvider =
 final _known = {for (final t in DashboardWidgetType.values) t.name};
 
 /// [state] as stored for [view]: `{"v": 2, "mode", "items", "rows" |
-/// "order"}`.
+/// "order"}`. Ids of types this build does not know are written back as
+/// they were read.
 String encodeViewState(DashboardView view, DashboardViewState state) {
   final s = state.normalized(view);
-  final rows = s.rows == null ? null : finishedRows(s.rows!, _known);
+  final rows = s.rows == null
+      ? null
+      : [
+          for (final r in withoutDuplicates(s.rows!))
+            if (r.cardIds.isNotEmpty) r,
+        ];
   final order = s.order == null
       ? null
       : [
-          for (final id in {...s.order!})
-            if (_known.contains(id)) id,
+          ...{...s.order!},
         ];
   return jsonEncode({
     'v': 2,
@@ -127,74 +189,121 @@ String encodeViewState(DashboardView view, DashboardViewState state) {
   });
 }
 
-var _loggedMalformed = false;
-
-/// The state stored in [json] for [view]. Unknown types are dropped and a
-/// type listed twice keeps its first slot; anything malformed reads as
-/// nothing saved (logged once).
-DashboardViewState decodeViewState(DashboardView view, String json) {
+/// Whether [json] is a v2 state at all (a JSON object); anything else is
+/// kept aside before a save replaces it.
+bool isReadableViewState(String json) {
   try {
-    final map = (jsonDecode(json) as Map).cast<String, Object?>();
-    final rawItems = (map['items'] as Map?) ?? const {};
-    final items = <String, WidgetEntry>{
-      for (final MapEntry(:key, :value) in rawItems.entries)
-        if (_known.contains(key))
-          key as String: WidgetEntry(
-            visible: (value as Map)['visible'] as bool? ?? true,
-            options: ((value['options'] as Map?) ?? const {})
-                .cast<String, Object?>(),
-          ),
-    };
-    final mode = map['mode'] == LayoutMode.custom.name
-        ? LayoutMode.custom
-        : LayoutMode.auto;
-    final rawRows = map['rows'] as List?;
-    final rows = rawRows == null
-        ? null
-        : withoutDuplicates(
-            dropUnknownCards([
-              for (final r in rawRows)
-                _row(
-                  [for (final w in (r as Map)['split'] as List) w as int],
-                  [
-                    for (final c in r['columns'] as List)
-                      [for (final id in c as List) id as String],
-                  ],
-                ),
-            ], _known),
-          );
-    final rawOrder = map['order'] as List?;
-    final order = rawOrder == null
-        ? null
-        : [
-            for (final id in {for (final id in rawOrder) id as String})
-              if (_known.contains(id)) id,
-          ];
-    return DashboardViewState(
-      mode: mode,
-      items: items,
-      rows: rows == null || rows.isEmpty ? null : rows,
-      order: order,
-    );
-  } on Object catch (e) {
-    if (!_loggedMalformed) {
-      _loggedMalformed = true;
-      debugPrint('Dashboard layout ${storageKey(view)} unreadable: $e');
-    }
-    return DashboardViewState.empty;
+    return jsonDecode(json) is Map;
+  } on FormatException {
+    return false;
   }
 }
 
-BoardRow _row(List<int> weights, List<List<String>> columns) {
-  if (weights.isEmpty || weights.any((w) => w < 1)) {
-    throw const FormatException('bad split');
+var _loggedMalformed = false;
+
+void _logMalformed(DashboardView view, Object what) {
+  if (_loggedMalformed) return;
+  _loggedMalformed = true;
+  debugPrint('Dashboard layout ${storageKey(view)}: skipped $what');
+}
+
+/// The state stored in [json] for [view]. Only what is malformed is
+/// skipped — an entry, a row, an id — the rest reads as saved (logged
+/// once); a value that is no JSON object reads as nothing saved. A type
+/// listed twice keeps its first slot. Ids of types this build does not know
+/// are kept: they never show, and a newer build finds them again.
+DashboardViewState decodeViewState(DashboardView view, String json) {
+  final Object? raw;
+  try {
+    raw = jsonDecode(json);
+  } on FormatException catch (e) {
+    _logMalformed(view, e);
+    return DashboardViewState.empty;
   }
-  // One list per weight: missing columns are empty, extra ones dropped.
+  if (raw is! Map) {
+    _logMalformed(view, 'a value that is not an object');
+    return DashboardViewState.empty;
+  }
+
+  final items = <String, WidgetEntry>{};
+  if (raw['items'] case final Map<Object?, Object?> rawItems) {
+    for (final MapEntry(:key, :value) in rawItems.entries) {
+      if (key is! String || value is! Map) {
+        _logMalformed(view, 'item $key');
+        continue;
+      }
+      final options = value['options'];
+      items[key] = WidgetEntry(
+        visible: value['visible'] != false,
+        options: {
+          if (options is Map)
+            for (final MapEntry(:key, :value) in options.entries)
+              if (key is String) key: value,
+        },
+      );
+    }
+  }
+
+  final mode = raw['mode'] == LayoutMode.custom.name
+      ? LayoutMode.custom
+      : LayoutMode.auto;
+  List<BoardRow>? rows;
+  if (raw['rows'] case final List<Object?> rawRows) {
+    rows = withoutDuplicates([
+      for (final r in rawRows) ?_decodeRow(r) ?? _skipped(view, 'a row'),
+    ]);
+  }
+  List<String>? order;
+  if (raw['order'] case final List<Object?> rawOrder) {
+    order = [
+      ...{
+        for (final id in rawOrder)
+          if (id is String) id,
+      },
+    ];
+  }
+  return DashboardViewState(
+    mode: mode,
+    items: items,
+    rows: rows == null || rows.isEmpty ? null : rows,
+    order: order,
+  );
+}
+
+BoardRow? _skipped(DashboardView view, String what) {
+  _logMalformed(view, what);
+  return null;
+}
+
+/// One stored row, or null when its split is unusable. Non-string ids are
+/// skipped; columns beyond the split join its last column, as a squeezed
+/// row does, so no widget loses its slot.
+BoardRow? _decodeRow(Object? raw) {
+  if (raw is! Map) return null;
+  final rawSplit = raw['split'];
+  final rawColumns = raw['columns'];
+  if (rawSplit is! List || rawSplit.isEmpty) return null;
+  final weights = <int>[];
+  for (final w in rawSplit) {
+    if (w is! int || w < 1) return null;
+    weights.add(w);
+  }
+  final columns = [
+    if (rawColumns is List)
+      for (final c in rawColumns)
+        [
+          if (c is List)
+            for (final id in c)
+              if (id is String) id,
+        ],
+  ];
+  final last = weights.length - 1;
   return BoardRow(
     split: RowSplit(weights),
     columns: [
-      for (var c = 0; c < weights.length; c++)
+      for (var c = 0; c < last; c++)
         if (c < columns.length) columns[c] else <String>[],
+      [for (final ids in columns.skip(last)) ...ids],
     ],
   );
 }

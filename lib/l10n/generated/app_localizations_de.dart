@@ -2489,6 +2489,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashLayoutDescrecentTransactions => 'Deine neuesten Buchungen';
 
   @override
+  String get dashLayoutOrderReplaced =>
+      'Deine frühere Reihenfolge wurde ersetzt';
+
+  @override
   String get exportTitle => 'Export & Sicherung';
 
   @override

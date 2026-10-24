@@ -6,8 +6,12 @@ import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
+import 'package:personal_finance/core/ledger/lookups.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
+import 'package:personal_finance/features/dashboard/presentation/board/drop_slot.dart';
 import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
 import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
@@ -195,11 +199,16 @@ class _LayoutChoice extends ConsumerWidget {
                       tooltip: (s.columns ?? 0) > fits
                           ? l.dashLayoutSplitFits(fits)
                           : null,
-                      label: Text(switch (s) {
-                        LayoutSegment.auto => l.dashLayoutAuto,
-                        LayoutSegment.custom => l.dashLayoutCustom,
-                        _ => '${s.columns}',
-                      }),
+                      label: switch (s) {
+                        LayoutSegment.auto => Text(l.dashLayoutAuto),
+                        LayoutSegment.custom => Text(l.dashLayoutCustom),
+                        // Read as "Two equal columns", seen as "2".
+                        _ => Semantics(
+                          label: splitName(l, RowSplit.equal(s.columns!)),
+                          excludeSemantics: true,
+                          child: Text('${s.columns}'),
+                        ),
+                      },
                     ),
                 ],
                 selected: {selected},
@@ -393,3 +402,22 @@ String widgetDescription(AppLocalizations l, DashboardWidgetType type) =>
       DashboardWidgetType.recentTransactions =>
         l.dashLayoutDescrecentTransactions,
     };
+
+/// [type]'s name in arrange mode and the phone sheet: its type, and for the
+/// forecast the account it shows ("Mini forecast · Everyday checking").
+String widgetName(
+  WidgetRef ref,
+  AppLocalizations l,
+  DashboardWidgetType type,
+  DashboardViewState state,
+) {
+  final name = widgetTypeLabel(l, type);
+  if (type != DashboardWidgetType.forecast) return name;
+  final accounts = ref.watch(accountMapProvider);
+  final defaultId = ref.watch(
+    settingsProvider.select((s) => s.get(EntrySettings.defaultAccountId)),
+  );
+  final chosen = state.optionsOf(type)['accountId'] as String?;
+  final id = chosen ?? (accounts.containsKey(defaultId) ? defaultId : null);
+  return '$name · ${id == null ? l.dashAllAccounts : accounts[id]?.name ?? ''}';
+}

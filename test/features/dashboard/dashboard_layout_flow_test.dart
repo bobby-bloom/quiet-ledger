@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -15,6 +17,19 @@ import 'package:personal_finance/features/dashboard/presentation/phone_editor_sh
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 
 import '../../helpers/test_app.dart';
+
+/// Loads Manrope, the app's font, as the screenshot tool does.
+Future<void> loadAppFonts() async {
+  Future<void> load(String family, String file) async {
+    final loader = FontLoader(family)
+      ..addFont(
+        Future.value(ByteData.sublistView(File(file).readAsBytesSync())),
+      );
+    await loader.load();
+  }
+
+  await load('Manrope', 'assets/fonts/Manrope.ttf');
+}
 
 void main() {
   late AppDatabase db;
@@ -37,16 +52,27 @@ void main() {
 
   Future<DashboardLayoutRepository> pumpAt(
     WidgetTester tester,
-    Size size,
-  ) async {
+    Size size, {
+    Locale locale = const Locale('en'),
+    double textScale = 1,
+    Future<void> Function()? seed,
+  }) async {
     db = newTestDb();
+    if (seed != null) await tester.runAsync(seed);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       testApp(
-        const DashboardScreen(),
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
+            child: const DashboardScreen(),
+          ),
+        ),
         db: db,
+        locale: locale,
         overrides: [
           forecastRunnerProvider.overrideWithValue(
             const ForecastRunner.inline(),
@@ -124,7 +150,7 @@ void main() {
       await tester.tap(find.text('Arrange widgets…'));
       await settle(tester);
       expect(find.byType(ArrangeBoard), findsOneWidget);
-      expect(find.text('Arrange widgets'), findsOneWidget);
+      expect(find.textContaining('Drag to move'), findsOneWidget);
 
       // Goal progress sits in row 2, column 3; move it one column left.
       await tester.tap(find.byTooltip('Move “Goal progress”'));
@@ -335,18 +361,19 @@ void main() {
       expect(state.mode, LayoutMode.custom);
       expect(state.order!.take(2), ['monthSummary', 'netWorth']);
 
-      await tester.tap(find.byTooltip('Remove “Mini forecast”'));
+      await tester.tap(find.byTooltip('Remove “Mini forecast · All accounts”'));
       await settle(tester);
       expect(find.text('Not on your dashboard'), findsOneWidget);
-      await tester.tap(
-        find.descendant(
-          of: find.ancestor(
-            of: find.text('Goal progress'),
-            matching: find.byType(ListTile),
-          ),
-          matching: find.text('Add'),
+      final addGoals = find.descendant(
+        of: find.ancestor(
+          of: find.text('Goal progress'),
+          matching: find.byType(ListTile),
         ),
+        matching: find.text('Add'),
       );
+      await tester.ensureVisible(addGoals);
+      await settle(tester);
+      await tester.tap(addGoals);
       await settle(tester);
       state = await saved(tester, repo, DashboardView.compact);
       expect(
@@ -358,12 +385,13 @@ void main() {
         isFalse,
       );
 
-      await tester.tap(
-        find.descendant(
-          of: find.byType(SegmentedButton<LayoutMode>),
-          matching: find.text('Auto'),
-        ),
+      final auto = find.descendant(
+        of: find.byType(SegmentedButton<LayoutMode>),
+        matching: find.text('Auto'),
       );
+      await tester.ensureVisible(auto);
+      await settle(tester);
+      await tester.tap(auto);
       await settle(tester);
       state = await saved(tester, repo, DashboardView.compact);
       expect(state.mode, LayoutMode.auto);
@@ -456,7 +484,7 @@ void main() {
         await gesture.up();
         await settle(tester);
         expect(find.byType(ArrangeBoard), findsNothing);
-        expect(find.text('Arrange widgets'), findsNothing);
+        expect(find.textContaining('Drag to move'), findsNothing);
 
         tester.view.physicalSize = wide;
         await settle(tester);
@@ -492,6 +520,211 @@ void main() {
         tester.view.physicalSize = wide;
         await settle(tester);
         expect(find.byType(ArrangeBoard), findsNothing);
+      } finally {
+        await teardown(tester);
+      }
+    });
+  });
+
+  // Regressions from the independent review.
+  group('review fixes', () {
+    Future<void> enterArrange(WidgetTester tester) async {
+      await openMenu(tester);
+      await tester.tap(find.text('Arrange widgets…'));
+      await settle(tester);
+    }
+
+    Future<void> moveGoalsLeft(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('Move “Goal progress”'));
+      await settle(tester);
+      await tester.tap(find.text('One column left'));
+      await settle(tester);
+    }
+
+    testWidgets('Done from Auto over a saved layout offers Undo, also when '
+        'the bar is gone before the write ends', (tester) async {
+      try {
+        final repo = await pumpAt(tester, wide);
+        await openMenu(tester);
+        await tester.tap(segment('2'));
+        await settle(tester);
+        await tester.tap(segment('Auto'));
+        await settle(tester);
+        await tester.tapAt(const Offset(5, 5));
+        await settle(tester);
+        final saved2 = (await saved(tester, repo, DashboardView.expanded)).rows;
+
+        await enterArrange(tester);
+        await moveGoalsLeft(tester);
+        await tester.tap(find.text('Done'));
+        await tester.pump();
+        await settle(tester);
+        expect(find.text('Layout replaced'), findsOneWidget);
+        await tester.tap(find.text('Undo'));
+        await settle(tester);
+        final state = await saved(tester, repo, DashboardView.expanded);
+        expect(state.mode, LayoutMode.auto);
+        expect(state.rows, saved2);
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    testWidgets('a type that shows on Auto without an entry stays shown '
+        'after Done', (tester) async {
+      try {
+        final repo = await pumpAt(
+          tester,
+          wide,
+          // As if accounts shipped after this save: no entry for it.
+          seed: () => db
+              .into(db.dashboardLayouts)
+              .insert(
+                DashboardLayoutsCompanion.insert(
+                  id: 'row',
+                  createdAt: 1,
+                  updatedAt: '1',
+                  originDeviceId: 'test-device',
+                  breakpoint: storageKey(DashboardView.expanded),
+                  widgets: encodeViewState(
+                    DashboardView.expanded,
+                    DashboardViewState.empty,
+                  ).replaceFirst('"accounts":{"visible":true},', ''),
+                ),
+              ),
+        );
+        await settle(tester);
+        expect(
+          (await saved(
+            tester,
+            repo,
+            DashboardView.expanded,
+          )).items.containsKey('accounts'),
+          isFalse,
+        );
+        await enterArrange(tester);
+        await moveGoalsLeft(tester);
+        await tester.tap(find.text('Done'));
+        await settle(tester);
+        final state = await saved(tester, repo, DashboardView.expanded);
+        expect(state.mode, LayoutMode.custom);
+        expect(
+          state.shows(DashboardView.expanded, DashboardWidgetType.accounts),
+          isTrue,
+        );
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    testWidgets('Done on Custom without a change keeps what changed '
+        'meanwhile', (tester) async {
+      try {
+        final repo = await pumpAt(tester, wide);
+        await openMenu(tester);
+        await tester.tap(segment('2'));
+        await settle(tester);
+        await tester.tapAt(const Offset(5, 5));
+        await settle(tester);
+        await enterArrange(tester);
+        await tester.runAsync(
+          () => repo.update(
+            DashboardView.expanded,
+            (s) => s.withOptions(
+              DashboardView.expanded,
+              DashboardWidgetType.forecast,
+              {'accountId': 'acc-2'},
+            ),
+          ),
+        );
+        await settle(tester);
+        await tester.tap(find.text('Done'));
+        await settle(tester);
+        final state = await saved(tester, repo, DashboardView.expanded);
+        expect(state.optionsOf(DashboardWidgetType.forecast), {
+          'accountId': 'acc-2',
+        });
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    testWidgets('Remove in arrange mode puts focus on the next widget', (
+      tester,
+    ) async {
+      try {
+        await pumpAt(tester, wide);
+        await enterArrange(tester);
+        await tester.tap(find.byTooltip('Move “Upcoming bills”'));
+        await settle(tester);
+        await tester.tap(find.text('Remove from dashboard'));
+        await settle(tester);
+        final focused = FocusManager.instance.primaryFocus;
+        expect(focused?.debugLabel, 'move goals');
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    for (final (scale, locale) in [
+      (2.0, const Locale('de')),
+      (1.5, const Locale('de')),
+      (2.0, const Locale('en')),
+    ]) {
+      testWidgets('the arrange bar fits at ${scale}x text '
+          '(${locale.languageCode})', (tester) async {
+        // The test font draws every glyph a full em wide; widths only mean
+        // something with the app's own font.
+        await tester.runAsync(loadAppFonts);
+        try {
+          await pumpAt(
+            tester,
+            const Size(788, 1100),
+            locale: locale,
+            textScale: scale,
+          );
+          await tester.tap(
+            find.byIcon(Icons.dashboard_customize_outlined).first,
+          );
+          await settle(tester);
+          await tester.tap(
+            find.text(
+              locale.languageCode == 'de'
+                  ? 'Widgets anordnen…'
+                  : 'Arrange widgets…',
+            ),
+          );
+          await settle(tester);
+          expect(find.byType(ArrangeBoard), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await teardown(tester);
+        }
+      });
+    }
+
+    testWidgets('a phone move on Auto over a saved order can be undone', (
+      tester,
+    ) async {
+      try {
+        final repo = await pumpAt(tester, const Size(390, 844));
+        await tester.runAsync(
+          () => repo.save(
+            DashboardView.compact,
+            const DashboardViewState(order: ['recentTransactions', 'netWorth']),
+          ),
+        );
+        await settle(tester);
+        await tester.tap(find.byTooltip('Dashboard layout'));
+        await settle(tester);
+        await tester.tap(find.byTooltip('Move “Month summary” up'));
+        await settle(tester);
+        expect(find.text('Your earlier order was replaced'), findsOneWidget);
+        await tester.tap(find.text('Undo'));
+        await settle(tester);
+        final state = await saved(tester, repo, DashboardView.compact);
+        expect(state.mode, LayoutMode.custom);
+        expect(state.order!.take(2), ['recentTransactions', 'netWorth']);
       } finally {
         await teardown(tester);
       }

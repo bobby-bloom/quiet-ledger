@@ -106,7 +106,8 @@ class DashboardViewState {
   bool isNew(DashboardView view, DashboardWidgetType type) =>
       items.isNotEmpty && !items.containsKey(type.name) && !shows(view, type);
 
-  /// The types that show in [view], in enum order.
+  /// The types that show in [view], in enum order. Ids of types this build
+  /// does not know never show; they keep their entries and slots.
   List<DashboardWidgetType> shown(DashboardView view) => [
     for (final t in DashboardWidgetType.values)
       if (shows(view, t)) t,
@@ -114,14 +115,45 @@ class DashboardViewState {
 
   /// This state with an entry for every known type, as it shows now in
   /// [view]: what a save writes, so "removed" and "new" stay apart.
+  ///
+  /// Entries of types this build does not know (a newer build's) stay as
+  /// they are, so syncing with an older build loses nothing.
   DashboardViewState normalized(DashboardView view) => copyWith(
     items: {
+      ...items,
       for (final t in DashboardWidgetType.values)
         t.name: (items[t.name] ?? const WidgetEntry()).copyWith(
           visible: shows(view, t),
         ),
     },
   );
+
+  /// This state with the mode and the arrangement of [before] (rows or
+  /// order, null included): what an Undo of a layout change writes, leaving
+  /// selection and options as they are now.
+  DashboardViewState withArrangementOf(DashboardViewState before) =>
+      DashboardViewState(
+        mode: before.mode,
+        items: items,
+        rows: before.rows,
+        order: before.order,
+      );
+
+  /// This state with every known type shown or hidden as in [before], the
+  /// options as they are now.
+  DashboardViewState withVisibilityOf(
+    DashboardView view,
+    DashboardViewState before,
+  ) {
+    final base = normalized(view).items;
+    return copyWith(
+      items: {
+        ...base,
+        for (final t in DashboardWidgetType.values)
+          t.name: base[t.name]!.copyWith(visible: before.shows(view, t)),
+      },
+    );
+  }
 
   /// [type] shown or hidden in [view], its options kept.
   DashboardViewState withVisible(

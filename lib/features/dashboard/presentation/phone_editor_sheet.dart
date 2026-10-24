@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
 import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
+import 'package:personal_finance/features/dashboard/presentation/dashboard_menu.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 
 /// Opens the phone's dashboard editor (docs/DASHBOARD.md, Phone): the
@@ -49,29 +51,55 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
     super.dispose();
   }
 
-  Future<void> _save(DashboardViewState next) =>
-      ref.read(dashboardLayoutRepositoryProvider).save(_view, next);
+  /// The custom order a move on Auto replaced, until Undo or the sheet
+  /// closes: the sheet covers the board's toasts, so it offers its own.
+  List<String>? _replaced;
+
+  Future<void> _change(
+    DashboardViewState Function(DashboardViewState current) change,
+  ) => ref.read(dashboardLayoutRepositoryProvider).update(_view, change);
 
   /// Moves [type] to [position] among the widgets shown and saves the order
-  /// — from Auto, the default order with the move becomes the custom one.
-  /// Hidden widgets keep their place.
-  void _move(DashboardViewState state, DashboardWidgetType type, int position) {
-    final shown = [for (final t in phoneOrder(state)) t.name];
-    final from = shown.indexOf(type.name);
-    final to = position.clamp(0, shown.length - 1);
-    if (from < 0 || from == to) return;
-    final order = moveInOrder(placedPhoneOrder(state), shown, type.name, to);
-    unawaited(
-      _save(
-        state.normalized(_view).copyWith(mode: LayoutMode.custom, order: order),
-      ),
-    );
+  /// — from Auto, the default order with the move becomes the custom one,
+  /// and a custom order saved before can come back with Undo. Hidden
+  /// widgets keep their place.
+  Future<void> _move(DashboardWidgetType type, int position) async {
     final l = context.l10n;
+    final view = View.of(context);
+    final direction = Directionality.of(context);
+    List<String>? replaced;
+    var count = 0;
+    var to = -1;
+    final (_, after) = await ref.read(dashboardLayoutRepositoryProvider).update(
+      _view,
+      (s) {
+        final shown = [for (final t in phoneOrder(s)) t.name];
+        final from = shown.indexOf(type.name);
+        to = position.clamp(0, shown.length - 1);
+        count = shown.length;
+        if (from < 0 || from == to) return s;
+        if (s.mode == LayoutMode.auto && s.order != null) replaced = s.order;
+        // Normalized first: a type that shows on Auto without an entry
+        // stays shown on Custom.
+        return s
+            .normalized(_view)
+            .copyWith(
+              mode: LayoutMode.custom,
+              order: moveInOrder(placedPhoneOrder(s), shown, type.name, to),
+            );
+      },
+    );
+    if (!mounted || to < 0) return;
+    final saved = replaced;
+    if (saved != null &&
+        !const ListEquality<String>().equals(saved, after.order)) {
+      setState(() => _replaced = saved);
+    }
     unawaited(
       SemanticsService.sendAnnouncement(
-        View.of(context),
-        l.dashLayoutMovedTo(widgetTypeLabel(l, type), to + 1, shown.length),
-        Directionality.of(context),
+        view,
+        l.dashLayoutMovedTo(widgetTypeLabel(l, type), to + 1, count),
+        direction,
       ),
     );
   }
@@ -111,7 +139,43 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                     ),
                   ),
                   const SizedBox(height: Space.sm),
-                  _PhoneLayoutChoice(state: state, onSave: _save),
+                  _PhoneLayoutChoice(
+                    state: state,
+                    onMode: (mode) => unawaited(
+                      _change(
+                        (s) =>
+                            (mode == LayoutMode.custom
+                                    ? s.normalized(_view)
+                                    : s)
+                                .copyWith(mode: mode),
+                      ),
+                    ),
+                  ),
+                  if (_replaced case final replaced?)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.dashLayoutOrderReplaced,
+                            style: context.text.bodySmall,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() => _replaced = null);
+                            unawaited(
+                              _change(
+                                (s) => s.copyWith(
+                                  mode: LayoutMode.custom,
+                                  order: replaced,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(l.commonUndo),
+                        ),
+                      ],
+                    ),
                   _FoldAll(types: shown),
                 ],
               ),
@@ -119,10 +183,10 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
           ),
           SliverReorderableList(
             itemCount: shown.length,
-            onReorderItem: (from, to) => _move(state, shown[from], to),
+            onReorderItem: (from, to) => unawaited(_move(shown[from], to)),
             itemBuilder: (context, i) {
               final t = shown[i];
-              final name = widgetTypeLabel(l, t);
+              final name = widgetName(ref, l, t, state);
               final arrows = [
                 IconButton(
                   focusNode: _up.putIfAbsent(t, FocusNode.new),
@@ -131,7 +195,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                   onPressed: i == 0
                       ? null
                       : () {
-                          _move(state, t, i - 1);
+                          unawaited(_move(t, i - 1));
                           if (i - 1 == 0) _down[t]?.requestFocus();
                         },
                 ),
@@ -142,7 +206,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                   onPressed: i == shown.length - 1
                       ? null
                       : () {
-                          _move(state, t, i + 1);
+                          unawaited(_move(t, i + 1));
                           if (i + 1 == shown.length - 1) {
                             _up[t]?.requestFocus();
                           }
@@ -152,7 +216,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                   tooltip: l.dashLayoutRemoveWidget(name),
                   icon: const Icon(Icons.remove_circle_outline),
                   onPressed: () => unawaited(
-                    _save(state.withVisible(_view, t, visible: false)),
+                    _change((s) => s.withVisible(_view, t, visible: false)),
                   ),
                 ),
               ];
@@ -228,7 +292,14 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
               for (final t in hidden)
                 ListTile(
                   leading: Icon(widgetIcon(t)),
-                  title: Text(widgetTypeLabel(l, t)),
+                  title: Row(
+                    spacing: Space.xs,
+                    children: [
+                      Flexible(child: Text(widgetTypeLabel(l, t))),
+                      if (state.isNew(_view, t)) const NewBadge(),
+                    ],
+                  ),
+                  subtitle: Text(widgetDescription(l, t)),
                   trailing: TextButton.icon(
                     onPressed: () => unawaited(addWidget(ref, _view, t)),
                     icon: const Icon(Icons.add),
@@ -258,10 +329,10 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
 /// Auto · Custom for the phone order (Custom only while one is saved) and
 /// the line saying whose order shows.
 class _PhoneLayoutChoice extends StatelessWidget {
-  const _PhoneLayoutChoice({required this.state, required this.onSave});
+  const _PhoneLayoutChoice({required this.state, required this.onMode});
 
   final DashboardViewState state;
-  final Future<void> Function(DashboardViewState) onSave;
+  final ValueChanged<LayoutMode> onMode;
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +342,9 @@ class _PhoneLayoutChoice extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: Space.xxs,
       children: [
+        ExcludeSemantics(
+          child: Text(l.dashLayoutLabel, style: context.text.labelLarge),
+        ),
         SegmentedButton<LayoutMode>(
           showSelectedIcon: false,
           segments: [
@@ -285,8 +359,7 @@ class _PhoneLayoutChoice extends StatelessWidget {
               ),
           ],
           selected: {mode},
-          onSelectionChanged: (picked) =>
-              unawaited(onSave(state.copyWith(mode: picked.first))),
+          onSelectionChanged: (picked) => onMode(picked.first),
         ),
         Text(
           mode == LayoutMode.custom

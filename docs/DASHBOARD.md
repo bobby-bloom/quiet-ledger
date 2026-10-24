@@ -50,7 +50,16 @@ equal columns, or deals the widgets on screen into one such row — with
 "Layout set to n columns · Undo" when that replaces a saved layout.
 
 Phones have Auto · Custom in the editor sheet (Custom only once an order is
-saved). The first move on Auto copies the default order.
+saved). The first move on Auto copies the default order; when that replaces
+a saved order, the sheet offers "Your earlier order was replaced · Undo".
+
+Switching to Custom (a number, Custom, Done, a phone move) first writes an
+entry for every type as it shows on Auto, so a type that shipped after the
+last save and shows on Auto stays shown.
+
+Undo puts back only what its action changed — a removed widget, the mode
+and rows a pick replaced, the visibility a reset changed — on the state as
+it is then, so other changes made meanwhile stay.
 
 ## Rows and fitting
 
@@ -92,8 +101,10 @@ first row's to the row below); "Add row" sits under the last row.
 - There is no auto-scroll: the arranged board is short; the Move menu is the
   way when it is taller than the window.
 - Removing and adding inside the session are part of it: Cancel undoes them.
-- **Done** saves rows and selection as Custom in one write. From Auto without
-  a change it leaves like Cancel; from Auto over a different saved layout it
+  Remove is announced and focus goes to the next widget.
+- **Done** saves the rows and the widgets the session removed or added as
+  Custom, on top of the saved state as it is then (options changed meanwhile
+  stay). Without a change it leaves like Cancel; from Auto over a different saved layout it
   offers "Layout replaced · Undo". **Cancel** with changes offers "Changes
   discarded · Undo", which comes back with the work. **Reset** puts the
   default rows in, inside the session. Done drops rows left with no widget
@@ -130,8 +141,17 @@ situational, never synced, and a restore keeps the device's own.
 | `compact.v2` | the same with `"order": ["<type>", …]` instead of `rows` |
 
 - `rows` / `order` are absent until a custom arrangement is saved.
-- Reading drops unknown types and keeps a duplicated id in its first slot;
-  anything malformed reads as nothing saved (logged once).
+- Every change is one `update`: the row is read and written inside one
+  transaction, so two changes in quick succession never undo each other.
+- Reading skips only what is malformed — an item, a row with an unusable
+  split, a non-string id — and keeps the rest; columns beyond a split join
+  its last column. A value that is not a JSON object reads as nothing saved,
+  and before a save replaces it the first such row is kept aside under
+  `<key>.unreadable`. All skips are logged once.
+- Ids and items of types this build does not know (a newer build's) are
+  kept and written back unchanged; they never show.
+- Two `*.v2` rows of one key (two devices before they synced): the last
+  written one counts, and the next save deletes the others.
 - The 0.1 rows `compact` / `expanded` (a flat list of `{type, size, options}`)
   stay as they are, because a 0.1 build would fail on the new shape. While no
   `*.v2` row exists they are migrated on read: a list equal to the old
@@ -145,5 +165,7 @@ situational, never synced, and a restore keeps the device's own.
 ## Known limitations
 
 - No auto-scroll while dragging.
-- Undo writes the whole view back as it was before the action.
-- Adding a widget does not scroll it into view.
+- Adding a widget neither scrolls it into view nor moves focus to it.
+- In the phone sheet, focus after Remove or Add is not placed.
+- Undo of a session restored after Cancel ("Changes discarded") brings back
+  the session as it was; Done then applies it on top of the current state.

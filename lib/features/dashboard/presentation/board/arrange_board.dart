@@ -432,7 +432,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
         fits: widget.fits,
       ),
       onMove: (move) => _move(id, move),
-      onRemove: () => widget.onRemove(id),
+      onRemove: () => _remove(id),
       focusNode: _focusNodes.putIfAbsent(
         id,
         () => FocusNode(debugLabel: 'move $id'),
@@ -676,6 +676,27 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
         fits: widget.fits,
       ),
     );
+  }
+
+  /// Takes [id] off the board, says so, and puts focus on the widget that
+  /// followed it (or the one before, at the end).
+  void _remove(String id) {
+    final order = [
+      for (final row in widget.rows)
+        for (final ids in shownColumns(row, widget.present, widget.fits))
+          ...ids,
+    ];
+    final at = order.indexOf(id);
+    final next = at + 1 < order.length
+        ? order[at + 1]
+        : at > 0
+        ? order[at - 1]
+        : null;
+    widget.onRemove(id);
+    _announce(_l.dashLayoutRemoved(widget.title(id)));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && next != null) _focusNodes[next]?.requestFocus();
+    });
   }
 
   /// Hands [rows] up, then keeps focus on [id] and says where it went.

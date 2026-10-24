@@ -2465,6 +2465,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashLayoutDescrecentTransactions => 'Your latest entries';
 
   @override
+  String get dashLayoutOrderReplaced => 'Your earlier order was replaced';
+
+  @override
   String get exportTitle => 'Export & backup';
 
   @override

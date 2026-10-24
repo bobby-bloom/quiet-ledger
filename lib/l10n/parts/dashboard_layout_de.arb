@@ -69,5 +69,6 @@
   "dashLayoutDescaccounts": "Salden deiner Konten",
   "dashLayoutDescgoals": "Fortschritt deiner Sparziele",
   "dashLayoutDesctopCategories": "Wofür dein Geld in diesem Zeitraum ging",
-  "dashLayoutDescrecentTransactions": "Deine neuesten Buchungen"
+  "dashLayoutDescrecentTransactions": "Deine neuesten Buchungen",
+  "dashLayoutOrderReplaced": "Deine frühere Reihenfolge wurde ersetzt"
 }
