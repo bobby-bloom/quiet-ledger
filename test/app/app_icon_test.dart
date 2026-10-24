@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/app/app_icon/app_icon_image.dart';
 import 'package:personal_finance/app/app_icon/app_icon_sync.dart';
