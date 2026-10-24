@@ -195,7 +195,8 @@ class _PhoneHeader extends ConsumerWidget {
     return SizedBox(
       height: 56,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        // The last icon's circle ends on the 16 px page margin.
+        padding: const EdgeInsets.only(left: 4, right: Space.sm),
         child: Row(
           children: [
             const Expanded(

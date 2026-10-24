@@ -302,12 +302,9 @@ class _ScenarioEditorScreenState extends ConsumerState<ScenarioEditorScreen> {
               icon: const Icon(Icons.delete_outline),
               onPressed: _delete,
             ),
-          Padding(
-            padding: const EdgeInsets.only(right: Space.xs),
-            child: FilledButton(
-              onPressed: _saving ? null : _save,
-              child: Text(l.commonSave),
-            ),
+          FilledButton(
+            onPressed: _saving ? null : _save,
+            child: Text(l.commonSave),
           ),
         ],
       ),

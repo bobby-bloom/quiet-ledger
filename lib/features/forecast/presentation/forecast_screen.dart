@@ -55,7 +55,6 @@ class ForecastScreen extends ConsumerWidget {
         : null;
     final accounts = [for (final id in accountIds) ?accountMap[id]];
     final size = WindowSize.of(context);
-    final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
     final sideHidden = ref.watch(
       settingsProvider.select((s) => s.get(ForecastSettings.sidePanelHidden)),
     );
@@ -63,9 +62,6 @@ class ForecastScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l.forecastTitle, style: context.text.titleLarge),
-        // Line the last button's circle up with the board's gutter (it sits
-        // 4 px inside its tap target).
-        actionsPadding: EdgeInsetsDirectional.only(end: gutter - Space.xxs),
         actions: [
           if (accounts.isNotEmpty)
             _AccountSelector(accounts: accounts, selectedId: accountId),

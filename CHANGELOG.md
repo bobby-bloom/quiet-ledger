@@ -86,8 +86,9 @@ a dated release section.
 
 ### Fixed
 
-- Forecast: the app bar's last button lines up with the page margin
-  instead of sitting at the window edge.
+- The app bar's last button lines up with the page margin on every
+  screen instead of sitting at the window edge (or wherever each screen
+  put its own spacer); the phone headers of Home and Transactions match.
 - Restoring a backup over existing transactions failed.
 - A scheduled backup to a folder on a drive that was not connected
   recreated the folder on the system disk; it is now reported instead.
