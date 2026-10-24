@@ -16,8 +16,8 @@
     }
   },
   "scenariosCompare": "Compare on the forecast",
-  "scenariosCompareDesc": "Up to 3 scenarios are shown next to the baseline.",
-  "scenariosMaxCompared": "Up to 3 scenarios can be compared. Turn one off first.",
+  "scenariosCompareDesc": "Up to 5 scenarios are shown next to the baseline.",
+  "scenariosMaxCompared": "Up to 5 scenarios can be compared. Turn one off first.",
   "scenariosChanges": "Changes",
   "scenariosAddChange": "Add change",
   "scenariosNoChanges": "No changes yet. Add one to see its effect.",

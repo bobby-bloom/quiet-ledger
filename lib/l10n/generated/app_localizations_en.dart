@@ -1836,6 +1836,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navTags => 'Tags';
 
   @override
+  String get navCollapseSidebar => 'Collapse sidebar';
+
+  @override
+  String get navExpandSidebar => 'Expand sidebar';
+
+  @override
   String get addTransaction => 'Add transaction';
 
   @override
@@ -2622,6 +2628,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forecastEditScenarios => 'Edit scenarios';
+
+  @override
+  String get forecastHideSidePanel => 'Hide side panel';
+
+  @override
+  String get forecastShowSidePanel => 'Show side panel';
 
   @override
   String get forecastNoScenarios =>
@@ -5135,11 +5147,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scenariosCompareDesc =>
-      'Up to 3 scenarios are shown next to the baseline.';
+      'Up to 5 scenarios are shown next to the baseline.';
 
   @override
   String get scenariosMaxCompared =>
-      'Up to 3 scenarios can be compared. Turn one off first.';
+      'Up to 5 scenarios can be compared. Turn one off first.';
 
   @override
   String get scenariosChanges => 'Changes';
@@ -5605,6 +5617,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setConfirmDelete => 'Confirm before deleting';
+
+  @override
+  String get setSidebarCollapsed => 'Collapse the sidebar';
+
+  @override
+  String get setForecastSidePanelHidden => 'Hide the forecast side panel';
 
   @override
   String get setCsvDateFormat => 'CSV date format';

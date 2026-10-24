@@ -78,23 +78,23 @@ void main() {
       );
     });
 
-    test('at most three scenarios are compared', () async {
+    test('at most five scenarios are compared', () async {
       final ids = [
-        for (var i = 0; i < 4; i++)
+        for (var i = 0; i < 6; i++)
           await repo.create(ScenarioDef(id: '', name: 's$i')),
       ];
-      for (final id in ids.take(3)) {
+      for (final id in ids.take(5)) {
         expect(await repo.setEnabled(id, enabled: true), isTrue);
       }
-      expect(await repo.setEnabled(ids[3], enabled: true), isFalse);
+      expect(await repo.setEnabled(ids[5], enabled: true), isFalse);
       expect(await repo.setEnabled(ids[0], enabled: true), isTrue);
       expect(await repo.setEnabled(ids[0], enabled: false), isTrue);
-      expect(await repo.setEnabled(ids[3], enabled: true), isTrue);
+      expect(await repo.setEnabled(ids[5], enabled: true), isTrue);
       final enabled = [
         for (final s in await repo.all())
           if (s.enabled) s.name,
       ];
-      expect(enabled, ['s1', 's2', 's3']);
+      expect(enabled, ['s1', 's2', 's3', 's4', 's5']);
     });
 
     test('duplicate copies adjustments and is not compared', () async {

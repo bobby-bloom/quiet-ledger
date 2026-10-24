@@ -2869,6 +2869,18 @@ abstract class AppLocalizations {
   /// **'Tags'**
   String get navTags;
 
+  /// No description provided for @navCollapseSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get navCollapseSidebar;
+
+  /// No description provided for @navExpandSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get navExpandSidebar;
+
   /// No description provided for @addTransaction.
   ///
   /// In en, this message translates to:
@@ -4174,6 +4186,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit scenarios'**
   String get forecastEditScenarios;
+
+  /// No description provided for @forecastHideSidePanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide side panel'**
+  String get forecastHideSidePanel;
+
+  /// No description provided for @forecastShowSidePanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show side panel'**
+  String get forecastShowSidePanel;
 
   /// No description provided for @forecastNoScenarios.
   ///
@@ -8247,13 +8271,13 @@ abstract class AppLocalizations {
   /// No description provided for @scenariosCompareDesc.
   ///
   /// In en, this message translates to:
-  /// **'Up to 3 scenarios are shown next to the baseline.'**
+  /// **'Up to 5 scenarios are shown next to the baseline.'**
   String get scenariosCompareDesc;
 
   /// No description provided for @scenariosMaxCompared.
   ///
   /// In en, this message translates to:
-  /// **'Up to 3 scenarios can be compared. Turn one off first.'**
+  /// **'Up to 5 scenarios can be compared. Turn one off first.'**
   String get scenariosMaxCompared;
 
   /// No description provided for @scenariosChanges.
@@ -9035,6 +9059,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm before deleting'**
   String get setConfirmDelete;
+
+  /// No description provided for @setSidebarCollapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse the sidebar'**
+  String get setSidebarCollapsed;
+
+  /// No description provided for @setForecastSidePanelHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the forecast side panel'**
+  String get setForecastSidePanelHidden;
 
   /// No description provided for @setCsvDateFormat.
   ///

@@ -466,7 +466,7 @@ class ScenarioDef {
 }
 
 /// At most this many scenarios are compared with the baseline.
-const maxComparedScenarios = 3;
+const maxComparedScenarios = 5;
 
 /// The scenarios shown in the comparison: the enabled ones, in order, at
 /// most [maxComparedScenarios].

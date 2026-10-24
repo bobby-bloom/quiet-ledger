@@ -337,7 +337,21 @@ abstract final class NavigationSettings {
       ),
   };
 
-  static final all = <SettingDef<Object?>>[tabs, ..._modules.values];
+  /// Wide layouts: the sidebar shows icons only. Toggled from the sidebar.
+  static final sidebarCollapsed = SettingDef.boolean(
+    key: 'navigation.sidebarCollapsed',
+    section: SettingSection.navigation,
+    defaultValue: false,
+    label: (l) => l.setSidebarCollapsed,
+    hidden: true,
+    deviceLocal: true,
+  );
+
+  static final all = <SettingDef<Object?>>[
+    tabs,
+    ..._modules.values,
+    sidebarCollapsed,
+  ];
 }
 
 String navTabLabel(AppLocalizations l, NavTab t) => switch (t) {
@@ -1015,6 +1029,18 @@ abstract final class ForecastSettings {
     module: AppModule.scenarios.name,
   );
 
+  /// Wide layouts: the board's side panel (scenarios, "Can I afford it?",
+  /// warnings, big events) is collapsed. Toggled from the board.
+  static final sidePanelHidden = SettingDef.boolean(
+    key: 'forecast.sidePanelHidden',
+    section: SettingSection.forecast,
+    defaultValue: false,
+    label: (l) => l.setForecastSidePanelHidden,
+    hidden: true,
+    deviceLocal: true,
+    module: AppModule.forecast.name,
+  );
+
   static final all = <SettingDef<Object?>>[
     horizonMonths,
     variableMethod,
@@ -1026,6 +1052,7 @@ abstract final class ForecastSettings {
     projectionYears,
     realValues,
     combineScenarios,
+    sidePanelHidden,
   ];
 }
 

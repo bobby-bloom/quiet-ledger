@@ -74,9 +74,20 @@ a dated release section.
   wide screens; phones get an "Edit dashboard" button too.
 - Desktop sidebar shows only the tabs chosen in Navigation & modules plus
   More; Settings and Import are reached through More.
+- Forecast: up to 5 scenarios can be compared at once (was 3).
+- Forecast: the balances table keeps its columns readable and scrolls
+  sideways on every screen size; phones now show every compared scenario
+  and the combined column too.
+- Forecast: on wide screens the side panel (scenarios, "Can I afford
+  it?", warnings, big events) can be hidden from the app bar; the choice
+  is remembered on this device.
+- Desktop sidebar can be collapsed to icons with the button at its
+  bottom; the choice is remembered on this device.
 
 ### Fixed
 
+- Forecast: the app bar's last button lines up with the page margin
+  instead of sitting at the window edge.
 - Restoring a backup over existing transactions failed.
 - A scheduled backup to a folder on a drive that was not connected
   recreated the folder on the system disk; it is now reported instead.

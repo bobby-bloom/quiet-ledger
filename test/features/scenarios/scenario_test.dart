@@ -92,12 +92,12 @@ void main() {
       expect(ScenarioAdjustment.decodeList('{"a":1}'), isEmpty);
     });
 
-    test('scenario copyWith and comparedScenarios caps at three', () {
+    test('scenario copyWith and comparedScenarios caps at five', () {
       final s = [
-        for (var i = 0; i < 5; i++)
+        for (var i = 0; i < 7; i++)
           ScenarioDef(id: '$i', name: 's$i', enabled: i != 1),
       ];
-      expect(comparedScenarios(s).map((e) => e.id), ['0', '2', '3']);
+      expect(comparedScenarios(s).map((e) => e.id), ['0', '2', '3', '4', '5']);
       final c = s.first.copyWith(color: 0xFF000000, name: 'x');
       expect(c.color, 0xFF000000);
       expect(c.copyWith(color: null).color, isNull);

@@ -1856,6 +1856,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navTags => 'Tags';
 
   @override
+  String get navCollapseSidebar => 'Seitenleiste einklappen';
+
+  @override
+  String get navExpandSidebar => 'Seitenleiste ausklappen';
+
+  @override
   String get addTransaction => 'Buchung hinzufügen';
 
   @override
@@ -2645,6 +2651,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get forecastEditScenarios => 'Szenarien bearbeiten';
+
+  @override
+  String get forecastHideSidePanel => 'Seitenleiste ausblenden';
+
+  @override
+  String get forecastShowSidePanel => 'Seitenleiste einblenden';
 
   @override
   String get forecastNoScenarios =>
@@ -5165,11 +5177,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get scenariosCompareDesc =>
-      'Bis zu 3 Szenarien werden neben der Basis angezeigt.';
+      'Bis zu 5 Szenarien werden neben der Basis angezeigt.';
 
   @override
   String get scenariosMaxCompared =>
-      'Es lassen sich höchstens 3 Szenarien vergleichen. Schalte zuerst eines aus.';
+      'Es lassen sich höchstens 5 Szenarien vergleichen. Schalte zuerst eines aus.';
 
   @override
   String get scenariosChanges => 'Änderungen';
@@ -5640,6 +5652,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setConfirmDelete => 'Vor dem Löschen bestätigen';
+
+  @override
+  String get setSidebarCollapsed => 'Seitenleiste einklappen';
+
+  @override
+  String get setForecastSidePanelHidden => 'Prognose-Seitenleiste ausblenden';
 
   @override
   String get setCsvDateFormat => 'CSV-Datumsformat';
