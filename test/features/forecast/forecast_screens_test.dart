@@ -127,6 +127,11 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
+  // The page, not the horizontally scrolling horizon selector.
+  final verticalScrollable = find.byWidgetPredicate(
+    (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+  );
+
   testWidgets('forecast board (phone) shows lowest point and scenario', (
     tester,
   ) async {
@@ -142,7 +147,11 @@ void main() {
     expect(find.text('Everyday checking'), findsWidgets);
     expect(find.textContaining('below your'), findsWidgets);
     expect(find.text('Pay rent less'), findsWidgets);
-    await tester.scrollUntilVisible(find.text('Can I afford it?'), 300);
+    await tester.scrollUntilVisible(
+      find.text('Can I afford it?'),
+      300,
+      scrollable: verticalScrollable,
+    );
     expect(find.text('Can I afford it?'), findsOneWidget);
     await unmount(tester);
   });
@@ -157,6 +166,93 @@ void main() {
     expect(find.text('Scenarios'), findsWidgets);
     expect(find.text('Upcoming big events'), findsOneWidget);
     expect(find.text('New laptop'), findsWidgets);
+    await unmount(tester);
+  });
+
+  testWidgets('custom horizon via dialog, up to 120 months', (tester) async {
+    await pumpScreen(tester, const ForecastScreen());
+    Future<void> settle() async {
+      for (var i = 0; i < 10; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+    }
+
+    // On a phone the custom segment is scrolled into view first.
+    expect(find.text('Custom'), findsOneWidget);
+    await tester.ensureVisible(find.text('Custom'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Custom'));
+    await tester.pumpAndSettle();
+    expect(find.text('Custom horizon'), findsOneWidget);
+
+    // Out of range: error and Done disabled.
+    await tester.enterText(find.byType(TextField), '200');
+    await tester.pump();
+    expect(find.text('Enter 1–120 months'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Done'))
+          .onPressed,
+      isNull,
+    );
+
+    await tester.enterText(find.byType(TextField), '18');
+    await tester.pump();
+    expect(find.text('Enter 1–120 months'), findsNothing);
+    expect(tester.widget<Slider>(find.byType(Slider)).value, 18);
+    await tester.tap(find.text('Done'));
+    await settle();
+    expect(find.text('18 mo'), findsOneWidget);
+    expect(find.text('Custom'), findsNothing);
+
+    // Tapping the selected custom segment reopens the dialog.
+    await tester.tap(find.text('18 mo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Custom horizon'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '120');
+    await tester.pump();
+    await tester.tap(find.text('Done'));
+    await settle();
+    expect(find.text('120 mo'), findsOneWidget);
+    expect(find.text('Lowest point'), findsOneWidget);
+
+    // A preset switches back and the custom segment resets.
+    await tester.ensureVisible(find.text('6 mo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('6 mo'));
+    await settle();
+    expect(find.text('Custom'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('horizon selector scrolls when it does not fit', (tester) async {
+    double extent() => tester
+        .state<ScrollableState>(
+          find
+              .ancestor(
+                of: find.byType(SegmentedButton<int>),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position
+        .maxScrollExtent;
+
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(320, 900),
+    );
+    expect(extent(), greaterThan(0));
+    await unmount(tester);
+
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(extent(), 0);
     await unmount(tester);
   });
 

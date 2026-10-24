@@ -1919,6 +1919,20 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get forecastHorizonCustom => 'Eigener';
+
+  @override
+  String get forecastHorizonCustomTitle => 'Eigener Zeitraum';
+
+  @override
+  String get forecastHorizonMonthsLabel => 'Monate';
+
+  @override
+  String forecastHorizonRangeError(int min, int max) {
+    return '$min–$max Monate eingeben';
+  }
+
+  @override
   String get forecastLowestPoint => 'Tiefster Stand';
 
   @override

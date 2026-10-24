@@ -1907,6 +1907,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get forecastHorizonCustom => 'Custom';
+
+  @override
+  String get forecastHorizonCustomTitle => 'Custom horizon';
+
+  @override
+  String get forecastHorizonMonthsLabel => 'Months';
+
+  @override
+  String forecastHorizonRangeError(int min, int max) {
+    return 'Enter $min–$max months';
+  }
+
+  @override
   String get forecastLowestPoint => 'Lowest point';
 
   @override

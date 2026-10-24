@@ -124,7 +124,8 @@ class ForecastHorizon extends Notifier<int> {
     settingsProvider.select((s) => s.get(ForecastSettings.horizonMonths)),
   );
 
-  void set(int months) => state = months.clamp(1, 36);
+  void set(int months) =>
+      state = months.clamp(1, ForecastSettings.maxHorizonMonths);
 }
 
 /// Account shown on the forecast board; null = all forecast accounts.

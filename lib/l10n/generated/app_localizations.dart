@@ -3145,6 +3145,30 @@ abstract class AppLocalizations {
   /// **'{months, plural, =1{1 month} other{{months} months}}'**
   String forecastHorizonLong(int months);
 
+  /// No description provided for @forecastHorizonCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get forecastHorizonCustom;
+
+  /// No description provided for @forecastHorizonCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom horizon'**
+  String get forecastHorizonCustomTitle;
+
+  /// No description provided for @forecastHorizonMonthsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get forecastHorizonMonthsLabel;
+
+  /// No description provided for @forecastHorizonRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter {min}–{max} months'**
+  String forecastHorizonRangeError(int min, int max);
+
   /// No description provided for @forecastLowestPoint.
   ///
   /// In en, this message translates to:

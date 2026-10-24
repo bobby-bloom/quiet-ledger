@@ -1225,6 +1225,20 @@
       }
     }
   },
+  "forecastHorizonCustom": "Custom",
+  "forecastHorizonCustomTitle": "Custom horizon",
+  "forecastHorizonMonthsLabel": "Months",
+  "forecastHorizonRangeError": "Enter {min}–{max} months",
+  "@forecastHorizonRangeError": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "forecastLowestPoint": "Lowest point",
   "forecastDaysBelow": "{days, plural, =1{1 day below {limit}} other{{days} days below {limit}}}",
   "@forecastDaysBelow": {

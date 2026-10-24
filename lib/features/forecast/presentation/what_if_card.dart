@@ -8,6 +8,7 @@ import 'package:personal_finance/app/ui/pickers.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/forecast/domain/cashflow_engine.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_dates.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_pipeline.dart';
@@ -46,7 +47,7 @@ class _WhatIfCardState extends ConsumerState<WhatIfCard> {
       context: context,
       initialDate: _date,
       firstDate: today,
-      lastDate: addMonthsClamped(today, 36),
+      lastDate: addMonthsClamped(today, ForecastSettings.maxHorizonMonths),
     );
     if (d != null) setState(() => _date = dayOf(d));
   }

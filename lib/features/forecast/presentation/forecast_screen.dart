@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -247,37 +250,173 @@ class _Board extends ConsumerWidget {
   }
 }
 
+/// Preset horizons plus a "Custom" segment that opens [_HorizonDialog].
+/// Stretches to the full width and scrolls sideways when it does not fit.
 class _HorizonSelector extends ConsumerWidget {
   const _HorizonSelector();
+
+  static const _presets = [3, 6, 12, 36];
+
+  /// Value of the custom segment.
+  static const _custom = -1;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final horizon = ref.watch(forecastHorizonProvider);
-    final setting = ref.watch(
-      settingsProvider.select((s) => s.get(ForecastSettings.horizonMonths)),
-    );
-    final options = {3, 6, 12, 36, setting, horizon}.toList()..sort();
+    final custom = !_presets.contains(horizon);
+    final notifier = ref.read(forecastHorizonProvider.notifier);
+
+    Future<void> pickCustom() async {
+      final months = await showDialog<int>(
+        context: context,
+        builder: (_) => _HorizonDialog(initial: horizon),
+      );
+      if (months != null) notifier.set(months);
+    }
+
     return Semantics(
       label: l.forecastHorizon,
       container: true,
-      child: SizedBox(
-        width: double.infinity,
-        child: SegmentedButton<int>(
-          segments: [
-            for (final m in options)
-              ButtonSegment(
-                value: m,
-                label: Text(l.forecastHorizonShort(m)),
-                tooltip: l.forecastHorizonLong(m),
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: SegmentedButton<int>(
+              segments: [
+                for (final m in _presets)
+                  ButtonSegment(
+                    value: m,
+                    label: Text(l.forecastHorizonShort(m)),
+                    tooltip: l.forecastHorizonLong(m),
+                  ),
+                ButtonSegment(
+                  value: _custom,
+                  label: Text(
+                    custom
+                        ? l.forecastHorizonShort(horizon)
+                        : l.forecastHorizonCustom,
+                  ),
+                  tooltip: custom
+                      ? l.forecastHorizonLong(horizon)
+                      : l.forecastHorizonCustomTitle,
+                ),
+              ],
+              selected: {if (custom) _custom else horizon},
+              showSelectedIcon: false,
+              // Narrow padding so all five fit on a typical phone.
+              style: const ButtonStyle(
+                padding: WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: Space.xs),
+                ),
               ),
-          ],
-          selected: {horizon},
-          showSelectedIcon: options.length <= 4,
-          onSelectionChanged: (s) =>
-              ref.read(forecastHorizonProvider.notifier).set(s.first),
+              // Tapping the selected segment empties the selection; for the
+              // custom segment that reopens the dialog.
+              emptySelectionAllowed: true,
+              onSelectionChanged: (s) {
+                final v = s.isEmpty ? (custom ? _custom : null) : s.first;
+                if (v == _custom) {
+                  unawaited(pickCustom());
+                } else if (v != null) {
+                  notifier.set(v);
+                }
+              },
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Picks a custom horizon with a slider and a number field kept in sync.
+class _HorizonDialog extends StatefulWidget {
+  const _HorizonDialog({required this.initial});
+
+  final int initial;
+
+  @override
+  State<_HorizonDialog> createState() => _HorizonDialogState();
+}
+
+class _HorizonDialogState extends State<_HorizonDialog> {
+  static const _max = ForecastSettings.maxHorizonMonths;
+
+  late int? _months = widget.initial.clamp(1, _max);
+  late final _field = TextEditingController(text: '$_months');
+
+  @override
+  void dispose() {
+    _field.dispose();
+    super.dispose();
+  }
+
+  void _typed(String text) {
+    final v = int.tryParse(text);
+    setState(() => _months = v != null && v >= 1 && v <= _max ? v : null);
+  }
+
+  void _slid(double x) {
+    final v = x.round();
+    _field.value = TextEditingValue(
+      text: '$v',
+      selection: TextSelection.collapsed(offset: '$v'.length),
+    );
+    setState(() => _months = v);
+  }
+
+  void _submit() {
+    if (_months != null) Navigator.of(context).pop(_months);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final months = _months;
+    return AlertDialog(
+      title: Text(l.forecastHorizonCustomTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _field,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              labelText: l.forecastHorizonMonthsLabel,
+              errorText: months == null
+                  ? l.forecastHorizonRangeError(1, _max)
+                  : null,
+            ),
+            onChanged: _typed,
+            onSubmitted: (_) => _submit(),
+          ),
+          const SizedBox(height: Space.sm),
+          Slider(
+            value: (months ?? widget.initial).clamp(1, _max).toDouble(),
+            min: 1,
+            max: _max.toDouble(),
+            divisions: _max - 1,
+            label: l.forecastHorizonLong(months ?? widget.initial),
+            semanticFormatterCallback: (x) => l.forecastHorizonLong(x.round()),
+            onChanged: _slid,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.commonCancel),
+        ),
+        FilledButton(
+          onPressed: months == null ? null : _submit,
+          child: Text(l.commonDone),
+        ),
+      ],
     );
   }
 }

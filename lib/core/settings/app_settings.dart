@@ -892,12 +892,15 @@ abstract final class RecurringSettings {
 }
 
 abstract final class ForecastSettings {
+  /// Longest cash-flow forecast horizon.
+  static const maxHorizonMonths = 120;
+
   static final horizonMonths = SettingDef.integer(
     key: 'forecast.horizonMonths',
     section: SettingSection.forecast,
     defaultValue: 3,
     min: 1,
-    max: 36,
+    max: maxHorizonMonths,
     label: (l) => l.setHorizonMonths,
     module: AppModule.forecast.name,
   );
