@@ -13,6 +13,8 @@
   "forecastLowestOk": "Tiefster Stand {amount} am {date}",
   "forecastLegendBaseline": "Basis",
   "forecastLegendThreshold": "Schwelle",
+  "forecastLegendCombined": "Alle kombiniert",
+  "forecastCombinedDesc": "Alle verglichenen Szenarien zusammen angewendet",
   "forecastChartSummary": "Erwarteter täglicher Kontostand von {account} vom {start} bis {end}. Tiefster Stand {amount} am {date}.",
   "forecastChartThreshold": "Mindestsaldo-Schwelle {threshold}.",
   "forecastChartScenario": "Mit {name}: tiefster Stand {amount} am {date}.",

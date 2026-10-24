@@ -6,7 +6,9 @@ import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
+import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/scenarios/data/scenario_repository.dart';
+import 'package:personal_finance/features/scenarios/domain/scenario.dart';
 import 'package:personal_finance/features/scenarios/presentation/scenario_labels.dart';
 
 /// Formats money for sentences; masked in privacy mode.
@@ -15,6 +17,12 @@ String Function(int minor) sentenceMoney(WidgetRef ref) {
   final hidden = ref.watch(privacyModeProvider);
   return (minor) => hidden ? '•••' : fmt.minor(minor);
 }
+
+/// The combined-scenarios run of a batch's [scenarios], when it is shown.
+T? combinedResult<T>(WidgetRef ref, Map<String, T> scenarios) =>
+    ref.watch(showCombinedScenariosProvider)
+    ? scenarios[combinedScenarioId]
+    : null;
 
 /// Shown instead of a feature screen when its module is switched off.
 class ModuleOffView extends StatelessWidget {

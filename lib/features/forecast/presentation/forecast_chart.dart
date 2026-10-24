@@ -17,19 +17,24 @@ class ChartLine {
     required this.color,
     required this.label,
     this.dashed = false,
+    this.dotted = false,
   });
 
   final List<int> values;
   final Color color;
   final String label;
   final bool dashed;
+
+  /// Dotted instead of dashed (the combined scenarios line).
+  final bool dotted;
 }
 
 /// Balance chart of the forecast board / projection: a solid baseline,
-/// dashed scenario lines, an optional dashed threshold line with a tinted
-/// band below it and a marker on the lowest point. Values become doubles
-/// only as chart coordinates. The whole chart is one image for
-/// accessibility, described by [semanticLabel].
+/// dashed scenario lines, a dotted line of all scenarios combined, an
+/// optional dashed threshold line with a tinted band below it and a marker
+/// on the lowest point. Values become doubles only as chart coordinates.
+/// The whole chart is one image for accessibility, described by
+/// [semanticLabel].
 class BalanceLineChart extends ConsumerWidget {
   const BalanceLineChart({
     required this.lines,
@@ -124,8 +129,8 @@ class BalanceLineChart extends ConsumerWidget {
               FlSpot(i.toDouble(), l.values[i] / 100),
           ],
           color: l.color,
-          barWidth: li == 0 ? 2 : 1.75,
-          dashArray: l.dashed ? const [5, 3] : null,
+          barWidth: li == 0 || l.dotted ? 2 : 1.75,
+          dashArray: l.dotted ? const [2, 3] : (l.dashed ? const [5, 3] : null),
           isStrokeJoinRound: true,
           dotData: FlDotData(
             show: li == 0 && markIndex != null,
@@ -327,18 +332,20 @@ class BalanceLineChart extends ConsumerWidget {
   }
 }
 
-/// Small legend entry: a short solid/dashed line and a label.
+/// Small legend entry: a short solid/dashed/dotted line and a label.
 class LegendEntry extends StatelessWidget {
   const LegendEntry({
     required this.color,
     required this.label,
     super.key,
     this.dashed = false,
+    this.dotted = false,
   });
 
   final Color color;
   final String label;
   final bool dashed;
+  final bool dotted;
 
   @override
   Widget build(BuildContext context) {
@@ -347,7 +354,7 @@ class LegendEntry extends StatelessWidget {
       children: [
         CustomPaint(
           size: const Size(20, 8),
-          painter: _LegendLinePainter(color, dashed: dashed),
+          painter: _LegendLinePainter(color, dashed: dashed, dotted: dotted),
         ),
         const SizedBox(width: 6),
         Text(
@@ -362,10 +369,11 @@ class LegendEntry extends StatelessWidget {
 }
 
 class _LegendLinePainter extends CustomPainter {
-  _LegendLinePainter(this.color, {required this.dashed});
+  _LegendLinePainter(this.color, {required this.dashed, required this.dotted});
 
   final Color color;
   final bool dashed;
+  final bool dotted;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -374,14 +382,15 @@ class _LegendLinePainter extends CustomPainter {
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.butt;
     final y = size.height / 2;
-    if (!dashed) {
+    if (!dashed && !dotted) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
       return;
     }
-    for (var x = 0.0; x < size.width; x += 7) {
+    final (on, step) = dotted ? (2.0, 5.0) : (4.0, 7.0);
+    for (var x = 0.0; x < size.width; x += step) {
       canvas.drawLine(
         Offset(x, y),
-        Offset(math.min(x + 4, size.width), y),
+        Offset(math.min(x + on, size.width), y),
         paint,
       );
     }
@@ -389,7 +398,7 @@ class _LegendLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LegendLinePainter old) =>
-      old.color != color || old.dashed != dashed;
+      old.color != color || old.dashed != dashed || old.dotted != dotted;
 }
 
 /// Index of [date] in a daily series starting at [start].

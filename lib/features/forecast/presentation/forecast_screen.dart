@@ -422,6 +422,7 @@ class _ChartSection extends ConsumerWidget {
     final accountName = accountId == null
         ? l.forecastTotal
         : accounts.firstWhere((a) => a.id == accountId).name;
+    final combined = combinedResult(ref, batch.scenarios);
     final lines = <ChartLine>[
       ChartLine(
         values: r.series(accountId),
@@ -436,6 +437,13 @@ class _ChartSection extends ConsumerWidget {
             label: s.name,
             dashed: true,
           ),
+      if (combined != null)
+        ChartLine(
+          values: combined.series(accountId),
+          color: combinedScenarioColor(context),
+          label: l.forecastLegendCombined,
+          dotted: true,
+        ),
     ];
     final semantic = StringBuffer(
       l.forecastChartSummary(
@@ -455,6 +463,12 @@ class _ChartSection extends ConsumerWidget {
       if (sl == null) continue;
       semantic.write(
         ' ${l.forecastChartScenario(s.name, money(sl.amountMinor), dates.medium(sl.date))}',
+      );
+    }
+    final cl = combined?.lowest(accountId);
+    if (cl != null) {
+      semantic.write(
+        ' ${l.forecastChartScenario(l.forecastLegendCombined, money(cl.amountMinor), dates.medium(cl.date))}',
       );
     }
     final method = ref.watch(
@@ -484,6 +498,7 @@ class _ChartSection extends ConsumerWidget {
                   color: line.color,
                   label: line.label,
                   dashed: line.dashed,
+                  dotted: line.dotted,
                 ),
               if (threshold != null)
                 LegendEntry(
@@ -542,6 +557,7 @@ class _ScenarioToggles extends ConsumerWidget {
     final compared = ref.watch(comparedScenariosProvider);
     final describer = adjustmentDescriber(context, ref);
     final money = sentenceMoney(ref);
+    final combined = combinedResult(ref, batch.scenarios);
     return SectionCard(
       title: l.forecastScenarios,
       actionLabel: l.forecastEditScenarios,
@@ -583,6 +599,16 @@ class _ScenarioToggles extends ConsumerWidget {
                           ),
                     money: money,
                   ),
+                if (compared.length >= 2)
+                  _CombinedRow(
+                    comparison: combined == null
+                        ? null
+                        : compareScenario(
+                            batch.baseline,
+                            combined,
+                            accountId: accountId,
+                          ),
+                  ),
               ],
             ),
     );
@@ -612,6 +638,92 @@ class _ScenarioRow extends ConsumerWidget {
     final color = slot >= 0
         ? scenarioColor(context, slot, argb: scenario.color)
         : context.colors.outlineVariant;
+    return MergeSemantics(
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        minTileHeight: 56,
+        leading: _Dot(color),
+        title: Text(scenario.name, style: context.text.titleSmall),
+        subtitle: _ScenarioSubtitle(text: subtitle, comparison: comparison),
+        trailing: Switch(
+          value: scenario.enabled,
+          onChanged: (on) async {
+            final messenger = ScaffoldMessenger.of(context);
+            final ok = await ref
+                .read(scenarioRepositoryProvider)
+                .setEnabled(scenario.id, enabled: on);
+            if (!ok) {
+              messenger.showSnackBar(
+                SnackBar(content: Text(l.scenariosMaxCompared)),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Toggles the line with all compared scenarios applied together.
+class _CombinedRow extends ConsumerWidget {
+  const _CombinedRow({required this.comparison});
+
+  /// null while the combined line is off (or being computed).
+  final ScenarioComparison? comparison;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final on = ref.watch(
+      settingsProvider.select((s) => s.get(ForecastSettings.combineScenarios)),
+    );
+    return MergeSemantics(
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        minTileHeight: 56,
+        leading: _Dot(
+          on ? combinedScenarioColor(context) : context.colors.outlineVariant,
+        ),
+        title: Text(l.forecastLegendCombined, style: context.text.titleSmall),
+        subtitle: _ScenarioSubtitle(
+          text: l.forecastCombinedDesc,
+          comparison: on ? comparison : null,
+        ),
+        trailing: Switch(
+          value: on,
+          onChanged: (v) => ref
+              .read(settingsProvider.notifier)
+              .set(ForecastSettings.combineScenarios, v),
+        ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot(this.color);
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 12,
+    height: 12,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  );
+}
+
+/// A scenario's description plus its effect on the lowest point and the
+/// end balance.
+class _ScenarioSubtitle extends ConsumerWidget {
+  const _ScenarioSubtitle({required this.text, required this.comparison});
+
+  final String text;
+  final ScenarioComparison? comparison;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final c = comparison;
     String? effect;
     Color? effectColor;
@@ -630,45 +742,19 @@ class _ScenarioRow extends ConsumerWidget {
             '${l.scenariosLowDelta(d(c.lowDeltaMinor))} · ${l.scenariosEndDelta(d(c.endDeltaMinor))}';
       }
     }
-    return MergeSemantics(
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        minTileHeight: 56,
-        leading: Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        title: Text(scenario.name, style: context.text.titleSmall),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
-            if (effect != null)
-              Text(
-                effect,
-                style: context.text.labelMedium?.copyWith(
-                  color: effectColor ?? context.colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-          ],
-        ),
-        trailing: Switch(
-          value: scenario.enabled,
-          onChanged: (on) async {
-            final messenger = ScaffoldMessenger.of(context);
-            final ok = await ref
-                .read(scenarioRepositoryProvider)
-                .setEnabled(scenario.id, enabled: on);
-            if (!ok) {
-              messenger.showSnackBar(
-                SnackBar(content: Text(l.scenariosMaxCompared)),
-              );
-            }
-          },
-        ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(text, maxLines: 2, overflow: TextOverflow.ellipsis),
+        if (effect != null)
+          Text(
+            effect,
+            style: context.text.labelMedium?.copyWith(
+              color: effectColor ?? context.colors.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -698,7 +784,12 @@ class _BalancesTable extends ConsumerWidget {
     final showPeriods = ref.watch(forecastShowPeriodsProvider) && !samePeriods;
     final rows = showPeriods ? r.periods : r.months;
     final compact = WindowSize.of(context).isCompact;
-    final columns = compact ? compared.take(1).toList() : compared;
+    final combined = combinedResult(ref, batch.scenarios);
+    final columns = <(String, CashflowResult?)>[
+      for (final s in compact ? compared.take(1) : compared)
+        (s.name, batch.scenarios[s.id]),
+      if (!compact && combined != null) (l.forecastLegendCombined, combined),
+    ];
     final head = context.text.labelMedium?.copyWith(
       color: context.colors.onSurfaceVariant,
       fontWeight: FontWeight.w700,
@@ -717,8 +808,7 @@ class _BalancesTable extends ConsumerWidget {
       return base;
     }
 
-    int? scenarioEnd(ScenarioDef s, int i) {
-      final sr = batch.scenarios[s.id];
+    int? scenarioEnd(CashflowResult? sr, int i) {
       if (sr == null) return null;
       final list = showPeriods ? sr.periods : sr.months;
       return i < list.length ? list[i].endOf(accountId) : null;
@@ -795,10 +885,10 @@ class _BalancesTable extends ConsumerWidget {
                       textAlign: TextAlign.end,
                     ),
                   ),
-                  for (final s in columns)
+                  for (final (name, _) in columns)
                     _Cell(
                       Text(
-                        l.forecastColWith(s.name),
+                        l.forecastColWith(name),
                         style: head,
                         textAlign: TextAlign.end,
                         maxLines: 2,
@@ -827,12 +917,12 @@ class _BalancesTable extends ConsumerWidget {
                       ),
                     ),
                     _Cell(amount(p.endOf(accountId))),
-                    for (final s in columns)
+                    for (final (_, sr) in columns)
                       _Cell(
-                        scenarioEnd(s, i) == null ||
-                                scenarioEnd(s, i) == p.endOf(accountId)
+                        scenarioEnd(sr, i) == null ||
+                                scenarioEnd(sr, i) == p.endOf(accountId)
                             ? Text('—', style: cell, textAlign: TextAlign.end)
-                            : amount(scenarioEnd(s, i)!),
+                            : amount(scenarioEnd(sr, i)!),
                       ),
                   ],
                 ),

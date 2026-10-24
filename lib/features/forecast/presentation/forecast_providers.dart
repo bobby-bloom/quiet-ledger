@@ -163,6 +163,26 @@ final comparedScenariosProvider = Provider<List<ScenarioDef>>((ref) {
   );
 });
 
+/// Whether the charts add a line with all compared scenarios applied
+/// together (setting on and at least two compared).
+final showCombinedScenariosProvider = Provider<bool>((ref) {
+  final on = ref.watch(
+    settingsProvider.select((s) => s.get(ForecastSettings.combineScenarios)),
+  );
+  return on && ref.watch(comparedScenariosProvider).length >= 2;
+});
+
+/// Engine runs for the compared scenarios, plus the combined run (id
+/// [combinedScenarioId]) when it is shown.
+final scenarioRunsProvider = Provider<List<ScenarioRun>>((ref) {
+  final scenarios = ref.watch(comparedScenariosProvider);
+  return [
+    for (final s in scenarios) ScenarioRun(s.id, s.adjustments),
+    if (ref.watch(showCombinedScenariosProvider))
+      ScenarioRun(combinedScenarioId, combinedAdjustments(scenarios)),
+  ];
+});
+
 // ------------------------------------------------------------- results ---
 
 /// Baseline cash-flow forecast for the current settings (horizon from
@@ -181,16 +201,13 @@ final forecastProvider = FutureProvider<CashflowResult>((ref) async {
 final forecastBoardProvider = FutureProvider<CashflowBatch>((ref) async {
   final input = await ref.watch(forecastInputProvider.future);
   final horizon = ref.watch(forecastHorizonProvider);
-  final scenarios = ref.watch(comparedScenariosProvider);
   return await ref
       .watch(forecastRunnerProvider)
       .cashflow(
         CashflowRequest(
           input: input,
           horizonMonths: horizon,
-          scenarios: [
-            for (final s in scenarios) ScenarioRun(s.id, s.adjustments),
-          ],
+          scenarios: ref.watch(scenarioRunsProvider),
         ),
       );
 });
@@ -318,16 +335,13 @@ final projectionAssumptionsProvider = Provider<ProjectionAssumptions>((ref) {
 
 final projectionProvider = FutureProvider<ProjectionBatch>((ref) async {
   final input = await ref.watch(forecastInputProvider.future);
-  final scenarios = ref.watch(comparedScenariosProvider);
   return await ref
       .watch(forecastRunnerProvider)
       .projection(
         ProjectionRequest(
           input: input,
           assumptions: ref.watch(projectionAssumptionsProvider),
-          scenarios: [
-            for (final s in scenarios) ScenarioRun(s.id, s.adjustments),
-          ],
+          scenarios: ref.watch(scenarioRunsProvider),
         ),
       );
 });

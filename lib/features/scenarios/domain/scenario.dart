@@ -472,3 +472,13 @@ const maxComparedScenarios = 3;
 /// most [maxComparedScenarios].
 List<ScenarioDef> comparedScenarios(List<ScenarioDef> all) =>
     all.where((s) => s.enabled).take(maxComparedScenarios).toList();
+
+/// Run id of all compared scenarios applied together.
+const combinedScenarioId = '_combined';
+
+/// The adjustments of [scenarios] applied together, in order: changes
+/// stack, the earliest end of a rule wins and the last return/inflation
+/// rate wins.
+List<ScenarioAdjustment> combinedAdjustments(List<ScenarioDef> scenarios) => [
+  for (final s in scenarios) ...s.adjustments,
+];

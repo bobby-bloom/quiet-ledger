@@ -1951,6 +1951,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forecastLegendThreshold => 'Threshold';
 
   @override
+  String get forecastLegendCombined => 'All combined';
+
+  @override
+  String get forecastCombinedDesc => 'All compared scenarios applied together';
+
+  @override
   String forecastChartSummary(
     String account,
     String start,
@@ -4949,6 +4955,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setCalculatorKeypad => 'Calculator keypad';
+
+  @override
+  String get setCombineScenarios => 'Show all scenarios combined';
+
+  @override
+  String get setCombineScenariosDesc =>
+      'Adds a line with all compared scenarios applied together. If several set a return or inflation rate, the last one wins.';
 
   @override
   String get setConfirmDelete => 'Confirm before deleting';

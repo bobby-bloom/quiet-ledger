@@ -1963,6 +1963,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get forecastLegendThreshold => 'Schwelle';
 
   @override
+  String get forecastLegendCombined => 'Alle kombiniert';
+
+  @override
+  String get forecastCombinedDesc =>
+      'Alle verglichenen Szenarien zusammen angewendet';
+
+  @override
   String forecastChartSummary(
     String account,
     String start,
@@ -4973,6 +4980,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setCalculatorKeypad => 'Rechner-Tastatur';
+
+  @override
+  String get setCombineScenarios => 'Alle Szenarien kombiniert zeigen';
+
+  @override
+  String get setCombineScenariosDesc =>
+      'Zusätzliche Linie mit allen verglichenen Szenarien zusammen. Setzen mehrere eine Rendite oder Inflation, gilt das letzte.';
 
   @override
   String get setConfirmDelete => 'Vor dem Löschen bestätigen';

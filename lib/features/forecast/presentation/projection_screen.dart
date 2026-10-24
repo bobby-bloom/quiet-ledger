@@ -173,6 +173,13 @@ class _ProjectionChart extends ConsumerWidget {
             label: s.name,
             dashed: true,
           ),
+      if (combinedResult(ref, batch.scenarios) case final c?)
+        ChartLine(
+          values: c.values,
+          color: combinedScenarioColor(context),
+          label: l.forecastLegendCombined,
+          dotted: true,
+        ),
     ];
     final marks = <int>{
       for (final m in p.milestones)
@@ -203,6 +210,7 @@ class _ProjectionChart extends ConsumerWidget {
                     color: line.color,
                     label: line.label,
                     dashed: line.dashed,
+                    dotted: line.dotted,
                   ),
               ],
             ),
@@ -387,6 +395,14 @@ class _Assumptions extends ConsumerWidget {
             value: s.get(ForecastSettings.realValues),
             onChanged: (v) => set(ForecastSettings.realValues, v),
           ),
+          if (ref.watch(comparedScenariosProvider).length >= 2)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l.setCombineScenarios),
+              subtitle: Text(l.setCombineScenariosDesc),
+              value: s.get(ForecastSettings.combineScenarios),
+              onChanged: (v) => set(ForecastSettings.combineScenarios, v),
+            ),
           _SliderRow(
             label: l.setInflation,
             value: s.get(ForecastSettings.inflationBp),

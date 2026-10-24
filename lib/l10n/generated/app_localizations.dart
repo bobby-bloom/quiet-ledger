@@ -3197,6 +3197,18 @@ abstract class AppLocalizations {
   /// **'Threshold'**
   String get forecastLegendThreshold;
 
+  /// No description provided for @forecastLegendCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'All combined'**
+  String get forecastLegendCombined;
+
+  /// No description provided for @forecastCombinedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All compared scenarios applied together'**
+  String get forecastCombinedDesc;
+
   /// No description provided for @forecastChartSummary.
   ///
   /// In en, this message translates to:
@@ -8075,6 +8087,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Calculator keypad'**
   String get setCalculatorKeypad;
+
+  /// No description provided for @setCombineScenarios.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all scenarios combined'**
+  String get setCombineScenarios;
+
+  /// No description provided for @setCombineScenariosDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a line with all compared scenarios applied together. If several set a return or inflation rate, the last one wins.'**
+  String get setCombineScenariosDesc;
 
   /// No description provided for @setConfirmDelete.
   ///

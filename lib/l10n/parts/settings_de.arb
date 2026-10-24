@@ -17,6 +17,8 @@
   "setBlockScreenshotsDesc": "Nur Android",
   "setBudgetMode": "Budgetmodus",
   "setCalculatorKeypad": "Rechner-Tastatur",
+  "setCombineScenarios": "Alle Szenarien kombiniert zeigen",
+  "setCombineScenariosDesc": "Zusätzliche Linie mit allen verglichenen Szenarien zusammen. Setzen mehrere eine Rendite oder Inflation, gilt das letzte.",
   "setConfirmDelete": "Vor dem Löschen bestätigen",
   "setCsvDateFormat": "CSV-Datumsformat",
   "setCsvDecimalSeparator": "CSV-Dezimaltrennzeichen",

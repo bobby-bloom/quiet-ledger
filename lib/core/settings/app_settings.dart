@@ -988,6 +988,16 @@ abstract final class ForecastSettings {
     module: AppModule.forecast.name,
   );
 
+  /// Adds a chart line with all compared scenarios applied together.
+  static final combineScenarios = SettingDef.boolean(
+    key: 'forecast.combineScenarios',
+    section: SettingSection.forecast,
+    defaultValue: false,
+    label: (l) => l.setCombineScenarios,
+    description: (l) => l.setCombineScenariosDesc,
+    module: AppModule.scenarios.name,
+  );
+
   static final all = <SettingDef<Object?>>[
     horizonMonths,
     variableMethod,
@@ -998,6 +1008,7 @@ abstract final class ForecastSettings {
     defaultReturnBp,
     projectionYears,
     realValues,
+    combineScenarios,
   ];
 }
 

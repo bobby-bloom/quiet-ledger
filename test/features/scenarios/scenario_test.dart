@@ -154,6 +154,50 @@ void main() {
       expect(r.series('checking').last, base.series('checking').last - 30000);
     });
 
+    test('combined scenarios stack their effects', () {
+      final laptop = ScenarioDef(
+        id: 'a',
+        name: 'Laptop',
+        adjustments: [
+          OneOffAdjustment(
+            date: d(2026, 11, 10),
+            amountMinor: -50000,
+            accountId: 'checking',
+            label: 'Laptop',
+          ),
+          const InflationAdjustment(inflationBp: 300),
+        ],
+      );
+      final rent = ScenarioDef(
+        id: 'b',
+        name: 'Rent',
+        adjustments: [
+          RecurringChangeAdjustment(
+            ruleId: 'rent',
+            from: d(2026, 11, 1),
+            mode: ChangeMode.absolute,
+            value: 10000,
+          ),
+          const InflationAdjustment(inflationBp: 450),
+        ],
+      );
+      final adjustments = combinedAdjustments([laptop, rent]);
+      expect(adjustments, [...laptop.adjustments, ...rent.adjustments]);
+      final r = withAdjustments(adjustments);
+      expect(
+        r.series('checking').last,
+        base.series('checking').last - 50000 - 30000,
+      );
+      // The last scenario's inflation wins.
+      expect(
+        applyAssumptionAdjustments(
+          const ProjectionAssumptions(),
+          adjustments,
+        ).inflationBp,
+        450,
+      );
+    });
+
     test('percent change of a category scales its rules', () {
       final r = withAdjustments([
         CategoryChangeAdjustment(

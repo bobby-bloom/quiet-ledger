@@ -53,3 +53,6 @@ Color scenarioColor(BuildContext context, int index, {int? argb}) {
     _ => context.finance.chartAt(2),
   };
 }
+
+/// Colour of the line with all compared scenarios combined (chart4).
+Color combinedScenarioColor(BuildContext context) => context.finance.chartAt(3);

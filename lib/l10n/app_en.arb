@@ -1276,6 +1276,8 @@
   },
   "forecastLegendBaseline": "Baseline",
   "forecastLegendThreshold": "Threshold",
+  "forecastLegendCombined": "All combined",
+  "forecastCombinedDesc": "All compared scenarios applied together",
   "forecastChartSummary": "Projected daily balance of {account} from {start} to {end}. Lowest point {amount} on {date}.",
   "@forecastChartSummary": {
     "placeholders": {
@@ -3125,6 +3127,8 @@
   "setBlockScreenshotsDesc": "Android only",
   "setBudgetMode": "Budget mode",
   "setCalculatorKeypad": "Calculator keypad",
+  "setCombineScenarios": "Show all scenarios combined",
+  "setCombineScenariosDesc": "Adds a line with all compared scenarios applied together. If several set a return or inflation rate, the last one wins.",
   "setConfirmDelete": "Confirm before deleting",
   "setCsvDateFormat": "CSV date format",
   "setCsvDecimalSeparator": "CSV decimal separator",

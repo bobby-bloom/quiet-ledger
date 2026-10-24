@@ -17,6 +17,8 @@
   "setBlockScreenshotsDesc": "Android only",
   "setBudgetMode": "Budget mode",
   "setCalculatorKeypad": "Calculator keypad",
+  "setCombineScenarios": "Show all scenarios combined",
+  "setCombineScenariosDesc": "Adds a line with all compared scenarios applied together. If several set a return or inflation rate, the last one wins.",
   "setConfirmDelete": "Confirm before deleting",
   "setCsvDateFormat": "CSV date format",
   "setCsvDecimalSeparator": "CSV decimal separator",

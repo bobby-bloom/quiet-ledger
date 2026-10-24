@@ -160,6 +160,59 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('combined scenarios line needs two compared scenarios', (
+    tester,
+  ) async {
+    Finder combinedSwitch() => find.descendant(
+      of: find.widgetWithText(ListTile, 'All combined'),
+      matching: find.byType(Switch),
+    );
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(find.text('All combined'), findsNothing);
+    await unmount(tester);
+
+    await SyncWriter(db, testClock(), 'dev-1').insert(
+      db.scenarios,
+      ScenariosCompanion(
+        name: const Value('Bonus'),
+        enabled: const Value(true),
+        adjustments: Value(
+          ScenarioAdjustment.encodeList([
+            OneOffAdjustment(
+              date: DateTime(2026, 12, 15),
+              amountMinor: 80000,
+              accountId: checking,
+              label: 'Bonus',
+            ),
+          ]),
+        ),
+      ),
+    );
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(combinedSwitch(), findsOneWidget);
+    expect(tester.widget<Switch>(combinedSwitch()).value, isFalse);
+    expect(find.text('With All combined'), findsNothing);
+
+    await tester.tap(combinedSwitch());
+    for (var i = 0; i < 10; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(tester.widget<Switch>(combinedSwitch()).value, isTrue);
+    // Legend entry, toggle row and balances column.
+    expect(find.text('All combined'), findsNWidgets(2));
+    expect(find.text('With All combined'), findsOneWidget);
+    await unmount(tester);
+  });
+
   testWidgets('chart has an accessible summary', (tester) async {
     final handle = tester.ensureSemantics();
     await pumpScreen(tester, const ForecastScreen());
