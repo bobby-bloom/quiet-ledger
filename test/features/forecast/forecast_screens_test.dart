@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart' hide isNotNull, isNull;
+import 'package:drift/drift.dart' hide Table, isNotNull, isNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -166,6 +166,80 @@ void main() {
     expect(find.text('Scenarios'), findsWidgets);
     expect(find.text('Upcoming big events'), findsOneWidget);
     expect(find.text('New laptop'), findsWidgets);
+    await unmount(tester);
+  });
+
+  testWidgets('desktop side panel collapses from the app bar', (tester) async {
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(find.text('Can I afford it?'), findsOneWidget);
+    await tester.tap(find.byTooltip('Hide side panel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Can I afford it?'), findsNothing);
+    expect(find.text('Upcoming big events'), findsNothing);
+    expect(find.text('Lowest point'), findsOneWidget);
+    await tester.tap(find.byTooltip('Show side panel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Can I afford it?'), findsOneWidget);
+    await unmount(tester);
+
+    // Phones stack everything in one column and have no toggle.
+    await pumpScreen(tester, const ForecastScreen());
+    expect(find.byTooltip('Hide side panel'), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('balances table scrolls sideways instead of squeezing', (
+    tester,
+  ) async {
+    final writer = SyncWriter(db, testClock(), 'dev-1');
+    for (final name in ['Second scenario', 'Third scenario']) {
+      await writer.insert(
+        db.scenarios,
+        ScenariosCompanion(
+          name: Value(name),
+          enabled: const Value(true),
+          adjustments: Value(
+            ScenarioAdjustment.encodeList([
+              OneOffAdjustment(
+                date: DateTime(2026, 12, 15),
+                amountMinor: 80000,
+                accountId: checking,
+                label: name,
+              ),
+            ]),
+          ),
+        ),
+      );
+    }
+    final table = find.byType(Table);
+    double extent() => tester
+        .state<ScrollableState>(
+          find.ancestor(of: table, matching: find.byType(Scrollable)).first,
+        )
+        .position
+        .maxScrollExtent;
+
+    // A phone shows every compared scenario and scrolls.
+    await pumpScreen(tester, const ForecastScreen());
+    await tester.scrollUntilVisible(table, 300, scrollable: verticalScrollable);
+    expect(find.text('With Pay rent less'), findsOneWidget);
+    expect(find.text('With Third scenario'), findsOneWidget);
+    expect(extent(), greaterThan(0));
+    await unmount(tester);
+
+    // Without scenarios the table fits a wide screen.
+    await db.delete(db.scenarios).go();
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(extent(), 0);
+    expect(tester.getSize(table).width, greaterThan(500));
     await unmount(tester);
   });
 

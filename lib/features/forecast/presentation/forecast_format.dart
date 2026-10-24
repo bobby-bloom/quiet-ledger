@@ -43,14 +43,18 @@ String eventKindLabel(AppLocalizations l, ForecastEventKind k) => switch (k) {
   ForecastEventKind.whatIf => l.forecastEventWhatIf,
 };
 
-/// Colour of the comparison slot [index] (0–2): tertiary, chart2, chart3
-/// (design: Foundations › chart palette). A scenario's own [argb] wins.
+/// Colour of the comparison slot [index] (0–4): tertiary, chart2, chart3,
+/// chart6, outline (design: Foundations › chart palette; chart1 is the
+/// baseline's hue, chart4 is too close to tertiary and chart5 is the
+/// combined line). A scenario's own [argb] wins.
 Color scenarioColor(BuildContext context, int index, {int? argb}) {
   if (argb != null) return Color(argb);
-  return switch (index % 3) {
+  return switch (index % 5) {
     0 => context.colors.tertiary,
     1 => context.finance.chartAt(1),
-    _ => context.finance.chartAt(2),
+    2 => context.finance.chartAt(2),
+    3 => context.finance.chartAt(5),
+    _ => context.colors.outline,
   };
 }
 

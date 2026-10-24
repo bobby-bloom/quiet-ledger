@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,10 +54,18 @@ class ForecastScreen extends ConsumerWidget {
         ? selected
         : null;
     final accounts = [for (final id in accountIds) ?accountMap[id]];
+    final size = WindowSize.of(context);
+    final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
+    final sideHidden = ref.watch(
+      settingsProvider.select((s) => s.get(ForecastSettings.sidePanelHidden)),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l.forecastTitle, style: context.text.titleLarge),
+        // Line the last button's circle up with the board's gutter (it sits
+        // 4 px inside its tap target).
+        actionsPadding: EdgeInsetsDirectional.only(end: gutter - Space.xxs),
         actions: [
           if (accounts.isNotEmpty)
             _AccountSelector(accounts: accounts, selectedId: accountId),
@@ -65,6 +74,18 @@ class ForecastScreen extends ConsumerWidget {
             icon: const Icon(Icons.trending_up),
             onPressed: () => context.push('/forecast/projection'),
           ),
+          if (size.isExpanded && accountIds.isNotEmpty)
+            IconButton(
+              tooltip: sideHidden
+                  ? l.forecastShowSidePanel
+                  : l.forecastHideSidePanel,
+              isSelected: !sideHidden,
+              icon: const Icon(Icons.view_sidebar_outlined),
+              selectedIcon: const Icon(Icons.view_sidebar),
+              onPressed: () => ref
+                  .read(settingsProvider.notifier)
+                  .set(ForecastSettings.sidePanelHidden, !sideHidden),
+            ),
         ],
       ),
       // Keep showing the previous result while a new one is computed.
@@ -181,6 +202,9 @@ class _Board extends ConsumerWidget {
     final compared = ref.watch(comparedScenariosProvider);
     final size = WindowSize.of(context);
     final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
+    final sideHidden = ref.watch(
+      settingsProvider.select((s) => s.get(ForecastSettings.sidePanelHidden)),
+    );
 
     final main = <Widget>[
       const _HorizonSelector(),
@@ -209,6 +233,8 @@ class _Board extends ConsumerWidget {
       _BigEvents(result: result, accountId: accountId),
     ];
 
+    // Wide layouts put [side] in a column of its own that the app bar can
+    // collapse.
     if (size.isExpanded) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,24 +244,25 @@ class _Board extends ConsumerWidget {
               padding: EdgeInsets.fromLTRB(
                 gutter,
                 Space.xs,
-                Space.sm,
+                sideHidden ? gutter : Space.sm,
                 Space.xl,
               ),
               children: main,
             ),
           ),
-          SizedBox(
-            width: 380,
-            child: ListView(
-              padding: EdgeInsets.fromLTRB(
-                Space.sm,
-                Space.xs,
-                gutter,
-                Space.xl,
+          if (!sideHidden)
+            SizedBox(
+              width: 380,
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(
+                  Space.sm,
+                  Space.xs,
+                  gutter,
+                  Space.xl,
+                ),
+                children: side,
               ),
-              children: side,
             ),
-          ),
         ],
       );
     }
@@ -765,7 +792,7 @@ class _ScenarioRow extends ConsumerWidget {
 
   final ScenarioDef scenario;
 
-  /// Comparison slot (0–2) or -1 when not compared.
+  /// Comparison slot (0–4) or -1 when not compared.
   final int slot;
   final String subtitle;
   final ScenarioComparison? comparison;
@@ -922,12 +949,10 @@ class _BalancesTable extends ConsumerWidget {
         ].every((x) => x);
     final showPeriods = ref.watch(forecastShowPeriodsProvider) && !samePeriods;
     final rows = showPeriods ? r.periods : r.months;
-    final compact = WindowSize.of(context).isCompact;
     final combined = combinedResult(ref, batch.scenarios);
     final columns = <(String, CashflowResult?)>[
-      for (final s in compact ? compared.take(1) : compared)
-        (s.name, batch.scenarios[s.id]),
-      if (!compact && combined != null) (l.forecastLegendCombined, combined),
+      for (final s in compared) (s.name, batch.scenarios[s.id]),
+      if (combined != null) (l.forecastLegendCombined, combined),
     ];
     final head = context.text.labelMedium?.copyWith(
       color: context.colors.onSurfaceVariant,
@@ -993,84 +1018,136 @@ class _BalancesTable extends ConsumerWidget {
                         v.first,
               ),
             ),
-          Table(
-            columnWidths: {
-              0: const FlexColumnWidth(1.3),
-              for (var i = 1; i < 3 + columns.length; i++)
-                i: const FlexColumnWidth(),
-            },
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: [
-              TableRow(
-                children: [
-                  _Cell(
-                    Text(
-                      showPeriods ? l.forecastColPeriod : l.forecastColMonth,
-                      style: head,
-                    ),
-                    start: true,
-                  ),
-                  _Cell(
-                    Text(
-                      l.forecastColLowest,
-                      style: head,
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                  _Cell(
-                    Text(
-                      l.forecastColEnd,
-                      style: head,
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                  for (final (name, _) in columns)
+          // Columns take the width of their content and share what is left;
+          // the table scrolls sideways when they do not fit.
+          _HorizontalScroll(
+            child: Table(
+              columnWidths: {
+                0: const IntrinsicColumnWidth(flex: 1.3),
+                for (var i = 1; i < 3 + columns.length; i++)
+                  i: const IntrinsicColumnWidth(flex: 1),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  children: [
                     _Cell(
                       Text(
-                        l.forecastColWith(name),
+                        showPeriods ? l.forecastColPeriod : l.forecastColMonth,
+                        style: head,
+                      ),
+                      start: true,
+                    ),
+                    _Cell(
+                      Text(
+                        l.forecastColLowest,
                         style: head,
                         textAlign: TextAlign.end,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                ],
-              ),
-              for (final (i, p) in rows.indexed)
-                TableRow(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: context.colors.surfaceContainerHigh,
-                      ),
-                    ),
-                  ),
-                  children: [
-                    _Cell(Text(label(p), style: cell), start: true),
                     _Cell(
-                      amount(
-                        p.lowOf(accountId)!.amountMinor,
-                        warn:
-                            threshold != null &&
-                            p.lowOf(accountId)!.amountMinor < threshold,
+                      Text(
+                        l.forecastColEnd,
+                        style: head,
+                        textAlign: TextAlign.end,
                       ),
                     ),
-                    _Cell(amount(p.endOf(accountId))),
-                    for (final (_, sr) in columns)
+                    for (final (name, _) in columns)
                       _Cell(
-                        scenarioEnd(sr, i) == null ||
-                                scenarioEnd(sr, i) == p.endOf(accountId)
-                            ? Text('—', style: cell, textAlign: TextAlign.end)
-                            : amount(scenarioEnd(sr, i)!),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          child: Text(
+                            l.forecastColWith(name),
+                            style: head,
+                            textAlign: TextAlign.end,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                   ],
                 ),
-            ],
+                for (final (i, p) in rows.indexed)
+                  TableRow(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: context.colors.surfaceContainerHigh,
+                        ),
+                      ),
+                    ),
+                    children: [
+                      _Cell(Text(label(p), style: cell), start: true),
+                      _Cell(
+                        amount(
+                          p.lowOf(accountId)!.amountMinor,
+                          warn:
+                              threshold != null &&
+                              p.lowOf(accountId)!.amountMinor < threshold,
+                        ),
+                      ),
+                      _Cell(amount(p.endOf(accountId))),
+                      for (final (_, sr) in columns)
+                        _Cell(
+                          scenarioEnd(sr, i) == null ||
+                                  scenarioEnd(sr, i) == p.endOf(accountId)
+                              ? Text('—', style: cell, textAlign: TextAlign.end)
+                              : amount(scenarioEnd(sr, i)!),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Fills the available width and scrolls [child] sideways when it is
+/// wider, with a scrollbar that mice can drag.
+class _HorizontalScroll extends StatefulWidget {
+  const _HorizontalScroll({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HorizontalScroll> createState() => _HorizontalScrollState();
+}
+
+class _HorizontalScrollState extends State<_HorizontalScroll> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    // The thumb stays visible (only when there is something to scroll) so
+    // hidden columns are not missed.
+    builder: (context, constraints) => Scrollbar(
+      controller: _controller,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        // Room for the scrollbar below the last row.
+        padding: const EdgeInsets.only(bottom: Space.sm),
+        child: ConstrainedBox(
+          // A hair narrower: rounding in a flexed table would otherwise
+          // leave a scroll extent of a few femtometres.
+          constraints: BoxConstraints(
+            minWidth: constraints.maxWidth - 2 * precisionErrorTolerance,
+          ),
+          child: widget.child,
+        ),
+      ),
+    ),
+  );
 }
 
 class _Cell extends StatelessWidget {
@@ -1085,7 +1162,12 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) => ConstrainedBox(
     constraints: const BoxConstraints(minHeight: Space.minTouch),
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+      // Numbers keep a gap to the column before them.
+      padding: EdgeInsetsDirectional.only(
+        start: start ? 0 : Space.md,
+        top: 6,
+        bottom: 6,
+      ),
       child: Align(
         alignment: start ? Alignment.centerLeft : Alignment.centerRight,
         child: child,

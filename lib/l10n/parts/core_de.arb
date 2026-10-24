@@ -15,6 +15,8 @@
   "navScenarios": "Szenarien",
   "navCategories": "Kategorien",
   "navTags": "Tags",
+  "navCollapseSidebar": "Seitenleiste einklappen",
+  "navExpandSidebar": "Seitenleiste ausklappen",
   "addTransaction": "Buchung hinzufügen",
   "commonSave": "Speichern",
   "commonCancel": "Abbrechen",

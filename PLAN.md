@@ -138,7 +138,7 @@ Non-goals for v1: actual sync, bank connections (PSD2/FinTS), multi-currency, mu
   - a percentage or absolute change from a date
   - adding or ending a recurring item
   - changed return or inflation assumptions
-  - Up to 3 scenarios can be compared against the baseline. Scenarios can be duplicated.
+  - Up to 5 scenarios can be compared against the baseline. Scenarios can be duplicated.
 - **Uncertainty band** (phase 2): p10–p90 based on the historical variance of variable categories.
 
 ### 2.5 Import (Excel migration, as extensive as possible)

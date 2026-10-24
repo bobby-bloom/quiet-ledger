@@ -93,7 +93,8 @@ class _GoTabIntent extends Intent {
 /// The app's adaptive scaffold (PLAN.md §4.1):
 /// * compact (< 600): bottom bar with the quick-add FAB in its centre
 /// * medium (600–839): navigation rail with the FAB on top
-/// * expanded (≥ 840): extended rail with an "Add transaction" button
+/// * expanded (≥ 840): sidebar with an "Add transaction" button; it
+///   collapses to icons with the button at its bottom
 ///
 /// Shortcuts: Ctrl/Cmd+N quick add, Ctrl/Cmd+1…9 switch tabs.
 class AdaptiveShell extends ConsumerWidget {
@@ -343,8 +344,9 @@ class _NavItem extends StatelessWidget {
 }
 
 /// Desktop sidebar (DesktopDashboard board): logo, the configured nav tabs as
-/// pill rows, More pinned to the bottom (it holds every other screen).
-class _Sidebar extends StatelessWidget {
+/// pill rows, More pinned to the bottom (it holds every other screen) and
+/// below it the button that collapses the sidebar to icons.
+class _Sidebar extends ConsumerWidget {
   const _Sidebar({
     required this.dests,
     required this.path,
@@ -358,60 +360,82 @@ class _Sidebar extends StatelessWidget {
   final VoidCallback onAdd;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cs = context.colors;
+    final collapsed = ref.watch(
+      settingsProvider.select(
+        (s) => s.get(NavigationSettings.sidebarCollapsed),
+      ),
+    );
     bool active(String prefix) => path == prefix || path.startsWith('$prefix/');
     // Screens without their own tab (Settings, Import, ...) live under More.
     final inTab = dests.any(
       (d) => d.tab != NavTab.more && active(_branchRoot(d.branch)),
     );
 
+    final logo = Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Icon(
+        Icons.account_balance_wallet_outlined,
+        size: 18,
+        color: cs.onPrimary,
+      ),
+    );
+
     return Container(
-      width: 232,
+      width: collapsed ? 72 : 232,
       color: cs.surfaceContainerLow,
       padding: const EdgeInsets.fromLTRB(12, 20, 12, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
-            child: Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    borderRadius: BorderRadius.circular(9),
+            padding: collapsed
+                ? const EdgeInsets.only(bottom: 20)
+                : const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            child: collapsed
+                ? Tooltip(
+                    message: l.appTitle,
+                    child: Center(child: logo),
+                  )
+                : Row(
+                    children: [
+                      logo,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l.appTitle,
+                          style: context.text.titleSmall?.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.account_balance_wallet_outlined,
-                    size: 18,
-                    color: cs.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    l.appTitle,
-                    style: context.text.titleSmall?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: Space.sm),
-            child: FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
-              label: Text(l.addTransaction),
-            ),
+            child: collapsed
+                ? Center(
+                    child: IconButton.filled(
+                      tooltip: l.addTransaction,
+                      onPressed: onAdd,
+                      icon: const Icon(Icons.add),
+                    ),
+                  )
+                : FilledButton.icon(
+                    onPressed: onAdd,
+                    icon: const Icon(Icons.add),
+                    label: Text(l.addTransaction),
+                  ),
           ),
           Expanded(
             child: ListView(
@@ -422,6 +446,7 @@ class _Sidebar extends StatelessWidget {
                       icon: d.icon,
                       label: navTabLabel(l, d.tab),
                       selected: active(_branchRoot(d.branch)),
+                      collapsed: collapsed,
                       onTap: () => onSelect(i),
                     ),
               ],
@@ -431,7 +456,30 @@ class _Sidebar extends StatelessWidget {
             icon: Icons.grid_view_outlined,
             label: l.navMore,
             selected: !inTab,
+            collapsed: collapsed,
             onTap: () => context.go('/more'),
+          ),
+          const SizedBox(height: Space.xxs),
+          // Collapsed: centred; open: its icon lines up with the items'.
+          Align(
+            alignment: collapsed
+                ? Alignment.center
+                : AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: collapsed ? 0 : 2),
+              child: IconButton(
+                tooltip: collapsed ? l.navExpandSidebar : l.navCollapseSidebar,
+                icon: Icon(
+                  collapsed
+                      ? Icons.keyboard_double_arrow_right
+                      : Icons.keyboard_double_arrow_left,
+                ),
+                color: cs.onSurfaceVariant,
+                onPressed: () => ref
+                    .read(settingsProvider.notifier)
+                    .set(NavigationSettings.sidebarCollapsed, !collapsed),
+              ),
+            ),
           ),
         ],
       ),
@@ -455,12 +503,16 @@ class _SidebarItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.collapsed = false,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Icon only, with the label as a tooltip.
+  final bool collapsed;
 
   @override
   Widget build(BuildContext context) {
@@ -477,29 +529,36 @@ class _SidebarItem extends StatelessWidget {
           child: Semantics(
             selected: selected,
             button: true,
+            label: collapsed ? label : null,
             child: SizedBox(
               height: 44,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Row(
-                  children: [
-                    Icon(icon, size: 22, color: fg),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        label,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.text.bodyMedium?.copyWith(
-                          color: fg,
-                          fontWeight: selected
-                              ? FontWeight.w700
-                              : FontWeight.w600,
-                        ),
+              child: collapsed
+                  ? Tooltip(
+                      message: label,
+                      excludeFromSemantics: true,
+                      child: Center(child: Icon(icon, size: 22, color: fg)),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Row(
+                        children: [
+                          Icon(icon, size: 22, color: fg),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              label,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.text.bodyMedium?.copyWith(
+                                color: fg,
+                                fontWeight: selected
+                                    ? FontWeight.w700
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
             ),
           ),
         ),

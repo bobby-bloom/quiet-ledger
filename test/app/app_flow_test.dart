@@ -89,6 +89,22 @@ void main() {
         );
         expect(tester.takeException(), isNull);
 
+        if (size.width >= 840) {
+          // The desktop sidebar collapses to icons and back.
+          expect(find.text('Add transaction'), findsOneWidget);
+          await tester.tap(find.byTooltip('Collapse sidebar'));
+          await settle(tester);
+          expect(find.text('Add transaction'), findsNothing);
+          expect(find.byTooltip('Add transaction'), findsOneWidget);
+          expect(find.byTooltip('More'), findsOneWidget);
+          await tester.tap(find.byTooltip('Expand sidebar'));
+          await settle(tester);
+          expect(find.text('Add transaction'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        } else {
+          expect(find.byTooltip('Collapse sidebar'), findsNothing);
+        }
+
         final accounts = await tester.runAsync(
           () => db.select(db.accounts).get(),
         );
