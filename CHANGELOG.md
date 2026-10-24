@@ -96,6 +96,11 @@ a dated release section.
 
 ### Fixed
 
+- The app is called Quiet Ledger everywhere: on the Android and iOS home
+  screen, in the macOS menu bar and the released `Quiet Ledger.app`, in
+  the Linux and Windows window titles, the Windows task manager and the
+  web app's title and install name (some still said `personal_finance`
+  or "Personal Finance"). Data stays where it is.
 - The app bar's last button lines up with the page margin on every
   screen instead of sitting at the window edge (or wherever each screen
   put its own spacer); the phone headers of Home and Transactions match.
