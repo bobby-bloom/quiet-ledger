@@ -126,7 +126,8 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
     macOS has the user-selected read-write and app-scope bookmark
     entitlements.
   - iOS can also use the app's Documents folder, visible in Files › On My
-    iPhone.
+    iPhone. It is stored as `appdocs:Backups` and resolved on every use,
+    because iOS moves the app container on updates.
   - A revoked permission is detected at start and shown as "Choose the
     folder again".
 - **Health** (`backupHealth`, shown by `BackupHealthBanner` on the

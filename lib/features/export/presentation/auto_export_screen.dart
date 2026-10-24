@@ -48,7 +48,10 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
     }
     final path = await FilePicker.getDirectoryPath(
       dialogTitle: l.exportAutoChooseFolder,
-      initialDirectory: current != null && isNativeFolderRef(current)
+      initialDirectory:
+          current == null ||
+              isNativeFolderRef(current) ||
+              current == appDocumentsFolderRef
           ? null
           : current,
     );
@@ -58,8 +61,8 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
 
   /// iOS: the app's Documents folder (Files › On My iPhone).
   Future<void> _useAppDocuments() async {
-    final path = await appDocumentsBackupPath();
-    if (path != null) await _setFolder(path, null);
+    if (await appDocumentsBackupPath() == null) return;
+    await _setFolder(appDocumentsFolderRef, null);
   }
 
   Future<void> _setFolder(String folder, String? name) async {
@@ -127,7 +130,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
     final schedule = s.get(ImportExportSettings.autoExport);
     final folder = s.get(ImportExportSettings.autoExportFolder);
     final hasFolder = folder != null && folder.isNotEmpty;
-    final folderLabel = s.get(BackupSettings.folderName) ?? folder;
+    final folderLabel = backupFolderLabel(l, s);
     final keep = s.get(ImportExportSettings.autoExportKeep);
     final last = DateTime.tryParse(
       s.get(ImportExportSettings.lastAutoExport) ?? '',

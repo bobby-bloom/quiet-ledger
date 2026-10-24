@@ -223,6 +223,7 @@
   "backupWebStoragePersistent": "Dieser Browser behält die Daten der App und löscht sie nicht von selbst.",
   "backupBootUnreadable": "Die Datenbankdatei ist beschädigt oder lässt sich mit dem Schlüssel auf diesem Gerät nicht entsperren.",
   "backupBootCopyDetails": "Details kopieren",
+  "backupAppDocumentsFolder": "Auf meinem iPhone › Quiet Ledger › Backups",
   "budgetsTitle": "Budgets",
   "budgetsBudgeted": "Budgetiert",
   "budgetsSpent": "Ausgegeben",

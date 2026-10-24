@@ -863,6 +863,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupBootCopyDetails => 'Copy details';
 
   @override
+  String get backupAppDocumentsFolder =>
+      'On My iPhone › Quiet Ledger › Backups';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

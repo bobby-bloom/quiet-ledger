@@ -93,5 +93,6 @@
   "backupWebStorageNotPersistent": "Dieser Browser kann die Daten der App löschen, wenn der Speicher knapp wird. Sichere regelmäßig.",
   "backupWebStoragePersistent": "Dieser Browser behält die Daten der App und löscht sie nicht von selbst.",
   "backupBootUnreadable": "Die Datenbankdatei ist beschädigt oder lässt sich mit dem Schlüssel auf diesem Gerät nicht entsperren.",
-  "backupBootCopyDetails": "Details kopieren"
+  "backupBootCopyDetails": "Details kopieren",
+  "backupAppDocumentsFolder": "Auf meinem iPhone › Quiet Ledger › Backups"
 }

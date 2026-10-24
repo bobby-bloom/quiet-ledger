@@ -5,10 +5,14 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
 import 'package:personal_finance/features/export/domain/backup_crypto.dart';
+import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
+import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Backups found in the automatic backup folder, newest first.
 final folderBackupsProvider = FutureProvider.autoDispose
@@ -19,6 +23,16 @@ final folderBackupsProvider = FutureProvider.autoDispose
       return files.where(isAutoExportFile).toList()
         ..sort((a, b) => b.compareTo(a));
     });
+
+/// How the backup folder is shown: the app Documents folder by its place
+/// in Files, a platform folder by its name, a path as it is. Null without a
+/// folder.
+String? backupFolderLabel(AppLocalizations l, SettingsSnapshot s) {
+  final folder = s.get(ImportExportSettings.autoExportFolder);
+  if (folder == null || folder.isEmpty) return null;
+  if (folder == appDocumentsFolderRef) return l.backupAppDocumentsFolder;
+  return s.get(BackupSettings.folderName) ?? folder;
+}
 
 /// When the backup [name] was made, from its file name
 /// (`…-yyyyMMdd-HHmmss…`, local time).

@@ -1447,6 +1447,12 @@ abstract class AppLocalizations {
   /// **'Copy details'**
   String get backupBootCopyDetails;
 
+  /// No description provided for @backupAppDocumentsFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'On My iPhone › Quiet Ledger › Backups'**
+  String get backupAppDocumentsFolder;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:
