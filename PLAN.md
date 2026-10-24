@@ -1,4 +1,4 @@
-# Personal Finance App — Project Plan
+# Quiet Ledger — Project Plan
 
 A local-first Flutter app to **track**, **record**, **plan** and **project** personal finances,
 replacing the current Excel sheet in which every money movement is logged.
