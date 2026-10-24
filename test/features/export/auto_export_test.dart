@@ -14,7 +14,6 @@ import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/data/export_folder_io.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
-import 'package:personal_finance/features/export/domain/export_settings.dart';
 import 'package:personal_finance/features/export/export_startup.dart';
 
 import '../../helpers/test_app.dart';
@@ -209,7 +208,7 @@ void main() {
       // The seeded tombstones are a year "old" at `later`.
       expect(await runTombstonePurgeIfDue(c, now: later), greaterThan(0));
       expect(
-        c.read(settingsProvider).get(ExportSettings.lastTombstonePurge),
+        c.read(settingsProvider).get(DataSettings.lastTombstonePurge),
         later.toIso8601String(),
       );
       // Within a week: skipped.

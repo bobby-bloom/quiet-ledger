@@ -6,11 +6,11 @@ import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
 import 'package:personal_finance/features/export/domain/backup_crypto.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 

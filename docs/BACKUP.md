@@ -50,11 +50,14 @@ Readers reject a higher format or schema version.
 Not in a backup: `change_log`, `sync_state` (reset by a restore), the
 full-text index (rebuilt), `safety_copies` (on-device only), the database
 key, the app-lock credential and the backup keys (secure storage). Settings
-that describe the device (`deviceLocalSettingKeys`: backup schedule,
-retention, folder and its name, last backup times and errors, password
-check, storage location, tombstone purge) keep their current value on
-restore, so restoring another device's backup cannot shrink retention and
-prune this device's backups.
+that describe the device (`SettingDef.deviceLocal`, collected in
+`deviceLocalSettingKeys`: backup schedule, retention, folder and its name,
+last backup times and errors, password check, storage location, tombstone
+purge) keep their current value on restore, so restoring another device's
+backup cannot shrink retention and prune this device's backups. They are
+never synced either: `SyncWriter` stores them without a `change_log`
+entry and `SyncEngine` neither sends nor applies them, so one device's
+successful backup can never hide another device's failing one.
 
 ## Encrypted backups (`.pfbackup`)
 
@@ -258,8 +261,8 @@ startup task (`migrateAttachmentPaths`) rewrites them.
 - A new way to create a backup: go through `createVerifiedBackup`, which
   applies encryption and the policy. Never write `exportBundle` output to
   a user-visible place directly.
-- A new device-specific setting: add it to `deviceLocalSettingKeys` or
-  `BackupSettings.deviceLocalKeys`.
+- A new device-specific setting: mark it `deviceLocal: true` and make sure
+  it is in `allSettings` (core code only sees settings listed there).
 - Releasing: freeze the backup format with
   `flutter test tool/backup_fixture/backup_fixture_test.dart`
   (`docs/VERSIONING.md`).

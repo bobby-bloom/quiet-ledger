@@ -10,9 +10,9 @@ import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/csv_reader.dart';
 import 'package:personal_finance/core/csv/csv_writer.dart';
 import 'package:personal_finance/core/db/database.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
 import 'package:personal_finance/core/sync/raw_rows.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 
 // Full backup bundle (PLAN.md §2.6): a zip with one CSV per synced table
@@ -28,17 +28,6 @@ import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 /// `change_log.entity` of the marker written by [restoreBundle].
 const restoreMarkerEntity = '_restore';
 
-/// Settings that describe this device rather than the data set. A restore
-/// keeps the current device's values for these.
-final deviceLocalSettingKeys = {
-  'export.autoExport',
-  'export.autoExportKeep',
-  'export.autoExportFolder',
-  'export.lastAutoExport',
-  'data.storageLocation',
-  'data.lastTombstonePurge',
-  ...BackupSettings.deviceLocalKeys,
-};
 
 /// A parsed table of a bundle: column names and raw SQL rows.
 @immutable

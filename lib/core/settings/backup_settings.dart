@@ -1,8 +1,9 @@
 import 'package:personal_finance/core/settings/setting_def.dart';
 
 // Hidden settings of the backup (not in the settings catalogue; shown and
-// edited on the export screens). The timestamps and the error describe
-// this device and are kept by a restore (`deviceLocalSettingKeys`).
+// edited on the export screens). The timestamps, the error and the folder
+// name describe this device: never synced and kept by a restore
+// (`SettingDef.deviceLocal`).
 
 abstract final class BackupSettings {
   /// ISO timestamp of the last start of a scheduled backup. Newer than
@@ -13,6 +14,7 @@ abstract final class BackupSettings {
     section: SettingSection.importExport,
     label: (l) => l.exportAutoTitle,
     hidden: true,
+    deviceLocal: true,
   );
 
   /// Message of the last failed scheduled backup; null after a success.
@@ -21,6 +23,7 @@ abstract final class BackupSettings {
     section: SettingSection.importExport,
     label: (l) => l.exportAutoTitle,
     hidden: true,
+    deviceLocal: true,
   );
 
   /// ISO timestamp of the last backup that was verified and stored outside
@@ -30,6 +33,7 @@ abstract final class BackupSettings {
     section: SettingSection.importExport,
     label: (l) => l.exportAutoTitle,
     hidden: true,
+    deviceLocal: true,
   );
 
   /// Warn when the last verified backup is older than this many days.
@@ -50,6 +54,7 @@ abstract final class BackupSettings {
     section: SettingSection.importExport,
     label: (l) => l.exportAutoTitle,
     hidden: true,
+    deviceLocal: true,
   );
 
   /// ISO timestamp of the last time the backup password was typed
@@ -59,14 +64,15 @@ abstract final class BackupSettings {
     section: SettingSection.importExport,
     label: (l) => l.exportAutoTitle,
     hidden: true,
+    deviceLocal: true,
   );
 
-  /// Keys that describe this device; a restore keeps the current values.
-  static final deviceLocalKeys = {
-    folderName.key,
-    passwordCheckedAt.key,
-    lastAttempt.key,
-    lastError.key,
-    lastVerified.key,
-  };
+  static final all = <SettingDef<Object?>>[
+    lastAttempt,
+    lastError,
+    lastVerified,
+    staleDays,
+    folderName,
+    passwordCheckedAt,
+  ];
 }

@@ -6,10 +6,10 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/domain/backup_health.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
 
 /// Whether there is any live transaction (no backup nagging on an empty
 /// app).

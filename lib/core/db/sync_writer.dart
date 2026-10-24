@@ -48,10 +48,14 @@ class SyncWriter {
       db.transaction(action);
 
   /// Inserts a row and returns its id. If [id] is null a UUIDv7 is created.
+  ///
+  /// [log] false writes the sync columns but no `change_log` entry, so the
+  /// row is never replicated (device-local settings).
   Future<String> insert<T extends Table, D>(
     TableInfo<T, D> table,
     Insertable<D> row, {
     String? id,
+    bool log = true,
   }) {
     return db.transaction(() async {
       final rowId = id ?? newId();
@@ -66,7 +70,7 @@ class SyncWriter {
         'origin_device_id': Variable<String>(deviceId),
       };
       await db.into(table).insert(RawValuesInsertable<D>(values));
-      await _log(table, rowId, ChangeOp.insert, hlc, cols);
+      if (log) await _log(table, rowId, ChangeOp.insert, hlc, cols);
       return rowId;
     });
   }
@@ -85,12 +89,14 @@ class SyncWriter {
     });
   }
 
-  /// Updates the columns set in [changes] for row [id].
+  /// Updates the columns set in [changes] for row [id]. See [insert] for
+  /// [log].
   Future<void> update<T extends Table, D>(
     TableInfo<T, D> table,
     String id,
-    Insertable<D> changes,
-  ) {
+    Insertable<D> changes, {
+    bool log = true,
+  }) {
     return db.transaction(() async {
       final hlc = clock.tick().toString();
       final cols = Map.of(changes.toColumns(false))
@@ -102,12 +108,16 @@ class SyncWriter {
       };
       final stmt = db.update(table)..where((_) => _idColumn(table).equals(id));
       await stmt.write(RawValuesInsertable<D>(values));
-      await _log(table, id, ChangeOp.update, hlc, cols);
+      if (log) await _log(table, id, ChangeOp.update, hlc, cols);
     });
   }
 
-  /// Soft-deletes row [id] (sets `deletedAt`).
-  Future<void> delete<T extends Table, D>(TableInfo<T, D> table, String id) {
+  /// Soft-deletes row [id] (sets `deletedAt`). See [insert] for [log].
+  Future<void> delete<T extends Table, D>(
+    TableInfo<T, D> table,
+    String id, {
+    bool log = true,
+  }) {
     return db.transaction(() async {
       final hlc = clock.tick().toString();
       final at = _now().millisecondsSinceEpoch;
@@ -118,6 +128,7 @@ class SyncWriter {
           'updated_at': Variable<String>(hlc),
         }),
       );
+      if (!log) return;
       await _log(table, id, ChangeOp.delete, hlc, {
         'deleted_at': Variable<int>(at),
       });
@@ -146,8 +157,12 @@ class SyncWriter {
     });
   }
 
-  /// Restores a soft-deleted row.
-  Future<void> undelete<T extends Table, D>(TableInfo<T, D> table, String id) {
+  /// Restores a soft-deleted row. See [insert] for [log].
+  Future<void> undelete<T extends Table, D>(
+    TableInfo<T, D> table,
+    String id, {
+    bool log = true,
+  }) {
     return db.transaction(() async {
       final hlc = clock.tick().toString();
       final stmt = db.update(table)..where((_) => _idColumn(table).equals(id));
@@ -157,6 +172,7 @@ class SyncWriter {
           'updated_at': Variable<String>(hlc),
         }),
       );
+      if (!log) return;
       await _log(table, id, ChangeOp.update, hlc, {
         'deleted_at': const Variable<int>(null),
       });

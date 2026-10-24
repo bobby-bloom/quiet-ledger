@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/presentation/folder_backups.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 

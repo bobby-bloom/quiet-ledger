@@ -8,6 +8,7 @@ import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/platform/notifications.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/sync_providers.dart';
 import 'package:personal_finance/core/sync/tombstone_purge.dart'
@@ -19,8 +20,6 @@ import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/data/export_folder_native.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
-import 'package:personal_finance/features/export/domain/export_settings.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Outcome of an automatic backup run.
@@ -239,7 +238,7 @@ Future<int> runTombstonePurgeIfDue(
     final at = now ?? DateTime.now();
     final db = read(databaseProvider);
     final s = await loadSettings(db);
-    final lastRaw = s.get(ExportSettings.lastTombstonePurge);
+    final lastRaw = s.get(DataSettings.lastTombstonePurge);
     final last = lastRaw == null ? null : DateTime.tryParse(lastRaw);
     if (last != null &&
         !last.isAfter(at) &&
@@ -258,7 +257,7 @@ Future<int> runTombstonePurgeIfDue(
       removed = await purgeTombstones(db, age, now: at);
     }
     await read(settingsProvider.notifier)
-        .set(ExportSettings.lastTombstonePurge, at.toIso8601String());
+        .set(DataSettings.lastTombstonePurge, at.toIso8601String());
     return removed;
   } on Object catch (e, st) {
     debugPrint('Tombstone purge failed: $e\n$st');

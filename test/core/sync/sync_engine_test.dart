@@ -97,6 +97,60 @@ void main() {
     expect(b.clock.last > Hlc.parse(aRow.updatedAt), isTrue);
   });
 
+  test('device-local settings are neither sent nor taken over', () async {
+    Future<void> setting(Device d, String key, String json) => d.writer.insert(
+      d.db.settings,
+      SettingsCompanion(
+        key: Value(key),
+        value: Value(json),
+        scope: const Value('global'),
+      ),
+      id: 'global|$key',
+    );
+    // Logged like before the setting became device-local.
+    await setting(a, 'export.autoExportFolder', '"content://tree/a"');
+    await setting(a, 'export.lastAutoExportError', '"disk full"');
+    await setting(a, 'budgets.warnThreshold', '95');
+    await a.sync();
+    await b.sync();
+    final onB = await b.db.select(b.db.settings).get();
+    expect(onB.map((r) => r.key), ['budgets.warnThreshold']);
+
+    // Taken over from a device that still sends them: ignored.
+    final logged = await (a.db.select(
+      a.db.changeLog,
+    )..where((c) => c.entityId.equals('global|export.autoExportFolder'))).get();
+    final change = Change.fromLogEntry(logged.single, originDeviceId: a.name);
+    expect(await b.engine.applyRemote([change]), 0);
+    expect(await b.db.select(b.db.settings).get(), hasLength(1));
+  });
+
+  test('a device-local write leaves no change_log entry', () async {
+    await a.writer.insert(
+      a.db.settings,
+      const SettingsCompanion(
+        key: Value('export.lastVerifiedBackup'),
+        value: Value('"2026-10-24"'),
+        scope: Value('global'),
+      ),
+      id: 'global|export.lastVerifiedBackup',
+      log: false,
+    );
+    await a.writer.update(
+      a.db.settings,
+      'global|export.lastVerifiedBackup',
+      const SettingsCompanion(value: Value('"2026-10-25"')),
+      log: false,
+    );
+    await a.writer.delete(
+      a.db.settings,
+      'global|export.lastVerifiedBackup',
+      log: false,
+    );
+    expect(await a.db.select(a.db.changeLog).get(), isEmpty);
+    expect(await a.engine.unsyncedCount(), 0);
+  });
+
   test('concurrent edits of different fields both survive', () async {
     final id = await account(a, 'Checking');
     await a.sync();

@@ -5,11 +5,11 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/platform/notifications.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/auto_export.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/data/export_folder_native.dart';
-import 'package:personal_finance/features/export/domain/backup_settings.dart';
 
 import '../../helpers/test_app.dart';
 import 'auto_export_test.dart' show caps;

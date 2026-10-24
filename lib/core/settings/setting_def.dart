@@ -113,6 +113,7 @@ class SettingDef<T> {
     this.scopes = const {SettingScope.global},
     this.keywords = const [],
     this.hidden = false,
+    this.deviceLocal = false,
     this.bootstrap = false,
     this.module,
   });
@@ -126,6 +127,7 @@ class SettingDef<T> {
     Set<SettingScope> scopes = const {SettingScope.global},
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     bool bootstrap = false,
     String? module,
   }) => SettingDef<bool>(
@@ -140,6 +142,7 @@ class SettingDef<T> {
     scopes: scopes,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     bootstrap: bootstrap,
     module: module,
   );
@@ -155,6 +158,7 @@ class SettingDef<T> {
     L10nText? description,
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     bool bootstrap = false,
     String? module,
   }) => SettingDef<E>(
@@ -171,6 +175,7 @@ class SettingDef<T> {
     encode: (v) => v.name,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     bootstrap: bootstrap,
     module: module,
   );
@@ -188,6 +193,7 @@ class SettingDef<T> {
     Set<SettingScope> scopes = const {SettingScope.global},
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     bool bootstrap = false,
     String? module,
     SettingEditor? editor,
@@ -204,6 +210,7 @@ class SettingDef<T> {
     scopes: scopes,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     bootstrap: bootstrap,
     module: module,
   );
@@ -219,6 +226,7 @@ class SettingDef<T> {
     Set<SettingScope> scopes = const {SettingScope.global},
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     String? module,
   }) => SettingDef<int?>(
     key: key,
@@ -232,6 +240,7 @@ class SettingDef<T> {
     scopes: scopes,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     module: module,
   );
 
@@ -244,6 +253,7 @@ class SettingDef<T> {
     String? hint,
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     bool bootstrap = false,
     String? module,
     SettingEditor? editor,
@@ -260,6 +270,7 @@ class SettingDef<T> {
     validate: validate,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     bootstrap: bootstrap,
     module: module,
   );
@@ -272,6 +283,7 @@ class SettingDef<T> {
     SettingEditor editor = const TextEditor(),
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     String? module,
   }) => SettingDef<String?>(
     key: key,
@@ -284,6 +296,7 @@ class SettingDef<T> {
     encode: (v) => v,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     module: module,
   );
 
@@ -296,6 +309,7 @@ class SettingDef<T> {
     L10nText? description,
     List<String> keywords = const [],
     bool hidden = false,
+    bool deviceLocal = false,
     String? module,
   }) => SettingDef<List<String>>(
     key: key,
@@ -308,6 +322,7 @@ class SettingDef<T> {
     encode: (v) => v,
     keywords: keywords,
     hidden: hidden,
+    deviceLocal: deviceLocal,
     module: module,
   );
 
@@ -330,6 +345,13 @@ class SettingDef<T> {
 
   /// Not shown in the settings UI (internal state such as onboarding).
   final bool hidden;
+
+  /// Describes this device rather than the data set (backup folder and
+  /// status, storage location, ...): never synced (`SyncWriter` writes it
+  /// without a `change_log` entry and `SyncEngine` skips it both ways) and
+  /// kept by a restore. Must be in `allSettings` so core code sees it
+  /// (`deviceLocalSettingKeys`).
+  final bool deviceLocal;
 
   /// Mirrored to shared_preferences so it is available before the DB opens.
   final bool bootstrap;

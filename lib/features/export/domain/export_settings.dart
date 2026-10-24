@@ -48,14 +48,6 @@ abstract final class ExportSettings {
     encode: (v) => [for (final p in v) p.toJson()],
     hidden: true,
   );
-
-  /// ISO timestamp of the last tombstone purge (startup task, weekly).
-  static final lastTombstonePurge = SettingDef.optionalString(
-    key: 'data.lastTombstonePurge',
-    section: SettingSection.data,
-    label: (l) => l.exportPurgeLast,
-    hidden: true,
-  );
 }
 
 /// Adds or replaces (by case-insensitive name) [preset]; keeps names sorted.

@@ -126,8 +126,10 @@ your tests: `flutter test test/features/<yours>`.
 replace, merge or hard-delete data run inside
 `withSafetyCopy(read, SafetyReason.x, ...)`. Backups that leave the device
 are made only by `createVerifiedBackup` (encryption policy, verification)
-and opened by `openBackup`. Device-specific settings go into
-`deviceLocalSettingKeys` so a restore keeps them. Migrations are
+and opened by `openBackup`. Device-specific settings are marked
+`deviceLocal: true` and listed in `allSettings`: they are never synced
+(written without a `change_log` entry, skipped by `SyncEngine` both ways)
+and a restore keeps them (`deviceLocalSettingKeys`). Migrations are
 forward-only; a newer database is refused, never downgraded.
 
 **Startup tasks** (post due recurring entries, auto-export, purge): register
