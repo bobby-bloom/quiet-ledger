@@ -170,6 +170,10 @@ Future<BundleContents?> openPickedBackup(
       unlock = await askBackupUnlock(context, error: wrong);
       if (unlock == null) return null;
       wrong = l.backupUnlockWrong;
+    } on Object catch (e) {
+      // Never an unhandled error for a file the user picked.
+      if (context.mounted) await fail(l.commonError('$e'));
+      return null;
     }
   }
 }

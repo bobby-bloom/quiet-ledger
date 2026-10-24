@@ -239,9 +239,16 @@ void main() {
       for (final e in fields.evaluate()) {
         final key = (e.widget.key! as ValueKey<String>).value;
         final i = int.parse(key.substring('recovery-group-'.length));
+        // Typed like from a handwritten copy: lower case, a space inside,
+        // look-alike digits. Unlocking accepts this, so this step must too.
+        final g = groups[i];
         await tester.enterText(
           find.byKey(ValueKey(key)),
-          groups[i].toLowerCase(),
+          '${g.substring(0, 2)} ${g.substring(2)}'
+              .toLowerCase()
+              .replaceAll('b', '8')
+              .replaceAll('o', '0')
+              .replaceAll('i', '1'),
         );
       }
       await tester.pump();

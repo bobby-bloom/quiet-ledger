@@ -70,10 +70,15 @@ AES-256-GCM(data key, nonce, bundle zip, aad = everything before) | tag
   key** (PBKDF2-HMAC-SHA256, 600 000 iterations, 16-byte salt; parameters
   in the header) and under the **recovery key** (HKDF-SHA256 with its own
   salt). Either one opens the file.
+- The header is validated before any key is derived: slot and nonce sizes,
+  and an iteration count between 1 000 and 10 000 000, since it is read
+  before anything is authenticated. Any broken header or payload is
+  reported as "damaged" (`BackupCryptoError.damaged`), never as a crash.
 - The **recovery key** is 160 random bits shown once as 8 groups of 4
   base32 characters (`ABCD-EFGH-…`). Setup is finished only after the user
-  types two random groups back. Input is forgiving: case, spaces, dashes
-  and 0/O, 1/I, 8/B are accepted.
+  types two random groups back. Input is forgiving, the same for the
+  confirmation and for unlocking (`normalizeRecoveryKey`): case, spaces,
+  dashes and 0/O, 1/I, 8/B are accepted.
 - **Changing the password** keeps the recovery key. Older files still open
   with their old password or the recovery key. The device keeps its
   earlier keys, so it opens old files without asking.

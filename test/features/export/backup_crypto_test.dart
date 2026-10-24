@@ -167,6 +167,66 @@ void main() {
     expect(await decryptBackup(await enc(), BackupUnlock(known: [again])), zip);
   });
 
+  test('a damaged header is reported as damaged, never as a crash', () async {
+    final file = await enc();
+    final h = readEncryptedHeader(file);
+    final json = Map<String, Object?>.from(h.json);
+    final payload = file.sublist(h.payloadOffset);
+
+    Uint8List withHeader(Map<String, Object?> j) {
+      final header = utf8.encode(jsonEncode(j));
+      return Uint8List.fromList([
+        ...file.sublist(0, 5),
+        ...(ByteData(4)..setUint32(0, header.length)).buffer.asUint8List(),
+        ...header,
+        ...payload,
+      ]);
+    }
+
+    Map<String, Object?> kdfWith(Object? iterations) => {
+      ...json,
+      'kdf': {...(json['kdf']! as Map), 'iterations': iterations},
+    };
+
+    final broken = <String, Uint8List>{
+      'no slots': withHeader({...json}..remove('slots')),
+      'no nonce': withHeader({...json}..remove('nonce')),
+      'slots of the wrong type': withHeader({...json, 'slots': 'x'}),
+      'short slot': withHeader({
+        ...json,
+        'slots': {...(json['slots']! as Map), 'password': 'AAAA'},
+      }),
+      'short nonce': withHeader({...json, 'nonce': 'AAAA'}),
+      'nonce not base64': withHeader({...json, 'nonce': '%%%'}),
+      'iterations 0': withHeader(kdfWith(0)),
+      'iterations 2^31': withHeader(kdfWith(1 << 31)),
+      'iterations as text': withHeader(kdfWith('many')),
+      'header longer than the file': Uint8List.fromList([
+        ...file.sublist(0, 5),
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        ...file.sublist(9),
+      ]),
+      'cut after the header': file.sublist(0, h.payloadOffset + 3),
+      'only the magic number': file.sublist(0, 12),
+    };
+    for (final e in broken.entries) {
+      for (final unlock in [
+        const BackupUnlock(password: 'correct horse'),
+        BackupUnlock(recoveryKey: recovery),
+        BackupUnlock(known: [keys]),
+      ]) {
+        await expectLater(
+          decryptBackup(e.value, unlock),
+          fails(BackupCryptoError.damaged),
+          reason: e.key,
+        );
+      }
+    }
+  });
+
   test('recovery key text: 8 groups, forgiving input', () {
     final text = formatRecoveryKey(recovery);
     expect(RegExp(r'^([A-Z2-7]{4}-){7}[A-Z2-7]{4}$').hasMatch(text), isTrue);
@@ -176,6 +236,7 @@ void main() {
         .replaceAll('i', '1');
     expect(parseRecoveryKey(sloppy), recovery);
     expect(parseRecoveryKey('ABCD-EFGH'), isNull);
+    expect(normalizeRecoveryKey(' 87 kd-o1 '), 'B7KDOI');
     expect(parseRecoveryKey('${text.substring(0, 38)}!'), isNull);
   });
 }

@@ -27,6 +27,12 @@ const encryptedBackupExtension = '.pfbackup';
 /// PBKDF2 iterations for new passwords (OWASP 2023 for HMAC-SHA256).
 const defaultPbkdf2Iterations = 600000;
 
+/// Iteration counts accepted from a file header. The count is read before
+/// anything is authenticated, so a damaged or crafted header must not make
+/// the key derivation run for hours (or not at all).
+const minPbkdf2Iterations = 1000;
+const maxPbkdf2Iterations = 10000000;
+
 /// Shortest backup password accepted.
 const minBackupPasswordLength = 8;
 
@@ -151,13 +157,18 @@ String formatRecoveryKey(Uint8List key) {
 
 /// Parses a typed recovery key; tolerant of case, spaces, dashes and the
 /// look-alikes 0/O, 1/I, 8/B. Null when it is not 20 bytes.
+/// Typed recovery key text as base32: upper case, without spaces and
+/// dashes, and with the look-alikes 0 → O, 1 → I, 8 → B (none of them is
+/// in the alphabet). Used for unlocking and for the confirmation step.
+String normalizeRecoveryKey(String input) => input
+    .toUpperCase()
+    .replaceAll(RegExp(r'[\s\-]'), '')
+    .replaceAll('0', 'O')
+    .replaceAll('1', 'I')
+    .replaceAll('8', 'B');
+
 Uint8List? parseRecoveryKey(String input) {
-  final s = input
-      .toUpperCase()
-      .replaceAll(RegExp(r'[\s\-]'), '')
-      .replaceAll('0', 'O')
-      .replaceAll('1', 'I')
-      .replaceAll('8', 'B');
+  final s = normalizeRecoveryKey(input);
   if (s.length != 32) return null;
   final out = <int>[];
   var buffer = 0;
@@ -291,6 +302,9 @@ class EncryptedBackupHeader {
     required this.recoverySalt,
     required this.createdAt,
     required this.appVersion,
+    required this.passwordSlot,
+    required this.recoverySlot,
+    required this.nonce,
     required this.json,
     required this.payloadOffset,
   });
@@ -302,6 +316,13 @@ class EncryptedBackupHeader {
   final Uint8List recoverySalt;
   final DateTime createdAt;
   final String appVersion;
+
+  /// The data key wrapped under the password and under the recovery key.
+  final Uint8List passwordSlot;
+  final Uint8List recoverySlot;
+
+  /// Nonce of the payload.
+  final Uint8List nonce;
   final Map<String, Object?> json;
 
   /// Start of the ciphertext; the bytes before it are the AAD.
@@ -325,21 +346,39 @@ EncryptedBackupHeader readEncryptedHeader(Uint8List bytes) {
       throw const BackupCryptoException(BackupCryptoError.newerVersion);
     }
     final recovery = (json['recovery']! as Map).cast<String, Object?>();
+    final slots = (json['slots']! as Map).cast<String, Object?>();
+    final iterations = (kdf['iterations']! as num).toInt();
+    final slotLength = _aes.nonceLength + 32 + _aes.macAlgorithm.macLength;
+    final passwordSlot = _unb64(slots['password']);
+    final recoverySlot = _unb64(slots['recovery']);
+    final nonce = _unb64(json['nonce']);
+    if (iterations < minPbkdf2Iterations ||
+        iterations > maxPbkdf2Iterations ||
+        passwordSlot.length != slotLength ||
+        recoverySlot.length != slotLength ||
+        nonce.length != _aes.nonceLength ||
+        bytes.length < end + _aes.macAlgorithm.macLength) {
+      throw const BackupCryptoException(BackupCryptoError.damaged);
+    }
     return EncryptedBackupHeader(
       keyId: json['keyId']! as String,
       recoveryId: recovery['id']! as String,
       salt: _unb64(kdf['salt']),
-      iterations: (kdf['iterations']! as num).toInt(),
+      iterations: iterations,
       recoverySalt: _unb64(recovery['salt']),
       createdAt: DateTime.parse(json['createdAt']! as String),
       appVersion: json['appVersion'] as String? ?? '',
+      passwordSlot: passwordSlot,
+      recoverySlot: recoverySlot,
+      nonce: nonce,
       json: json,
       payloadOffset: end,
     );
   } on BackupCryptoException {
     rethrow;
   } on Object {
-    throw const BackupCryptoException(BackupCryptoError.notEncrypted);
+    // The magic number matched, so this is a backup whose header is broken.
+    throw const BackupCryptoException(BackupCryptoError.damaged);
   }
 }
 
@@ -437,12 +476,23 @@ class BackupUnlock {
   final Uint8List? recoveryKey;
 }
 
-/// Decrypts [bytes] to the bundle zip. Throws [BackupCryptoException].
+/// Decrypts [bytes] to the bundle zip. Throws [BackupCryptoException],
+/// and nothing else: any other failure is reported as
+/// [BackupCryptoError.damaged].
 Future<Uint8List> decryptBackup(Uint8List bytes, BackupUnlock unlock) async {
+  try {
+    return await _decrypt(bytes, unlock);
+  } on BackupCryptoException {
+    rethrow;
+  } on Object {
+    throw const BackupCryptoException(BackupCryptoError.damaged);
+  }
+}
+
+Future<Uint8List> _decrypt(Uint8List bytes, BackupUnlock unlock) async {
   final h = readEncryptedHeader(bytes);
-  final slots = (h.json['slots']! as Map).cast<String, Object?>();
-  final pwSlot = _unb64(slots['password']);
-  final recSlot = _unb64(slots['recovery']);
+  final pwSlot = h.passwordSlot;
+  final recSlot = h.recoverySlot;
 
   Uint8List? dataKey;
   for (final k in unlock.known) {
@@ -474,7 +524,7 @@ Future<Uint8List> decryptBackup(Uint8List bytes, BackupUnlock unlock) async {
     final clear = await _aes.decrypt(
       SecretBox(
         Uint8List.sublistView(bytes, h.payloadOffset, bytes.length - macLength),
-        nonce: _unb64(h.json['nonce']),
+        nonce: h.nonce,
         mac: Mac(Uint8List.sublistView(bytes, bytes.length - macLength)),
       ),
       secretKey: SecretKey(dataKey),

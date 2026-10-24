@@ -246,8 +246,7 @@ class _SetupFlowState extends ConsumerState<_SetupFlow> {
       _password.text == _repeat.text;
 
   bool _matches(TextEditingController c, int group) =>
-      c.text.trim().toUpperCase().replaceAll('0', 'O').replaceAll('1', 'I') ==
-      _groups[group];
+      normalizeRecoveryKey(c.text) == _groups[group];
 
   Future<void> _save() async {
     final l = context.l10n;
@@ -471,6 +470,9 @@ class _SetupFlowState extends ConsumerState<_SetupFlow> {
         autocorrect: false,
         enableSuggestions: false,
         textCapitalization: TextCapitalization.characters,
+        // Spaces and dashes are not part of a group; drop them before the
+        // length limit cuts the group short.
+        inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'[\s\-]'))],
         maxLength: 4,
         style: context.mono,
         onChanged: (_) => setState(() {}),
