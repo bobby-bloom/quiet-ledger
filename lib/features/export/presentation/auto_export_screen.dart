@@ -74,7 +74,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
       await s.set(BackupSettings.folderName, name);
     }
     // A new folder: an access error of the old one no longer applies.
-    await s.reset(BackupSettings.lastError);
+    await clearBackupFailure(ref.read);
   }
 
   Future<void> _runNow() async {

@@ -40,7 +40,14 @@ class _Notifications extends NoopNotificationService {
 class _FlakyFolder extends MemoryExportFolder {
   bool corruptReads = false;
   bool failWrites = false;
+  bool failLists = false;
   int writes = 0;
+
+  @override
+  Future<List<String>> listFiles() async {
+    if (failLists) throw StateError('folder offline');
+    return await super.listFiles();
+  }
 
   @override
   Future<void> writeFile(String name, Uint8List bytes) async {
@@ -143,12 +150,61 @@ void main() {
       expect(folder.writes, 2);
       expect(notes.shown, hasLength(1));
 
+      // Two failures in a row: the next try waits 4 hours.
       folder.failWrites = false;
       expect(
-        await runAutoExportIfDue(c, now: day.add(const Duration(hours: 2))),
+        await runAutoExportIfDue(c, now: day.add(const Duration(hours: 3))),
+        isFalse,
+      );
+      expect(folder.writes, 2);
+      expect(
+        await runAutoExportIfDue(c, now: day.add(const Duration(hours: 5))),
         isTrue,
       );
       expect(get(BackupSettings.lastError), isNull);
+      expect(c.read(settingsProvider).get(BackupSettings.failureCount), 0);
+    });
+
+    test('retries back off: 1 h, 4 h, 12 h, then daily', () {
+      expect(
+        [for (var n = 1; n <= 6; n++) backupRetryDelay(n).inHours],
+        [1, 4, 12, 24, 24, 24],
+      );
+      final at = DateTime(2026, 10, 1, 8);
+      expect(
+        isBackupRetryDue(2, at, at.add(const Duration(hours: 3))),
+        isFalse,
+      );
+      expect(isBackupRetryDue(2, at, at.add(const Duration(hours: 4))), isTrue);
+      // Unknown or future attempt (clock change): try now.
+      expect(isBackupRetryDue(5, null, at), isTrue);
+      expect(isBackupRetryDue(5, at.add(const Duration(days: 1)), at), isTrue);
+    });
+
+    test('"Back up now" ignores the backoff and resets it', () async {
+      folder.failWrites = true;
+      final day = DateTime(2026, 10, 1, 8);
+      for (var i = 0; i < 3; i++) {
+        await runAutoExportNow(c.read, now: day.add(Duration(minutes: i)));
+      }
+      expect(c.read(settingsProvider).get(BackupSettings.failureCount), 3);
+      folder.failWrites = false;
+      final r = await runAutoExportNow(
+        c.read,
+        now: day.add(const Duration(minutes: 5)),
+      );
+      expect(r.written, isTrue);
+      expect(c.read(settingsProvider).get(BackupSettings.failureCount), 0);
+    });
+
+    test('an unreachable folder fails before any export', () async {
+      folder.failLists = true;
+      final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
+      expect(r.written, isFalse);
+      expect(folder.writes, 0);
+      expect(get(BackupSettings.lastError), contains('offline'));
+      // Still counted as an attempt, so the retry backoff applies.
+      expect(get(BackupSettings.lastAttempt), isNotNull);
     });
 
     test('a backup written after a clock change is never pruned', () async {

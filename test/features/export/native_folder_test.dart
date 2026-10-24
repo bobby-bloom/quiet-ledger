@@ -143,7 +143,7 @@ void main() {
       final s = c.read(settingsProvider);
       expect(s.get(ImportExportSettings.autoExportFolder), 'bookmark:renewed');
       expect(s.get(BackupSettings.folderName), 'Moved backups');
-      expect(native.calls.take(2), ['refresh', 'write']);
+      expect(native.calls.take(3), ['refresh', 'list', 'write']);
     });
 
     test('the startup check renews outdated access too', () async {

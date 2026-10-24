@@ -9,6 +9,23 @@ final _fileName = RegExp(
   r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.(?:zip|pfbackup)$',
 );
 
+/// How long to wait after [failures] scheduled backups failed in a row
+/// before trying again: 1 h, 4 h, 12 h, then once a day. The health banner
+/// shows the failure all the time; this only spaces out the work.
+Duration backupRetryDelay(int failures) => switch (failures) {
+  <= 1 => const Duration(hours: 1),
+  2 => const Duration(hours: 4),
+  3 => const Duration(hours: 12),
+  _ => const Duration(days: 1),
+};
+
+/// Whether a failed scheduled backup should be tried again at [now], given
+/// the start of the last attempt.
+bool isBackupRetryDue(int failures, DateTime? lastAttempt, DateTime now) =>
+    lastAttempt == null ||
+    lastAttempt.isAfter(now) ||
+    !now.isBefore(lastAttempt.add(backupRetryDelay(failures)));
+
 /// Whether an automatic backup is due at [now]. Daily: once per calendar
 /// day. Weekly: when the last one is at least 7 calendar days old. A
 /// [last] in the future (clock change) counts as due.

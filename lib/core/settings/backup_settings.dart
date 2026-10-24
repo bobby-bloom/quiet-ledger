@@ -26,6 +26,19 @@ abstract final class BackupSettings {
     deviceLocal: true,
   );
 
+  /// Scheduled backups that failed in a row; 0 after a success. Spaces out
+  /// the retries (`backupRetryDelay`).
+  static final failureCount = SettingDef.integer(
+    key: 'export.backupFailureCount',
+    section: SettingSection.importExport,
+    defaultValue: 0,
+    min: 0,
+    max: 100000,
+    label: (l) => l.exportAutoTitle,
+    hidden: true,
+    deviceLocal: true,
+  );
+
   /// ISO timestamp of the last backup that was verified and stored outside
   /// the app (scheduled, or saved/shared/downloaded by hand).
   static final lastVerified = SettingDef.optionalString(
@@ -70,6 +83,7 @@ abstract final class BackupSettings {
   static final all = <SettingDef<Object?>>[
     lastAttempt,
     lastError,
+    failureCount,
     lastVerified,
     staleDays,
     folderName,

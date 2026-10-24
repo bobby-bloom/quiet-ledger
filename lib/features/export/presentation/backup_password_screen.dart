@@ -13,6 +13,7 @@ import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/auto_export.dart';
 import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/domain/backup_crypto.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
@@ -191,7 +192,7 @@ Future<void> _showSetup(
   if (saved ?? false) {
     ref.invalidate(backupKeyringProvider);
     // A paused backup can run again.
-    await ref.read(settingsProvider.notifier).reset(BackupSettings.lastError);
+    await clearBackupFailure(ref.read);
   }
 }
 

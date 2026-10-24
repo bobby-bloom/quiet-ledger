@@ -19,7 +19,7 @@ Each one has a test; a failing test there means data could be lost.
 | 1 | **Lossless round trip.** Backup → restore into an empty database → backup gives byte-identical tables, for every column of every table (including soft-deleted rows, sync columns, blobs and receipt files). | `test/features/export/backup_invariants_test.dart`, `receipts_backup_test.dart` |
 | 2 | **Complete coverage.** Every table is either in `syncedTableNames` (backed up) or in `backupExcludedTables`. A new table fails the test until it is classified. | `backup_invariants_test.dart` |
 | 3 | **Old backups stay restorable.** A backup from every released version is kept in `test/fixtures/bundles/` and must restore without losing a value. | `backup_invariants_test.dart` |
-| 4 | **Write → verify → prune.** A scheduled backup counts only after it has been read back from its folder, decrypted and validated; a file that fails is removed again. Old backups are deleted only after that, never the file just written and never a manual backup. | `backup_reliability_test.dart` |
+| 4 | **Write → verify → prune.** A scheduled backup counts only after it has been decrypted and validated, and read back from its folder byte for byte identical; a file that fails is removed again. Old backups are deleted only after that, never the file just written and never a manual backup. | `backup_reliability_test.dart` |
 | 5 | **Copy before destroy.** Restore, reset, import undo, merging categories or tags, restoring a safety copy and purging old tombstones first take a verified safety copy. If the copy fails, the operation does not run. Schema migrations first copy the database file. | `backup_reliability_test.dart`, `test/core/db/db_safety_test.dart` |
 | 6 | **No silent failure.** A failed, interrupted or paused scheduled backup, a lost folder permission and a stale last backup are shown on the dashboard and the export screen. Failures also raise a notification once. | `backup_reliability_test.dart`, `backup_ui_test.dart` |
 | 7 | **Atomic restore.** A failed restore leaves the database and the receipt files exactly as they were. | `receipts_backup_test.dart` |
@@ -114,14 +114,18 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
 
 - **When.** Daily or weekly, checked at start, when the app returns to the
   foreground and hourly while it stays open (`BackupScheduler`). After a
-  failure it retries on every check instead of waiting for the next day.
+  failure it does not wait for the next day but retries with growing gaps
+  (`backupRetryDelay`: 1 h, 4 h, 12 h, then daily, counted in
+  `BackupSettings.failureCount`). The banner shows the failure throughout.
+  "Back up now", a new folder or a new backup password retry at once.
   Concurrent runs share one backup.
-- **Run** (`runAutoExportNow`): record the attempt → create and verify the
-  backup (`createVerifiedBackup`) → write
-  `personal-finance-backup-<yyyyMMdd-HHmmss>.zip|.pfbackup` → read it back,
-  compare bytes, decrypt and validate (`openBackup`), deleting it again if
-  that fails → prune to the newest N, never the new file and never other
-  files → record success. Manual backups are named
+- **Run** (`runAutoExportNow`): record the attempt → list the folder (an
+  unreachable folder fails here, before any export) → create the backup,
+  encrypt it and decrypt it again to check it (`createVerifiedBackup`) →
+  write `personal-finance-backup-<yyyyMMdd-HHmmss>.zip|.pfbackup` → read
+  it back and compare it byte for byte, deleting it again if that fails →
+  prune to the newest N, never the new file and never other files →
+  record success. Manual backups are named
   `personal-finance-manual-…`, so a manual backup saved into the backup
   folder is never pruned.
 - **Folder access.**

@@ -54,10 +54,18 @@ Future<bool> runAutoExportIfDue(
     final last = lastRaw == null ? null : DateTime.tryParse(lastRaw);
     final schedule = s.get(ImportExportSettings.autoExport);
     if (schedule == AutoExportSchedule.off) return false;
-    // After a failure, retry on every run instead of waiting for the next
-    // scheduled day.
+    // After a failure, retry with growing gaps (1 h, 4 h, 12 h, daily)
+    // instead of waiting for the next scheduled day.
     final failed = s.get(BackupSettings.lastError) != null;
-    if (!failed && !isAutoExportDue(schedule, last, at)) return false;
+    if (failed) {
+      final attempt = DateTime.tryParse(
+        s.get(BackupSettings.lastAttempt) ?? '',
+      );
+      final failures = s.get(BackupSettings.failureCount);
+      if (!isBackupRetryDue(failures, attempt, at)) return false;
+    } else if (!isAutoExportDue(schedule, last, at)) {
+      return false;
+    }
     final r = await runAutoExportNow(read, now: at);
     return r.written;
   } on Object catch (e, st) {
@@ -102,14 +110,18 @@ Future<AutoExportResult> _runAutoExport(
       throw StateError('No export folder');
     }
     final path = await renewBackupFolderAccess(read, saved);
-    final backup = await createVerifiedBackup(read);
     final folder = read(exportFolderFactoryProvider)(path);
+    // Cheap check first: an unreachable folder (revoked, offline, unplugged)
+    // fails here instead of after a full export and encryption.
+    await folder.listFiles();
+    final backup = await createVerifiedBackup(read);
     final name = autoExportFileName(at, backup.extension);
     await folder.writeFile(name, backup.bytes);
 
-    // Verify what actually landed in the folder: same bytes, and it opens
-    // (decrypts) and validates. A file that fails is removed again so it
-    // never counts as one of the backups to keep.
+    // Verify what actually landed in the folder: byte for byte the backup
+    // that createVerifiedBackup already decrypted and validated, so it
+    // opens too. A file that fails is removed again so it never counts as
+    // one of the backups to keep.
     try {
       final stored = await folder.readFile(name);
       if (!listEquals(stored, backup.bytes)) {
@@ -117,7 +129,6 @@ Future<AutoExportResult> _runAutoExport(
           'The backup in the folder differs from what was written',
         );
       }
-      await openBackup(read, stored!);
     } on Object {
       try {
         await folder.deleteFile(name);
@@ -137,7 +148,7 @@ Future<AutoExportResult> _runAutoExport(
     }
     await settings.set(ImportExportSettings.lastAutoExport, stamp);
     await settings.set(BackupSettings.lastVerified, stamp);
-    await settings.reset(BackupSettings.lastError);
+    await clearBackupFailure(read);
     return AutoExportResult(fileName: name, pruned: prune);
   } on Object catch (e, st) {
     debugPrint('Auto-export failed: $e\n$st');
@@ -146,10 +157,23 @@ Future<AutoExportResult> _runAutoExport(
   }
 }
 
+/// Forgets a scheduled backup failure, so the next run is due right away
+/// (a success, a new folder, a new backup password).
+Future<void> clearBackupFailure(ProviderReader read) async {
+  final settings = read(settingsProvider.notifier);
+  await settings.reset(BackupSettings.lastError);
+  await settings.reset(BackupSettings.failureCount);
+}
+
 Future<void> _recordFailure(ProviderReader read, Object error) async {
   try {
     final settings = read(settingsProvider.notifier);
-    final first = read(settingsProvider).get(BackupSettings.lastError) == null;
+    final current = read(settingsProvider);
+    final first = current.get(BackupSettings.lastError) == null;
+    await settings.set(
+      BackupSettings.failureCount,
+      first ? 1 : current.get(BackupSettings.failureCount) + 1,
+    );
     final l = lookupAppLocalizations(Locale(read(languageCodeProvider)));
     await settings.set(BackupSettings.lastError, switch (error) {
       BackupFolderAccessException() => l.backupFolderAccessLost,

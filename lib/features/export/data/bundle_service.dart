@@ -28,7 +28,6 @@ import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 /// `change_log.entity` of the marker written by [restoreBundle].
 const restoreMarkerEntity = '_restore';
 
-
 /// A parsed table of a bundle: column names and raw SQL rows.
 @immutable
 class BundleTable {
