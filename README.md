@@ -7,7 +7,7 @@ a fast, private app that runs on Android, iOS, the web, Windows, macOS and
 Linux. Your data stays on your device in an encrypted database: no account,
 no telemetry, no cloud dependency.
 
-[![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![Release](../../actions/workflows/release.yml/badge.svg)](../../actions/workflows/release.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 ![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
@@ -152,7 +152,8 @@ flutter test tool/screenshots/screenshots_test.dart   # PNGs in build/screenshot
 ```
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these checks
-and builds the app for all six platforms.
+only for version tags, as the first step of the release (see
+[Versioning](#versioning)); pushes and pull requests are not checked.
 
 ## Project layout
 
