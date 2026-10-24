@@ -1,0 +1,280 @@
+{
+  "accountsTitle": "Accounts",
+  "accountsAdd": "Add account",
+  "accountsEmpty": "No accounts yet. Add your bank accounts, cash and cards to track balances and net worth.",
+  "accountsReorder": "Reorder accounts",
+  "accountsReorderHint": "Drag accounts to change their order, or below another heading to move them into that group.",
+  "accountsDragHandle": "Move {name}",
+  "@accountsDragHandle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsReconcileBalances": "Reconcile balances",
+  "accountsSelectHint": "Select an account to see its details.",
+  "accountsMoreActions": "More actions",
+  "accountsManageGroups": "Manage groups",
+  "accountsShowArchivedMenu": "Show archived accounts",
+  "accountsHideArchived": "Hide archived accounts",
+  "accountsShowArchived": "{count, plural, =1{Show 1 archived account} other{Show {count} archived accounts}}",
+  "@accountsShowArchived": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsArchivedSection": "Archived",
+  "accountsArchivedDesc": "Hidden from lists and pickers. Its history stays.",
+  "accountsNetWorth": "Net worth",
+  "accountsAssets": "Assets",
+  "accountsLiabilities": "Liabilities",
+  "accountsNetWorthSemantics": "Net worth {net}. Assets {assets}, liabilities {liabilities}.",
+  "@accountsNetWorthSemantics": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "assets": {
+        "type": "String"
+      },
+      "liabilities": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAlertBelow": "Alert below {amount}",
+  "@accountsAlertBelow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsBelowThreshold": "Below the {amount} alert",
+  "@accountsBelowThreshold": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsNotInNetWorth": "Not in net worth",
+  "accountsNotInBudgets": "Not in budgets",
+  "accountsNotInForecast": "Not in forecast",
+  "accountsReturnAssumed": "{rate} p.a. assumed",
+  "@accountsReturnAssumed": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsInterestRate": "{rate} interest",
+  "@accountsInterestRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOpen": "Open",
+  "accountsReconcile": "Reconcile",
+  "accountsArchive": "Archive",
+  "accountsUnarchive": "Unarchive",
+  "accountsNoGroup": "No group",
+  "accountsTypeChecking": "Checking",
+  "accountsTypeSavings": "Savings",
+  "accountsTypeCash": "Cash",
+  "accountsTypeCreditCard": "Credit card",
+  "accountsTypeInvestment": "Investment",
+  "accountsTypeLoan": "Loan",
+  "accountsTypeOtherAsset": "Other asset",
+  "accountsTypeOtherLiability": "Other liability",
+  "accountsArchivedSnack": "Account archived",
+  "accountsUnarchivedSnack": "Account restored",
+  "accountsCannotDeleteTitle": "Account in use",
+  "accountsDeleteInUse": "{count, plural, =1{This account has 1 transaction and can't be deleted. Archive it to hide it while keeping its history.} other{This account has {count} transactions and can't be deleted. Archive it to hide it while keeping its history.}}",
+  "@accountsDeleteInUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsDeleteInUseRules": "{count, plural, =1{A recurring rule uses this account. Change or delete it first, or archive the account.} other{{count} recurring rules use this account. Change or delete them first, or archive the account.}}",
+  "@accountsDeleteInUseRules": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsDeleteMessage": "The account has no transactions. Linked goals are unlinked.",
+  "accountsDeleted": "Account deleted",
+  "accountsNotFound": "This account no longer exists.",
+  "accountsRange1M": "1M",
+  "accountsRange3M": "3M",
+  "accountsRange6M": "6M",
+  "accountsRange1Y": "1Y",
+  "accountsRangeAll": "All",
+  "accountsCurrentBalance": "Current balance",
+  "accountsLowBalanceWarning": "Below the low-balance alert of {amount}",
+  "@accountsLowBalanceWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsBalanceOverTime": "Balance over time",
+  "accountsChartEmpty": "Not enough data for a chart yet.",
+  "accountsChartSemantics": "Balance of {name} from {from} to {to}: {start} at the start, {end} at the end, lowest {lowest}.",
+  "@accountsChartSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "lowest": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsRecentTransactions": "Recent transactions",
+  "accountsAllTransactions": "All",
+  "accountsNoTransactions": "No transactions in this account yet.",
+  "accountsDetails": "Details",
+  "accountsTransferWith": "Transfer · {name}",
+  "@accountsTransferWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsSplit": "Split",
+  "accountsUncategorized": "Uncategorised",
+  "accountsNew": "New account",
+  "accountsEditTitle": "Edit account",
+  "accountsCreate": "Create account",
+  "accountsSectionBasics": "Basics",
+  "accountsSectionAppearance": "Appearance",
+  "accountsSectionInclude": "Counts toward",
+  "accountsSectionPlanning": "Planning",
+  "accountsFieldName": "Name",
+  "accountsNameRequired": "Enter a name",
+  "accountsFieldType": "Type",
+  "accountsFieldOpeningBalance": "Opening balance",
+  "accountsFieldOpeningDate": "Opening date",
+  "accountsLiabilityHint": "Enter debt as a negative amount, e.g. −4,152.30.",
+  "accountsFieldGroup": "Group",
+  "accountsNewGroup": "New group…",
+  "accountsGroupName": "Group name",
+  "accountsIncludeNetWorth": "Net worth",
+  "accountsIncludeBudgets": "Budgets",
+  "accountsIncludeBudgetsDesc": "Spending from this account counts against budgets",
+  "accountsIncludeForecast": "Forecast",
+  "accountsLowBalance": "Low-balance alert",
+  "accountsLowBalanceHint": "Warn when the balance falls below this amount",
+  "accountsExpectedReturn": "Expected annual return",
+  "accountsExpectedReturnHint": "Used by the net-worth projection",
+  "accountsInterest": "Interest rate",
+  "accountsInterestHint": "Annual rate, e.g. for loans and credit cards",
+  "accountsRateInvalid": "Enter a percentage between −100 and 100",
+  "accountsNote": "Note",
+  "accountsDiscardTitle": "Discard changes?",
+  "accountsKeepEditing": "Keep editing",
+  "accountsDiscard": "Discard",
+  "accountsReconcileTitle": "Reconcile",
+  "accountsReconcileIntro": "Enter the balance your bank shows for the date below. The cleared transactions in the app should add up to it.",
+  "accountsBankBalance": "Bank balance",
+  "accountsBankDate": "Balance date",
+  "accountsDifference": "Difference",
+  "accountsClearedBalance": "Cleared in the app",
+  "accountsPendingSum": "{count, plural, =0{Pending} =1{Pending (1)} other{Pending ({count})}}",
+  "@accountsPendingSum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsEnterBankBalance": "Enter the bank balance to compare.",
+  "accountsReconciled": "Balanced. The app matches your bank.",
+  "accountsDifferenceMore": "Your bank shows more than the app. Clear pending income or add the missing entries.",
+  "accountsDifferenceLess": "Your bank shows less than the app. Clear pending expenses the bank already booked.",
+  "accountsCreateCorrection": "Book correction of {amount}",
+  "@accountsCreateCorrection": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCreateCorrectionShort": "Book correction",
+  "accountsCorrectionConfirmTitle": "Book a correction?",
+  "accountsCorrectionConfirm": "A cleared transaction of {amount} is added so the app matches the bank balance.",
+  "@accountsCorrectionConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCorrectionPayee": "Reconciliation",
+  "accountsCorrectionNote": "Correction to match the bank balance",
+  "accountsCorrectionCreated": "Correction booked",
+  "accountsPendingTitle": "Pending transactions",
+  "accountsPendingHint": "Select the ones your bank already booked and mark them as cleared.",
+  "accountsNoPending": "No pending transactions up to this date.",
+  "accountsSelectAll": "Select all",
+  "accountsMarkClearedNone": "Mark as cleared",
+  "accountsMarkCleared": "{count, plural, =1{Mark 1 as cleared ({amount})} other{Mark {count} as cleared ({amount})}}",
+  "@accountsMarkCleared": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsMarkedCleared": "{count, plural, =1{1 transaction cleared} other{{count} transactions cleared}}",
+  "@accountsMarkedCleared": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsGroupsTitle": "Account groups",
+  "accountsGroupsEmpty": "No groups yet. Groups bundle accounts in the list, e.g. \"Daily\" or \"Savings\".",
+  "accountsGroupsHint": "Tap to rename, drag to reorder. Deleting a group keeps its accounts.",
+  "accountsGroupAdd": "Add group",
+  "accountsGroupRename": "Rename group",
+  "accountsGroupDeleteMessage": "Its accounts stay and become ungrouped.",
+  "accountsGroupDeleted": "Group deleted",
+  "accountsGroupCount": "{count, plural, =0{No accounts} =1{1 account} other{{count} accounts}}",
+  "@accountsGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

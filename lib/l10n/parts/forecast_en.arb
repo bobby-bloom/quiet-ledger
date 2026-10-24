@@ -1,0 +1,279 @@
+{
+  "forecastTitle": "Forecast",
+  "forecastTotal": "All accounts",
+  "forecastChooseAccount": "Choose account",
+  "forecastHorizon": "Horizon",
+  "forecastHorizonShort": "{months} mo",
+  "@forecastHorizonShort": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastHorizonLong": "{months, plural, =1{1 month} other{{months} months}}",
+  "@forecastHorizonLong": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastLowestPoint": "Lowest point",
+  "forecastDaysBelow": "{days, plural, =1{1 day below {limit}} other{{days} days below {limit}}}",
+  "@forecastDaysBelow": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastStaysAbove": "Stays above {limit}",
+  "forecastLowestBelowThreshold": "Lowest {amount} on {date}, below your {threshold} threshold",
+  "@forecastLowestBelowThreshold": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLowestBelowZero": "Lowest {amount} on {date}, below zero",
+  "@forecastLowestBelowZero": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLowestOk": "Lowest {amount} on {date}",
+  "@forecastLowestOk": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLegendBaseline": "Baseline",
+  "forecastLegendThreshold": "Threshold",
+  "forecastChartSummary": "Projected daily balance of {account} from {start} to {end}. Lowest point {amount} on {date}.",
+  "@forecastChartSummary": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastChartThreshold": "Low-balance threshold {threshold}.",
+  "forecastChartScenario": "With {name}: lowest {amount} on {date}.",
+  "@forecastChartScenario": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastScenarios": "Scenarios",
+  "forecastEditScenarios": "Edit scenarios",
+  "forecastNoScenarios": "No scenarios yet. Try a raise, a big purchase or paying off a loan early.",
+  "forecastAddScenario": "Add scenario",
+  "forecastBalances": "Balances",
+  "forecastMonths": "Months",
+  "forecastBudgetPeriods": "Budget periods",
+  "forecastColMonth": "Month",
+  "forecastColPeriod": "Period",
+  "forecastColLowest": "Lowest",
+  "forecastColEnd": "End",
+  "forecastColWith": "With {name}",
+  "forecastPartial": "until {date}",
+  "forecastWhatIf": "Can I afford it?",
+  "forecastWhatIfAmount": "Amount",
+  "forecastWhatIfDate": "Date",
+  "forecastWhatIfAccount": "From account",
+  "forecastWhatIfCheck": "Check",
+  "forecastWhatIfHint": "Checks the forecast only. Nothing is saved.",
+  "forecastWhatIfQuestion": "Can I afford {amount} on {date} from {account}?",
+  "@forecastWhatIfQuestion": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfYes": "Yes. Afterwards your lowest balance is {amount} on {date}.",
+  "@forecastWhatIfYes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfTight": "Tight. Your balance would drop to {amount} on {date}, below your {threshold} threshold.",
+  "@forecastWhatIfTight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfNo": "No. Your balance would drop to {amount} on {date}.",
+  "@forecastWhatIfNo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfChange": "{delta} compared with now",
+  "forecastWhatIfEnterAmount": "Enter an amount",
+  "forecastUpcoming": "Upcoming big events",
+  "forecastNoEvents": "No big events in this horizon.",
+  "forecastShowAll": "Show all",
+  "forecastShowLess": "Show less",
+  "forecastWarnings": "Warnings",
+  "forecastWarnBelowZero": "{account} goes below zero on {date}",
+  "@forecastWarnBelowZero": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWarnBelowThreshold": "{account} drops below {threshold} on {date}",
+  "@forecastWarnBelowThreshold": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastNoWarnings": "No account drops below its threshold.",
+  "forecastNoAccounts": "No accounts are included in the forecast yet. Add an account or turn on “Include in forecast”.",
+  "forecastAddAccount": "Add account",
+  "forecastModuleOff": "The forecast is turned off. You can turn it on in Settings › Navigation & modules.",
+  "forecastOpenSettings": "Open settings",
+  "forecastProjection": "Long-term projection",
+  "forecastEventRecurring": "Recurring",
+  "forecastEventScheduled": "Scheduled",
+  "forecastEventGoal": "Goal contribution",
+  "forecastEventOneOff": "Scenario",
+  "forecastEventWhatIf": "What-if",
+  "forecastTransferTo": "To {account}",
+  "forecastTransferFrom": "From {account}",
+  "forecastVariableNote": "Includes expected variable spending: {method}.",
+  "forecastLoading": "Calculating forecast…",
+  "forecastProjYears": "Years",
+  "forecastProjYearsValue": "{years, plural, =1{1 year} other{{years} years}}",
+  "@forecastProjYearsValue": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastProjSource": "Savings from",
+  "forecastProjSourceHistory": "History",
+  "forecastProjSourcePlan": "Plan",
+  "forecastProjSourceHistoryDesc": "Average of the last 12 months: {amount} per month",
+  "forecastProjSourcePlanDesc": "Recurring items and expected spending: {amount} in the first month",
+  "forecastProjRealDesc": "In today's money (adjusted for inflation)",
+  "forecastProjPerYear": "{value} per year",
+  "forecastProjNetWorthOn": "Net worth on {date}",
+  "forecastProjToday": "Today: {amount}",
+  "forecastProjMilestones": "Milestones",
+  "forecastProjNoMilestones": "No milestones within this period.",
+  "forecastMilestoneNetWorth": "Net worth reaches {amount}",
+  "forecastMilestoneDebtFree": "Debt-free",
+  "forecastMilestonePaidOff": "{account} paid off",
+  "forecastMilestoneGoal": "Goal reached: {goal}",
+  "forecastProjChartSummary": "Projected net worth from {start} to {end}: {startAmount} now, {endAmount} at the end.",
+  "@forecastProjChartSummary": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastProjChartMilestones": "{count, plural, =0{No milestones.} =1{1 milestone.} other{{count} milestones.}}",
+  "@forecastProjChartMilestones": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastProjAssumptions": "Assumptions",
+  "forecastProjAssets": "Assets",
+  "forecastProjDebts": "Debts",
+  "forecastProjNominal": "Nominal",
+  "forecastProjReal": "Real",
+  "forecastProjNoAccounts": "No accounts are included in net worth yet."
+}

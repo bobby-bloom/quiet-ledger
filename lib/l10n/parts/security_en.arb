@@ -1,0 +1,119 @@
+{
+  "securityLockedTitle": "Quiet Ledger is locked",
+  "securityEnterPin": "Enter your PIN",
+  "securityEnterPassword": "Enter your password",
+  "securityUnlock": "Unlock",
+  "securityUseBiometrics": "Unlock with biometrics",
+  "securityBiometricReason": "Unlock Quiet Ledger",
+  "securityWrongPin": "Wrong PIN",
+  "securityWrongPassword": "Wrong password",
+  "securityAttemptsLeft": "{count, plural, =1{1 attempt left before a delay} other{{count} attempts left before a delay}}",
+  "@securityAttemptsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTryAgainIn": "Too many attempts. Try again in {time}.",
+  "@securityTryAgainIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "securityChecking": "Checking…",
+  "securityDeleteDigit": "Delete digit",
+  "securityDigitsOf": "{count} of {total} digits entered",
+  "@securityDigitsOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "securityDigitsEntered": "{count, plural, =0{No digits entered} =1{1 digit entered} other{{count} digits entered}}",
+  "@securityDigitsEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "securityPasswordLabel": "Password",
+  "securityShowPassword": "Show password",
+  "securityHidePassword": "Hide password",
+  "securitySetupTitle": "Set up app lock",
+  "securityChooseMethod": "How do you want to unlock the app?",
+  "securityMethodPin": "PIN",
+  "securityMethodPassword": "Password",
+  "securityAlsoBiometrics": "Also unlock with biometrics",
+  "securityAlsoBiometricsDesc": "Fingerprint, face or Windows Hello. Your PIN or password stays as a fallback.",
+  "securityNewPin": "Choose a PIN",
+  "securityConfirmPin": "Enter the PIN again",
+  "securityNewPassword": "Choose a password",
+  "securityConfirmPassword": "Enter the password again",
+  "securityMismatch": "The entries don't match. Try again.",
+  "securityPinDigitsOnly": "Use digits only",
+  "securityPinLength": "{min} to {max} digits",
+  "@securityPinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "securityPasswordTooShort": "At least {min} characters",
+  "@securityPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "securityChangePin": "Change PIN",
+  "securityChangePassword": "Change password",
+  "securityChangeDesc": "Or switch between PIN and password",
+  "securityLockNow": "Lock now",
+  "securityLockOffDesc": "Require a PIN or password to open the app",
+  "securityLockTimeoutDesc": "How long the app may stay in the background before it locks",
+  "securityConfirmIdentity": "Confirm it's you",
+  "securityCurrentPin": "Current PIN",
+  "securityCurrentPassword": "Current password",
+  "securityDisableTitle": "Turn off app lock?",
+  "securityDisableMessage": "Anyone with access to this device can then open the app and see your finances.",
+  "securityTurnOff": "Turn off",
+  "securityTimeoutImmediately": "Immediately",
+  "securityTimeoutSeconds": "{n} s",
+  "@securityTimeoutSeconds": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTimeoutMinutes": "{n} min",
+  "@securityTimeoutMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTimeoutHours": "{n} h",
+  "@securityTimeoutHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityContentHidden": "Content hidden"
+}

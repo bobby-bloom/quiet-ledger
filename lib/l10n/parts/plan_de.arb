@@ -1,0 +1,11 @@
+{
+  "@@locale": "de",
+  "planTabBudgets": "Budgets",
+  "planTabRecurring": "Wiederkehrend",
+  "planTabGoals": "Ziele",
+  "planBillsCalendar": "Zahlungskalender",
+  "planPreviousPeriod": "Vorheriger Zeitraum",
+  "planNextPeriod": "Nächster Zeitraum",
+  "planToday": "Heute",
+  "planPeriodSemantics": "Zeitraum {title}, {range}"
+}

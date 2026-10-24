@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Accounts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button,input,select{font:inherit;color:inherit}
+a{color:#1F5A53}a:hover{color:#0A3530}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #F8F7F3; color: #1B1D1C; font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif; font-variant-numeric: tabular-nums; display: flex; flex-direction: column">
+
+<header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 4px">
+<div style="display: flex; align-items: center; gap: 2px">
+<a href="Main.dc.html" aria-label="Back" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 24px; color: #1B1D1C"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+<h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.4px">Accounts</h1>
+</div>
+<div style="display: flex; align-items: center">
+<button type="button" aria-label="Reconcile balances" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 24px; color: #4A4F4D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M7 20h10M5 7h14"></path><path d="M5 7 2.5 13a2.5 2.5 0 0 0 5 0L5 7ZM19 7l-2.5 6a2.5 2.5 0 0 0 5 0L19 7Z"></path></svg></button>
+<button type="button" aria-label="Add account" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 24px; color: #4A4F4D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</header>
+
+<section aria-label="Summary" style="padding: 0 20px 12px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><span style="font-size: 13px; font-weight: 600; color: #4A4F4D">Net worth</span><span style="font-size: 28px; font-weight: 800; letter-spacing: -0.8px">€24,118.40</span></div>
+<div style="display: flex; gap: 2px; height: 6px" aria-hidden="true"><div style="width: 86.3%; background: #1F5A53; border-radius: 3px"></div><div style="flex: 1; background: #B3261E; border-radius: 3px"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: #4A4F4D"><span>Assets <span style="font-weight: 700; color: #1B1D1C">€28,683.07</span></span><span>Liabilities <span style="font-weight: 700; color: #1B1D1C">−€4,564.67</span></span></div>
+</section>
+
+<div style="flex: 1; display: flex; flex-direction: column; padding-bottom: 80px">
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>CHECKING</span><span>€2,166.12</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #DCEDE8; color: #1F5A53; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 4l9 5.5M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3.5 20h17"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Everyday checking</span><span style="font-size: 12px; color: #4A4F4D">Alert below €500</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,8 8,10 16,13 24,15 30,3 38,7 46,11 56,15"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€1,246.12</span>
+</button>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; border-top: 1px solid #ECEBE5; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #DCEDE8; color: #1F5A53; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2v-17Z"></path><path d="M9 9h6M9 13h4"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Bills account</span><span style="font-size: 12px; color: #4A4F4D">Rent, insurance, utilities</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,6 8,14 18,15 28,5 36,13 46,14 56,9"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€920.00</span>
+</button>
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>SAVINGS</span><span>€11,450.00</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #EEDCF7; color: #6A4C7C; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"></rect><circle cx="12" cy="12" r="3.5"></circle><path d="M12 8.5v1M12 14.5v1"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Emergency fund</span><span style="font-size: 12px; color: #4A4F4D">Goal: 85% of €12,000</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,17 10,15 20,13 30,11 40,8 48,6 56,4"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€10,200.00</span>
+</button>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; border-top: 1px solid #ECEBE5; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #EEDCF7; color: #6A4C7C; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Holiday savings</span><span style="font-size: 12px; color: #4A4F4D">+€150 last transfer</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,16 12,16 14,12 28,12 30,9 44,9 46,5 56,5"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€1,250.00</span>
+</button>
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>CASH</span><span>€86.50</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #F7EBCB; color: #7A5900; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="2"></rect><circle cx="12" cy="12" r="2.5"></circle></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Wallet</span><span style="font-size: 12px; color: #4A4F4D">Counted 20 Oct</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,6 10,9 20,12 26,4 36,8 46,11 56,13"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€86.50</span>
+</button>
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>CREDIT CARD</span><span>−€412.37</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #DFE6F2; color: #3A5A8F; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"></rect><path d="M2.5 10h19M6.5 15h4"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Visa card</span><span style="font-size: 12px; color: #4A4F4D">Settles 5 Nov from checking</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,4 6,4 14,8 24,10 34,13 44,15 56,17"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">−€412.37</span>
+</button>
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>INVESTMENT</span><span>€14,980.45</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #DCE4FA; color: #2149B0; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V12M10 20V6M15 20v-9M20 20V8M3 20.5h18"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">ETF portfolio</span><span style="font-size: 12px; color: #4A4F4D">Not in budgets · 5% p.a. assumed</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,15 8,13 14,14 22,10 30,11 38,7 46,8 56,4"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">€14,980.45</span>
+</button>
+
+<div style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #F2F1EC; font-size: 12px; font-weight: 700; color: #4A4F4D; letter-spacing: 0.3px"><span>LOAN</span><span>−€4,152.30</span></div>
+<button type="button" style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; background: transparent; text-align: left; width: 100%">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #F6E0DB; color: #8A3B2E; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16.5 6 11l2.5-4h7L18 11l2 5.5v2.5H4v-2.5Z"></path><path d="M4 13h16M7 19v1.5M17 19v1.5"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Car loan</span><span style="font-size: 12px; color: #4A4F4D">€235.00 / month · ends Mar 2028</span></span>
+<svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline fill="none" stroke="#767C79" stroke-width="1.5" stroke-linejoin="round" points="0,17 10,15 20,13 30,11 40,8 48,6 56,4"></polyline></svg>
+<span style="width: 92px; text-align: right; font-size: 15px; font-weight: 700">−€4,152.30</span>
+</button>
+
+</div>
+
+<nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #ECEBE5; display: grid; grid-template-columns: 1fr 1.35fr 72px 1fr 1fr 1fr; align-items: start; padding: 0 4px">
+<a href="Main.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #4A4F4D; font-size: 12px; font-weight: 600"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"></path><path d="M5.5 9v11h4.5v-6h4v6h4.5V9"></path></svg></span>Home</a>
+<a href="Transactions.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #4A4F4D; font-size: 12px; font-weight: 600"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 6.5h12M8.5 12h12M8.5 17.5h12M4 6.5h.01M4 12h.01M4 17.5h.01"></path></svg></span>Transactions</a>
+<div style="height: 72px; display: flex; align-items: center; justify-content: center">
+<a href="QuickAdd.dc.html" aria-label="Add transaction" style="width: 56px; height: 56px; border-radius: 16px; background: #1F5A53; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(20, 40, 36, 0.25)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></a>
+</div>
+<a href="Plan.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #4A4F4D; font-size: 12px; font-weight: 600"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="0.6"></circle></svg></span>Plan</a>
+<a href="Forecast.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #4A4F4D; font-size: 12px; font-weight: 600"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 18 9 12l4 3 7.5-8"></path><path d="M15.5 7h5v5"></path></svg></span>Forecast</a>
+<button type="button" aria-current="page" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 0; background: transparent; color: #0F2E29; font-size: 12px; font-weight: 700; padding: 0"><span style="width: 56px; height: 32px; border-radius: 16px; background: #D5E6E1; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg></span>More</button>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

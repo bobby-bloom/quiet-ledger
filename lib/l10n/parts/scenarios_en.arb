@@ -1,0 +1,152 @@
+{
+  "scenariosTitle": "Scenarios",
+  "scenariosNew": "New scenario",
+  "scenariosEdit": "Edit scenario",
+  "scenariosEmpty": "No scenarios yet. A scenario changes the plan – a raise, a big purchase, ending a loan – without touching your data.",
+  "scenariosName": "Name",
+  "scenariosNameRequired": "Enter a name",
+  "scenariosColor": "Colour",
+  "scenariosColorAuto": "Automatic",
+  "scenariosColorOption": "Colour {index}",
+  "@scenariosColorOption": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "scenariosCompare": "Compare on the forecast",
+  "scenariosCompareDesc": "Up to 3 scenarios are shown next to the baseline.",
+  "scenariosMaxCompared": "Up to 3 scenarios can be compared. Turn one off first.",
+  "scenariosChanges": "Changes",
+  "scenariosAddChange": "Add change",
+  "scenariosNoChanges": "No changes yet. Add one to see its effect.",
+  "scenariosDuplicate": "Duplicate",
+  "scenariosCopyName": "{name} (copy)",
+  "scenariosDeleteTitle": "Delete scenario?",
+  "scenariosDeleteMessage": "“{name}” will be deleted. Your data is not affected.",
+  "scenariosNotFound": "This scenario no longer exists.",
+  "scenariosModuleOff": "Scenarios are turned off. You can turn them on in Settings › Navigation & modules.",
+  "scenariosSaved": "Scenario saved",
+  "scenariosChangeCount": "{count, plural, =0{No changes} =1{1 change} other{{count} changes}}",
+  "@scenariosChangeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scenariosTypeOneOff": "One-off event",
+  "scenariosTypeCategory": "Change spending in a category",
+  "scenariosTypeRecurringChange": "Change a recurring item",
+  "scenariosTypeAddRecurring": "Add a recurring item",
+  "scenariosTypeEndRecurring": "End a recurring item",
+  "scenariosTypeReturn": "Different return",
+  "scenariosTypeInflation": "Different inflation",
+  "scenariosTypeUnknown": "Unsupported change",
+  "scenariosSumOneOff": "One-off · {amount} on {date}",
+  "@scenariosSumOneOff": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumPercent": "{percent} from {date}",
+  "@scenariosSumPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumCategoryAbsolute": "{amount} per month from {date}",
+  "@scenariosSumCategoryAbsolute": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumRecurringAbsolute": "{amount} per payment from {date}",
+  "@scenariosSumRecurringAbsolute": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumAddRecurring": "{amount} {frequency} from {date}",
+  "@scenariosSumAddRecurring": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumEndRecurring": "Ends {date}",
+  "scenariosSumReturnAll": "Return {percent} on investments",
+  "scenariosSumReturnAccount": "Return {percent} on {account}",
+  "@scenariosSumReturnAccount": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumInflation": "Inflation {percent}",
+  "scenariosUnknownItem": "Unknown",
+  "scenariosFieldLabel": "Label",
+  "scenariosFieldDate": "Date",
+  "scenariosFieldFrom": "From",
+  "scenariosFieldUntil": "Until (optional)",
+  "scenariosFieldAmount": "Amount",
+  "scenariosFieldAccount": "Account",
+  "scenariosFieldTransferTo": "Transfer to (optional)",
+  "scenariosFieldCategory": "Category",
+  "scenariosFieldRule": "Recurring item",
+  "scenariosFieldChangeBy": "Change by",
+  "scenariosModePercent": "Percent",
+  "scenariosModeAmount": "Amount",
+  "scenariosFieldPercent": "Change in % (e.g. 5 or −10)",
+  "scenariosFieldDeltaMonthly": "Change per month (negative = less)",
+  "scenariosFieldDeltaEach": "Change per payment (negative = less)",
+  "scenariosFieldRepeats": "Repeats",
+  "scenariosFreqWeekly": "weekly",
+  "scenariosFreqMonthly": "monthly",
+  "scenariosFreqQuarterly": "every 3 months",
+  "scenariosFreqYearly": "yearly",
+  "scenariosFreqCustom": "custom",
+  "scenariosFieldReturn": "Expected return per year in %",
+  "scenariosFieldInflation": "Inflation per year in %",
+  "scenariosAllInvestments": "All investments",
+  "scenariosInvalidNumber": "Enter a valid number",
+  "scenariosRequired": "Required",
+  "scenariosChoose": "Choose…",
+  "scenariosNoRules": "There are no recurring items yet.",
+  "scenariosLowDelta": "Lowest {delta}",
+  "scenariosEndDelta": "End {delta}",
+  "scenariosResolvesWarning": "Stays above your threshold",
+  "scenariosCausesWarning": "Drops below your threshold"
+}

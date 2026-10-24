@@ -1,0 +1,52 @@
+{
+  "onbDefaultChecking": "Checking account",
+  "onbStepOf": "Step {current} of {total}",
+  "onbGetStarted": "Get started",
+  "onbSetUpLock": "Set up app lock",
+  "onbSkipFinish": "Not now, finish",
+  "onbTagline": "Your money, on your device. Record, track, plan and project — without a cloud account.",
+  "onbPointRecord": "Log a transaction in seconds",
+  "onbPointTrack": "See balances, net worth and where your money goes",
+  "onbPointPlan": "Budgets, recurring bills and savings goals",
+  "onbPointProject": "Forecast your balance months ahead",
+  "onbPointPrivate": "Private: encrypted on this device, no telemetry",
+  "onbFormatsTitle": "Language & formats",
+  "onbFormatsSubtitle": "You can change all of this later in Settings.",
+  "onbPreview": "Preview",
+  "onbPeriodTitle": "Budget period",
+  "onbPeriodSubtitle": "When does your money month start? Many people use the day their salary arrives.",
+  "onbLastDayOfMonth": "Last day of the month",
+  "onbSalaryHint": "Tip: after you add your salary as a recurring income you can let periods start on payday (Settings › Budgets).",
+  "onbStartTitle": "How do you want to start?",
+  "onbStartSubtitle": "Default categories are created either way.",
+  "onbImportTitle": "Import from Excel or CSV",
+  "onbImportText": "Bring your existing sheet with all its history. The importer maps columns, categories and accounts.",
+  "onbFreshTitle": "Start fresh",
+  "onbFreshText": "Add your accounts with their current balances.",
+  "onbAccountsTitle": "Your accounts",
+  "onbAccountsSubtitle": "Enter today's balance for each account. You can add more later.",
+  "onbAccountName": "Name",
+  "onbAccountType": "Type",
+  "onbOpeningBalance": "Current balance",
+  "onbAddAccount": "Add another account",
+  "onbLockTitle": "Protect your data",
+  "onbLockSubtitle": "Lock the app with a PIN, password or biometrics.",
+  "onbTypeChecking": "Checking",
+  "onbTypeSavings": "Savings",
+  "onbTypeCash": "Cash",
+  "onbTypeCreditCard": "Credit card",
+  "onbTypeInvestment": "Investment",
+  "onbTypeLoan": "Loan",
+  "onbTypeOtherAsset": "Other asset",
+  "onbTypeOtherLiability": "Other liability",
+  "@onbStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
+}

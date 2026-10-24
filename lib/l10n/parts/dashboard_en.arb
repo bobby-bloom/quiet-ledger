@@ -1,0 +1,114 @@
+{
+  "dashWidgetOptions": "Widget options",
+  "dashNetWorth": "Net worth",
+  "dashThisMonth": "this month",
+  "dashAcrossAccounts": "across {count, plural, =1{1 account} other{{count} accounts}}",
+  "dashIn12Months": "{amount} in 12 months",
+  "dashNetWorthChart": "Net worth over the last 12 months",
+  "dashLast12Months": "Last 12 months",
+  "dashSoFar": "{month} so far",
+  "dashExpenses": "Expenses",
+  "dashSavingsRate": "Savings rate",
+  "dashTopCategories": "Top categories",
+  "dashNoSpending": "No spending in this period",
+  "dashUncategorised": "Uncategorised",
+  "dashAllAccounts": "All accounts",
+  "dashViewAll": "View all",
+  "dashBudgets": "Budgets",
+  "dashAllBudgets": "All budgets",
+  "dashUpcoming": "Upcoming",
+  "dashNextDays": "next {days} days",
+  "dashCalendar": "Calendar",
+  "dashNoUpcoming": "Nothing due in the next {days} days",
+  "dashGoals": "Goals",
+  "dashNoGoals": "No savings goals yet",
+  "dashRecent": "Recent transactions",
+  "dashNoBudgets": "No budgets for this period",
+  "dashSetUpBudgets": "Set up budgets",
+  "dashOver": "{amount} over",
+  "dashOf": "of {amount}",
+  "dashEdit": "Edit dashboard",
+  "dashEditTitle": "Edit dashboard",
+  "dashAddWidget": "Add widget",
+  "dashRemove": "Remove",
+  "dashMakeWide": "Make wide",
+  "dashMakeNormal": "Make normal width",
+  "dashChooseAccount": "Choose account",
+  "dashResetLayout": "Reset to default",
+  "dashLayoutPhone": "Phone",
+  "dashLayoutWide": "Tablet & desktop",
+  "dashPrevPeriod": "Previous period",
+  "dashNextPeriod": "Next period",
+  "dashToday": "Back to today",
+  "dashSearchHint": "Search transactions",
+  "dashNewTransaction": "New transaction",
+  "dashAutoPost": "auto-post",
+  "dashConfirm": "confirm",
+  "dashConfirmDaysBefore": "confirm {days} days before",
+  "dashWelcomeEmpty": "Add your first transaction to see your dashboard come alive.",
+  "dashWTypenetWorth": "Net worth",
+  "dashWTypemonthSummary": "Month summary",
+  "dashWTypebudgets": "Budget progress",
+  "dashWTypeupcomingBills": "Upcoming bills",
+  "dashWTypeforecast": "Mini forecast",
+  "dashWTypeaccounts": "Accounts",
+  "dashWTypegoals": "Goal progress",
+  "dashWTypetopCategories": "Top categories",
+  "dashWTyperecentTransactions": "Recent transactions",
+  "@dashAcrossAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashIn12Months": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashSoFar": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashNextDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashNoUpcoming": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashOf": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashConfirmDaysBefore": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
+}

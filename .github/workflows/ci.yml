@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.x
+          cache: true
+      - run: flutter pub get
+      - run: dart run tool/l10n.dart --check
+      - run: dart run build_runner build
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+
+  build:
+    needs: analyze-test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: linux, cmd: "flutter build linux" }
+          - { os: ubuntu-latest, target: web, cmd: "flutter build web" }
+          - { os: ubuntu-latest, target: android, cmd: "flutter build apk --debug" }
+          - { os: windows-latest, target: windows, cmd: "flutter build windows" }
+          - { os: macos-latest, target: macos, cmd: "flutter build macos" }
+          - { os: macos-latest, target: ios, cmd: "flutter build ios --no-codesign" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.x
+          cache: true
+      - if: matrix.target == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev libsecret-1-dev
+      - if: matrix.target == 'android'
+        uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: flutter pub get
+      - run: dart run tool/l10n.dart
+      - run: dart run build_runner build
+      - run: ${{ matrix.cmd }}
+
+  integration:
+    needs: analyze-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.x
+          cache: true
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev libsecret-1-dev xvfb
+      - run: flutter pub get && dart run tool/l10n.dart && dart run build_runner build
+      - run: xvfb-run flutter test integration_test -d linux

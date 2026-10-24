@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import – Map columns</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button,input,select{font:inherit;color:inherit}
+a{color:#1F5A53}a:hover{color:#0A3530}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #F8F7F3; color: #1B1D1C; font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif; font-variant-numeric: tabular-nums; display: flex; flex-direction: column">
+
+<header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 4px">
+<button type="button" aria-label="Cancel import" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 24px; color: #1B1D1C"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+<div style="flex: 1; display: flex; flex-direction: column; min-width: 0"><h1 style="margin: 0; font-size: 18px; font-weight: 800">Map columns</h1><span style="font-size: 12px; color: #4A4F4D">Profile: Household log</span></div>
+<span style="font-size: 12px; font-weight: 700; color: #4A4F4D; padding-right: 8px">Step 4 of 11</span>
+</header>
+
+<div aria-label="Import progress, step 4 of 11" style="display: flex; flex-direction: column; gap: 6px; padding: 0 16px 10px">
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 3px">
+<span style="height: 4px; border-radius: 2px; background: #1F5A53"></span><span style="height: 4px; border-radius: 2px; background: #1F5A53"></span><span style="height: 4px; border-radius: 2px; background: #1F5A53"></span><span style="height: 4px; border-radius: 2px; background: #1F5A53; outline: 2px solid #CDE8E1"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span><span style="height: 4px; border-radius: 2px; background: #E0DFD9"></span>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: #4A4F4D"><span style="display: flex; align-items: center; gap: 4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Structure</span><span style="font-weight: 800; color: #1F5A53">Mapping</span><span>Next: Formats</span></div>
+</div>
+
+<div style="margin: 0 16px; display: flex; align-items: center; gap: 10px; font-size: 13px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: #DCEDE8; color: #1F5A53; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3Z"></path><path d="M14 3v4h4M9.5 11.5l5 5M14.5 11.5l-5 5"></path></svg></span>
+<span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 700">household-ledger.xlsx · sheet “2026”</span><span style="font-size: 12px; color: #4A4F4D">1,284 rows · header in row 3 · 6 subtotal rows skipped</span></span>
+</div>
+
+<section aria-label="Sheet preview" style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 6px">
+<div style="overflow-x: auto; border: 1px solid #E0DFD9; border-radius: 12px; background: #FFFFFF">
+<table style="border-collapse: collapse; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; white-space: nowrap; min-width: 640px">
+<thead>
+<tr style="background: #F2F1EC; color: #4A4F4D; text-align: left">
+<th scope="col" style="width: 26px; padding: 4px 6px; font-weight: 500; text-align: right; border-right: 1px solid #E6E5DF"></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500"><span style="display: block; font-size: 11px">A</span><span style="color: #1B1D1C; font-weight: 500">Date</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500"><span style="display: block; font-size: 11px">B</span><span style="color: #1B1D1C; font-weight: 500">What</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500; text-align: right"><span style="display: block; font-size: 11px">C</span><span style="color: #1B1D1C; font-weight: 500">Out</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500; text-align: right"><span style="display: block; font-size: 11px">D</span><span style="color: #1B1D1C; font-weight: 500">In</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500"><span style="display: block; font-size: 11px">E</span><span style="color: #1B1D1C; font-weight: 500">Category</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500; text-align: right"><span style="display: block; font-size: 11px">F</span><span style="color: #1B1D1C; font-weight: 500">Balance</span></th>
+<th scope="col" style="padding: 4px 8px; font-weight: 500"><span style="display: block; font-size: 11px">G</span><span style="color: #1B1D1C; font-weight: 500">Receipt no.</span></th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 26px; border-top: 1px solid #ECEBE5"><td style="padding: 0 6px; color: #4A4F4D; text-align: right; border-right: 1px solid #E6E5DF">4</td><td style="padding: 0 8px">01.10.2026</td><td style="padding: 0 8px">Salary</td><td style="padding: 0 8px"></td><td style="padding: 0 8px; text-align: right">3.300,00</td><td style="padding: 0 8px">Income &gt; Salary</td><td style="padding: 0 8px; text-align: right">4.112,40</td><td style="padding: 0 8px"></td></tr>
+<tr style="height: 26px; border-top: 1px solid #ECEBE5"><td style="padding: 0 6px; color: #4A4F4D; text-align: right; border-right: 1px solid #E6E5DF">5</td><td style="padding: 0 8px">01.10.2026</td><td style="padding: 0 8px">Rent October</td><td style="padding: 0 8px; text-align: right">980,00</td><td style="padding: 0 8px"></td><td style="padding: 0 8px">Home &gt; Rent</td><td style="padding: 0 8px; text-align: right">3.132,40</td><td style="padding: 0 8px"></td></tr>
+<tr style="height: 26px; border-top: 1px solid #ECEBE5"><td style="padding: 0 6px; color: #4A4F4D; text-align: right; border-right: 1px solid #E6E5DF">6</td><td style="padding: 0 8px; background: #F9DEDC; color: #410E0B; box-shadow: inset 0 0 0 1.5px #B3261E"><span style="display: flex; align-items: center; gap: 4px">31.09.2026<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Invalid date"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5M12 16h.01"></path></svg></span></td><td style="padding: 0 8px">City Transit</td><td style="padding: 0 8px; text-align: right">49,00</td><td style="padding: 0 8px"></td><td style="padding: 0 8px">Transport</td><td style="padding: 0 8px; text-align: right">3.083,40</td><td style="padding: 0 8px">R-0412</td></tr>
+<tr style="height: 26px; border-top: 1px solid #ECEBE5"><td style="padding: 0 6px; color: #4A4F4D; text-align: right; border-right: 1px solid #E6E5DF">7</td><td style="padding: 0 8px">02.10.2026</td><td style="padding: 0 8px">Corner Grocer</td><td style="padding: 0 8px; text-align: right; background: #F9DEDC; color: #410E0B; box-shadow: inset 0 0 0 1.5px #B3261E"><span style="display: flex; align-items: center; justify-content: flex-end; gap: 4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Not a number"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5M12 16h.01"></path></svg>41,2O</span></td><td style="padding: 0 8px"></td><td style="padding: 0 8px">Food &gt; Groceries</td><td style="padding: 0 8px; text-align: right">3.042,20</td><td style="padding: 0 8px">R-0413</td></tr>
+</tbody>
+</table>
+</div>
+<div role="status" style="display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-radius: 12px; background: #FBEFC9; color: #4A3500; font-size: 12px">
+<span style="display: flex; align-items: center; gap: 6px; font-weight: 700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z"></path><path d="M12 10v4.5M12 17.2h.01"></path></svg>Balance check: 1,281 of 1,284 rows match column F</span>
+<span>2 values can’t be read (rows 6, 7) · 1 balance mismatch in row 212</span>
+</div>
+</section>
+
+<section aria-label="Amount format" style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 700; color: #4A4F4D">Amounts are written as</span>
+<div role="radiogroup" aria-label="Amount format" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 44px; border: 1px solid #767C79; border-radius: 22px; overflow: hidden">
+<button type="button" role="radio" aria-checked="false" style="border: 0; background: transparent; font-size: 13px; font-weight: 600">One signed</button>
+<button type="button" role="radio" aria-checked="true" style="border: 0; border-left: 1px solid #767C79; background: #D5E6E1; color: #0F2E29; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Out + In</button>
+<button type="button" role="radio" aria-checked="false" style="border: 0; border-left: 1px solid #767C79; background: transparent; font-size: 13px; font-weight: 600">+ Type col.</button>
+</div>
+</section>
+
+<section aria-label="Column mapping" style="padding: 6px 16px 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; height: 46px">
+<label for="map-a" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">A</span>Date</label>
+<div style="position: relative; width: 196px"><select id="map-a" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Date</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-b" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">B</span>What</label>
+<div style="position: relative; width: 196px"><select id="map-b" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Payee</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-c" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">C</span>Out</label>
+<div style="position: relative; width: 196px"><select id="map-c" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Amount out (debit)</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-d" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">D</span>In</label>
+<div style="position: relative; width: 196px"><select id="map-d" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Amount in (credit)</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-e" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">E</span>Category</label>
+<div style="position: relative; width: 196px"><select id="map-e" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Category › Sub (“&gt;”)</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-f" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">F</span>Balance</label>
+<div style="position: relative; width: 196px"><select id="map-f" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Running balance (check)</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 46px; border-top: 1px solid #ECEBE5">
+<label for="map-g" style="flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 6px; background: #ECEBE5; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; display: flex; align-items: center; justify-content: center">G</span>Receipt no.</label>
+<div style="position: relative; width: 196px"><select id="map-g" style="width: 100%; height: 40px; appearance: none; -webkit-appearance: none; border: 1px solid #767C79; border-radius: 8px; background: #FFFFFF; padding: 0 32px 0 12px; font-size: 14px; font-weight: 600"><option>Custom field: Receipt no.</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4F4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 10px; top: 11px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+</section>
+
+<footer style="position: absolute; left: 0; right: 0; bottom: 0; height: 76px; box-sizing: border-box; padding: 12px 16px; background: #F2F1EC; border-top: 1px solid #E0DFD9; display: flex; gap: 12px">
+<button type="button" style="flex: 1; height: 52px; border: 1px solid #767C79; border-radius: 26px; background: transparent; font-size: 15px; font-weight: 700; color: #1F5A53">Back</button>
+<button type="button" style="flex: 2; height: 52px; border: 0; border-radius: 26px; background: #1F5A53; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px">Next: Formats<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

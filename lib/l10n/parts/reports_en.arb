@@ -1,0 +1,200 @@
+{
+  "reportsTitle": "Reports",
+  "reportsSpendingTitle": "Spending by category",
+  "reportsIncomeByCategoryTitle": "Income by category",
+  "reportsIncomeExpenseTitle": "Income vs expenses",
+  "reportsNetWorthTitle": "Net worth",
+  "reportsCategoryTrendTitle": "Category trend",
+  "reportsTopPayeesTitle": "Top payees",
+  "reportsComparisonTitle": "Period comparison",
+  "reportsPeriod": "Period",
+  "reportsCustomRange": "Custom range…",
+  "reportsPreviousPeriod": "Previous period",
+  "reportsNextPeriod": "Next period",
+  "reportsAllAccounts": "All accounts",
+  "reportsAccountsCount": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@reportsAccountsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsAllTags": "All tags",
+  "reportsTagsCount": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@reportsTagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsCustomField": "Custom field",
+  "reportsCustomFieldValue": "{field}: {value}",
+  "@reportsCustomFieldValue": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsChooseField": "Field",
+  "reportsFieldValue": "Value",
+  "reportsNoFields": "No custom fields yet",
+  "reportsIncludeExcluded": "Include excluded",
+  "reportsIncludeExcludedHint": "Includes the categories, accounts and tags excluded in Settings › Reports",
+  "reportsClearFilters": "Clear filters",
+  "reportsExportCsv": "Export CSV",
+  "reportsExported": "Report exported",
+  "reportsExportFailed": "Export failed: {message}",
+  "@reportsExportFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsNoData": "No data for this period",
+  "reportsTotal": "Total",
+  "reportsUncategorized": "Uncategorised",
+  "reportsOther": "Other",
+  "reportsArchived": "archived",
+  "reportsData": "Data",
+  "reportsColShare": "Share",
+  "reportsColCount": "Transactions",
+  "reportsColPeriod": "Period",
+  "reportsColIncome": "Income",
+  "reportsColExpenses": "Expenses",
+  "reportsColNet": "Net",
+  "reportsColSavingsRate": "Savings rate",
+  "reportsColMonth": "Month",
+  "reportsColAssets": "Assets",
+  "reportsColLiabilities": "Liabilities",
+  "reportsColNetWorth": "Net worth",
+  "reportsColAverage": "Average",
+  "reportsColCurrent": "Current",
+  "reportsColPrevious": "Previous",
+  "reportsColLastYear": "Last year",
+  "reportsColDeltaPrevious": "Δ previous",
+  "reportsColDeltaPreviousPct": "Δ previous %",
+  "reportsColDeltaLastYear": "Δ last year",
+  "reportsColDeltaLastYearPct": "Δ last year %",
+  "reportsIntervalMonth": "Month",
+  "reportsIntervalQuarter": "Quarter",
+  "reportsIntervalYear": "Year",
+  "reportsIntervalBudgetPeriod": "Budget period",
+  "reportsSortTotal": "Total",
+  "reportsSortCount": "Count",
+  "reportsSortAverage": "Average",
+  "reportsAllCategories": "All categories",
+  "reportsShowTransactions": "Show transactions",
+  "reportsSubcategories": "Show subcategories",
+  "reportsChooseCategories": "Categories",
+  "reportsTopCategoriesAuto": "Top 3 categories",
+  "reportsSavingsRate": "Savings rate",
+  "reportsNetChange": "Net change",
+  "reportsChangeInPeriod": "{amount} in this period",
+  "@reportsChangeInPeriod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsVsPrevious": "vs previous period",
+  "reportsVsLastYear": "vs same period last year",
+  "reportsQuarterLabel": "Q{quarter} {year}",
+  "@reportsQuarterLabel": {
+    "placeholders": {
+      "quarter": {
+        "type": "int"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsDonutSummary": "{title}, total {total}. {items}",
+  "@reportsDonutSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsBarsSummary": "Income vs expenses over {count} periods: income {income}, expenses {expenses}.",
+  "@reportsBarsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "income": {
+        "type": "String"
+      },
+      "expenses": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsLineSummary": "Net worth from {from} to {to}: {start} to {end}.",
+  "@reportsLineSummary": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTrendSummary": "Category trend over {count} periods. {items}",
+  "@reportsTrendSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsPayeesSummary": "Top payees: {items}",
+  "@reportsPayeesSummary": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsComparisonSummary": "Total {current}, previous period {previous}, last year {lastYear}.",
+  "@reportsComparisonSummary": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      },
+      "lastYear": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsOpenReport": "Open report",
+  "reportsNotFound": "Report not found"
+}

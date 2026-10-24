@@ -1,0 +1,3980 @@
+{
+  "@@locale": "en",
+  "accountsTitle": "Accounts",
+  "accountsAdd": "Add account",
+  "accountsEmpty": "No accounts yet. Add your bank accounts, cash and cards to track balances and net worth.",
+  "accountsReorder": "Reorder accounts",
+  "accountsReorderHint": "Drag accounts to change their order, or below another heading to move them into that group.",
+  "accountsDragHandle": "Move {name}",
+  "@accountsDragHandle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsReconcileBalances": "Reconcile balances",
+  "accountsSelectHint": "Select an account to see its details.",
+  "accountsMoreActions": "More actions",
+  "accountsManageGroups": "Manage groups",
+  "accountsShowArchivedMenu": "Show archived accounts",
+  "accountsHideArchived": "Hide archived accounts",
+  "accountsShowArchived": "{count, plural, =1{Show 1 archived account} other{Show {count} archived accounts}}",
+  "@accountsShowArchived": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsArchivedSection": "Archived",
+  "accountsArchivedDesc": "Hidden from lists and pickers. Its history stays.",
+  "accountsNetWorth": "Net worth",
+  "accountsAssets": "Assets",
+  "accountsLiabilities": "Liabilities",
+  "accountsNetWorthSemantics": "Net worth {net}. Assets {assets}, liabilities {liabilities}.",
+  "@accountsNetWorthSemantics": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "assets": {
+        "type": "String"
+      },
+      "liabilities": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAlertBelow": "Alert below {amount}",
+  "@accountsAlertBelow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsBelowThreshold": "Below the {amount} alert",
+  "@accountsBelowThreshold": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsNotInNetWorth": "Not in net worth",
+  "accountsNotInBudgets": "Not in budgets",
+  "accountsNotInForecast": "Not in forecast",
+  "accountsReturnAssumed": "{rate} p.a. assumed",
+  "@accountsReturnAssumed": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsInterestRate": "{rate} interest",
+  "@accountsInterestRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOpen": "Open",
+  "accountsReconcile": "Reconcile",
+  "accountsArchive": "Archive",
+  "accountsUnarchive": "Unarchive",
+  "accountsNoGroup": "No group",
+  "accountsTypeChecking": "Checking",
+  "accountsTypeSavings": "Savings",
+  "accountsTypeCash": "Cash",
+  "accountsTypeCreditCard": "Credit card",
+  "accountsTypeInvestment": "Investment",
+  "accountsTypeLoan": "Loan",
+  "accountsTypeOtherAsset": "Other asset",
+  "accountsTypeOtherLiability": "Other liability",
+  "accountsArchivedSnack": "Account archived",
+  "accountsUnarchivedSnack": "Account restored",
+  "accountsCannotDeleteTitle": "Account in use",
+  "accountsDeleteInUse": "{count, plural, =1{This account has 1 transaction and can't be deleted. Archive it to hide it while keeping its history.} other{This account has {count} transactions and can't be deleted. Archive it to hide it while keeping its history.}}",
+  "@accountsDeleteInUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsDeleteInUseRules": "{count, plural, =1{A recurring rule uses this account. Change or delete it first, or archive the account.} other{{count} recurring rules use this account. Change or delete them first, or archive the account.}}",
+  "@accountsDeleteInUseRules": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsDeleteMessage": "The account has no transactions. Linked goals are unlinked.",
+  "accountsDeleted": "Account deleted",
+  "accountsNotFound": "This account no longer exists.",
+  "accountsRange1M": "1M",
+  "accountsRange3M": "3M",
+  "accountsRange6M": "6M",
+  "accountsRange1Y": "1Y",
+  "accountsRangeAll": "All",
+  "accountsCurrentBalance": "Current balance",
+  "accountsLowBalanceWarning": "Below the low-balance alert of {amount}",
+  "@accountsLowBalanceWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsBalanceOverTime": "Balance over time",
+  "accountsChartEmpty": "Not enough data for a chart yet.",
+  "accountsChartSemantics": "Balance of {name} from {from} to {to}: {start} at the start, {end} at the end, lowest {lowest}.",
+  "@accountsChartSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "lowest": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsRecentTransactions": "Recent transactions",
+  "accountsAllTransactions": "All",
+  "accountsNoTransactions": "No transactions in this account yet.",
+  "accountsDetails": "Details",
+  "accountsTransferWith": "Transfer · {name}",
+  "@accountsTransferWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsSplit": "Split",
+  "accountsUncategorized": "Uncategorised",
+  "accountsNew": "New account",
+  "accountsEditTitle": "Edit account",
+  "accountsCreate": "Create account",
+  "accountsSectionBasics": "Basics",
+  "accountsSectionAppearance": "Appearance",
+  "accountsSectionInclude": "Counts toward",
+  "accountsSectionPlanning": "Planning",
+  "accountsFieldName": "Name",
+  "accountsNameRequired": "Enter a name",
+  "accountsFieldType": "Type",
+  "accountsFieldOpeningBalance": "Opening balance",
+  "accountsFieldOpeningDate": "Opening date",
+  "accountsLiabilityHint": "Enter debt as a negative amount, e.g. −4,152.30.",
+  "accountsFieldGroup": "Group",
+  "accountsNewGroup": "New group…",
+  "accountsGroupName": "Group name",
+  "accountsIncludeNetWorth": "Net worth",
+  "accountsIncludeBudgets": "Budgets",
+  "accountsIncludeBudgetsDesc": "Spending from this account counts against budgets",
+  "accountsIncludeForecast": "Forecast",
+  "accountsLowBalance": "Low-balance alert",
+  "accountsLowBalanceHint": "Warn when the balance falls below this amount",
+  "accountsExpectedReturn": "Expected annual return",
+  "accountsExpectedReturnHint": "Used by the net-worth projection",
+  "accountsInterest": "Interest rate",
+  "accountsInterestHint": "Annual rate, e.g. for loans and credit cards",
+  "accountsRateInvalid": "Enter a percentage between −100 and 100",
+  "accountsNote": "Note",
+  "accountsDiscardTitle": "Discard changes?",
+  "accountsKeepEditing": "Keep editing",
+  "accountsDiscard": "Discard",
+  "accountsReconcileTitle": "Reconcile",
+  "accountsReconcileIntro": "Enter the balance your bank shows for the date below. The cleared transactions in the app should add up to it.",
+  "accountsBankBalance": "Bank balance",
+  "accountsBankDate": "Balance date",
+  "accountsDifference": "Difference",
+  "accountsClearedBalance": "Cleared in the app",
+  "accountsPendingSum": "{count, plural, =0{Pending} =1{Pending (1)} other{Pending ({count})}}",
+  "@accountsPendingSum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsEnterBankBalance": "Enter the bank balance to compare.",
+  "accountsReconciled": "Balanced. The app matches your bank.",
+  "accountsDifferenceMore": "Your bank shows more than the app. Clear pending income or add the missing entries.",
+  "accountsDifferenceLess": "Your bank shows less than the app. Clear pending expenses the bank already booked.",
+  "accountsCreateCorrection": "Book correction of {amount}",
+  "@accountsCreateCorrection": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCreateCorrectionShort": "Book correction",
+  "accountsCorrectionConfirmTitle": "Book a correction?",
+  "accountsCorrectionConfirm": "A cleared transaction of {amount} is added so the app matches the bank balance.",
+  "@accountsCorrectionConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCorrectionPayee": "Reconciliation",
+  "accountsCorrectionNote": "Correction to match the bank balance",
+  "accountsCorrectionCreated": "Correction booked",
+  "accountsPendingTitle": "Pending transactions",
+  "accountsPendingHint": "Select the ones your bank already booked and mark them as cleared.",
+  "accountsNoPending": "No pending transactions up to this date.",
+  "accountsSelectAll": "Select all",
+  "accountsMarkClearedNone": "Mark as cleared",
+  "accountsMarkCleared": "{count, plural, =1{Mark 1 as cleared ({amount})} other{Mark {count} as cleared ({amount})}}",
+  "@accountsMarkCleared": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsMarkedCleared": "{count, plural, =1{1 transaction cleared} other{{count} transactions cleared}}",
+  "@accountsMarkedCleared": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsGroupsTitle": "Account groups",
+  "accountsGroupsEmpty": "No groups yet. Groups bundle accounts in the list, e.g. \"Daily\" or \"Savings\".",
+  "accountsGroupsHint": "Tap to rename, drag to reorder. Deleting a group keeps its accounts.",
+  "accountsGroupAdd": "Add group",
+  "accountsGroupRename": "Rename group",
+  "accountsGroupDeleteMessage": "Its accounts stay and become ungrouped.",
+  "accountsGroupDeleted": "Group deleted",
+  "accountsGroupCount": "{count, plural, =0{No accounts} =1{1 account} other{{count} accounts}}",
+  "@accountsGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsTitle": "Budgets",
+  "budgetsBudgeted": "Budgeted",
+  "budgetsSpent": "Spent",
+  "budgetsLeftLabel": "Left",
+  "budgetsLeftDays": "{days, plural, =0{Left · last day} =1{Left · 1 day} other{Left · {days} days}}",
+  "@budgetsLeftDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsTodayDayOf": "Today, day {day} of {total}",
+  "@budgetsTodayDayOf": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOfAmount": "of {amount}",
+  "@budgetsOfAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsOverBudget": "{amount} over budget",
+  "@budgetsOverBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsUsedLeft": "{percent}% used · {amount} left",
+  "@budgetsUsedLeft": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAmountLeft": "{amount} left",
+  "@budgetsAmountLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsInclRolledOver": "incl. {amount} rolled over",
+  "@budgetsInclRolledOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsInclOverspentCarried": "incl. {amount} overspent carried over",
+  "@budgetsInclOverspentCarried": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSpentOf": "{spent} spent of {available}",
+  "@budgetsSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsUnbudgetedSpent": "{amount} spent in categories without a budget",
+  "@budgetsUnbudgetedSpent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEmpty": "No budgets for this period yet.",
+  "budgetsAdd": "Add budget",
+  "budgetsCopyPrevious": "Copy previous period",
+  "budgetsFromAverage": "{count, plural, =1{From last period’s spending} other{From {count}-period average}}",
+  "@budgetsFromAverage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsFromTemplate": "From template",
+  "budgetsSaveTemplate": "Save as template",
+  "budgetsEditAll": "Edit all amounts",
+  "budgetsClearPeriod": "Remove all budgets",
+  "budgetsClearPeriodTitle": "Remove all budgets of this period?",
+  "budgetsClearPeriodMessage": "Transactions are not affected.",
+  "budgetsFillMenu": "Fill",
+  "budgetsFilledCount": "{count, plural, =0{No budgets set} =1{1 budget set} other{{count} budgets set}}",
+  "@budgetsFilledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsNothingToCopy": "The previous period has no budgets.",
+  "budgetsNoSpendingHistory": "No spending found in those periods.",
+  "budgetsOverwriteTitle": "Replace existing amounts?",
+  "budgetsOverwriteMessage": "Categories that already have a budget in this period get the new amount; others stay unchanged.",
+  "budgetsOverwriteConfirm": "Replace",
+  "budgetsAmountLabel": "Budget",
+  "budgetsAmountInvalid": "Enter an amount of 0 or more",
+  "budgetsRemove": "Remove budget",
+  "budgetsTemplateName": "Template name",
+  "budgetsTemplateNameRequired": "Enter a name",
+  "budgetsTemplateSaved": "Template “{name}” saved",
+  "@budgetsTemplateSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsTemplateSummary": "{count, plural, =1{1 category} other{{count} categories}} · {total}",
+  "@budgetsTemplateSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNoTemplates": "No templates yet. Save a period as a template first.",
+  "budgetsBulkTotal": "Total budgeted: {amount}",
+  "@budgetsBulkTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNoCategories": "No expense categories yet.",
+  "budgetsLeftToAssign": "{amount} left to assign",
+  "@budgetsLeftToAssign": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAllAssigned": "Every euro is assigned",
+  "budgetsOverAssigned": "{amount} more assigned than available",
+  "@budgetsOverAssigned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEnvelopeFormula": "Income {income} + carried over {carry} − assigned {assigned}",
+  "@budgetsEnvelopeFormula": {
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "carry": {
+        "type": "String"
+      },
+      "assigned": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSelectHint": "Select a budget to see its details.",
+  "budgetsCategoryMissing": "This category no longer exists.",
+  "budgetsTransactionsInPeriod": "Transactions in this period",
+  "budgetsNoTransactions": "No transactions in this period.",
+  "budgetsSpentNoBudget": "spent · no budget set",
+  "budgetsBudgetedThisPeriod": "Budgeted this period",
+  "budgetsCarriedIn": "Carried in from last period",
+  "budgetsRollsOverNext": "Rolls over if the period ended now",
+  "budgetsWarningAt": "Warning at",
+  "budgetsEditAmount": "Edit budget",
+  "budgetsSetBudget": "Set budget",
+  "budgetsRolloverOption": "Rollover",
+  "budgetsThresholdOption": "Warning threshold",
+  "budgetsDefaultValue": "Default ({value})",
+  "@budgetsDefaultValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsHistory": "Last periods",
+  "budgetsHistoryRow": "{period}: {spent} spent, budget {budget}",
+  "@budgetsHistoryRow": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsHistoryLegend": "Bars show spending; the tick marks the budget.",
+  "budgetsSplitLine": "split",
+  "budgetsAlertOverTitle": "{category} is over budget",
+  "@budgetsAlertOverTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertOverBody": "{amount} over budget this period.",
+  "@budgetsAlertOverBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertWarningTitle": "{category} is nearly used up",
+  "@budgetsAlertWarningTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertWarningBody": "{percent}% used, {amount} left.",
+  "@budgetsAlertWarningBody": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertLowBalanceTitle": "Low balance: {account}",
+  "@budgetsAlertLowBalanceTitle": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertLowBalanceBody": "Balance {balance} is below {threshold}.",
+  "@budgetsAlertLowBalanceBody": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesTitle": "Categories",
+  "categoriesAdd": "Add category",
+  "categoriesAddSub": "Add subcategory",
+  "categoriesNew": "New category",
+  "categoriesNewSub": "New subcategory",
+  "categoriesEdit": "Edit category",
+  "categoriesName": "Name",
+  "categoriesNameRequired": "Enter a name",
+  "categoriesParent": "Parent category",
+  "categoriesTopLevel": "None (top level)",
+  "categoriesParentLocked": "Has subcategories, so it stays top level",
+  "categoriesIcon": "Icon",
+  "categoriesPickIcon": "Choose an icon",
+  "categoriesIconLabel": "Icon {name}",
+  "@categoriesIconLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesColor": "Colour",
+  "categoriesColorNone": "Default colour",
+  "categoriesColorLabel": "Colour {n}",
+  "@categoriesColorLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFavourite": "Favourite",
+  "categoriesUnfavourite": "Remove from favourites",
+  "categoriesFavouriteDesc": "Shown first when picking a category",
+  "categoriesBudgetSection": "Budget",
+  "categoriesRollover": "Rollover",
+  "categoriesUseDefault": "Budget setting ({value})",
+  "@categoriesUseDefault": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesWarnThreshold": "Warning threshold",
+  "categoriesWarnThresholdHint": "Leave empty to use the budget setting",
+  "categoriesThresholdInvalid": "Enter a value from 1 to 100",
+  "categoriesArchived": "Archived",
+  "categoriesArchivedDesc": "Hidden from pickers; existing transactions keep it",
+  "categoriesArchive": "Archive",
+  "categoriesUnarchive": "Unarchive",
+  "categoriesShowArchived": "Show archived",
+  "categoriesHideArchived": "Hide archived",
+  "categoriesMoreActions": "More actions",
+  "categoriesReorder": "Reorder",
+  "categoriesReorderHint": "Drag to reorder. Subcategories are sorted from their parent.",
+  "categoriesReorderChildren": "Reorder subcategories",
+  "categoriesSubCount": "{count, plural, =1{1 subcategory} other{{count} subcategories}}",
+  "@categoriesSubCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesUsage": "{count, plural, =0{Not used yet} =1{1 transaction} other{{count} transactions}}",
+  "@categoriesUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesEmpty": "No categories yet. Start with the default set or create your own.",
+  "categoriesEmptyExpense": "No expense categories yet.",
+  "categoriesEmptyIncome": "No income categories yet.",
+  "categoriesAddDefaults": "Add default categories",
+  "categoriesMergeAction": "Merge",
+  "categoriesMergeTitle": "Merge?",
+  "categoriesMergeConfirm": "Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted.",
+  "@categoriesMergeConfirm": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesMerged": "\"{source}\" merged into \"{target}\"",
+  "@categoriesMerged": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesMergeInvalid": "Choose a different category of the same type.",
+  "categoriesMergeNest": "A category with subcategories can only be merged into a top-level category.",
+  "categoriesInvalidParent": "Choose a top-level category of the same type as parent.",
+  "categoriesHasChildrenError": "A category with subcategories can't become a subcategory.",
+  "categoriesInUseError": "This category is in use.",
+  "categoriesNotFound": "This category no longer exists.",
+  "categoriesInUseTitle": "Category in use",
+  "categoriesDeleteInUse": "\"{name}\" is used by {count} transactions and {budgets} budgets. Merge it into another category to keep the history together, or archive it.",
+  "@categoriesDeleteInUse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesDeleteHasChildren": "Delete or move the subcategories of \"{name}\" first.",
+  "@categoriesDeleteHasChildren": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesDeleted": "Category deleted",
+  "categoriesModuleOff": "{module} is switched off. Turn it on in Settings › Navigation & modules.",
+  "@categoriesModuleOff": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesOpenSettings": "Open settings",
+  "categoriesTagsTitle": "Tags",
+  "categoriesTagAdd": "Add tag",
+  "categoriesTagNew": "New tag",
+  "categoriesTagEdit": "Edit tag",
+  "categoriesTagName": "Tag name",
+  "categoriesTagTaken": "A tag with this name already exists",
+  "categoriesTagsEmpty": "No tags yet. Tags cut across categories, e.g. #vacation-2026 or #reimbursable.",
+  "categoriesTagMergeInto": "Merge #{name} into…",
+  "@categoriesTagMergeInto": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesTagMergeConfirm": "Move all transactions tagged #{source} to #{target}? #{source} is deleted; transactions with both keep one tag.",
+  "@categoriesTagMergeConfirm": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesTagNoMergeTarget": "There is no other tag to merge into.",
+  "categoriesTagDeleteMessage": "{count, plural, =1{It is removed from 1 transaction.} other{It is removed from {count} transactions.}}",
+  "@categoriesTagDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesTagDeleted": "Tag deleted",
+  "categoriesFieldsTitle": "Custom fields",
+  "categoriesFieldAdd": "Add field",
+  "categoriesFieldNew": "New custom field",
+  "categoriesFieldEdit": "Edit custom field",
+  "categoriesFieldName": "Field name",
+  "categoriesFieldType": "Type",
+  "categoriesFieldTypeText": "Text",
+  "categoriesFieldTypeNumber": "Number",
+  "categoriesFieldTypeDate": "Date",
+  "categoriesFieldTypeSelect": "Single choice",
+  "categoriesFieldTypeMultiselect": "Multiple choice",
+  "categoriesFieldTypeBoolean": "Checkbox",
+  "categoriesFieldTypeLocked": "The type can't change because values exist.",
+  "categoriesFieldAppliesTo": "Applies to",
+  "categoriesFieldTransactions": "Transactions",
+  "categoriesFieldAccounts": "Accounts",
+  "categoriesFieldOptions": "Options",
+  "categoriesFieldOptionHint": "New option",
+  "categoriesFieldAddOption": "Add option",
+  "categoriesFieldOptionsRequired": "Add at least one option",
+  "categoriesFieldOptionCount": "{count, plural, =1{1 option} other{{count} options}}",
+  "@categoriesFieldOptionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldValues": "{count, plural, =0{No values} =1{1 value} other{{count} values}}",
+  "@categoriesFieldValues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldArchivedDesc": "Hidden when entering data; existing values stay",
+  "categoriesFieldDeleteMessage": "{count, plural, =1{Its 1 stored value is deleted too.} other{Its {count} stored values are deleted too.}}",
+  "@categoriesFieldDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldDeleted": "Custom field deleted",
+  "categoriesFieldsEmpty": "No custom fields yet. Add fields such as \"Receipt no.\" or \"Project\" to transactions or accounts.",
+  "appTitle": "Quiet Ledger",
+  "navHome": "Home",
+  "navTransactions": "Transactions",
+  "navPlan": "Plan",
+  "navForecast": "Forecast",
+  "navMore": "More",
+  "navAccounts": "Accounts",
+  "navReports": "Reports",
+  "navSettings": "Settings",
+  "navImport": "Import",
+  "navExport": "Export",
+  "navRules": "Rules",
+  "navGoals": "Goals",
+  "navScenarios": "Scenarios",
+  "navCategories": "Categories",
+  "navTags": "Tags",
+  "addTransaction": "Add transaction",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonEdit": "Edit",
+  "commonDone": "Done",
+  "commonBack": "Back",
+  "commonNext": "Next",
+  "commonClose": "Close",
+  "commonUndo": "Undo",
+  "commonSearch": "Search",
+  "commonAdd": "Add",
+  "commonNone": "None",
+  "commonAll": "All",
+  "commonReset": "Reset",
+  "commonConfirm": "Confirm",
+  "commonYes": "Yes",
+  "commonNo": "No",
+  "commonRetry": "Retry",
+  "commonEmpty": "Nothing here yet",
+  "commonError": "Something went wrong: {message}",
+  "@commonError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDeleteConfirm": "Delete \"{name}\"?",
+  "@commonDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commonComingSoon": "This screen is not available yet.",
+  "typeExpense": "Expense",
+  "typeIncome": "Income",
+  "typeTransfer": "Transfer",
+  "statusCleared": "Cleared",
+  "statusPending": "Pending",
+  "statusPlanned": "Planned",
+  "privacyHiddenAmount": "Hidden amount, tap to reveal",
+  "privacyToggle": "Hide amounts",
+  "moreTemplates": "Templates",
+  "bootErrorTitle": "The database could not be opened",
+  "dashWidgetOptions": "Widget options",
+  "dashNetWorth": "Net worth",
+  "dashThisMonth": "this month",
+  "dashAcrossAccounts": "across {count, plural, =1{1 account} other{{count} accounts}}",
+  "dashIn12Months": "{amount} in 12 months",
+  "dashNetWorthChart": "Net worth over the last 12 months",
+  "dashLast12Months": "Last 12 months",
+  "dashSoFar": "{month} so far",
+  "dashExpenses": "Expenses",
+  "dashSavingsRate": "Savings rate",
+  "dashTopCategories": "Top categories",
+  "dashNoSpending": "No spending in this period",
+  "dashUncategorised": "Uncategorised",
+  "dashAllAccounts": "All accounts",
+  "dashViewAll": "View all",
+  "dashBudgets": "Budgets",
+  "dashAllBudgets": "All budgets",
+  "dashUpcoming": "Upcoming",
+  "dashNextDays": "next {days} days",
+  "dashCalendar": "Calendar",
+  "dashNoUpcoming": "Nothing due in the next {days} days",
+  "dashGoals": "Goals",
+  "dashNoGoals": "No savings goals yet",
+  "dashRecent": "Recent transactions",
+  "dashNoBudgets": "No budgets for this period",
+  "dashSetUpBudgets": "Set up budgets",
+  "dashOver": "{amount} over",
+  "dashOf": "of {amount}",
+  "dashEdit": "Edit dashboard",
+  "dashEditTitle": "Edit dashboard",
+  "dashAddWidget": "Add widget",
+  "dashRemove": "Remove",
+  "dashMakeWide": "Make wide",
+  "dashMakeNormal": "Make normal width",
+  "dashChooseAccount": "Choose account",
+  "dashResetLayout": "Reset to default",
+  "dashLayoutPhone": "Phone",
+  "dashLayoutWide": "Tablet & desktop",
+  "dashPrevPeriod": "Previous period",
+  "dashNextPeriod": "Next period",
+  "dashToday": "Back to today",
+  "dashSearchHint": "Search transactions",
+  "dashNewTransaction": "New transaction",
+  "dashAutoPost": "auto-post",
+  "dashConfirm": "confirm",
+  "dashConfirmDaysBefore": "confirm {days} days before",
+  "dashWelcomeEmpty": "Add your first transaction to see your dashboard come alive.",
+  "dashWTypenetWorth": "Net worth",
+  "dashWTypemonthSummary": "Month summary",
+  "dashWTypebudgets": "Budget progress",
+  "dashWTypeupcomingBills": "Upcoming bills",
+  "dashWTypeforecast": "Mini forecast",
+  "dashWTypeaccounts": "Accounts",
+  "dashWTypegoals": "Goal progress",
+  "dashWTypetopCategories": "Top categories",
+  "dashWTyperecentTransactions": "Recent transactions",
+  "@dashAcrossAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashIn12Months": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashSoFar": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashNextDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashNoUpcoming": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashOf": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashConfirmDaysBefore": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "exportTitle": "Export & backup",
+  "exportTxnTitle": "Transactions as CSV",
+  "exportTxnDesc": "Export transactions of a period and selected accounts, e.g. for Excel.",
+  "exportPeriod": "Period",
+  "exportPeriodThisMonth": "This month",
+  "exportPeriodLastMonth": "Last month",
+  "exportPeriodThisYear": "This year",
+  "exportPeriodLastYear": "Last year",
+  "exportPeriodLast12Months": "Last 12 months",
+  "exportPeriodAll": "All time",
+  "exportPeriodCustom": "Custom…",
+  "exportPeriodRange": "{start} – {end}",
+  "@exportPeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAccounts": "Accounts",
+  "exportAccountsAll": "All accounts",
+  "exportAccountsSelected": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@exportAccountsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFiles": "Files",
+  "exportLayoutFlat": "One file",
+  "exportLayoutPerAccount": "One per account",
+  "exportLayoutPerAccountHint": "Saved together as a zip archive.",
+  "exportOptions": "CSV options",
+  "exportOptionsEdit": "Edit options",
+  "exportHeaderRow": "Header row",
+  "exportColumns": "Columns",
+  "exportColumnsSummary": "{selected} of {total} columns",
+  "@exportColumnsSummary": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "exportColumnsHint": "Drag to change the order.",
+  "exportColumnsMin": "Select at least one column.",
+  "exportApply": "Apply",
+  "exportUseDefaults": "Defaults from settings",
+  "exportPresets": "Presets",
+  "exportPresetsEmpty": "No saved presets yet.",
+  "exportPresetSave": "Save as preset",
+  "exportPresetName": "Preset name",
+  "exportPresetSaved": "Preset “{name}” saved",
+  "@exportPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetDeleted": "Preset “{name}” deleted",
+  "@exportPresetDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetApplied": "Preset “{name}” applied",
+  "@exportPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetDelete": "Delete preset “{name}”",
+  "@exportPresetDelete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPreview": "Preview",
+  "exportPreviewHint": "first {count} rows",
+  "@exportPreviewHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportPreviewEmpty": "No transactions match the period and accounts.",
+  "exportRun": "Export CSV",
+  "exportRunZip": "Export zip",
+  "exportSaved": "Saved to {location}",
+  "@exportSaved": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "exportSavedShort": "Export saved",
+  "exportShared": "Export shared",
+  "exportDownloaded": "Download started",
+  "exportRows": "{count, plural, =0{No rows} =1{1 row} other{{count} rows}}",
+  "@exportRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFailed": "Export failed: {message}",
+  "@exportFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportWorking": "Working…",
+  "exportBackupTitle": "Full backup",
+  "exportBackupDesc": "All data and settings as a zip of CSV files with a checksum manifest. Use it as a backup or to move to another device.",
+  "exportBackupRun": "Create backup",
+  "exportBackupDone": "Backup created and verified ({count} rows)",
+  "@exportBackupDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportRestoreRun": "Restore backup…",
+  "exportRestoreTitle": "Restore this backup?",
+  "exportRestoreCreated": "Created",
+  "exportRestoreAppVersion": "App version",
+  "exportRestoreDevice": "Device",
+  "exportRestoreThisDevice": "This device",
+  "exportRestoreOtherDevice": "Another device",
+  "exportRestoreTotalRows": "Rows in total",
+  "exportRestoreWarning": "This replaces all data and settings on this device with the backup. It cannot be undone.",
+  "exportRestoreBackupFirst": "Save a backup of the current data first",
+  "exportRestoreConfirm": "Replace all data",
+  "exportRestoreAborted": "Restore cancelled. Nothing was changed.",
+  "exportRestoreDone": "Backup restored ({count} rows)",
+  "@exportRestoreDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportRestoreFailed": "Restore failed, nothing was changed: {message}",
+  "@exportRestoreFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportErrTitle": "Cannot restore",
+  "exportErrNotBundle": "This file is not a backup created by this app.",
+  "exportErrNewerFormat": "This backup was created by a newer version of the app. Update the app to restore it.",
+  "exportErrChecksum": "The backup is damaged: {file} does not match its checksum.",
+  "@exportErrChecksum": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "exportErrInvalid": "The backup is damaged: {detail}",
+  "@exportErrInvalid": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoTitle": "Automatic backup",
+  "exportAutoDesc": "Regularly writes a full backup to a folder, for example one that a cloud client syncs.",
+  "exportAutoSchedule": "Schedule",
+  "exportAutoNoFolder": "No folder chosen",
+  "exportAutoChooseFolder": "Choose folder…",
+  "exportAutoLast": "Last backup: {date}",
+  "@exportAutoLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoNever": "No automatic backup yet",
+  "exportAutoRunNow": "Back up now",
+  "exportAutoRunDone": "Backup written: {file}",
+  "@exportAutoRunDone": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoRunFailed": "Backup failed: {message}",
+  "@exportAutoRunFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoKeepValue": "{count, plural, =1{Keep the newest backup} other{Keep the newest {count} backups}}",
+  "@exportAutoKeepValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportAutoUnavailable": "Automatic backups to a folder are not available in the browser. Use “Create backup” instead.",
+  "exportAutoNeedsFolder": "Choose a folder to start automatic backups.",
+  "exportAutoSettings": "Automatic backup settings",
+  "exportDecrease": "Decrease",
+  "exportIncrease": "Increase",
+  "exportPurgeLast": "Last clean-up of deleted entries",
+  "exportColDate": "Date",
+  "exportColValueDate": "Value date",
+  "exportColAccount": "Account",
+  "exportColType": "Type",
+  "exportColAmount": "Amount",
+  "exportColCurrency": "Currency",
+  "exportColPayee": "Payee",
+  "exportColNote": "Note",
+  "exportColCategory": "Category",
+  "exportColSplit": "Split",
+  "exportColTags": "Tags",
+  "exportColStatus": "Status",
+  "exportColTransferAccount": "Transfer account",
+  "exportColId": "ID",
+  "forecastTitle": "Forecast",
+  "forecastTotal": "All accounts",
+  "forecastChooseAccount": "Choose account",
+  "forecastHorizon": "Horizon",
+  "forecastHorizonShort": "{months} mo",
+  "@forecastHorizonShort": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastHorizonLong": "{months, plural, =1{1 month} other{{months} months}}",
+  "@forecastHorizonLong": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastLowestPoint": "Lowest point",
+  "forecastDaysBelow": "{days, plural, =1{1 day below {limit}} other{{days} days below {limit}}}",
+  "@forecastDaysBelow": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastStaysAbove": "Stays above {limit}",
+  "forecastLowestBelowThreshold": "Lowest {amount} on {date}, below your {threshold} threshold",
+  "@forecastLowestBelowThreshold": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLowestBelowZero": "Lowest {amount} on {date}, below zero",
+  "@forecastLowestBelowZero": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLowestOk": "Lowest {amount} on {date}",
+  "@forecastLowestOk": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastLegendBaseline": "Baseline",
+  "forecastLegendThreshold": "Threshold",
+  "forecastChartSummary": "Projected daily balance of {account} from {start} to {end}. Lowest point {amount} on {date}.",
+  "@forecastChartSummary": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastChartThreshold": "Low-balance threshold {threshold}.",
+  "forecastChartScenario": "With {name}: lowest {amount} on {date}.",
+  "@forecastChartScenario": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastScenarios": "Scenarios",
+  "forecastEditScenarios": "Edit scenarios",
+  "forecastNoScenarios": "No scenarios yet. Try a raise, a big purchase or paying off a loan early.",
+  "forecastAddScenario": "Add scenario",
+  "forecastBalances": "Balances",
+  "forecastMonths": "Months",
+  "forecastBudgetPeriods": "Budget periods",
+  "forecastColMonth": "Month",
+  "forecastColPeriod": "Period",
+  "forecastColLowest": "Lowest",
+  "forecastColEnd": "End",
+  "forecastColWith": "With {name}",
+  "forecastPartial": "until {date}",
+  "forecastWhatIf": "Can I afford it?",
+  "forecastWhatIfAmount": "Amount",
+  "forecastWhatIfDate": "Date",
+  "forecastWhatIfAccount": "From account",
+  "forecastWhatIfCheck": "Check",
+  "forecastWhatIfHint": "Checks the forecast only. Nothing is saved.",
+  "forecastWhatIfQuestion": "Can I afford {amount} on {date} from {account}?",
+  "@forecastWhatIfQuestion": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfYes": "Yes. Afterwards your lowest balance is {amount} on {date}.",
+  "@forecastWhatIfYes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfTight": "Tight. Your balance would drop to {amount} on {date}, below your {threshold} threshold.",
+  "@forecastWhatIfTight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfNo": "No. Your balance would drop to {amount} on {date}.",
+  "@forecastWhatIfNo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWhatIfChange": "{delta} compared with now",
+  "forecastWhatIfEnterAmount": "Enter an amount",
+  "forecastUpcoming": "Upcoming big events",
+  "forecastNoEvents": "No big events in this horizon.",
+  "forecastShowAll": "Show all",
+  "forecastShowLess": "Show less",
+  "forecastWarnings": "Warnings",
+  "forecastWarnBelowZero": "{account} goes below zero on {date}",
+  "@forecastWarnBelowZero": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastWarnBelowThreshold": "{account} drops below {threshold} on {date}",
+  "@forecastWarnBelowThreshold": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastNoWarnings": "No account drops below its threshold.",
+  "forecastNoAccounts": "No accounts are included in the forecast yet. Add an account or turn on “Include in forecast”.",
+  "forecastAddAccount": "Add account",
+  "forecastModuleOff": "The forecast is turned off. You can turn it on in Settings › Navigation & modules.",
+  "forecastOpenSettings": "Open settings",
+  "forecastProjection": "Long-term projection",
+  "forecastEventRecurring": "Recurring",
+  "forecastEventScheduled": "Scheduled",
+  "forecastEventGoal": "Goal contribution",
+  "forecastEventOneOff": "Scenario",
+  "forecastEventWhatIf": "What-if",
+  "forecastTransferTo": "To {account}",
+  "forecastTransferFrom": "From {account}",
+  "forecastVariableNote": "Includes expected variable spending: {method}.",
+  "forecastLoading": "Calculating forecast…",
+  "forecastProjYears": "Years",
+  "forecastProjYearsValue": "{years, plural, =1{1 year} other{{years} years}}",
+  "@forecastProjYearsValue": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastProjSource": "Savings from",
+  "forecastProjSourceHistory": "History",
+  "forecastProjSourcePlan": "Plan",
+  "forecastProjSourceHistoryDesc": "Average of the last 12 months: {amount} per month",
+  "forecastProjSourcePlanDesc": "Recurring items and expected spending: {amount} in the first month",
+  "forecastProjRealDesc": "In today's money (adjusted for inflation)",
+  "forecastProjPerYear": "{value} per year",
+  "forecastProjNetWorthOn": "Net worth on {date}",
+  "forecastProjToday": "Today: {amount}",
+  "forecastProjMilestones": "Milestones",
+  "forecastProjNoMilestones": "No milestones within this period.",
+  "forecastMilestoneNetWorth": "Net worth reaches {amount}",
+  "forecastMilestoneDebtFree": "Debt-free",
+  "forecastMilestonePaidOff": "{account} paid off",
+  "forecastMilestoneGoal": "Goal reached: {goal}",
+  "forecastProjChartSummary": "Projected net worth from {start} to {end}: {startAmount} now, {endAmount} at the end.",
+  "@forecastProjChartSummary": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "forecastProjChartMilestones": "{count, plural, =0{No milestones.} =1{1 milestone.} other{{count} milestones.}}",
+  "@forecastProjChartMilestones": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forecastProjAssumptions": "Assumptions",
+  "forecastProjAssets": "Assets",
+  "forecastProjDebts": "Debts",
+  "forecastProjNominal": "Nominal",
+  "forecastProjReal": "Real",
+  "forecastProjNoAccounts": "No accounts are included in net worth yet.",
+  "goalsNew": "New goal",
+  "goalsEdit": "Edit goal",
+  "goalsEmpty": "No savings goals yet. Set one to see how much to put aside each period.",
+  "goalsNoActive": "All goals are archived.",
+  "goalsByPriority": "By priority · drag to reorder",
+  "goalsArchived": "Archived ({count})",
+  "@goalsArchived": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsShow": "Show",
+  "goalsHide": "Hide",
+  "goalsSelectHint": "Select a goal to see its details.",
+  "goalsReached": "Goal reached",
+  "goalsRequiredPerPeriod": "Needs {amount} per period until {date}",
+  "@goalsRequiredPerPeriod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsProjected": "At this pace: {date}",
+  "@goalsProjected": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsNoPace": "Set a planned contribution to see when you get there.",
+  "goalsOnTrack": "On track",
+  "goalsBehind": "Behind",
+  "goalsOfTarget": "of {amount}",
+  "@goalsOfTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsAddContribution": "Add contribution",
+  "goalsReorder": "Drag to change priority",
+  "goalsSemanticProgress": "{saved} of {target} saved",
+  "@goalsSemanticProgress": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDeposit": "Add",
+  "goalsWithdraw": "Withdraw",
+  "goalsAmountInvalid": "Enter an amount",
+  "goalsModuleOff": "Goals are switched off in Settings › Navigation & modules.",
+  "goalsNotFound": "This goal no longer exists.",
+  "goalsSaved": "Goal saved",
+  "goalsDetails": "Goal",
+  "goalsName": "Name",
+  "goalsNameRequired": "Enter a name",
+  "goalsTarget": "Target amount",
+  "goalsTargetRequired": "Enter a target above 0",
+  "goalsTargetDate": "Target date",
+  "goalsNoTargetDate": "No date",
+  "goalsLinkedAccount": "Linked account",
+  "goalsNoAccount": "None – track manually",
+  "goalsLinkedHelp": "Progress follows the account balance; the pace comes from its last 3–6 months.",
+  "goalsSavedSoFar": "Saved so far",
+  "goalsPlannedContribution": "Planned contribution per period",
+  "goalsPlannedContributionHelp": "Used for the projected date when there is no account history.",
+  "goalsArchive": "Archive",
+  "goalsUnarchive": "Restore",
+  "importTitle": "Import",
+  "importStepOf": "Step {current} of {total}",
+  "@importStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importStepSource": "Source",
+  "importStepSheets": "Sheets",
+  "importStepStructure": "Structure",
+  "importStepMapping": "Map columns",
+  "importStepFormats": "Formats",
+  "importStepValues": "Categories & accounts",
+  "importStepTransfers": "Transfers",
+  "importStepDuplicates": "Duplicates",
+  "importStepSummary": "Summary",
+  "importNextStep": "Next: {step}",
+  "@importNextStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "importProfileLabel": "Profile: {name}",
+  "@importProfileLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importWorking": "Working…",
+  "importHistory": "Import history",
+  "importCancelTitle": "Leave the import?",
+  "importCancelMessage": "Your choices for this import are lost.",
+  "importCancelConfirm": "Leave",
+  "importSourceIntro": "Import your spreadsheet history or bank exports. Several files can be imported in one batch.",
+  "importPickFiles": "Choose files",
+  "importPickFilesHint": "Excel (.xlsx, .xlsm, .xls), CSV or TSV",
+  "importPasteTitle": "Paste from a spreadsheet",
+  "importPasteHint": "Select rows in Excel, copy them and paste them here.",
+  "importPasteButton": "Paste from clipboard",
+  "importPasteAdd": "Use these rows",
+  "importPasteField": "Pasted rows",
+  "importPasteEmpty": "The clipboard holds no text.",
+  "importFilesTitle": "Files in this import",
+  "importFileSheets": "{count, plural, =1{1 sheet} other{{count} sheets}}",
+  "@importFileSheets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRows": "{count, plural, =1{1 row} other{{count} rows}}",
+  "@importRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFileCsvInfo": "{encoding} · delimiter {delimiter}",
+  "@importFileCsvInfo": {
+    "placeholders": {
+      "encoding": {
+        "type": "String"
+      },
+      "delimiter": {
+        "type": "String"
+      }
+    }
+  },
+  "importRemoveFile": "Remove",
+  "importCsvOptions": "Reading options",
+  "importEncoding": "Encoding",
+  "importAuto": "Automatic",
+  "importDelimiter": "Delimiter",
+  "importQuote": "Quote character",
+  "importTab": "Tab",
+  "importErrOds": "OpenDocument spreadsheets (.ods) can't be read. Open the file in LibreOffice Calc or Excel, save it as Excel workbook (.xlsx) and import that file.",
+  "importErrNumbers": "Apple Numbers files can't be read. In Numbers choose File › Export To › Excel and import the .xlsx file.",
+  "importErrEncrypted": "This workbook is password-protected. Remove the password in Excel (File › Info › Protect Workbook), save it and try again.",
+  "importErrNotSpreadsheet": "This file holds no table that can be imported.",
+  "importErrCorrupt": "The file could not be read. It may be damaged or in an unsupported format.",
+  "importErrEmpty": "The file is empty.",
+  "importProfileUse": "Profile",
+  "importProfileNone": "No profile – detect everything",
+  "importProfileLoadFile": "Load profile file",
+  "importProfileInvalid": "This file is not an import profile.",
+  "importProfileHint": "A profile repeats every choice of an earlier import.",
+  "importSheetsIntro": "Choose the sheets to import and where their account comes from.",
+  "importSheetHidden": "hidden",
+  "importSheetNoData": "No transactions found",
+  "importAccountSource": "Account",
+  "importAccountFixed": "One account",
+  "importAccountColumn": "From a column",
+  "importAccountSheetName": "Sheet name",
+  "importAccountName": "Account name",
+  "importAccountNameHint": "Existing or new account",
+  "importYear": "Year for dates without year",
+  "importYearNone": "None",
+  "importStructureIntro": "Rows above the header (titles, bank details), sum rows and empty rows are skipped.",
+  "importHeaderRow": "Header row",
+  "importHeaderRows": "Header rows",
+  "importNoHeader": "No header",
+  "importFirstDataRow": "First data row",
+  "importLastDataRow": "Last data row",
+  "importUntilEnd": "Until the end",
+  "importRowFilters": "Row filters",
+  "importSkipPatterns": "Skip sum rows starting with",
+  "importSkipPatternsHint": "Separate with commas; /…/ is a regular expression",
+  "importSkipWithoutDate": "Skip rows without a date",
+  "importSkipZero": "Skip rows without an amount",
+  "importRowData": "Data",
+  "importRowTitle": "Title",
+  "importRowHeader": "Header",
+  "importRowEmpty": "Empty",
+  "importRowSubtotal": "Sum row",
+  "importRowNoDate": "No date",
+  "importRowNoAmount": "No amount",
+  "importRowAfterEnd": "After the end",
+  "importRowInvalid": "Unreadable",
+  "importRowStats": "{data} data rows · {skipped} skipped",
+  "@importRowStats": {
+    "placeholders": {
+      "data": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "importPreviewMore": "Showing the first {shown} of {total} rows",
+  "@importPreviewMore": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importSheetPicker": "Sheet",
+  "importSheetInfo": "{file} · sheet “{sheet}”",
+  "@importSheetInfo": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "sheet": {
+        "type": "String"
+      }
+    }
+  },
+  "importInfoHeaderRow": "header in row {row}",
+  "@importInfoHeaderRow": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "importInfoNoHeader": "no header",
+  "importInfoSubtotals": "{count, plural, =1{1 subtotal row skipped} other{{count} subtotal rows skipped}}",
+  "@importInfoSubtotals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importAmountMode": "Amounts are written as",
+  "importAmountSigned": "One signed",
+  "importAmountDebitCredit": "Out + In",
+  "importAmountWithType": "+ Type col.",
+  "importInvertSign": "Expenses are written as positive numbers",
+  "importTypeNegative": "Type values for money out",
+  "importTypePositive": "Type values for money in",
+  "importCategorySeparator": "Category separator",
+  "importTagSeparator": "Tag separator",
+  "importSeparatorNone": "None",
+  "importSeparatorSpace": "Space",
+  "importTargetIgnore": "Ignore",
+  "importTargetDate": "Date",
+  "importTargetValueDate": "Value date",
+  "importTargetAmount": "Amount",
+  "importTargetAmountAbs": "Amount (without sign)",
+  "importTargetDebit": "Amount out (debit)",
+  "importTargetCredit": "Amount in (credit)",
+  "importTargetAmountType": "Type (in/out)",
+  "importTargetPayee": "Payee",
+  "importTargetNote": "Description / note",
+  "importTargetCategory": "Category",
+  "importTargetCategorySub": "Category › Sub (“{separator}”)",
+  "@importTargetCategorySub": {
+    "placeholders": {
+      "separator": {
+        "type": "String"
+      }
+    }
+  },
+  "importTargetSubcategory": "Subcategory",
+  "importTargetAccount": "Account",
+  "importTargetTags": "Tags",
+  "importTargetStatus": "Status",
+  "importTargetCustom": "Custom field: {name}",
+  "@importTargetCustom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importTargetBalance": "Running balance (check)",
+  "importColumn": "Column {letter}",
+  "@importColumn": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "importBalanceCheck": "Balance check: {matched} of {checked} rows match column {column}",
+  "@importBalanceCheck": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "checked": {
+        "type": "int"
+      },
+      "column": {
+        "type": "String"
+      }
+    }
+  },
+  "importBadValues": "{count, plural, =1{1 value can't be read} other{{count} values can't be read}} (rows {rows})",
+  "@importBadValues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "String"
+      }
+    }
+  },
+  "importMismatches": "{count, plural, =1{1 balance mismatch} other{{count} balance mismatches}} (rows {rows})",
+  "@importMismatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "String"
+      }
+    }
+  },
+  "importApplyToSimilar": "Use for all sheets with these columns",
+  "importAppliedToSimilar": "{count, plural, =0{No other sheet has these columns} =1{Applied to 1 more sheet} other{Applied to {count} more sheets}}",
+  "@importAppliedToSimilar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importNeedDateAmount": "Map a date and an amount column in every sheet to continue.",
+  "importInvalidCell": "Can't be read: {value}",
+  "@importInvalidCell": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "importFormatsIntro": "Formats are detected per column. Change them when values are read wrongly.",
+  "importDateFormat": "Date format",
+  "importNumberFormat": "Number format",
+  "importDetected": "Detected: {format}",
+  "@importDetected": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "importDateSerial": "Excel serial number (45000)",
+  "importDateDmy": "Day first (31.12.2024)",
+  "importDateMdy": "Month first (12/31/2024)",
+  "importDateYmd": "ISO (2024-12-31)",
+  "importDateCompact": "Compact (20241231)",
+  "importDateMonthName": "Month name (31 Dec 2024)",
+  "importDateCells": "Date cells",
+  "importNumberDe": "1.234,56",
+  "importNumberEn": "1,234.56",
+  "importNumberSpace": "1 234,56",
+  "importSamples": "Examples",
+  "importIssuesTitle": "Values that can't be read",
+  "importNoIssues": "All values can be read.",
+  "importIssueAt": "Row {row}, column {column}",
+  "@importIssueAt": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      },
+      "column": {
+        "type": "String"
+      }
+    }
+  },
+  "importIssueBadDate": "Not a date",
+  "importIssueMissingDate": "Date missing",
+  "importIssueBadValueDate": "Value date not readable (ignored)",
+  "importIssueBadAmount": "Not an amount",
+  "importIssueMissingAmount": "Amount missing",
+  "importIssueBadType": "Unknown type value",
+  "importIssueBadBalance": "Balance not readable (not checked)",
+  "importIssueBadStatus": "Unknown status (ignored)",
+  "importIssueBadCustomField": "Custom field value not readable",
+  "importIssueMissingAccount": "No account",
+  "importIssueYearMismatch": "Date outside the sheet's year",
+  "importMoreIssues": "and {count} more",
+  "@importMoreIssues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importAccountsTitle": "Accounts",
+  "importCategoriesTitle": "Categories",
+  "importValuesIntro": "Each value from the sheets goes to an existing entry or creates a new one.",
+  "importValueRows": "{count, plural, =1{1 row} other{{count} rows}} · {sum}",
+  "@importValueRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sum": {
+        "type": "String"
+      }
+    }
+  },
+  "importExisting": "Existing",
+  "importCreateNew": "Create new",
+  "importNoCategory": "No category",
+  "importAsTransfer": "Transfer",
+  "importTransferTo": "Transfer to account",
+  "importNewAccountName": "New account “{name}”",
+  "@importNewAccountName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importNewCategoryName": "New category “{name}”",
+  "@importNewCategoryName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importChoose": "Choose…",
+  "importSuggestion": "Suggestion: {name}",
+  "@importSuggestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importAccountType": "Account type",
+  "importCategoryKind": "Kind",
+  "importNoCategoryColumn": "The sheets have no category column. Rules and the transaction list can categorise later.",
+  "importAccTypeChecking": "Checking",
+  "importAccTypeSavings": "Savings",
+  "importAccTypeCash": "Cash",
+  "importAccTypeCreditCard": "Credit card",
+  "importAccTypeInvestment": "Investment",
+  "importAccTypeLoan": "Loan",
+  "importAccTypeOtherAsset": "Other asset",
+  "importAccTypeOtherLiability": "Other liability",
+  "importTransfersIntro": "Money that left one account and arrived in another is merged into one transfer.",
+  "importDetectTransfers": "Detect transfers",
+  "importTransferWindow": "Maximum days apart",
+  "importDaysApart": "{days, plural, =0{same day} =1{1 day apart} other{{days} days apart}}",
+  "@importDaysApart": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "importTransfersNone": "No matching pairs found.",
+  "importTransfersCount": "{selected} of {total} pairs merged",
+  "@importTransfersCount": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importMergeAll": "Merge all",
+  "importMergeNone": "Merge none",
+  "importDuplicatesIntro": "Rows with the same date, amount and payee/note as an existing transaction are skipped unless you include them.",
+  "importIncremental": "Only import rows added since the last import of this file or profile",
+  "importDupExisting": "Already in the app",
+  "importDupBatch": "Twice in this import",
+  "importDupAlready": "Imported before",
+  "importDupNone": "No duplicates found.",
+  "importDupSkipAll": "Skip all",
+  "importDupImportAll": "Import all",
+  "importDupIncluded": "{included} of {total} included",
+  "@importDupIncluded": {
+    "placeholders": {
+      "included": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importAlreadyCount": "{count, plural, =1{1 row was imported before and is skipped.} other{{count} rows were imported before and are skipped.}}",
+  "@importAlreadyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryReady": "Ready to import",
+  "importSummaryTransactions": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@importSummaryTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryTransfers": "{count, plural, =1{incl. 1 transfer} other{incl. {count} transfers}}",
+  "@importSummaryTransfers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummarySkipped": "{count} duplicates skipped",
+  "@importSummarySkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryAlready": "{count} already imported",
+  "@importSummaryAlready": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryInvalid": "{count} unreadable rows",
+  "@importSummaryInvalid": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryRules": "{count} categorised by rules",
+  "@importSummaryRules": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryNew": "New: {accounts} accounts · {categories} categories · {tags} tags",
+  "@importSummaryNew": {
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "categories": {
+        "type": "int"
+      },
+      "tags": {
+        "type": "int"
+      }
+    }
+  },
+  "importResultingBalances": "Resulting balances",
+  "importByCategory": "By category",
+  "importStartsAt": "Starts at {amount}",
+  "@importStartsAt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "importMatchesSheet": "Matches the sheet",
+  "importSheetSays": "Sheet: {amount}",
+  "@importSheetSays": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "importNewBadge": "New",
+  "importUncategorised": "Uncategorised",
+  "importWarnings": "Warnings",
+  "importWarnInvalid": "{count} rows can't be read and will not be imported.",
+  "@importWarnInvalid": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importWarnMismatch": "{count} running-balance mismatches in {account}.",
+  "@importWarnMismatch": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "importWarnFormulas": "{count} formula cells have no saved result. Open the file in Excel, save it and import again.",
+  "@importWarnFormulas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importWarnYear": "{count} dates lie outside their sheet's year.",
+  "@importWarnYear": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importWarnUncategorised": "{count} transactions have no category.",
+  "@importWarnUncategorised": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importWarnDuplicates": "{count} possible duplicates will be imported.",
+  "@importWarnDuplicates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importApplyRules": "Run rules on rows without a category",
+  "importSetOpening": "Set opening balances of new accounts from the running balance",
+  "importSaveProfile": "Save these choices as profile",
+  "importProfileName": "Profile name",
+  "importUpdateProfile": "Update profile “{name}”",
+  "@importUpdateProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importCommit": "{count, plural, =0{Nothing to import} =1{Import 1 transaction} other{Import {count} transactions}}",
+  "@importCommit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "The import failed; nothing was written. {message}",
+  "@importFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "importDoneTitle": "Import complete",
+  "importDoneMessage": "{count, plural, =1{1 transaction was imported.} other{{count} transactions were imported.}}",
+  "@importDoneMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importShowTransactions": "Show transactions",
+  "importAgain": "Start another import",
+  "importUndo": "Undo import",
+  "importUndone": "Import undone",
+  "importHistoryTab": "History",
+  "importProfilesTab": "Profiles",
+  "importHistoryEmpty": "No imports yet.",
+  "importNew": "New import",
+  "importHistoryCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@importHistoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importHistoryLive": "{live} of {total} still present",
+  "@importHistoryLive": {
+    "placeholders": {
+      "live": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importHistoryUndone": "Undone on {date}",
+  "@importHistoryUndone": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "importHistoryUndoTitle": "Undo this import?",
+  "importHistoryUndoMessage": "{count, plural, =1{The transaction of this import is deleted.} other{All {count} transactions of this import are deleted.}} Accounts, categories and tags it created are removed when nothing else uses them.",
+  "@importHistoryUndoMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importHistoryUndoAction": "Undo import",
+  "importProfilesEmpty": "No profiles yet. Save one in the last step of an import.",
+  "importProfileExport": "Export",
+  "importProfileRename": "Rename",
+  "importProfileExported": "Profile saved",
+  "importProfileImported": "Profile imported",
+  "importProfileStart": "Import with this profile",
+  "onbDefaultChecking": "Checking account",
+  "onbStepOf": "Step {current} of {total}",
+  "onbGetStarted": "Get started",
+  "onbSetUpLock": "Set up app lock",
+  "onbSkipFinish": "Not now, finish",
+  "onbTagline": "Your money, on your device. Record, track, plan and project — without a cloud account.",
+  "onbPointRecord": "Log a transaction in seconds",
+  "onbPointTrack": "See balances, net worth and where your money goes",
+  "onbPointPlan": "Budgets, recurring bills and savings goals",
+  "onbPointProject": "Forecast your balance months ahead",
+  "onbPointPrivate": "Private: encrypted on this device, no telemetry",
+  "onbFormatsTitle": "Language & formats",
+  "onbFormatsSubtitle": "You can change all of this later in Settings.",
+  "onbPreview": "Preview",
+  "onbPeriodTitle": "Budget period",
+  "onbPeriodSubtitle": "When does your money month start? Many people use the day their salary arrives.",
+  "onbLastDayOfMonth": "Last day of the month",
+  "onbSalaryHint": "Tip: after you add your salary as a recurring income you can let periods start on payday (Settings › Budgets).",
+  "onbStartTitle": "How do you want to start?",
+  "onbStartSubtitle": "Default categories are created either way.",
+  "onbImportTitle": "Import from Excel or CSV",
+  "onbImportText": "Bring your existing sheet with all its history. The importer maps columns, categories and accounts.",
+  "onbFreshTitle": "Start fresh",
+  "onbFreshText": "Add your accounts with their current balances.",
+  "onbAccountsTitle": "Your accounts",
+  "onbAccountsSubtitle": "Enter today's balance for each account. You can add more later.",
+  "onbAccountName": "Name",
+  "onbAccountType": "Type",
+  "onbOpeningBalance": "Current balance",
+  "onbAddAccount": "Add another account",
+  "onbLockTitle": "Protect your data",
+  "onbLockSubtitle": "Lock the app with a PIN, password or biometrics.",
+  "onbTypeChecking": "Checking",
+  "onbTypeSavings": "Savings",
+  "onbTypeCash": "Cash",
+  "onbTypeCreditCard": "Credit card",
+  "onbTypeInvestment": "Investment",
+  "onbTypeLoan": "Loan",
+  "onbTypeOtherAsset": "Other asset",
+  "onbTypeOtherLiability": "Other liability",
+  "@onbStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planTabBudgets": "Budgets",
+  "planTabRecurring": "Recurring",
+  "planTabGoals": "Goals",
+  "planBillsCalendar": "Bills calendar",
+  "planPreviousPeriod": "Previous period",
+  "planNextPeriod": "Next period",
+  "planToday": "Today",
+  "planPeriodSemantics": "Period {title}, {range}",
+  "@planPeriodSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringNew": "New recurring item",
+  "recurringEdit": "Edit recurring item",
+  "recurringEmpty": "No recurring items yet. Add rent, salary or subscriptions to see them coming.",
+  "recurringSelectHint": "Select a recurring item to edit it.",
+  "recurringNext30Days": "Next 30 days",
+  "recurringBills": "{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}",
+  "@recurringBills": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringIncomeCount": "{count, plural, =0{No income} =1{1 income} other{{count} incomes}}",
+  "@recurringIncomeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringDueTitle": "Waiting for confirmation",
+  "recurringDueToday": "Due today",
+  "recurringOverdueDays": "{days, plural, =1{Overdue by 1 day} other{Overdue by {days} days}}",
+  "@recurringOverdueDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringDueInDays": "{days, plural, =1{Tomorrow} other{In {days} days}}",
+  "@recurringDueInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringMorePending": "{count, plural, =1{+1 more due} other{+{count} more due}}",
+  "@recurringMorePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringSkip": "Skip",
+  "recurringEditConfirm": "Edit & confirm",
+  "recurringConfirmed": "“{name}” posted",
+  "@recurringConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringSkipped": "“{name}” skipped",
+  "@recurringSkipped": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringActiveRules": "Active ({count})",
+  "@recurringActiveRules": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringInactiveRules": "Paused or ended",
+  "recurringNoActive": "No active recurring items.",
+  "recurringPaused": "Paused",
+  "recurringEnded": "Ended",
+  "recurringNextOn": "Next {date}",
+  "@recurringNextOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringAutoPostShort": "auto-post",
+  "recurringConfirmShort": "confirm",
+  "recurringPostedLabel": "posted",
+  "recurringWhat": "What",
+  "recurringWhen": "When",
+  "recurringPosting": "Posting & reminders",
+  "recurringName": "Name",
+  "recurringFromAccount": "From account",
+  "recurringToAccount": "To account",
+  "recurringNotSet": "Not set",
+  "recurringSplit": "Split across categories",
+  "recurringAddSplit": "Add line",
+  "recurringSplitBalanced": "Split adds up",
+  "recurringSplitRemainder": "{amount} not assigned",
+  "@recurringSplitRemainder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringTags": "Tags",
+  "recurringRepeats": "Repeats",
+  "recurringPresetMonthly": "Monthly on a day",
+  "recurringPresetLastDay": "Last day of the month",
+  "recurringPresetLastBusinessDay": "Last business day of the month",
+  "recurringPresetWeekly": "Weekly",
+  "recurringPresetQuarterly": "Quarterly",
+  "recurringPresetYearly": "Yearly",
+  "recurringPresetDaily": "Daily",
+  "recurringPresetCustom": "Custom (RRULE)",
+  "recurringDayOfMonth": "Day of the month",
+  "recurringMonthEndHint": "In shorter months the last day is used.",
+  "recurringEveryNMonths": "Every … months",
+  "recurringEveryNWeeks": "Every … weeks",
+  "recurringEveryNYears": "Every … years",
+  "recurringEveryNDays": "Every … days",
+  "recurringMonth": "Month",
+  "recurringDay": "Day",
+  "recurringRRule": "Recurrence rule (RRULE)",
+  "recurringRRuleHelp": "RFC 5545, e.g. FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "recurringRRuleInvalid": "This schedule is not valid.",
+  "recurringDecrease": "Decrease",
+  "recurringIncrease": "Increase",
+  "recurringStartDate": "Starts",
+  "recurringEnds": "Ends",
+  "recurringEndsNever": "Never",
+  "recurringEndsOnDate": "On date",
+  "recurringEndsAfterCount": "After …",
+  "recurringEndDate": "End date",
+  "recurringOccurrences": "Number of occurrences",
+  "recurringShift": "On weekends and holidays",
+  "recurringShiftNone": "Keep date",
+  "recurringShiftEarlier": "Earlier",
+  "recurringShiftLater": "Later",
+  "recurringAutoPostHelp": "Posted automatically on the due date when the app starts.",
+  "recurringRemindHelp": "You confirm (or skip) each occurrence; it is not posted on its own.",
+  "recurringRemindDaysBefore": "{days, plural, =0{Remind on the due date} =1{Remind 1 day before} other{Remind {days} days before}}",
+  "@recurringRemindDaysBefore": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNotifyTime": "Notification time",
+  "recurringActive": "Active",
+  "recurringActiveHelp": "Paused items are not posted and not reminded.",
+  "recurringAmountChanges": "Amount changes",
+  "recurringAmountChangesHelp": "A new amount from a date (e.g. a rent increase). Earlier postings stay unchanged.",
+  "recurringAddAmountChange": "Add amount change",
+  "recurringFromDate": "From {date}",
+  "@recurringFromDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringEffectiveFrom": "Effective from",
+  "recurringNewAmount": "New amount",
+  "recurringNextOccurrences": "Next occurrences",
+  "recurringNoUpcoming": "No upcoming occurrences.",
+  "recurringShiftedFrom": "{date} (moved from {original})",
+  "@recurringShiftedFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "original": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringLastPosted": "Handled up to {date}",
+  "@recurringLastPosted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringPostedHistory": "Posted",
+  "recurringNothingPosted": "Nothing posted yet.",
+  "recurringSaved": "Recurring item saved",
+  "recurringDeleteMessage": "Already posted transactions are kept.",
+  "recurringNotFound": "This recurring item no longer exists.",
+  "recurringErrorName": "Enter a name",
+  "recurringErrorAmount": "Enter an amount",
+  "recurringErrorEndBeforeStart": "The end date must not be before the start date",
+  "recurringErrorCount": "Enter at least 1",
+  "recurringErrorAccount": "Choose an account",
+  "recurringErrorTransferAccount": "Choose the target account",
+  "recurringErrorSameAccount": "Choose two different accounts",
+  "recurringErrorSplits": "The split lines must add up to the amount",
+  "recurringPickRule": "Choose a recurring item",
+  "recurringPickIncome": "Choose the salary",
+  "recurringNoIncomeRules": "No recurring income yet. Add your salary as recurring income first.",
+  "recurringNothingOnDay": "Nothing due on this day.",
+  "recurringMonthOut": "Bills this month",
+  "recurringMonthIn": "Income this month",
+  "recurringReminderBillBody": "{amount} due on {date}",
+  "@recurringReminderBillBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringReminderIncomeBody": "{amount} expected on {date}",
+  "@recurringReminderIncomeBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringChannelBills": "Bill reminders",
+  "recurringChannelIncome": "Income reminders",
+  "recurringChannelLowBalance": "Low balance",
+  "recurringChannelBudgets": "Budget alerts",
+  "reportsTitle": "Reports",
+  "reportsSpendingTitle": "Spending by category",
+  "reportsIncomeByCategoryTitle": "Income by category",
+  "reportsIncomeExpenseTitle": "Income vs expenses",
+  "reportsNetWorthTitle": "Net worth",
+  "reportsCategoryTrendTitle": "Category trend",
+  "reportsTopPayeesTitle": "Top payees",
+  "reportsComparisonTitle": "Period comparison",
+  "reportsPeriod": "Period",
+  "reportsCustomRange": "Custom range…",
+  "reportsPreviousPeriod": "Previous period",
+  "reportsNextPeriod": "Next period",
+  "reportsAllAccounts": "All accounts",
+  "reportsAccountsCount": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@reportsAccountsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsAllTags": "All tags",
+  "reportsTagsCount": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@reportsTagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsCustomField": "Custom field",
+  "reportsCustomFieldValue": "{field}: {value}",
+  "@reportsCustomFieldValue": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsChooseField": "Field",
+  "reportsFieldValue": "Value",
+  "reportsNoFields": "No custom fields yet",
+  "reportsIncludeExcluded": "Include excluded",
+  "reportsIncludeExcludedHint": "Includes the categories, accounts and tags excluded in Settings › Reports",
+  "reportsClearFilters": "Clear filters",
+  "reportsExportCsv": "Export CSV",
+  "reportsExported": "Report exported",
+  "reportsExportFailed": "Export failed: {message}",
+  "@reportsExportFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsNoData": "No data for this period",
+  "reportsTotal": "Total",
+  "reportsUncategorized": "Uncategorised",
+  "reportsOther": "Other",
+  "reportsArchived": "archived",
+  "reportsData": "Data",
+  "reportsColShare": "Share",
+  "reportsColCount": "Transactions",
+  "reportsColPeriod": "Period",
+  "reportsColIncome": "Income",
+  "reportsColExpenses": "Expenses",
+  "reportsColNet": "Net",
+  "reportsColSavingsRate": "Savings rate",
+  "reportsColMonth": "Month",
+  "reportsColAssets": "Assets",
+  "reportsColLiabilities": "Liabilities",
+  "reportsColNetWorth": "Net worth",
+  "reportsColAverage": "Average",
+  "reportsColCurrent": "Current",
+  "reportsColPrevious": "Previous",
+  "reportsColLastYear": "Last year",
+  "reportsColDeltaPrevious": "Δ previous",
+  "reportsColDeltaPreviousPct": "Δ previous %",
+  "reportsColDeltaLastYear": "Δ last year",
+  "reportsColDeltaLastYearPct": "Δ last year %",
+  "reportsIntervalMonth": "Month",
+  "reportsIntervalQuarter": "Quarter",
+  "reportsIntervalYear": "Year",
+  "reportsIntervalBudgetPeriod": "Budget period",
+  "reportsSortTotal": "Total",
+  "reportsSortCount": "Count",
+  "reportsSortAverage": "Average",
+  "reportsAllCategories": "All categories",
+  "reportsShowTransactions": "Show transactions",
+  "reportsSubcategories": "Show subcategories",
+  "reportsChooseCategories": "Categories",
+  "reportsTopCategoriesAuto": "Top 3 categories",
+  "reportsSavingsRate": "Savings rate",
+  "reportsNetChange": "Net change",
+  "reportsChangeInPeriod": "{amount} in this period",
+  "@reportsChangeInPeriod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsVsPrevious": "vs previous period",
+  "reportsVsLastYear": "vs same period last year",
+  "reportsQuarterLabel": "Q{quarter} {year}",
+  "@reportsQuarterLabel": {
+    "placeholders": {
+      "quarter": {
+        "type": "int"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsDonutSummary": "{title}, total {total}. {items}",
+  "@reportsDonutSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsBarsSummary": "Income vs expenses over {count} periods: income {income}, expenses {expenses}.",
+  "@reportsBarsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "income": {
+        "type": "String"
+      },
+      "expenses": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsLineSummary": "Net worth from {from} to {to}: {start} to {end}.",
+  "@reportsLineSummary": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTrendSummary": "Category trend over {count} periods. {items}",
+  "@reportsTrendSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsPayeesSummary": "Top payees: {items}",
+  "@reportsPayeesSummary": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsComparisonSummary": "Total {current}, previous period {previous}, last year {lastYear}.",
+  "@reportsComparisonSummary": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      },
+      "lastYear": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsOpenReport": "Open report",
+  "reportsNotFound": "Report not found",
+  "rulesTitle": "Rules",
+  "rulesEmpty": "No rules yet. Rules fill in category, tags and more when a payee, note or amount matches.",
+  "rulesAdd": "New rule",
+  "rulesOrderHint": "Rules run from top to bottom. For each field the first matching rule wins; drag to change the order.",
+  "rulesDisabled": "Disabled",
+  "rulesEnable": "Enabled",
+  "rulesRerun": "Re-run rules",
+  "rulesRerunTitle": "Re-run rules on existing transactions",
+  "rulesRerunOnlyUncategorised": "Only transactions without a category",
+  "rulesRerunAllHint": "Rules re-evaluate every transaction and replace existing categories, notes and status.",
+  "rulesRerunPreview": "{count, plural, =0{No transaction would change} =1{1 transaction would change} other{{count} transactions would change}} ({scanned} checked)",
+  "@rulesRerunPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "scanned": {
+        "type": "int"
+      }
+    }
+  },
+  "rulesRerunApply": "Apply",
+  "rulesRerunDone": "{count, plural, =0{Nothing changed} =1{1 transaction updated} other{{count} transactions updated}}",
+  "@rulesRerunDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulesNoRules": "There are no enabled rules.",
+  "rulesNew": "New rule",
+  "rulesEdit": "Edit rule",
+  "rulesName": "Name",
+  "rulesConditions": "If",
+  "rulesMatchAll": "All match",
+  "rulesMatchAny": "Any matches",
+  "rulesAddCondition": "Add condition",
+  "rulesCondText": "Payee / note text",
+  "rulesCondAmount": "Amount range",
+  "rulesCondAccount": "Account",
+  "rulesCondType": "Type",
+  "rulesFieldPayee": "Payee",
+  "rulesFieldNote": "Note",
+  "rulesFieldPayeeOrNote": "Payee or note",
+  "rulesOpContains": "contains",
+  "rulesOpEquals": "is",
+  "rulesOpStartsWith": "starts with",
+  "rulesOpEndsWith": "ends with",
+  "rulesOpRegex": "matches regex",
+  "rulesNegate": "Negate (does not match)",
+  "rulesText": "Text",
+  "rulesInvalidRegex": "Invalid regular expression",
+  "rulesAmountMin": "From",
+  "rulesAmountMax": "To",
+  "rulesAmountAbs": "Ignore the sign",
+  "rulesChooseAccounts": "Choose accounts",
+  "rulesAccountsSelected": "{count, plural, =0{No account} =1{1 account} other{{count} accounts}}",
+  "@rulesAccountsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulesRemoveCondition": "Remove condition",
+  "rulesActions": "Then",
+  "rulesActCategory": "Set category",
+  "rulesActTags": "Add tags",
+  "rulesActPayee": "Rename payee to",
+  "rulesActNote": "Set note",
+  "rulesActStatus": "Set status",
+  "rulesActCustomFields": "Set custom fields",
+  "rulesKeep": "Don't change",
+  "rulesOverwrite": "Replace existing values",
+  "rulesOverwriteHint": "Otherwise the rule only fills empty fields. A payee rename always applies.",
+  "rulesApplyOnEntry": "Apply when entering transactions",
+  "rulesApplyOnImport": "Apply when importing",
+  "rulesTest": "Try it",
+  "rulesTestHint": "Enter an example to see what the rule does.",
+  "rulesTestAmount": "Amount (negative = expense)",
+  "rulesTestMatch": "Matches – would set:",
+  "rulesTestNoMatch": "Doesn't match",
+  "rulesTestNoChange": "Matches, but the fields are already set",
+  "rulesSaved": "Rule saved",
+  "rulesDeleted": "Rule deleted",
+  "rulesInvalid": "Give the rule a name, at least one complete condition and one action.",
+  "rulesCreateFromTxn": "Create rule from this transaction",
+  "rulesSummaryWhen": "When {condition}",
+  "@rulesSummaryWhen": {
+    "placeholders": {
+      "condition": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesSummaryAmount": "amount {range}",
+  "@rulesSummaryAmount": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesSummaryAnd": " and ",
+  "rulesSummaryOr": " or ",
+  "rulesSummaryNoConditions": "No conditions",
+  "rulesYes": "Yes",
+  "rulesNo": "No",
+  "scenariosTitle": "Scenarios",
+  "scenariosNew": "New scenario",
+  "scenariosEdit": "Edit scenario",
+  "scenariosEmpty": "No scenarios yet. A scenario changes the plan – a raise, a big purchase, ending a loan – without touching your data.",
+  "scenariosName": "Name",
+  "scenariosNameRequired": "Enter a name",
+  "scenariosColor": "Colour",
+  "scenariosColorAuto": "Automatic",
+  "scenariosColorOption": "Colour {index}",
+  "@scenariosColorOption": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "scenariosCompare": "Compare on the forecast",
+  "scenariosCompareDesc": "Up to 3 scenarios are shown next to the baseline.",
+  "scenariosMaxCompared": "Up to 3 scenarios can be compared. Turn one off first.",
+  "scenariosChanges": "Changes",
+  "scenariosAddChange": "Add change",
+  "scenariosNoChanges": "No changes yet. Add one to see its effect.",
+  "scenariosDuplicate": "Duplicate",
+  "scenariosCopyName": "{name} (copy)",
+  "scenariosDeleteTitle": "Delete scenario?",
+  "scenariosDeleteMessage": "“{name}” will be deleted. Your data is not affected.",
+  "scenariosNotFound": "This scenario no longer exists.",
+  "scenariosModuleOff": "Scenarios are turned off. You can turn them on in Settings › Navigation & modules.",
+  "scenariosSaved": "Scenario saved",
+  "scenariosChangeCount": "{count, plural, =0{No changes} =1{1 change} other{{count} changes}}",
+  "@scenariosChangeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scenariosTypeOneOff": "One-off event",
+  "scenariosTypeCategory": "Change spending in a category",
+  "scenariosTypeRecurringChange": "Change a recurring item",
+  "scenariosTypeAddRecurring": "Add a recurring item",
+  "scenariosTypeEndRecurring": "End a recurring item",
+  "scenariosTypeReturn": "Different return",
+  "scenariosTypeInflation": "Different inflation",
+  "scenariosTypeUnknown": "Unsupported change",
+  "scenariosSumOneOff": "One-off · {amount} on {date}",
+  "@scenariosSumOneOff": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumPercent": "{percent} from {date}",
+  "@scenariosSumPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumCategoryAbsolute": "{amount} per month from {date}",
+  "@scenariosSumCategoryAbsolute": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumRecurringAbsolute": "{amount} per payment from {date}",
+  "@scenariosSumRecurringAbsolute": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumAddRecurring": "{amount} {frequency} from {date}",
+  "@scenariosSumAddRecurring": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumEndRecurring": "Ends {date}",
+  "scenariosSumReturnAll": "Return {percent} on investments",
+  "scenariosSumReturnAccount": "Return {percent} on {account}",
+  "@scenariosSumReturnAccount": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "scenariosSumInflation": "Inflation {percent}",
+  "scenariosUnknownItem": "Unknown",
+  "scenariosFieldLabel": "Label",
+  "scenariosFieldDate": "Date",
+  "scenariosFieldFrom": "From",
+  "scenariosFieldUntil": "Until (optional)",
+  "scenariosFieldAmount": "Amount",
+  "scenariosFieldAccount": "Account",
+  "scenariosFieldTransferTo": "Transfer to (optional)",
+  "scenariosFieldCategory": "Category",
+  "scenariosFieldRule": "Recurring item",
+  "scenariosFieldChangeBy": "Change by",
+  "scenariosModePercent": "Percent",
+  "scenariosModeAmount": "Amount",
+  "scenariosFieldPercent": "Change in % (e.g. 5 or −10)",
+  "scenariosFieldDeltaMonthly": "Change per month (negative = less)",
+  "scenariosFieldDeltaEach": "Change per payment (negative = less)",
+  "scenariosFieldRepeats": "Repeats",
+  "scenariosFreqWeekly": "weekly",
+  "scenariosFreqMonthly": "monthly",
+  "scenariosFreqQuarterly": "every 3 months",
+  "scenariosFreqYearly": "yearly",
+  "scenariosFreqCustom": "custom",
+  "scenariosFieldReturn": "Expected return per year in %",
+  "scenariosFieldInflation": "Inflation per year in %",
+  "scenariosAllInvestments": "All investments",
+  "scenariosInvalidNumber": "Enter a valid number",
+  "scenariosRequired": "Required",
+  "scenariosChoose": "Choose…",
+  "scenariosNoRules": "There are no recurring items yet.",
+  "scenariosLowDelta": "Lowest {delta}",
+  "scenariosEndDelta": "End {delta}",
+  "scenariosResolvesWarning": "Stays above your threshold",
+  "scenariosCausesWarning": "Drops below your threshold",
+  "securityLockedTitle": "Quiet Ledger is locked",
+  "securityEnterPin": "Enter your PIN",
+  "securityEnterPassword": "Enter your password",
+  "securityUnlock": "Unlock",
+  "securityUseBiometrics": "Unlock with biometrics",
+  "securityBiometricReason": "Unlock Quiet Ledger",
+  "securityWrongPin": "Wrong PIN",
+  "securityWrongPassword": "Wrong password",
+  "securityAttemptsLeft": "{count, plural, =1{1 attempt left before a delay} other{{count} attempts left before a delay}}",
+  "@securityAttemptsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTryAgainIn": "Too many attempts. Try again in {time}.",
+  "@securityTryAgainIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "securityChecking": "Checking…",
+  "securityDeleteDigit": "Delete digit",
+  "securityDigitsOf": "{count} of {total} digits entered",
+  "@securityDigitsOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "securityDigitsEntered": "{count, plural, =0{No digits entered} =1{1 digit entered} other{{count} digits entered}}",
+  "@securityDigitsEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "securityPasswordLabel": "Password",
+  "securityShowPassword": "Show password",
+  "securityHidePassword": "Hide password",
+  "securitySetupTitle": "Set up app lock",
+  "securityChooseMethod": "How do you want to unlock the app?",
+  "securityMethodPin": "PIN",
+  "securityMethodPassword": "Password",
+  "securityAlsoBiometrics": "Also unlock with biometrics",
+  "securityAlsoBiometricsDesc": "Fingerprint, face or Windows Hello. Your PIN or password stays as a fallback.",
+  "securityNewPin": "Choose a PIN",
+  "securityConfirmPin": "Enter the PIN again",
+  "securityNewPassword": "Choose a password",
+  "securityConfirmPassword": "Enter the password again",
+  "securityMismatch": "The entries don't match. Try again.",
+  "securityPinDigitsOnly": "Use digits only",
+  "securityPinLength": "{min} to {max} digits",
+  "@securityPinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "securityPasswordTooShort": "At least {min} characters",
+  "@securityPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "securityChangePin": "Change PIN",
+  "securityChangePassword": "Change password",
+  "securityChangeDesc": "Or switch between PIN and password",
+  "securityLockNow": "Lock now",
+  "securityLockOffDesc": "Require a PIN or password to open the app",
+  "securityLockTimeoutDesc": "How long the app may stay in the background before it locks",
+  "securityConfirmIdentity": "Confirm it's you",
+  "securityCurrentPin": "Current PIN",
+  "securityCurrentPassword": "Current password",
+  "securityDisableTitle": "Turn off app lock?",
+  "securityDisableMessage": "Anyone with access to this device can then open the app and see your finances.",
+  "securityTurnOff": "Turn off",
+  "securityTimeoutImmediately": "Immediately",
+  "securityTimeoutSeconds": "{n} s",
+  "@securityTimeoutSeconds": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTimeoutMinutes": "{n} min",
+  "@securityTimeoutMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityTimeoutHours": "{n} h",
+  "@securityTimeoutHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "securityContentHidden": "Content hidden",
+  "fieldAccount": "Account",
+  "fieldAmount": "Amount",
+  "fieldBalance": "Balance",
+  "fieldCategory": "Category",
+  "fieldDate": "Date",
+  "fieldNote": "Note",
+  "fieldPayee": "Payee",
+  "fieldStatus": "Status",
+  "setAccentScheme": "Accent colour",
+  "setAmountColorStyle": "Amount colours",
+  "setAppLock": "App lock",
+  "setAutoExport": "Automatic export",
+  "setAutoExportFolder": "Export folder",
+  "setAutoExportKeep": "Keep last exports",
+  "setBlockScreenshots": "Block screenshots",
+  "setBlockScreenshotsDesc": "Android only",
+  "setBudgetMode": "Budget mode",
+  "setCalculatorKeypad": "Calculator keypad",
+  "setConfirmDelete": "Confirm before deleting",
+  "setCsvDateFormat": "CSV date format",
+  "setCsvDecimalSeparator": "CSV decimal separator",
+  "setCsvDelimiter": "CSV delimiter",
+  "setCsvEncoding": "CSV encoding",
+  "setCustomAccent": "Custom accent",
+  "setDashboardPeriod": "Dashboard period",
+  "setDashboardWidgets": "Dashboard widgets",
+  "setDateFormat": "Date format",
+  "setDefaultAccount": "Default account",
+  "setDefaultCategorySet": "Default categories",
+  "setDefaultDate": "Default date",
+  "setDefaultFilter": "Default filter",
+  "setDefaultPostingMode": "Default posting mode",
+  "setDefaultReturn": "Default expected return",
+  "setDefaultReturnDesc": "Per year, for accounts without their own value",
+  "setDefaultRollover": "Default rollover",
+  "setDefaultType": "Default type",
+  "setDensity": "Density",
+  "setDeviceName": "Device name",
+  "setDynamicColor": "Dynamic colour",
+  "setDynamicColorDesc": "Use the system accent colour (Material You)",
+  "setExcludedAccounts": "Excluded accounts",
+  "setExcludedCategories": "Excluded categories",
+  "setExcludedTags": "Excluded tags",
+  "setFieldOrder": "Quick-add field order",
+  "setFirstDayOfWeek": "First day of week",
+  "setFiscalYearStart": "Fiscal year starts in month",
+  "setFiscalYearStartDesc": "1 = January",
+  "setFormatLocale": "Number & date format",
+  "setFormatLocaleDesc": "Region used to format numbers and dates",
+  "setGrouping": "Grouping",
+  "setHideAmounts": "Hide amounts",
+  "setHideAmountsDesc": "Blur amounts until tapped",
+  "setHideInAppSwitcher": "Hide content in app switcher",
+  "setHighContrast": "High contrast",
+  "setHolidayCountry": "Holiday calendar",
+  "setHolidayRegion": "Federal state",
+  "setHorizonMonths": "Forecast horizon (months)",
+  "setImportProfiles": "Import profiles & history",
+  "setIncludePending": "Include pending",
+  "setIncludePlanned": "Include planned",
+  "setInflation": "Inflation rate",
+  "setLanguage": "Language",
+  "setLockMethod": "Unlock method",
+  "setLockOnStart": "Lock on start",
+  "setLockTimeout": "Lock after (in background)",
+  "setLowBalanceThreshold": "Low-balance threshold",
+  "setManageCategories": "Manage categories",
+  "setManageCustomFields": "Manage custom fields",
+  "setManageTags": "Manage tags",
+  "setModAttachments": "Attachments",
+  "setModBudgets": "Budgets",
+  "setModCustomFields": "Custom fields",
+  "setNavTabs": "Navigation tabs",
+  "setNavTabsDesc": "Choose and order the tabs",
+  "setNotificationTime": "Notification time",
+  "setNotifyBills": "Notify about bills",
+  "setNotifyBudget": "Notify about budgets",
+  "setNotifyIncome": "Notify about income",
+  "setNotifyLowBalance": "Notify about low balance",
+  "setOnboardingDone": "Onboarding completed",
+  "setOptAmber": "Amber",
+  "setOptAutoPost": "Post automatically",
+  "setOptBiWeekly": "Every two weeks",
+  "setOptBiometric": "Biometrics",
+  "setOptBlue": "Blue",
+  "setOptBudgetPeriod": "Budget period",
+  "setOptCalendarMonth": "Calendar month",
+  "setOptColorCoded": "Colour-coded",
+  "setOptComfortable": "Comfortable",
+  "setOptComma": "comma",
+  "setOptCompact": "Compact",
+  "setOptCustom": "Custom",
+  "setOptDaily": "Daily",
+  "setOptDark": "Dark",
+  "setOptDay": "Day",
+  "setOptEnvelope": "Envelope (zero-based)",
+  "setOptFromBudget": "From budget",
+  "setOptFromLanguage": "From language",
+  "setOptLargestFirst": "Largest first",
+  "setOptLastMonth": "Last month",
+  "setOptLastUsed": "Last used",
+  "setOptLastYear": "Last year",
+  "setOptLight": "Light",
+  "setOptLocaleDefault": "Locale default",
+  "setOptMonday": "Monday",
+  "setOptMonth": "Month",
+  "setOptMonthly": "Monthly",
+  "setOptNationwide": "Nationwide only",
+  "setOptNeutral": "Neutral",
+  "setOptNewestFirst": "Newest first",
+  "setOptNextBusinessDay": "Next business day",
+  "setOptNoRollover": "No rollover",
+  "setOptNoShift": "Don't shift",
+  "setOptOff": "Off",
+  "setOptOldestFirst": "Oldest first",
+  "setOptPassword": "Password",
+  "setOptPoint": "point",
+  "setOptPreviousBusinessDay": "Previous business day",
+  "setOptQuarterly": "Quarterly",
+  "setOptRemindConfirm": "Remind & confirm",
+  "setOptRolloverBoth": "Leftover and overspent",
+  "setOptRolloverLeftover": "Carry leftover",
+  "setOptRolloverOverspent": "Carry overspent",
+  "setOptRose": "Rose",
+  "setOptSaturday": "Saturday",
+  "setOptSemicolon": "semicolon",
+  "setOptSignOnly": "+/− only",
+  "setOptSlate": "Slate",
+  "setOptSmallestFirst": "Smallest first",
+  "setOptSpruce": "Spruce",
+  "setOptSunday": "Sunday",
+  "setOptSystem": "System",
+  "setOptThisMonth": "This month",
+  "setOptThisYear": "This year",
+  "setOptToday": "Today",
+  "setOptTracking": "Tracking (limits)",
+  "setOptViolet": "Violet",
+  "setOptWeek": "Week",
+  "setOptWeekly": "Weekly",
+  "setOptYearToDate": "Year to date",
+  "setOptYearly": "Yearly",
+  "setPayeeSuggestions": "Payee suggestions",
+  "setPayeeSuggestionsDesc": "Learn category and account from history",
+  "setPeriodType": "Period",
+  "setPrivacyOnStart": "Privacy mode on start",
+  "setProjectionYears": "Projection years",
+  "setQuietHoursEnd": "Quiet hours end",
+  "setQuietHoursStart": "Quiet hours start",
+  "setRealValues": "Show real values",
+  "setRealValuesDesc": "Adjust projections for inflation",
+  "setRecentCategories": "Recent categories shown",
+  "setReminderLeadDays": "Remind days before",
+  "setReportPeriod": "Default period",
+  "setRequiredFields": "Required fields",
+  "setRunningBalance": "Running balance",
+  "setRunningBalanceDesc": "Show the balance after each transaction",
+  "setSalaryBased": "Start on payday",
+  "setSalaryBasedDesc": "The period starts when the chosen income arrives",
+  "setSalaryRule": "Salary income",
+  "setSecAppearance": "Appearance",
+  "setSecBudgets": "Budgets",
+  "setSecCategories": "Categories & tags",
+  "setSecDashboard": "Dashboard",
+  "setSecData": "Data",
+  "setSecEntry": "Entry",
+  "setSecForecast": "Forecast & projection",
+  "setSecGeneral": "General",
+  "setSecImportExport": "Import / export",
+  "setSecNavigation": "Navigation & modules",
+  "setSecPrivacy": "Privacy",
+  "setSecRecurring": "Recurring & reminders",
+  "setSecSecurity": "Security",
+  "setShowCents": "Show cents",
+  "setSignStyle": "Negative amounts",
+  "setSort": "Sort order",
+  "setStartDay": "Start day of month",
+  "setStartDayDesc": "0 = last day of the month",
+  "setStartScreen": "Start screen",
+  "setStorageLocation": "Storage location",
+  "setTextScale": "Text size",
+  "setThemeMode": "Theme",
+  "setTombstoneDays": "Keep deleted items (days)",
+  "setTombstoneDaysDesc": "Needed later for sync",
+  "setUpcomingDays": "Upcoming bills window (days)",
+  "setVariableMethod": "Variable spending estimate",
+  "setVisibleColumns": "Visible columns",
+  "setWarnThreshold": "Warning threshold",
+  "setWeekendShift": "Weekend & holiday shift",
+  "setModuleEnabled": "Enable {module}",
+  "@setModuleEnabled": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "setOptMean": "Average of last {n} months",
+  "@setOptMean": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "setOptMedian": "Median of last {n} months",
+  "@setOptMedian": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "setOptLastNMonths": "Last {n} months",
+  "@setOptLastNMonths": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "setSettingsTitle": "Settings",
+  "settingsUiSearchHint": "Search settings",
+  "settingsUiNoResults": "No settings match “{query}”",
+  "@settingsUiNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiClear": "Clear",
+  "settingsUiSecAbout": "About",
+  "settingsUiAboutSummary": "Version {version}",
+  "@settingsUiAboutSummary": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiAboutVersion": "Version",
+  "settingsUiAboutLicenses": "Open-source licences",
+  "settingsUiAboutPrivacy": "All data stays on this device. No account, no telemetry.",
+  "settingsUiAboutEncryption": "Database encryption",
+  "settingsUiAboutEncryptionOn": "On (SQLite3 Multiple Ciphers, key in the system keystore)",
+  "settingsUiAboutEncryptionOff": "Off: no secure key storage was available when the database was created",
+  "settingsUiAboutEncryptionUnavailable": "Not available on this platform",
+  "settingsUiAmountsHidden": "Amounts hidden",
+  "settingsUiAmountsVisible": "Amounts visible",
+  "settingsUiTabsCount": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@settingsUiTabsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiDaysBefore": "{count, plural, =0{On the day} =1{1 day before} other{{count} days before}}",
+  "@settingsUiDaysBefore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiMonthsCount": "{count, plural, =1{1 month} other{{count} months}}",
+  "@settingsUiMonthsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiModuleOff": "Module off",
+  "settingsUiModuleOffNotice": "The {module} module is switched off.",
+  "@settingsUiModuleOffNotice": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiTurnOn": "Turn on",
+  "settingsUiDataSummary": "Storage, statistics, reset",
+  "settingsUiResetSection": "Reset section",
+  "settingsUiResetSectionTitle": "Reset “{section}”?",
+  "@settingsUiResetSectionTitle": {
+    "placeholders": {
+      "section": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetSectionMessage": "All settings in this section return to their defaults.",
+  "settingsUiResetDone": "Section reset",
+  "settingsUiModulesTitle": "Modules",
+  "settingsUiModulesDesc": "Switched-off modules disappear from navigation and settings. Their data is kept.",
+  "settingsUiNavTabsHint": "{min} to {max} tabs, “More” is always last",
+  "@settingsUiNavTabsHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiNavTabsRecommend": "Tip: keep Home or Transactions in the bar.",
+  "settingsUiNavTabModuleOff": "Hidden while the module is switched off",
+  "settingsUiNavMoreAlways": "Always shown, always last",
+  "settingsUiDragHandle": "Drag to reorder",
+  "settingsUiMoveUp": "Move up",
+  "settingsUiMoveDown": "Move down",
+  "settingsUiNotSet": "Not set",
+  "settingsUiAndMore": "+{count} more",
+  "@settingsUiAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiLastDay": "Last day",
+  "settingsUiDecrease": "Decrease",
+  "settingsUiIncrease": "Increase",
+  "settingsUiTapToType": "Double-tap to type a value",
+  "settingsUiInvalidNumber": "Enter a number",
+  "settingsUiInvalidValue": "This value is not allowed",
+  "settingsUiOutOfRange": "Enter a value from {min} to {max}",
+  "@settingsUiOutOfRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiOutOfRangeText": "From {min} to {max}",
+  "@settingsUiOutOfRangeText": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiPresets": "Presets",
+  "settingsUiCustomColor": "Custom colour",
+  "settingsUiHue": "Hue",
+  "settingsUiSaturation": "Saturation",
+  "settingsUiLightness": "Lightness",
+  "settingsUiHex": "HEX",
+  "settingsUiInvalidHex": "Enter a colour like #1F5A53",
+  "settingsUiNoTags": "No tags yet",
+  "settingsUiPrivacyNow": "Hide amounts now",
+  "settingsUiPrivacyNowDesc": "Privacy mode for this session",
+  "settingsUiStats": "Database statistics",
+  "settingsUiStatRecurring": "Recurring rules",
+  "settingsUiStatImports": "Imports",
+  "settingsUiStatChangeLog": "Change log entries",
+  "settingsUiStatDbSize": "Database size",
+  "settingsUiRefresh": "Refresh",
+  "settingsUiRebuildIndex": "Rebuild search index",
+  "settingsUiRebuildIndexDesc": "Fixes missing or outdated search results",
+  "settingsUiRebuildDone": "Search index rebuilt",
+  "settingsUiRerunRules": "Re-run rules",
+  "settingsUiRerunRulesDesc": "Apply your categorisation rules to existing transactions",
+  "settingsUiRerunRulesAll": "Re-evaluate all transactions",
+  "settingsUiRerunRulesAllDesc": "Rule values replace existing categories, not only empty ones",
+  "settingsUiRerunRulesDone": "{count, plural, =0{No transactions changed} =1{1 transaction changed} other{{count} transactions changed}}",
+  "@settingsUiRerunRulesDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiRun": "Run",
+  "settingsUiResetApp": "Reset app",
+  "settingsUiResetAppDesc": "Delete all data on this device and start over",
+  "settingsUiResetAppTitle": "Delete all data?",
+  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.",
+  "@settingsUiResetAppMessage": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetAppWord": "DELETE",
+  "settingsUiTypeToConfirm": "Type {word}",
+  "@settingsUiTypeToConfirm": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetAppConfirm": "Delete everything",
+  "settingsUiStorageDefault": "Default app folder",
+  "settingsUiStorageMoveTitle": "Change storage location?",
+  "settingsUiStorageMoveMessage": "The current database is copied to {path} and used from there after the next restart. The old file stays where it is.",
+  "@settingsUiStorageMoveMessage": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiStorageExisting": "{path} already contains a database. It will be used after the next restart; nothing is copied. It must have been created with this installation, otherwise it cannot be opened.",
+  "@settingsUiStorageExisting": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiStorageCopy": "Copy and switch",
+  "settingsUiStorageUseExisting": "Use this database",
+  "settingsUiStorageRestart": "Restart the app to use the new location.",
+  "settingsUiStorageResetDefault": "Use default folder",
+  "settingsUiStorageResetMessage": "After the next restart the app uses the database in its default folder again. Data stored in the custom folder is not copied back.",
+  "settingsUiStatDeleted": "Deleted items kept for sync",
+  "settingsUiPurge": "Purge deleted items",
+  "settingsUiPurgeDesc": "Remove items deleted more than {days} days ago",
+  "@settingsUiPurgeDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiPurgeMessage": "Permanently removes items that were deleted more than {days} days ago. They can no longer be restored or synced.",
+  "@settingsUiPurgeMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiPurgeConfirm": "Purge",
+  "settingsUiPurgeDone": "{count, plural, =0{Nothing to purge} =1{1 item removed} other{{count} items removed}}",
+  "@settingsUiPurgeDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSearchHint": "Search payee, note, category",
+  "txnSearchLabel": "Search transactions",
+  "txnSearchHintWide": "Payee, note, tag, category",
+  "txnSelectMultiple": "Select multiple",
+  "txnNew": "New",
+  "txnCtrl": "Ctrl",
+  "txnEntries": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@txnEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnIn": "In",
+  "txnOut": "Out",
+  "txnToday": "Today",
+  "txnYesterday": "Yesterday",
+  "txnTodayDate": "Today, {date}",
+  "@txnTodayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnYesterdayDate": "Yesterday, {date}",
+  "@txnYesterdayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnGroupToday": "Today · {date}",
+  "@txnGroupToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnGroupYesterday": "Yesterday · {date}",
+  "@txnGroupYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferTo": "To {account}",
+  "@txnTransferTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferFrom": "From {account}",
+  "@txnTransferFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferFromSub": "Transfer · from {account}",
+  "@txnTransferFromSub": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferToSub": "Transfer · to {account}",
+  "@txnTransferToSub": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnSplitCount": "Split · {count}",
+  "@txnSplitCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnNoPayee": "No payee",
+  "txnUncategorized": "Uncategorized",
+  "txnUnknownAccount": "Unknown account",
+  "txnHasReceipt": "Has receipt",
+  "txnRecurring": "Recurring",
+  "txnBalanceShort": "Bal. {amount}",
+  "@txnBalanceShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnEmpty": "No transactions yet. Add your first one with the + button.",
+  "txnEmptyFiltered": "No transactions match these filters.",
+  "txnClearFilters": "Clear filters",
+  "txnFilters": "Filters",
+  "txnFilterAllDates": "All dates",
+  "txnFilterType": "Type",
+  "txnFilterTag": "Tag",
+  "txnFilterCustomField": "Custom field",
+  "txnChipCount": "{label} · {count}",
+  "@txnChipCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSaveFilter": "Save filter",
+  "txnPresetThisMonth": "This month",
+  "txnPresetLastMonth": "Last month",
+  "txnPresetLast30": "Last 30 days",
+  "txnPresetLast90": "Last 90 days",
+  "txnPresetThisYear": "This year",
+  "txnPresetLastYear": "Last year",
+  "txnPresetCustom": "Custom range…",
+  "txnAmountMin": "At least",
+  "txnAmountMax": "At most",
+  "txnAmountHint": "Compares the amount without sign.",
+  "txnAmountAtLeast": "≥ {amount}",
+  "@txnAmountAtLeast": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAmountAtMost": "≤ {amount}",
+  "@txnAmountAtMost": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnApply": "Apply",
+  "txnChooseCategories": "Choose categories",
+  "txnCustomFieldAny": "Has any value",
+  "txnCustomFieldEquals": "Is",
+  "txnCustomFieldContains": "Contains",
+  "txnCustomFieldIncludes": "Includes",
+  "txnCustomFieldValue": "Value",
+  "txnCustomFieldAdd": "Add condition",
+  "txnCustomFieldChoose": "Field",
+  "txnCustomFieldNone": "No custom fields for transactions yet.",
+  "txnSavedFilters": "Saved filters",
+  "txnAllTransactions": "All transactions",
+  "txnFilterName": "Name",
+  "txnFilterSaved": "Filter saved",
+  "txnFilterUpdated": "Filter updated",
+  "txnUpdateFilter": "Update with current filter",
+  "txnRename": "Rename",
+  "txnSetDefault": "Use as default",
+  "txnUnsetDefault": "Stop using as default",
+  "txnIsDefault": "Default",
+  "txnFilterDeleted": "Filter deleted",
+  "txnNoSavedFilters": "No saved filters yet. Set filters in the transaction list and tap “Save filter”.",
+  "txnNoDefaultFilter": "No default filter",
+  "txnNameRequired": "Enter a name",
+  "txnViewOptions": "View options",
+  "txnGroupingOffHint": "Grouping applies when sorted by date.",
+  "txnRunningBalanceHint": "The running balance is shown when the list is filtered to one account and sorted by date.",
+  "txnChooseAccountAction": "Choose account",
+  "txnSelectedCount": "{count} selected",
+  "@txnSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSelectAll": "Select all",
+  "txnClearSelection": "Clear selection",
+  "txnSetCategory": "Set category",
+  "txnSetStatus": "Set status",
+  "txnSetDate": "Set date",
+  "txnSetAccount": "Move to account",
+  "txnAddTags": "Add tags",
+  "txnBulkUpdated": "{count, plural, =1{1 transaction updated} other{{count} transactions updated}}",
+  "@txnBulkUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleted": "{count, plural, =1{Transaction deleted} other{{count} transactions deleted}}",
+  "@txnDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleteConfirmTitle": "{count, plural, =1{Delete this transaction?} other{Delete {count} transactions?}}",
+  "@txnDeleteConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleteConfirmBody": "You can undo this right afterwards.",
+  "txnDuplicate": "Duplicate",
+  "txnDuplicated": "Transaction duplicated",
+  "txnMarkCleared": "Mark as cleared",
+  "txnMarkPending": "Mark as pending",
+  "txnStatusChanged": "Status changed",
+  "txnSaveAsTemplate": "Save as template",
+  "txnTemplateSaved": "Template saved",
+  "txnOpen": "Open",
+  "txnSelect": "Select",
+  "txnMoreActions": "More actions",
+  "txnDetailTitle": "Transaction",
+  "txnEditTransaction": "Edit transaction",
+  "txnCloseDetail": "Close detail",
+  "txnNotFound": "This transaction no longer exists.",
+  "txnSplit": "Split",
+  "txnCustomFields": "Custom fields",
+  "txnAttachments": "Attachments",
+  "txnAttachmentCount": "{count, plural, =1{Attachment · 1 file} other{Attachments · {count} files}}",
+  "@txnAttachmentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnAddAttachment": "Add attachment",
+  "txnAttachReceipt": "Attach receipt",
+  "txnRemoveAttachment": "Remove attachment {name}",
+  "@txnRemoveAttachment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAttachmentUnavailable": "The file is not available on this device.",
+  "txnAttachmentPending": "Saved with the transaction",
+  "txnShare": "Share",
+  "txnOrigin": "Origin",
+  "txnOriginRecurring": "Recurring: {name}",
+  "@txnOriginRecurring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOriginImport": "Imported from {file}",
+  "@txnOriginImport": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOriginManual": "Entered manually",
+  "txnValueDate": "Value date",
+  "txnNewTransaction": "New transaction",
+  "txnNewTemplate": "New template",
+  "txnEditTemplate": "Edit template",
+  "txnSaveExpense": "Save expense",
+  "txnSaveIncome": "Save income",
+  "txnSaveTransfer": "Save transfer",
+  "txnSaveChanges": "Save changes",
+  "txnSaveTemplate": "Save template",
+  "txnSplitAction": "Split across categories",
+  "txnRecentCategories": "Recent categories",
+  "txnFromAccount": "From",
+  "txnToAccount": "To",
+  "txnChooseAccount": "Choose account",
+  "txnChooseCategory": "Choose category",
+  "txnKeypad": "Amount keypad",
+  "txnDecimalSeparator": "Decimal separator",
+  "txnDeleteDigit": "Delete digit",
+  "txnPlus": "Plus",
+  "txnMinus": "Minus",
+  "txnTimes": "Times",
+  "txnDivide": "Divided by",
+  "txnAmountPreview": "= {amount}",
+  "@txnAmountPreview": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnErrAmount": "Enter an amount",
+  "txnErrAmountInvalid": "This calculation is not valid",
+  "txnErrDivZero": "Division by zero",
+  "txnErrTooLarge": "This amount is too large",
+  "txnErrRequired": "Required",
+  "txnErrSameAccount": "Choose two different accounts",
+  "txnErrSplit": "The split lines must add up to the total",
+  "txnErrNoAccount": "Create an account first to record transactions.",
+  "txnErrCheckFields": "Please check the highlighted fields.",
+  "txnCreateAccount": "Create account",
+  "txnSavedExpense": "Expense saved",
+  "txnSavedIncome": "Income saved",
+  "txnSavedTransfer": "Transfer saved",
+  "txnChangesSaved": "Changes saved",
+  "txnSaveFailed": "Could not save: {message}",
+  "@txnSaveFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAddSplit": "Add split",
+  "txnRemaining": "Remaining {amount}",
+  "@txnRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOverAssigned": "Over by {amount}",
+  "@txnOverAssigned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnFullyAssigned": "Fully assigned",
+  "txnRemoveSplit": "Remove line",
+  "txnSplitLineCategory": "Split {n} category",
+  "@txnSplitLineCategory": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSplitLineAmount": "Split {n} amount",
+  "@txnSplitLineAmount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "txnAssignRemaining": "Assign remaining",
+  "txnStopSplit": "Remove split",
+  "txnAddTag": "Add tag",
+  "txnRemoveTag": "Remove tag {name}",
+  "@txnRemoveTag": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnCreateTag": "Create “{name}”",
+  "@txnCreateTag": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnSearchTags": "Search or create a tag",
+  "txnMoreDetails": "More details",
+  "txnUseTemplate": "Use template {name}",
+  "@txnUseTemplate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTemplatesEmpty": "No templates yet. Save a transaction as a template to enter it with one tap.",
+  "txnTemplateAddNow": "Add now",
+  "txnTemplatePosted": "{name} added",
+  "@txnTemplatePosted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTemplateName": "Template name",
+  "txnTemplateDeleted": "Template deleted",
+  "txnTemplateFillIn": "Open in quick add",
+  "txnTemplateInvalid": "This template is incomplete. Edit it to choose an account.",
+  "txnPickDate": "Choose date",
+  "txnClear": "Clear",
+  "txnSum": "Total {amount}",
+  "@txnSum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnKeyDelete": "Del",
+  "txnImportBatchChip": "From one import",
+  "txnCreateRule": "Create rule"
+}

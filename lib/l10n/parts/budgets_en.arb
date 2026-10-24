@@ -1,0 +1,284 @@
+{
+  "@@locale": "en",
+  "budgetsTitle": "Budgets",
+  "budgetsBudgeted": "Budgeted",
+  "budgetsSpent": "Spent",
+  "budgetsLeftLabel": "Left",
+  "budgetsLeftDays": "{days, plural, =0{Left · last day} =1{Left · 1 day} other{Left · {days} days}}",
+  "@budgetsLeftDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsTodayDayOf": "Today, day {day} of {total}",
+  "@budgetsTodayDayOf": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOfAmount": "of {amount}",
+  "@budgetsOfAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsOverBudget": "{amount} over budget",
+  "@budgetsOverBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsUsedLeft": "{percent}% used · {amount} left",
+  "@budgetsUsedLeft": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAmountLeft": "{amount} left",
+  "@budgetsAmountLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsInclRolledOver": "incl. {amount} rolled over",
+  "@budgetsInclRolledOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsInclOverspentCarried": "incl. {amount} overspent carried over",
+  "@budgetsInclOverspentCarried": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSpentOf": "{spent} spent of {available}",
+  "@budgetsSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsUnbudgetedSpent": "{amount} spent in categories without a budget",
+  "@budgetsUnbudgetedSpent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEmpty": "No budgets for this period yet.",
+  "budgetsAdd": "Add budget",
+  "budgetsCopyPrevious": "Copy previous period",
+  "budgetsFromAverage": "{count, plural, =1{From last period’s spending} other{From {count}-period average}}",
+  "@budgetsFromAverage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsFromTemplate": "From template",
+  "budgetsSaveTemplate": "Save as template",
+  "budgetsEditAll": "Edit all amounts",
+  "budgetsClearPeriod": "Remove all budgets",
+  "budgetsClearPeriodTitle": "Remove all budgets of this period?",
+  "budgetsClearPeriodMessage": "Transactions are not affected.",
+  "budgetsFillMenu": "Fill",
+  "budgetsFilledCount": "{count, plural, =0{No budgets set} =1{1 budget set} other{{count} budgets set}}",
+  "@budgetsFilledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsNothingToCopy": "The previous period has no budgets.",
+  "budgetsNoSpendingHistory": "No spending found in those periods.",
+  "budgetsOverwriteTitle": "Replace existing amounts?",
+  "budgetsOverwriteMessage": "Categories that already have a budget in this period get the new amount; others stay unchanged.",
+  "budgetsOverwriteConfirm": "Replace",
+  "budgetsAmountLabel": "Budget",
+  "budgetsAmountInvalid": "Enter an amount of 0 or more",
+  "budgetsRemove": "Remove budget",
+  "budgetsTemplateName": "Template name",
+  "budgetsTemplateNameRequired": "Enter a name",
+  "budgetsTemplateSaved": "Template “{name}” saved",
+  "@budgetsTemplateSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsTemplateSummary": "{count, plural, =1{1 category} other{{count} categories}} · {total}",
+  "@budgetsTemplateSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNoTemplates": "No templates yet. Save a period as a template first.",
+  "budgetsBulkTotal": "Total budgeted: {amount}",
+  "@budgetsBulkTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNoCategories": "No expense categories yet.",
+  "budgetsLeftToAssign": "{amount} left to assign",
+  "@budgetsLeftToAssign": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAllAssigned": "Every euro is assigned",
+  "budgetsOverAssigned": "{amount} more assigned than available",
+  "@budgetsOverAssigned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEnvelopeFormula": "Income {income} + carried over {carry} − assigned {assigned}",
+  "@budgetsEnvelopeFormula": {
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "carry": {
+        "type": "String"
+      },
+      "assigned": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSelectHint": "Select a budget to see its details.",
+  "budgetsCategoryMissing": "This category no longer exists.",
+  "budgetsTransactionsInPeriod": "Transactions in this period",
+  "budgetsNoTransactions": "No transactions in this period.",
+  "budgetsSpentNoBudget": "spent · no budget set",
+  "budgetsBudgetedThisPeriod": "Budgeted this period",
+  "budgetsCarriedIn": "Carried in from last period",
+  "budgetsRollsOverNext": "Rolls over if the period ended now",
+  "budgetsWarningAt": "Warning at",
+  "budgetsEditAmount": "Edit budget",
+  "budgetsSetBudget": "Set budget",
+  "budgetsRolloverOption": "Rollover",
+  "budgetsThresholdOption": "Warning threshold",
+  "budgetsDefaultValue": "Default ({value})",
+  "@budgetsDefaultValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsHistory": "Last periods",
+  "budgetsHistoryRow": "{period}: {spent} spent, budget {budget}",
+  "@budgetsHistoryRow": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsHistoryLegend": "Bars show spending; the tick marks the budget.",
+  "budgetsSplitLine": "split",
+  "budgetsAlertOverTitle": "{category} is over budget",
+  "@budgetsAlertOverTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertOverBody": "{amount} over budget this period.",
+  "@budgetsAlertOverBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertWarningTitle": "{category} is nearly used up",
+  "@budgetsAlertWarningTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertWarningBody": "{percent}% used, {amount} left.",
+  "@budgetsAlertWarningBody": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertLowBalanceTitle": "Low balance: {account}",
+  "@budgetsAlertLowBalanceTitle": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertLowBalanceBody": "Balance {balance} is below {threshold}.",
+  "@budgetsAlertLowBalanceBody": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  }
+}

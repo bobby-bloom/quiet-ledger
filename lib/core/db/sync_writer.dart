@@ -1,0 +1,205 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+import 'package:personal_finance/core/db/database.dart';
+import 'package:personal_finance/core/sync/hlc.dart';
+import 'package:uuid/uuid.dart';
+
+const _uuid = Uuid();
+
+/// Generates a new time-ordered UUIDv7.
+String newId() => _uuid.v7();
+
+/// The single write path for all synced tables (PLAN.md §4.3).
+///
+/// Every write stamps the row (id, createdAt, updatedAt = HLC,
+/// originDeviceId) and appends a [ChangeLog] entry in the same DB
+/// transaction. Deletes are soft: they set `deletedAt`.
+///
+/// Usage:
+/// ```dart
+/// final id = await writer.insert(db.accounts, AccountsCompanion.insert(...));
+/// await writer.update(db.accounts, id, AccountsCompanion(name: Value('x')));
+/// await writer.delete(db.accounts, id);
+/// await writer.transaction(() async { ... several writes ... });
+/// ```
+/// Build companions with the plain `XCompanion(...)` constructor (not
+/// `XCompanion.insert`, which demands the sync columns). Sync columns set on
+/// a companion are ignored. Read live rows with `where((t) => t.deletedAt.isNull())`.
+class SyncWriter {
+  SyncWriter(this.db, this.clock, this.deviceId, {DateTime Function()? now})
+    : _now = now ?? DateTime.now;
+
+  final AppDatabase db;
+  final HlcClock clock;
+  final String deviceId;
+  final DateTime Function() _now;
+
+  static const _syncCols = {
+    'id',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    'origin_device_id',
+  };
+
+  /// Runs [action] in one DB transaction (nested calls join the outer one).
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      db.transaction(action);
+
+  /// Inserts a row and returns its id. If [id] is null a UUIDv7 is created.
+  Future<String> insert<T extends Table, D>(
+    TableInfo<T, D> table,
+    Insertable<D> row, {
+    String? id,
+  }) {
+    return db.transaction(() async {
+      final rowId = id ?? newId();
+      final hlc = clock.tick().toString();
+      final cols = Map.of(row.toColumns(false))
+        ..removeWhere((k, _) => _syncCols.contains(k));
+      final values = <String, Expression>{
+        ...cols,
+        'id': Variable<String>(rowId),
+        'created_at': Variable<int>(_now().millisecondsSinceEpoch),
+        'updated_at': Variable<String>(hlc),
+        'origin_device_id': Variable<String>(deviceId),
+      };
+      await db.into(table).insert(RawValuesInsertable<D>(values));
+      await _log(table, rowId, ChangeOp.insert, hlc, cols);
+      return rowId;
+    });
+  }
+
+  /// Inserts many rows efficiently in one transaction; returns their ids.
+  Future<List<String>> insertAll<T extends Table, D>(
+    TableInfo<T, D> table,
+    List<Insertable<D>> rows,
+  ) {
+    return db.transaction(() async {
+      final ids = <String>[];
+      for (final r in rows) {
+        ids.add(await insert(table, r));
+      }
+      return ids;
+    });
+  }
+
+  /// Updates the columns set in [changes] for row [id].
+  Future<void> update<T extends Table, D>(
+    TableInfo<T, D> table,
+    String id,
+    Insertable<D> changes,
+  ) {
+    return db.transaction(() async {
+      final hlc = clock.tick().toString();
+      final cols = Map.of(changes.toColumns(false))
+        ..removeWhere((k, _) => _syncCols.contains(k));
+      if (cols.isEmpty) return;
+      final values = <String, Expression>{
+        ...cols,
+        'updated_at': Variable<String>(hlc),
+      };
+      final stmt = db.update(table)..where((_) => _idColumn(table).equals(id));
+      await stmt.write(RawValuesInsertable<D>(values));
+      await _log(table, id, ChangeOp.update, hlc, cols);
+    });
+  }
+
+  /// Soft-deletes row [id] (sets `deletedAt`).
+  Future<void> delete<T extends Table, D>(TableInfo<T, D> table, String id) {
+    return db.transaction(() async {
+      final hlc = clock.tick().toString();
+      final at = _now().millisecondsSinceEpoch;
+      final stmt = db.update(table)..where((_) => _idColumn(table).equals(id));
+      await stmt.write(
+        RawValuesInsertable<D>({
+          'deleted_at': Variable<int>(at),
+          'updated_at': Variable<String>(hlc),
+        }),
+      );
+      await _log(table, id, ChangeOp.delete, hlc, {
+        'deleted_at': Variable<int>(at),
+      });
+    });
+  }
+
+  /// Soft-deletes all rows of [table] whose [column] equals [value]
+  /// (e.g. all splits of a transaction).
+  Future<void> deleteWhere<T extends Table, D>(
+    TableInfo<T, D> table,
+    String column,
+    String value,
+  ) {
+    return db.transaction(() async {
+      final col = table.columnsByName[column]! as GeneratedColumn<String>;
+      final deletedAt =
+          table.columnsByName['deleted_at']! as GeneratedColumn<int>;
+      final rows =
+          await (db.selectOnly(table)
+                ..addColumns([_idColumn(table)])
+                ..where(col.equals(value) & deletedAt.isNull()))
+              .get();
+      for (final r in rows) {
+        await delete(table, r.read(_idColumn(table))!);
+      }
+    });
+  }
+
+  /// Restores a soft-deleted row.
+  Future<void> undelete<T extends Table, D>(TableInfo<T, D> table, String id) {
+    return db.transaction(() async {
+      final hlc = clock.tick().toString();
+      final stmt = db.update(table)..where((_) => _idColumn(table).equals(id));
+      await stmt.write(
+        RawValuesInsertable<D>({
+          'deleted_at': const Variable<int>(null),
+          'updated_at': Variable<String>(hlc),
+        }),
+      );
+      await _log(table, id, ChangeOp.update, hlc, {
+        'deleted_at': const Variable<int>(null),
+      });
+    });
+  }
+
+  GeneratedColumn<String> _idColumn(TableInfo<Table, dynamic> table) =>
+      table.columnsByName['id']! as GeneratedColumn<String>;
+
+  Future<void> _log(
+    TableInfo<Table, dynamic> table,
+    String id,
+    ChangeOp op,
+    String hlc,
+    Map<String, Expression> cols,
+  ) {
+    return db
+        .into(db.changeLog)
+        .insert(
+          ChangeLogCompanion.insert(
+            entity: table.actualTableName,
+            entityId: id,
+            op: op,
+            hlc: hlc,
+            changedFields: jsonEncode({
+              for (final e in cols.entries) e.key: _jsonValue(e.value),
+            }),
+          ),
+        );
+  }
+
+  static Object? _jsonValue(Expression e) {
+    final v = switch (e) {
+      Variable(:final value) => value,
+      Constant(:final value) => value,
+      _ => e.toString(),
+    };
+    return switch (v) {
+      final DateTime d => d.toIso8601String(),
+      final bool b => b,
+      final Uint8List bytes => base64Encode(bytes),
+      final BigInt i => i.toString(),
+      _ => v,
+    };
+  }
+}

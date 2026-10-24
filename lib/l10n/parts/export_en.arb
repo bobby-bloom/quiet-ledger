@@ -1,0 +1,250 @@
+{
+  "exportTitle": "Export & backup",
+  "exportTxnTitle": "Transactions as CSV",
+  "exportTxnDesc": "Export transactions of a period and selected accounts, e.g. for Excel.",
+  "exportPeriod": "Period",
+  "exportPeriodThisMonth": "This month",
+  "exportPeriodLastMonth": "Last month",
+  "exportPeriodThisYear": "This year",
+  "exportPeriodLastYear": "Last year",
+  "exportPeriodLast12Months": "Last 12 months",
+  "exportPeriodAll": "All time",
+  "exportPeriodCustom": "Custom…",
+  "exportPeriodRange": "{start} – {end}",
+  "@exportPeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAccounts": "Accounts",
+  "exportAccountsAll": "All accounts",
+  "exportAccountsSelected": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@exportAccountsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFiles": "Files",
+  "exportLayoutFlat": "One file",
+  "exportLayoutPerAccount": "One per account",
+  "exportLayoutPerAccountHint": "Saved together as a zip archive.",
+  "exportOptions": "CSV options",
+  "exportOptionsEdit": "Edit options",
+  "exportHeaderRow": "Header row",
+  "exportColumns": "Columns",
+  "exportColumnsSummary": "{selected} of {total} columns",
+  "@exportColumnsSummary": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "exportColumnsHint": "Drag to change the order.",
+  "exportColumnsMin": "Select at least one column.",
+  "exportApply": "Apply",
+  "exportUseDefaults": "Defaults from settings",
+  "exportPresets": "Presets",
+  "exportPresetsEmpty": "No saved presets yet.",
+  "exportPresetSave": "Save as preset",
+  "exportPresetName": "Preset name",
+  "exportPresetSaved": "Preset “{name}” saved",
+  "@exportPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetDeleted": "Preset “{name}” deleted",
+  "@exportPresetDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetApplied": "Preset “{name}” applied",
+  "@exportPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPresetDelete": "Delete preset “{name}”",
+  "@exportPresetDelete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPreview": "Preview",
+  "exportPreviewHint": "first {count} rows",
+  "@exportPreviewHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportPreviewEmpty": "No transactions match the period and accounts.",
+  "exportRun": "Export CSV",
+  "exportRunZip": "Export zip",
+  "exportSaved": "Saved to {location}",
+  "@exportSaved": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "exportSavedShort": "Export saved",
+  "exportShared": "Export shared",
+  "exportDownloaded": "Download started",
+  "exportRows": "{count, plural, =0{No rows} =1{1 row} other{{count} rows}}",
+  "@exportRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFailed": "Export failed: {message}",
+  "@exportFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportWorking": "Working…",
+  "exportBackupTitle": "Full backup",
+  "exportBackupDesc": "All data and settings as a zip of CSV files with a checksum manifest. Use it as a backup or to move to another device.",
+  "exportBackupRun": "Create backup",
+  "exportBackupDone": "Backup created and verified ({count} rows)",
+  "@exportBackupDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportRestoreRun": "Restore backup…",
+  "exportRestoreTitle": "Restore this backup?",
+  "exportRestoreCreated": "Created",
+  "exportRestoreAppVersion": "App version",
+  "exportRestoreDevice": "Device",
+  "exportRestoreThisDevice": "This device",
+  "exportRestoreOtherDevice": "Another device",
+  "exportRestoreTotalRows": "Rows in total",
+  "exportRestoreWarning": "This replaces all data and settings on this device with the backup. It cannot be undone.",
+  "exportRestoreBackupFirst": "Save a backup of the current data first",
+  "exportRestoreConfirm": "Replace all data",
+  "exportRestoreAborted": "Restore cancelled. Nothing was changed.",
+  "exportRestoreDone": "Backup restored ({count} rows)",
+  "@exportRestoreDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportRestoreFailed": "Restore failed, nothing was changed: {message}",
+  "@exportRestoreFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportErrTitle": "Cannot restore",
+  "exportErrNotBundle": "This file is not a backup created by this app.",
+  "exportErrNewerFormat": "This backup was created by a newer version of the app. Update the app to restore it.",
+  "exportErrChecksum": "The backup is damaged: {file} does not match its checksum.",
+  "@exportErrChecksum": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "exportErrInvalid": "The backup is damaged: {detail}",
+  "@exportErrInvalid": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoTitle": "Automatic backup",
+  "exportAutoDesc": "Regularly writes a full backup to a folder, for example one that a cloud client syncs.",
+  "exportAutoSchedule": "Schedule",
+  "exportAutoNoFolder": "No folder chosen",
+  "exportAutoChooseFolder": "Choose folder…",
+  "exportAutoLast": "Last backup: {date}",
+  "@exportAutoLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoNever": "No automatic backup yet",
+  "exportAutoRunNow": "Back up now",
+  "exportAutoRunDone": "Backup written: {file}",
+  "@exportAutoRunDone": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoRunFailed": "Backup failed: {message}",
+  "@exportAutoRunFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "exportAutoKeepValue": "{count, plural, =1{Keep the newest backup} other{Keep the newest {count} backups}}",
+  "@exportAutoKeepValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportAutoUnavailable": "Automatic backups to a folder are not available in the browser. Use “Create backup” instead.",
+  "exportAutoNeedsFolder": "Choose a folder to start automatic backups.",
+  "exportAutoSettings": "Automatic backup settings",
+  "exportDecrease": "Decrease",
+  "exportIncrease": "Increase",
+  "exportPurgeLast": "Last clean-up of deleted entries",
+  "exportColDate": "Date",
+  "exportColValueDate": "Value date",
+  "exportColAccount": "Account",
+  "exportColType": "Type",
+  "exportColAmount": "Amount",
+  "exportColCurrency": "Currency",
+  "exportColPayee": "Payee",
+  "exportColNote": "Note",
+  "exportColCategory": "Category",
+  "exportColSplit": "Split",
+  "exportColTags": "Tags",
+  "exportColStatus": "Status",
+  "exportColTransferAccount": "Transfer account",
+  "exportColId": "ID"
+}

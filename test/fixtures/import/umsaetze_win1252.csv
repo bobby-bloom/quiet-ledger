@@ -1,0 +1,12 @@
+"Umsätze Girokonto";"DE12 3456 7890 1234 5678 90"
+"Zeitraum: 01.01.2024 - 31.01.2024";
+
+"Buchungstag";"Valuta";"Auftraggeber/Empfänger";"Verwendungszweck";"Betrag (EUR)";"Saldo (EUR)"
+"01.02.2024";"01.02.2024";"Arbeitgeber GmbH";"Gehalt Februar";"3.250,00";"6.238,98"
+"29.01.2024";"29.01.2024";"Rückerstattung Amazon";"Gutschrift";"29,99";"2.988,98"
+"22.01.2024";"22.01.2024";"Café Süß";"Frühstück";"-12,75";"2.958,99"
+"15.01.2024";"15.01.2024";"Straßenbahn Köln";"Monatskarte";"-58,90";"2.971,74"
+"09.01.2024";"09.01.2024";"Größenwahn Möbel";"Regal ""Ivar""";"-1.234,56";"3.030,64"
+"04.01.2024";"04.01.2024";"Hausverwaltung Schmidt";"Miete Januar";"-980,00";"4.265,20"
+"03.01.2024";"03.01.2024";"Arbeitgeber GmbH";"Gehalt Januar";"3.250,00";"5.245,20"
+"02.01.2024";"02.01.2024";"Bäckerei Müller";"Brötchen; Kaffee";"-4,80";"1.995,20"

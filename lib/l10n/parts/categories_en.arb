@@ -1,0 +1,225 @@
+{
+  "categoriesTitle": "Categories",
+  "categoriesAdd": "Add category",
+  "categoriesAddSub": "Add subcategory",
+  "categoriesNew": "New category",
+  "categoriesNewSub": "New subcategory",
+  "categoriesEdit": "Edit category",
+  "categoriesName": "Name",
+  "categoriesNameRequired": "Enter a name",
+  "categoriesParent": "Parent category",
+  "categoriesTopLevel": "None (top level)",
+  "categoriesParentLocked": "Has subcategories, so it stays top level",
+  "categoriesIcon": "Icon",
+  "categoriesPickIcon": "Choose an icon",
+  "categoriesIconLabel": "Icon {name}",
+  "@categoriesIconLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesColor": "Colour",
+  "categoriesColorNone": "Default colour",
+  "categoriesColorLabel": "Colour {n}",
+  "@categoriesColorLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFavourite": "Favourite",
+  "categoriesUnfavourite": "Remove from favourites",
+  "categoriesFavouriteDesc": "Shown first when picking a category",
+  "categoriesBudgetSection": "Budget",
+  "categoriesRollover": "Rollover",
+  "categoriesUseDefault": "Budget setting ({value})",
+  "@categoriesUseDefault": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesWarnThreshold": "Warning threshold",
+  "categoriesWarnThresholdHint": "Leave empty to use the budget setting",
+  "categoriesThresholdInvalid": "Enter a value from 1 to 100",
+  "categoriesArchived": "Archived",
+  "categoriesArchivedDesc": "Hidden from pickers; existing transactions keep it",
+  "categoriesArchive": "Archive",
+  "categoriesUnarchive": "Unarchive",
+  "categoriesShowArchived": "Show archived",
+  "categoriesHideArchived": "Hide archived",
+  "categoriesMoreActions": "More actions",
+  "categoriesReorder": "Reorder",
+  "categoriesReorderHint": "Drag to reorder. Subcategories are sorted from their parent.",
+  "categoriesReorderChildren": "Reorder subcategories",
+  "categoriesSubCount": "{count, plural, =1{1 subcategory} other{{count} subcategories}}",
+  "@categoriesSubCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesUsage": "{count, plural, =0{Not used yet} =1{1 transaction} other{{count} transactions}}",
+  "@categoriesUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesEmpty": "No categories yet. Start with the default set or create your own.",
+  "categoriesEmptyExpense": "No expense categories yet.",
+  "categoriesEmptyIncome": "No income categories yet.",
+  "categoriesAddDefaults": "Add default categories",
+  "categoriesMergeAction": "Merge",
+  "categoriesMergeTitle": "Merge?",
+  "categoriesMergeConfirm": "Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted.",
+  "@categoriesMergeConfirm": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesMerged": "\"{source}\" merged into \"{target}\"",
+  "@categoriesMerged": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesMergeInvalid": "Choose a different category of the same type.",
+  "categoriesMergeNest": "A category with subcategories can only be merged into a top-level category.",
+  "categoriesInvalidParent": "Choose a top-level category of the same type as parent.",
+  "categoriesHasChildrenError": "A category with subcategories can't become a subcategory.",
+  "categoriesInUseError": "This category is in use.",
+  "categoriesNotFound": "This category no longer exists.",
+  "categoriesInUseTitle": "Category in use",
+  "categoriesDeleteInUse": "\"{name}\" is used by {count} transactions and {budgets} budgets. Merge it into another category to keep the history together, or archive it.",
+  "@categoriesDeleteInUse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesDeleteHasChildren": "Delete or move the subcategories of \"{name}\" first.",
+  "@categoriesDeleteHasChildren": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesDeleted": "Category deleted",
+  "categoriesModuleOff": "{module} is switched off. Turn it on in Settings › Navigation & modules.",
+  "@categoriesModuleOff": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesOpenSettings": "Open settings",
+  "categoriesTagsTitle": "Tags",
+  "categoriesTagAdd": "Add tag",
+  "categoriesTagNew": "New tag",
+  "categoriesTagEdit": "Edit tag",
+  "categoriesTagName": "Tag name",
+  "categoriesTagTaken": "A tag with this name already exists",
+  "categoriesTagsEmpty": "No tags yet. Tags cut across categories, e.g. #vacation-2026 or #reimbursable.",
+  "categoriesTagMergeInto": "Merge #{name} into…",
+  "@categoriesTagMergeInto": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesTagMergeConfirm": "Move all transactions tagged #{source} to #{target}? #{source} is deleted; transactions with both keep one tag.",
+  "@categoriesTagMergeConfirm": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesTagNoMergeTarget": "There is no other tag to merge into.",
+  "categoriesTagDeleteMessage": "{count, plural, =1{It is removed from 1 transaction.} other{It is removed from {count} transactions.}}",
+  "@categoriesTagDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesTagDeleted": "Tag deleted",
+  "categoriesFieldsTitle": "Custom fields",
+  "categoriesFieldAdd": "Add field",
+  "categoriesFieldNew": "New custom field",
+  "categoriesFieldEdit": "Edit custom field",
+  "categoriesFieldName": "Field name",
+  "categoriesFieldType": "Type",
+  "categoriesFieldTypeText": "Text",
+  "categoriesFieldTypeNumber": "Number",
+  "categoriesFieldTypeDate": "Date",
+  "categoriesFieldTypeSelect": "Single choice",
+  "categoriesFieldTypeMultiselect": "Multiple choice",
+  "categoriesFieldTypeBoolean": "Checkbox",
+  "categoriesFieldTypeLocked": "The type can't change because values exist.",
+  "categoriesFieldAppliesTo": "Applies to",
+  "categoriesFieldTransactions": "Transactions",
+  "categoriesFieldAccounts": "Accounts",
+  "categoriesFieldOptions": "Options",
+  "categoriesFieldOptionHint": "New option",
+  "categoriesFieldAddOption": "Add option",
+  "categoriesFieldOptionsRequired": "Add at least one option",
+  "categoriesFieldOptionCount": "{count, plural, =1{1 option} other{{count} options}}",
+  "@categoriesFieldOptionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldValues": "{count, plural, =0{No values} =1{1 value} other{{count} values}}",
+  "@categoriesFieldValues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldArchivedDesc": "Hidden when entering data; existing values stay",
+  "categoriesFieldDeleteMessage": "{count, plural, =1{Its 1 stored value is deleted too.} other{Its {count} stored values are deleted too.}}",
+  "@categoriesFieldDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoriesFieldDeleted": "Custom field deleted",
+  "categoriesFieldsEmpty": "No custom fields yet. Add fields such as \"Receipt no.\" or \"Project\" to transactions or accounts."
+}

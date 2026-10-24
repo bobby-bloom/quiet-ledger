@@ -1,0 +1,235 @@
+{
+  "settingsUiSearchHint": "Search settings",
+  "settingsUiNoResults": "No settings match “{query}”",
+  "@settingsUiNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiClear": "Clear",
+  "settingsUiSecAbout": "About",
+  "settingsUiAboutSummary": "Version {version}",
+  "@settingsUiAboutSummary": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiAboutVersion": "Version",
+  "settingsUiAboutLicenses": "Open-source licences",
+  "settingsUiAboutPrivacy": "All data stays on this device. No account, no telemetry.",
+  "settingsUiAboutEncryption": "Database encryption",
+  "settingsUiAboutEncryptionOn": "On (SQLite3 Multiple Ciphers, key in the system keystore)",
+  "settingsUiAboutEncryptionOff": "Off: no secure key storage was available when the database was created",
+  "settingsUiAboutEncryptionUnavailable": "Not available on this platform",
+  "settingsUiAmountsHidden": "Amounts hidden",
+  "settingsUiAmountsVisible": "Amounts visible",
+  "settingsUiTabsCount": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@settingsUiTabsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiDaysBefore": "{count, plural, =0{On the day} =1{1 day before} other{{count} days before}}",
+  "@settingsUiDaysBefore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiMonthsCount": "{count, plural, =1{1 month} other{{count} months}}",
+  "@settingsUiMonthsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiModuleOff": "Module off",
+  "settingsUiModuleOffNotice": "The {module} module is switched off.",
+  "@settingsUiModuleOffNotice": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiTurnOn": "Turn on",
+  "settingsUiDataSummary": "Storage, statistics, reset",
+  "settingsUiResetSection": "Reset section",
+  "settingsUiResetSectionTitle": "Reset “{section}”?",
+  "@settingsUiResetSectionTitle": {
+    "placeholders": {
+      "section": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetSectionMessage": "All settings in this section return to their defaults.",
+  "settingsUiResetDone": "Section reset",
+  "settingsUiModulesTitle": "Modules",
+  "settingsUiModulesDesc": "Switched-off modules disappear from navigation and settings. Their data is kept.",
+  "settingsUiNavTabsHint": "{min} to {max} tabs, “More” is always last",
+  "@settingsUiNavTabsHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiNavTabsRecommend": "Tip: keep Home or Transactions in the bar.",
+  "settingsUiNavTabModuleOff": "Hidden while the module is switched off",
+  "settingsUiNavMoreAlways": "Always shown, always last",
+  "settingsUiDragHandle": "Drag to reorder",
+  "settingsUiMoveUp": "Move up",
+  "settingsUiMoveDown": "Move down",
+  "settingsUiNotSet": "Not set",
+  "settingsUiAndMore": "+{count} more",
+  "@settingsUiAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiLastDay": "Last day",
+  "settingsUiDecrease": "Decrease",
+  "settingsUiIncrease": "Increase",
+  "settingsUiTapToType": "Double-tap to type a value",
+  "settingsUiInvalidNumber": "Enter a number",
+  "settingsUiInvalidValue": "This value is not allowed",
+  "settingsUiOutOfRange": "Enter a value from {min} to {max}",
+  "@settingsUiOutOfRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiOutOfRangeText": "From {min} to {max}",
+  "@settingsUiOutOfRangeText": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiPresets": "Presets",
+  "settingsUiCustomColor": "Custom colour",
+  "settingsUiHue": "Hue",
+  "settingsUiSaturation": "Saturation",
+  "settingsUiLightness": "Lightness",
+  "settingsUiHex": "HEX",
+  "settingsUiInvalidHex": "Enter a colour like #1F5A53",
+  "settingsUiNoTags": "No tags yet",
+  "settingsUiPrivacyNow": "Hide amounts now",
+  "settingsUiPrivacyNowDesc": "Privacy mode for this session",
+  "settingsUiStats": "Database statistics",
+  "settingsUiStatRecurring": "Recurring rules",
+  "settingsUiStatImports": "Imports",
+  "settingsUiStatChangeLog": "Change log entries",
+  "settingsUiStatDbSize": "Database size",
+  "settingsUiRefresh": "Refresh",
+  "settingsUiRebuildIndex": "Rebuild search index",
+  "settingsUiRebuildIndexDesc": "Fixes missing or outdated search results",
+  "settingsUiRebuildDone": "Search index rebuilt",
+  "settingsUiRerunRules": "Re-run rules",
+  "settingsUiRerunRulesDesc": "Apply your categorisation rules to existing transactions",
+  "settingsUiRerunRulesAll": "Re-evaluate all transactions",
+  "settingsUiRerunRulesAllDesc": "Rule values replace existing categories, not only empty ones",
+  "settingsUiRerunRulesDone": "{count, plural, =0{No transactions changed} =1{1 transaction changed} other{{count} transactions changed}}",
+  "@settingsUiRerunRulesDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiRun": "Run",
+  "settingsUiResetApp": "Reset app",
+  "settingsUiResetAppDesc": "Delete all data on this device and start over",
+  "settingsUiResetAppTitle": "Delete all data?",
+  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.",
+  "@settingsUiResetAppMessage": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetAppWord": "DELETE",
+  "settingsUiTypeToConfirm": "Type {word}",
+  "@settingsUiTypeToConfirm": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiResetAppConfirm": "Delete everything",
+  "settingsUiStorageDefault": "Default app folder",
+  "settingsUiStorageMoveTitle": "Change storage location?",
+  "settingsUiStorageMoveMessage": "The current database is copied to {path} and used from there after the next restart. The old file stays where it is.",
+  "@settingsUiStorageMoveMessage": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiStorageExisting": "{path} already contains a database. It will be used after the next restart; nothing is copied. It must have been created with this installation, otherwise it cannot be opened.",
+  "@settingsUiStorageExisting": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUiStorageCopy": "Copy and switch",
+  "settingsUiStorageUseExisting": "Use this database",
+  "settingsUiStorageRestart": "Restart the app to use the new location.",
+  "settingsUiStorageResetDefault": "Use default folder",
+  "settingsUiStorageResetMessage": "After the next restart the app uses the database in its default folder again. Data stored in the custom folder is not copied back.",
+  "settingsUiStatDeleted": "Deleted items kept for sync",
+  "settingsUiPurge": "Purge deleted items",
+  "settingsUiPurgeDesc": "Remove items deleted more than {days} days ago",
+  "@settingsUiPurgeDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiPurgeMessage": "Permanently removes items that were deleted more than {days} days ago. They can no longer be restored or synced.",
+  "@settingsUiPurgeMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUiPurgeConfirm": "Purge",
+  "settingsUiPurgeDone": "{count, plural, =0{Nothing to purge} =1{1 item removed} other{{count} items removed}}",
+  "@settingsUiPurgeDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

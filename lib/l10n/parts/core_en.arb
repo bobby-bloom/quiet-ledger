@@ -1,0 +1,65 @@
+{
+  "appTitle": "Quiet Ledger",
+  "navHome": "Home",
+  "navTransactions": "Transactions",
+  "navPlan": "Plan",
+  "navForecast": "Forecast",
+  "navMore": "More",
+  "navAccounts": "Accounts",
+  "navReports": "Reports",
+  "navSettings": "Settings",
+  "navImport": "Import",
+  "navExport": "Export",
+  "navRules": "Rules",
+  "navGoals": "Goals",
+  "navScenarios": "Scenarios",
+  "navCategories": "Categories",
+  "navTags": "Tags",
+  "addTransaction": "Add transaction",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonEdit": "Edit",
+  "commonDone": "Done",
+  "commonBack": "Back",
+  "commonNext": "Next",
+  "commonClose": "Close",
+  "commonUndo": "Undo",
+  "commonSearch": "Search",
+  "commonAdd": "Add",
+  "commonNone": "None",
+  "commonAll": "All",
+  "commonReset": "Reset",
+  "commonConfirm": "Confirm",
+  "commonYes": "Yes",
+  "commonNo": "No",
+  "commonRetry": "Retry",
+  "commonEmpty": "Nothing here yet",
+  "commonError": "Something went wrong: {message}",
+  "@commonError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDeleteConfirm": "Delete \"{name}\"?",
+  "@commonDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commonComingSoon": "This screen is not available yet.",
+  "typeExpense": "Expense",
+  "typeIncome": "Income",
+  "typeTransfer": "Transfer",
+  "statusCleared": "Cleared",
+  "statusPending": "Pending",
+  "statusPlanned": "Planned",
+  "privacyHiddenAmount": "Hidden amount, tap to reveal",
+  "privacyToggle": "Hide amounts",
+  "moreTemplates": "Templates",
+  "bootErrorTitle": "The database could not be opened"
+}

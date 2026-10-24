@@ -1,0 +1,81 @@
+import 'tables.dart';
+
+-- Full-text search over transactions (payee, note, category and tag names).
+-- rowid of txn_search = rowid of transactions. Soft-deleted transactions stay
+-- in the index; queries join transactions and filter on deleted_at.
+CREATE VIRTUAL TABLE txn_search USING fts5(
+  payee,
+  note,
+  category,
+  tags,
+  tokenize = 'unicode61 remove_diacritics 2'
+);
+
+CREATE TRIGGER txn_search_ai AFTER INSERT ON transactions BEGIN
+  INSERT INTO txn_search(rowid, payee, note, category, tags)
+  VALUES (
+    new.rowid,
+    new.payee,
+    new.note,
+    (SELECT name FROM categories WHERE id = new.category_id),
+    ''
+  );
+END;
+
+CREATE TRIGGER txn_search_au AFTER UPDATE ON transactions BEGIN
+  DELETE FROM txn_search WHERE rowid = old.rowid;
+  INSERT INTO txn_search(rowid, payee, note, category, tags)
+  VALUES (
+    new.rowid,
+    new.payee,
+    new.note,
+    (SELECT name FROM categories WHERE id = new.category_id),
+    (SELECT group_concat(t.name, ' ') FROM transaction_tags tt
+       JOIN tags t ON t.id = tt.tag_id
+       WHERE tt.transaction_id = new.id AND tt.deleted_at IS NULL)
+  );
+END;
+
+CREATE TRIGGER txn_search_tag_ai AFTER INSERT ON transaction_tags BEGIN
+  UPDATE txn_search SET tags = (
+    SELECT group_concat(t.name, ' ') FROM transaction_tags tt
+      JOIN tags t ON t.id = tt.tag_id
+      WHERE tt.transaction_id = new.transaction_id AND tt.deleted_at IS NULL
+  ) WHERE rowid = (SELECT rowid FROM transactions WHERE id = new.transaction_id);
+END;
+
+CREATE TRIGGER txn_search_tag_au AFTER UPDATE ON transaction_tags BEGIN
+  UPDATE txn_search SET tags = (
+    SELECT group_concat(t.name, ' ') FROM transaction_tags tt
+      JOIN tags t ON t.id = tt.tag_id
+      WHERE tt.transaction_id = new.transaction_id AND tt.deleted_at IS NULL
+  ) WHERE rowid = (SELECT rowid FROM transactions WHERE id = new.transaction_id);
+END;
+
+-- Renaming a category or tag refreshes the indexed names.
+CREATE TRIGGER txn_search_cat_au AFTER UPDATE OF name ON categories BEGIN
+  UPDATE txn_search SET category = new.name
+  WHERE rowid IN (SELECT rowid FROM transactions WHERE category_id = new.id);
+END;
+
+CREATE TRIGGER txn_search_tagname_au AFTER UPDATE OF name ON tags BEGIN
+  UPDATE txn_search SET tags = (
+    SELECT group_concat(t.name, ' ') FROM transactions tx
+      JOIN transaction_tags tt ON tt.transaction_id = tx.id
+      JOIN tags t ON t.id = tt.tag_id
+      WHERE tx.rowid = txn_search.rowid AND tt.deleted_at IS NULL
+  ) WHERE rowid IN (
+    SELECT tx.rowid FROM transactions tx
+      JOIN transaction_tags tt ON tt.transaction_id = tx.id
+      WHERE tt.tag_id = new.id
+  );
+END;
+
+-- Rebuilds the whole index (Settings › Data › Rebuild search index).
+rebuildSearchIndex: INSERT INTO txn_search(rowid, payee, note, category, tags)
+  SELECT tx.rowid, tx.payee, tx.note,
+    (SELECT name FROM categories WHERE id = tx.category_id),
+    (SELECT group_concat(t.name, ' ') FROM transaction_tags tt
+       JOIN tags t ON t.id = tt.tag_id
+       WHERE tt.transaction_id = tx.id AND tt.deleted_at IS NULL)
+  FROM transactions tx;

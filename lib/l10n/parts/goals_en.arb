@@ -1,0 +1,84 @@
+{
+  "@@locale": "en",
+  "goalsNew": "New goal",
+  "goalsEdit": "Edit goal",
+  "goalsEmpty": "No savings goals yet. Set one to see how much to put aside each period.",
+  "goalsNoActive": "All goals are archived.",
+  "goalsByPriority": "By priority · drag to reorder",
+  "goalsArchived": "Archived ({count})",
+  "@goalsArchived": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsShow": "Show",
+  "goalsHide": "Hide",
+  "goalsSelectHint": "Select a goal to see its details.",
+  "goalsReached": "Goal reached",
+  "goalsRequiredPerPeriod": "Needs {amount} per period until {date}",
+  "@goalsRequiredPerPeriod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsProjected": "At this pace: {date}",
+  "@goalsProjected": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsNoPace": "Set a planned contribution to see when you get there.",
+  "goalsOnTrack": "On track",
+  "goalsBehind": "Behind",
+  "goalsOfTarget": "of {amount}",
+  "@goalsOfTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsAddContribution": "Add contribution",
+  "goalsReorder": "Drag to change priority",
+  "goalsSemanticProgress": "{saved} of {target} saved",
+  "@goalsSemanticProgress": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDeposit": "Add",
+  "goalsWithdraw": "Withdraw",
+  "goalsAmountInvalid": "Enter an amount",
+  "goalsModuleOff": "Goals are switched off in Settings › Navigation & modules.",
+  "goalsNotFound": "This goal no longer exists.",
+  "goalsSaved": "Goal saved",
+  "goalsDetails": "Goal",
+  "goalsName": "Name",
+  "goalsNameRequired": "Enter a name",
+  "goalsTarget": "Target amount",
+  "goalsTargetRequired": "Enter a target above 0",
+  "goalsTargetDate": "Target date",
+  "goalsNoTargetDate": "No date",
+  "goalsLinkedAccount": "Linked account",
+  "goalsNoAccount": "None – track manually",
+  "goalsLinkedHelp": "Progress follows the account balance; the pace comes from its last 3–6 months.",
+  "goalsSavedSoFar": "Saved so far",
+  "goalsPlannedContribution": "Planned contribution per period",
+  "goalsPlannedContributionHelp": "Used for the projected date when there is no account history.",
+  "goalsArchive": "Archive",
+  "goalsUnarchive": "Restore"
+}

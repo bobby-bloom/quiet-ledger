@@ -1,0 +1,21 @@
+{
+  "@@locale": "en",
+  "planTabBudgets": "Budgets",
+  "planTabRecurring": "Recurring",
+  "planTabGoals": "Goals",
+  "planBillsCalendar": "Bills calendar",
+  "planPreviousPeriod": "Previous period",
+  "planNextPeriod": "Next period",
+  "planToday": "Today",
+  "planPeriodSemantics": "Period {title}, {range}",
+  "@planPeriodSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  }
+}

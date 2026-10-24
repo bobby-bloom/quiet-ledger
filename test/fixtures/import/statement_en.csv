@@ -1,0 +1,8 @@
+﻿Date,Description,Category,Amount,Balance
+03/01/2024,"ACME Corp",Income:Salary,"4,125.50","5,125.50"
+03/02/2024,"Whole Foods",Food:Groceries,"(87.34)","5,038.16"
+03/05/2024,"Landlord LLC",Housing:Rent,"(1,450.00)","3,588.16"
+03/09/2024,"Shell",Transport:Fuel,"(45.00)","3,543.16"
+03/13/2024,"Netflix",Entertainment:Streaming,"(15.99)","3,527.17"
+03/21/2024,"Whole Foods",Food:Groceries,"(120.10)","3,407.07"
+03/28/2024,"Refund Store",Shopping,"25.00","3,432.07"

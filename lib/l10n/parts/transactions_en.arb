@@ -1,0 +1,418 @@
+{
+  "txnSearchHint": "Search payee, note, category",
+  "txnSearchLabel": "Search transactions",
+  "txnSearchHintWide": "Payee, note, tag, category",
+  "txnSelectMultiple": "Select multiple",
+  "txnNew": "New",
+  "txnCtrl": "Ctrl",
+  "txnEntries": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@txnEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnIn": "In",
+  "txnOut": "Out",
+  "txnToday": "Today",
+  "txnYesterday": "Yesterday",
+  "txnTodayDate": "Today, {date}",
+  "@txnTodayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnYesterdayDate": "Yesterday, {date}",
+  "@txnYesterdayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnGroupToday": "Today · {date}",
+  "@txnGroupToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnGroupYesterday": "Yesterday · {date}",
+  "@txnGroupYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferTo": "To {account}",
+  "@txnTransferTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferFrom": "From {account}",
+  "@txnTransferFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferFromSub": "Transfer · from {account}",
+  "@txnTransferFromSub": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTransferToSub": "Transfer · to {account}",
+  "@txnTransferToSub": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "txnSplitCount": "Split · {count}",
+  "@txnSplitCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnNoPayee": "No payee",
+  "txnUncategorized": "Uncategorized",
+  "txnUnknownAccount": "Unknown account",
+  "txnHasReceipt": "Has receipt",
+  "txnRecurring": "Recurring",
+  "txnBalanceShort": "Bal. {amount}",
+  "@txnBalanceShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnEmpty": "No transactions yet. Add your first one with the + button.",
+  "txnEmptyFiltered": "No transactions match these filters.",
+  "txnClearFilters": "Clear filters",
+  "txnFilters": "Filters",
+  "txnFilterAllDates": "All dates",
+  "txnFilterType": "Type",
+  "txnFilterTag": "Tag",
+  "txnFilterCustomField": "Custom field",
+  "txnChipCount": "{label} · {count}",
+  "@txnChipCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSaveFilter": "Save filter",
+  "txnPresetThisMonth": "This month",
+  "txnPresetLastMonth": "Last month",
+  "txnPresetLast30": "Last 30 days",
+  "txnPresetLast90": "Last 90 days",
+  "txnPresetThisYear": "This year",
+  "txnPresetLastYear": "Last year",
+  "txnPresetCustom": "Custom range…",
+  "txnAmountMin": "At least",
+  "txnAmountMax": "At most",
+  "txnAmountHint": "Compares the amount without sign.",
+  "txnAmountAtLeast": "≥ {amount}",
+  "@txnAmountAtLeast": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAmountAtMost": "≤ {amount}",
+  "@txnAmountAtMost": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnApply": "Apply",
+  "txnChooseCategories": "Choose categories",
+  "txnCustomFieldAny": "Has any value",
+  "txnCustomFieldEquals": "Is",
+  "txnCustomFieldContains": "Contains",
+  "txnCustomFieldIncludes": "Includes",
+  "txnCustomFieldValue": "Value",
+  "txnCustomFieldAdd": "Add condition",
+  "txnCustomFieldChoose": "Field",
+  "txnCustomFieldNone": "No custom fields for transactions yet.",
+  "txnSavedFilters": "Saved filters",
+  "txnAllTransactions": "All transactions",
+  "txnFilterName": "Name",
+  "txnFilterSaved": "Filter saved",
+  "txnFilterUpdated": "Filter updated",
+  "txnUpdateFilter": "Update with current filter",
+  "txnRename": "Rename",
+  "txnSetDefault": "Use as default",
+  "txnUnsetDefault": "Stop using as default",
+  "txnIsDefault": "Default",
+  "txnFilterDeleted": "Filter deleted",
+  "txnNoSavedFilters": "No saved filters yet. Set filters in the transaction list and tap “Save filter”.",
+  "txnNoDefaultFilter": "No default filter",
+  "txnNameRequired": "Enter a name",
+  "txnViewOptions": "View options",
+  "txnGroupingOffHint": "Grouping applies when sorted by date.",
+  "txnRunningBalanceHint": "The running balance is shown when the list is filtered to one account and sorted by date.",
+  "txnChooseAccountAction": "Choose account",
+  "txnSelectedCount": "{count} selected",
+  "@txnSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSelectAll": "Select all",
+  "txnClearSelection": "Clear selection",
+  "txnSetCategory": "Set category",
+  "txnSetStatus": "Set status",
+  "txnSetDate": "Set date",
+  "txnSetAccount": "Move to account",
+  "txnAddTags": "Add tags",
+  "txnBulkUpdated": "{count, plural, =1{1 transaction updated} other{{count} transactions updated}}",
+  "@txnBulkUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleted": "{count, plural, =1{Transaction deleted} other{{count} transactions deleted}}",
+  "@txnDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleteConfirmTitle": "{count, plural, =1{Delete this transaction?} other{Delete {count} transactions?}}",
+  "@txnDeleteConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnDeleteConfirmBody": "You can undo this right afterwards.",
+  "txnDuplicate": "Duplicate",
+  "txnDuplicated": "Transaction duplicated",
+  "txnMarkCleared": "Mark as cleared",
+  "txnMarkPending": "Mark as pending",
+  "txnStatusChanged": "Status changed",
+  "txnSaveAsTemplate": "Save as template",
+  "txnTemplateSaved": "Template saved",
+  "txnOpen": "Open",
+  "txnSelect": "Select",
+  "txnMoreActions": "More actions",
+  "txnDetailTitle": "Transaction",
+  "txnEditTransaction": "Edit transaction",
+  "txnCloseDetail": "Close detail",
+  "txnNotFound": "This transaction no longer exists.",
+  "txnSplit": "Split",
+  "txnCustomFields": "Custom fields",
+  "txnAttachments": "Attachments",
+  "txnAttachmentCount": "{count, plural, =1{Attachment · 1 file} other{Attachments · {count} files}}",
+  "@txnAttachmentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnAddAttachment": "Add attachment",
+  "txnAttachReceipt": "Attach receipt",
+  "txnRemoveAttachment": "Remove attachment {name}",
+  "@txnRemoveAttachment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAttachmentUnavailable": "The file is not available on this device.",
+  "txnAttachmentPending": "Saved with the transaction",
+  "txnShare": "Share",
+  "txnOrigin": "Origin",
+  "txnOriginRecurring": "Recurring: {name}",
+  "@txnOriginRecurring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOriginImport": "Imported from {file}",
+  "@txnOriginImport": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOriginManual": "Entered manually",
+  "txnValueDate": "Value date",
+  "txnNewTransaction": "New transaction",
+  "txnNewTemplate": "New template",
+  "txnEditTemplate": "Edit template",
+  "txnSaveExpense": "Save expense",
+  "txnSaveIncome": "Save income",
+  "txnSaveTransfer": "Save transfer",
+  "txnSaveChanges": "Save changes",
+  "txnSaveTemplate": "Save template",
+  "txnSplitAction": "Split across categories",
+  "txnRecentCategories": "Recent categories",
+  "txnFromAccount": "From",
+  "txnToAccount": "To",
+  "txnChooseAccount": "Choose account",
+  "txnChooseCategory": "Choose category",
+  "txnKeypad": "Amount keypad",
+  "txnDecimalSeparator": "Decimal separator",
+  "txnDeleteDigit": "Delete digit",
+  "txnPlus": "Plus",
+  "txnMinus": "Minus",
+  "txnTimes": "Times",
+  "txnDivide": "Divided by",
+  "txnAmountPreview": "= {amount}",
+  "@txnAmountPreview": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnErrAmount": "Enter an amount",
+  "txnErrAmountInvalid": "This calculation is not valid",
+  "txnErrDivZero": "Division by zero",
+  "txnErrTooLarge": "This amount is too large",
+  "txnErrRequired": "Required",
+  "txnErrSameAccount": "Choose two different accounts",
+  "txnErrSplit": "The split lines must add up to the total",
+  "txnErrNoAccount": "Create an account first to record transactions.",
+  "txnErrCheckFields": "Please check the highlighted fields.",
+  "txnCreateAccount": "Create account",
+  "txnSavedExpense": "Expense saved",
+  "txnSavedIncome": "Income saved",
+  "txnSavedTransfer": "Transfer saved",
+  "txnChangesSaved": "Changes saved",
+  "txnSaveFailed": "Could not save: {message}",
+  "@txnSaveFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "txnAddSplit": "Add split",
+  "txnRemaining": "Remaining {amount}",
+  "@txnRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnOverAssigned": "Over by {amount}",
+  "@txnOverAssigned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnFullyAssigned": "Fully assigned",
+  "txnRemoveSplit": "Remove line",
+  "txnSplitLineCategory": "Split {n} category",
+  "@txnSplitLineCategory": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "txnSplitLineAmount": "Split {n} amount",
+  "@txnSplitLineAmount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "txnAssignRemaining": "Assign remaining",
+  "txnStopSplit": "Remove split",
+  "txnAddTag": "Add tag",
+  "txnRemoveTag": "Remove tag {name}",
+  "@txnRemoveTag": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnCreateTag": "Create “{name}”",
+  "@txnCreateTag": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnSearchTags": "Search or create a tag",
+  "txnMoreDetails": "More details",
+  "txnUseTemplate": "Use template {name}",
+  "@txnUseTemplate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTemplatesEmpty": "No templates yet. Save a transaction as a template to enter it with one tap.",
+  "txnTemplateAddNow": "Add now",
+  "txnTemplatePosted": "{name} added",
+  "@txnTemplatePosted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txnTemplateName": "Template name",
+  "txnTemplateDeleted": "Template deleted",
+  "txnTemplateFillIn": "Open in quick add",
+  "txnTemplateInvalid": "This template is incomplete. Edit it to choose an account.",
+  "txnPickDate": "Choose date",
+  "txnClear": "Clear",
+  "txnSum": "Total {amount}",
+  "@txnSum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txnKeyDelete": "Del",
+  "txnImportBatchChip": "From one import",
+  "txnCreateRule": "Create rule"
+}
