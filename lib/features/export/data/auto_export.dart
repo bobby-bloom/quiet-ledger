@@ -16,6 +16,7 @@ import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
+import 'package:personal_finance/features/export/data/export_folder_native.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
@@ -139,9 +140,14 @@ Future<void> _recordFailure(ProviderReader read, Object error) async {
   try {
     final settings = read(settingsProvider.notifier);
     final first = read(settingsProvider).get(BackupSettings.lastError) == null;
-    await settings.set(BackupSettings.lastError, '$error');
-    if (!first) return;
     final l = lookupAppLocalizations(Locale(read(languageCodeProvider)));
+    await settings.set(
+      BackupSettings.lastError,
+      error is BackupFolderAccessException
+          ? l.backupFolderAccessLost
+          : '$error',
+    );
+    if (!first) return;
     final service = read(notificationServiceProvider);
     if (await service.init()) {
       await service.showBackupProblem(
@@ -151,6 +157,26 @@ Future<void> _recordFailure(ProviderReader read, Object error) async {
     }
   } on Object catch (e) {
     debugPrint('Could not record the backup failure: $e');
+  }
+}
+
+/// Startup check: a platform backup folder whose permission is gone is
+/// reported right away (banner, notification) instead of at the next due
+/// backup. Never throws.
+Future<void> checkBackupFolderAccess(ProviderReader read) async {
+  try {
+    final folder = read(settingsProvider)
+        .get(ImportExportSettings.autoExportFolder);
+    if (folder == null || !isNativeFolderRef(folder)) return;
+    if (read(settingsProvider).get(ImportExportSettings.autoExport) ==
+        AutoExportSchedule.off) {
+      return;
+    }
+    if (!await nativeFolderAccessible(folder)) {
+      await _recordFailure(read, const BackupFolderAccessException());
+    }
+  } on Object catch (e) {
+    debugPrint('Backup folder check failed: $e');
   }
 }
 

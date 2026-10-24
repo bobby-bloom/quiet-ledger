@@ -172,6 +172,8 @@
   "backupSafetyTitle": "Sicherheitskopien",
   "backupStaleDays": "Warnen, wenn die letzte Sicherung älter ist als",
   "backupStaleDaysValue": "{days, plural, =1{1 Tag} other{{days} Tage}}",
+  "backupFolderAccessLost": "Die App hat keinen Zugriff mehr auf den Sicherungsordner. Wähle den Ordner erneut aus.",
+  "backupUseAppDocuments": "„Auf meinem iPhone“ in Dateien verwenden",
   "budgetsTitle": "Budgets",
   "budgetsBudgeted": "Budgetiert",
   "budgetsSpent": "Ausgegeben",

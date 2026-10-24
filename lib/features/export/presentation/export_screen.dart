@@ -14,6 +14,7 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/transaction_export.dart';
+import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/domain/export_period.dart';
 import 'package:personal_finance/features/export/domain/txn_export.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
@@ -660,7 +661,10 @@ class _AutoExportCard extends ConsumerWidget {
         scheduleLabel(l, schedule)
       else
         '${scheduleLabel(l, schedule)} · ${l.exportAutoKeepValue(keep)}',
-      if (folder == null || folder.isEmpty) l.exportAutoNoFolder else folder,
+      if (folder == null || folder.isEmpty)
+        l.exportAutoNoFolder
+      else
+        s.get(BackupSettings.folderName) ?? folder,
       if (last == null)
         l.exportAutoNever
       else

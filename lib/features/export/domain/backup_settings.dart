@@ -43,8 +43,18 @@ abstract final class BackupSettings {
     hidden: true,
   );
 
+  /// Display name of a platform backup folder (`autoExportFolder` then
+  /// holds an opaque reference).
+  static final folderName = SettingDef.optionalString(
+    key: 'export.autoExportFolderName',
+    section: SettingSection.importExport,
+    label: (l) => l.exportAutoTitle,
+    hidden: true,
+  );
+
   /// Keys that describe this device; a restore keeps the current values.
   static final deviceLocalKeys = {
+    folderName.key,
     lastAttempt.key,
     lastError.key,
     lastVerified.key,

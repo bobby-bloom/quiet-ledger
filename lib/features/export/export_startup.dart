@@ -5,6 +5,7 @@ import 'package:personal_finance/features/export/data/auto_export.dart';
 /// Startup task: writes the scheduled automatic backup when due, then keeps
 /// checking while the app is open (resume, hourly).
 Future<void> autoExportStartupTask(ProviderContainer container) async {
+  await checkBackupFolderAccess(container.read);
   await runAutoExportIfDue(container);
   try {
     container

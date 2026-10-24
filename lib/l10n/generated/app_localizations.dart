@@ -1141,6 +1141,18 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{1 day} other{{days} days}}'**
   String backupStaleDaysValue(int days);
 
+  /// No description provided for @backupFolderAccessLost.
+  ///
+  /// In en, this message translates to:
+  /// **'The app no longer has access to the backup folder. Choose the folder again.'**
+  String get backupFolderAccessLost;
+
+  /// No description provided for @backupUseAppDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Use “On My iPhone” in Files'**
+  String get backupUseAppDocuments;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:

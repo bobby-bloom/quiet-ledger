@@ -2,9 +2,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 
 ExportFolder openExportFolder(String path) => IoExportFolder(path);
+
+/// `<app Documents>/Backups` (iOS: visible in Files › On My iPhone).
+Future<String?> appDocumentsBackupPath() async =>
+    p.join((await getApplicationDocumentsDirectory()).path, 'Backups');
 
 /// [ExportFolder] backed by `dart:io`.
 class IoExportFolder implements ExportFolder {

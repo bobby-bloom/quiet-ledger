@@ -10,6 +10,8 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/auto_export.dart';
+import 'package:personal_finance/features/export/data/export_folder.dart';
+import 'package:personal_finance/features/export/data/export_folder_native.dart';
 import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
@@ -29,17 +31,46 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
 
   Future<void> _chooseFolder() async {
     final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
     final current = ref
         .read(settingsProvider)
         .get(ImportExportSettings.autoExportFolder);
+    if (ref.read(platformCapabilitiesProvider).backupFolder ==
+        BackupFolderKind.native) {
+      try {
+        final picked = await pickNativeFolder();
+        if (picked != null) await _setFolder(picked.ref, picked.name);
+      } on Object catch (e) {
+        messenger.showSnackBar(SnackBar(content: Text(l.commonError('$e'))));
+      }
+      return;
+    }
     final path = await FilePicker.getDirectoryPath(
       dialogTitle: l.exportAutoChooseFolder,
-      initialDirectory: current,
+      initialDirectory: current != null && isNativeFolderRef(current)
+          ? null
+          : current,
     );
     if (path == null || path.isEmpty) return;
-    await ref
-        .read(settingsProvider.notifier)
-        .set(ImportExportSettings.autoExportFolder, path);
+    await _setFolder(path, null);
+  }
+
+  /// iOS: the app's Documents folder (Files › On My iPhone).
+  Future<void> _useAppDocuments() async {
+    final path = await appDocumentsBackupPath();
+    if (path != null) await _setFolder(path, null);
+  }
+
+  Future<void> _setFolder(String folder, String? name) async {
+    final s = ref.read(settingsProvider.notifier);
+    await s.set(ImportExportSettings.autoExportFolder, folder);
+    if (name == null) {
+      await s.reset(BackupSettings.folderName);
+    } else {
+      await s.set(BackupSettings.folderName, name);
+    }
+    // A new folder: an access error of the old one no longer applies.
+    await s.reset(BackupSettings.lastError);
   }
 
   Future<void> _runNow() async {
@@ -91,6 +122,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
     final schedule = s.get(ImportExportSettings.autoExport);
     final folder = s.get(ImportExportSettings.autoExportFolder);
     final hasFolder = folder != null && folder.isNotEmpty;
+    final folderLabel = s.get(BackupSettings.folderName) ?? folder;
     final keep = s.get(ImportExportSettings.autoExportKeep);
     final last = DateTime.tryParse(
       s.get(ImportExportSettings.lastAutoExport) ?? '',
@@ -150,7 +182,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                           ImportExportSettings.autoExportFolder.label(l),
                         ),
                         subtitle: Text(
-                          hasFolder ? folder : l.exportAutoNoFolder,
+                          hasFolder ? folderLabel! : l.exportAutoNoFolder,
                           style: hasFolder ? context.mono : null,
                         ),
                         trailing: TextButton(
@@ -158,6 +190,15 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                           child: Text(l.exportAutoChooseFolder),
                         ),
                       ),
+                      if (caps.appDocumentsFolder)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            onPressed: _useAppDocuments,
+                            icon: const Icon(Icons.phone_iphone),
+                            label: Text(l.backupUseAppDocuments),
+                          ),
+                        ),
                       if (!hasFolder && schedule != AutoExportSchedule.off)
                         Padding(
                           padding: const EdgeInsets.only(bottom: Space.xs),

@@ -2,6 +2,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/core/db/connection/connection.dart';
 
+/// How the automatic backup reaches its folder.
+enum BackupFolderKind {
+  /// No folder (web).
+  none,
+
+  /// A file-system path picked with the directory dialog (Linux, Windows).
+  path,
+
+  /// A folder the platform grants lasting access to through
+  /// `personal_finance/backup_folder` (Android Storage Access Framework,
+  /// iOS/macOS security-scoped bookmarks).
+  native,
+}
+
 /// What the current platform can do. The UI hides features that are not
 /// available (e.g. biometrics on Linux, folder auto-export on the web).
 @immutable
@@ -18,6 +32,8 @@ class PlatformCapabilities {
     required this.blockScreenshots,
     required this.hideInAppSwitcher,
     required this.customStorageLocation,
+    this.backupFolder = BackupFolderKind.path,
+    this.appDocumentsFolder = false,
   });
 
   factory PlatformCapabilities.current() {
@@ -48,6 +64,14 @@ class PlatformCapabilities {
       blockScreenshots: !web && platform == TargetPlatform.android,
       hideInAppSwitcher: mobile,
       customStorageLocation: desktop,
+      backupFolder: web
+          ? BackupFolderKind.none
+          : platform == TargetPlatform.android ||
+                platform == TargetPlatform.iOS ||
+                platform == TargetPlatform.macOS
+          ? BackupFolderKind.native
+          : BackupFolderKind.path,
+      appDocumentsFolder: !web && platform == TargetPlatform.iOS,
     );
   }
 
@@ -62,6 +86,11 @@ class PlatformCapabilities {
   final bool blockScreenshots;
   final bool hideInAppSwitcher;
   final bool customStorageLocation;
+  final BackupFolderKind backupFolder;
+
+  /// iOS: the app's own Documents folder, visible in Files › On My iPhone,
+  /// can hold the automatic backups without picking a folder.
+  final bool appDocumentsFolder;
 }
 
 final platformCapabilitiesProvider = Provider<PlatformCapabilities>(

@@ -684,6 +684,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get backupFolderAccessLost =>
+      'Die App hat keinen Zugriff mehr auf den Sicherungsordner. Wähle den Ordner erneut aus.';
+
+  @override
+  String get backupUseAppDocuments =>
+      '„Auf meinem iPhone“ in Dateien verwenden';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

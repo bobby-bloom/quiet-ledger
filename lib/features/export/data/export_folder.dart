@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personal_finance/features/export/data/export_folder_native.dart';
 import 'package:personal_finance/features/export/data/export_folder_stub.dart'
     if (dart.library.io) 'package:personal_finance/features/export/data/export_folder_io.dart'
     as impl;
@@ -22,8 +23,15 @@ abstract interface class ExportFolder {
   Future<void> deleteFile(String name);
 }
 
-/// Opens the folder at [path] (created if missing).
-ExportFolder openExportFolder(String path) => impl.openExportFolder(path);
+/// Opens the folder at [path] (created if missing), or the platform folder
+/// [path] refers to (`content://…`, `bookmark:…`; see
+/// `export_folder_native.dart`).
+ExportFolder openExportFolder(String path) => isNativeFolderRef(path)
+    ? NativeExportFolder(path)
+    : impl.openExportFolder(path);
+
+/// `<app Documents>/Backups` where the platform has one, else null.
+Future<String?> appDocumentsBackupPath() => impl.appDocumentsBackupPath();
 
 /// Factory used by auto-export; override in tests.
 final exportFolderFactoryProvider = Provider<ExportFolder Function(String)>(

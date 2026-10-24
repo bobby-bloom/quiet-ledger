@@ -132,5 +132,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "backupFolderAccessLost": "The app no longer has access to the backup folder. Choose the folder again.",
+  "backupUseAppDocuments": "Use “On My iPhone” in Files"
 }
