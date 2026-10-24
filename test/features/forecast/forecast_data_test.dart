@@ -325,6 +325,43 @@ void main() {
     expect(input.method, VariableSpendingMethod.median6);
   });
 
+  test('a budget with its own length is spread over budget periods', () async {
+    // Yearly household budget: 1,200 over 12 calendar months.
+    await writer.insert(
+      db.budgets,
+      BudgetsCompanion(
+        categoryId: Value(household),
+        periodStart: Value(DateTime(2026)),
+        periodEnd: Value(DateTime(2027)),
+        amountMinor: const Value(120000),
+      ),
+    );
+    // A weekly groceries window does not replace the October budget row.
+    await writer.insert(
+      db.budgets,
+      BudgetsCompanion(
+        categoryId: Value(groceries),
+        periodStart: Value(DateTime(2026, 10, 19)),
+        periodEnd: Value(DateTime(2026, 10, 26)),
+        amountMinor: const Value(6000),
+      ),
+    );
+    final input = await gather(
+      values: {BudgetSettings.weekendShift.key: 'none'},
+    );
+    final householdRows = [
+      for (final b in input.budgets)
+        if (b.categoryId == household) b,
+    ]..sort((a, b) => a.periodStart.compareTo(b.periodStart));
+    expect(householdRows, hasLength(12));
+    expect(householdRows.every((b) => b.amountMinor == 10000), isTrue);
+    expect(householdRows.first.periodStart, DateTime(2026));
+    final groceriesOct = input.budgets.where(
+      (b) => b.categoryId == groceries && b.periodStart == DateTime(2026, 10),
+    );
+    expect(groceriesOct.single.amountMinor, 25000);
+  });
+
   test('end to end: gathered input runs through the engine', () async {
     final input = await gather(values: {'forecast.variableMethod': 'mean3'});
     final r = runCashflow(CashflowRequest(input: input, horizonMonths: 3));

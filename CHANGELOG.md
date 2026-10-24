@@ -13,6 +13,30 @@ a dated release section.
 
 ### Added
 
+- Budgets show planned entries and recurring items that are not booked
+  yet as outstanding: a striped part of the bar, "€80 planned" or
+  "Planned: €30 over" on the row, the planned total on the summary card
+  and an "Outstanding" list with Confirm and Skip on the budget's detail
+  screen. They never
+  count as spent, so alerts, rollover and "left to assign" are unchanged.
+  Settings › Budgets › Show planned and upcoming turns this off.
+- Repeating budgets: a budget can repeat every period, every n-th period,
+  for a number of periods or until a date, so new periods no longer
+  start empty. New budgets repeat every period by default. Changing or
+  removing a repeating budget asks whether it applies to this period only
+  or to this and the following periods; budgets set by hand in a period
+  always win. "Repeat these budgets every period" in the Fill menu turns
+  a period's budgets into repeating ones. Database schema 4.
+- Budgets with their own length: a budget can last a week, month, quarter
+  or year instead of the budget period, e.g. a yearly holiday budget or a
+  weekly groceries budget on a monthly board. The board shows the window
+  containing today with its own bar; the detail screen lists every window
+  of the period and the last windows' history. Totals stay for budgets of
+  the period; in envelope mode and the forecast a long window's amount is
+  spread evenly over the budget periods it covers.
+- Merging categories with repeating budgets: budgets of the same period
+  are added up; the target's repeating budgets stay, and the source's
+  take over when they end.
 - Backups include receipt files.
 - Encrypted backups (`.pfbackup`) with a backup password and a recovery key
   that must be confirmed. Required while the app lock or the database

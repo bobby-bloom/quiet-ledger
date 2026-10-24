@@ -80,6 +80,9 @@ void main() {
       'DROP TRIGGER txn_search_cat_au',
       'DROP TRIGGER txn_search_tagname_au',
       'DROP TABLE safety_copies',
+      'DROP TABLE budget_rules',
+      'ALTER TABLE budgets DROP COLUMN rule_id',
+      'ALTER TABLE budgets DROP COLUMN period_end',
       'PRAGMA user_version = 1',
     ]) {
       await v1.customStatement(s);
@@ -107,22 +110,57 @@ void main() {
     final version = await v2.customSelect('PRAGMA user_version').getSingle();
     expect(version.data.values.first, AppDatabase.currentSchemaVersion);
     await v2.customSelect('SELECT count(*) FROM safety_copies').get();
+    await v2.customSelect('SELECT count(*) FROM budget_rules').get();
+    await v2.customSelect('SELECT rule_id, period_end FROM budgets').get();
   });
 
-  test('a v2 database upgrades to v3 and keeps its data', () async {
+  test(
+    'a v2 database upgrades to the current schema and keeps its data',
+    () async {
+      final raw = sqlite3.openInMemory();
+      final v2 = AppDatabase(
+        NativeDatabase.opened(raw, closeUnderlyingOnClose: false),
+      );
+      final w = SyncWriter(v2, testClock(), 'd');
+      await w.insert(v2.tags, const TagsCompanion(name: Value('kept')));
+      await v2.customStatement('DROP TABLE safety_copies');
+      await v2.customStatement('DROP TABLE budget_rules');
+      await v2.customStatement('ALTER TABLE budgets DROP COLUMN rule_id');
+      await v2.customStatement('ALTER TABLE budgets DROP COLUMN period_end');
+      await v2.customStatement('PRAGMA user_version = 2');
+      await v2.close();
+
+      final v3 = AppDatabase(NativeDatabase.opened(raw));
+      addTearDown(v3.close);
+      expect((await v3.select(v3.tags).get()).single.name, 'kept');
+      expect(await v3.select(v3.safetyCopies).get(), isEmpty);
+    },
+  );
+
+  test('a v3 database upgrades to v4 and keeps its budgets', () async {
     final raw = sqlite3.openInMemory();
-    final v2 = AppDatabase(
+    final v3 = AppDatabase(
       NativeDatabase.opened(raw, closeUnderlyingOnClose: false),
     );
-    final w = SyncWriter(v2, testClock(), 'd');
-    await w.insert(v2.tags, const TagsCompanion(name: Value('kept')));
-    await v2.customStatement('DROP TABLE safety_copies');
-    await v2.customStatement('PRAGMA user_version = 2');
-    await v2.close();
+    final w = SyncWriter(v3, testClock(), 'd');
+    await v3.customStatement('DROP TABLE budget_rules');
+    await v3.customStatement('ALTER TABLE budgets DROP COLUMN rule_id');
+    await v3.customStatement('ALTER TABLE budgets DROP COLUMN period_end');
+    await v3.customStatement('PRAGMA user_version = 3');
+    await v3.customStatement(
+      'INSERT INTO budgets (id, created_at, updated_at, origin_device_id, '
+      "category_id, period_start, amount_minor) VALUES ('b1', 0, "
+      "'${w.clock.tick()}', 'd', 'food', 1793487600, 40000)",
+    );
+    await v3.close();
 
-    final v3 = AppDatabase(NativeDatabase.opened(raw));
-    addTearDown(v3.close);
-    expect((await v3.select(v3.tags).get()).single.name, 'kept');
-    expect(await v3.select(v3.safetyCopies).get(), isEmpty);
+    final v4 = AppDatabase(NativeDatabase.opened(raw));
+    addTearDown(v4.close);
+    final b = (await v4.select(v4.budgets).get()).single;
+    expect(
+      (b.id, b.categoryId, b.amountMinor, b.ruleId),
+      ('b1', 'food', 40000, null),
+    );
+    expect(await v4.select(v4.budgetRules).get(), isEmpty);
   });
 }

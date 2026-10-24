@@ -92,7 +92,9 @@ enum ProgressState { onTrack, warning, over }
 
 /// Budget/goal progress bar: track 6px, radius 3. Colours map on track →
 /// primary, ≥ threshold → warningFill, over → error. [tick] marks today's
-/// position in the period (0..1).
+/// position in the period (0..1). [pending] (0..1, after [value]) is drawn
+/// as a lighter, striped segment for amounts that are expected but not
+/// booked yet; callers also say so in text.
 class ProgressBar extends StatelessWidget {
   const ProgressBar({
     required this.value,
@@ -101,6 +103,7 @@ class ProgressBar extends StatelessWidget {
     this.tick,
     this.color,
     this.height = 6,
+    this.pending = 0,
   });
 
   final double value;
@@ -108,6 +111,7 @@ class ProgressBar extends StatelessWidget {
   final double? tick;
   final Color? color;
   final double height;
+  final double pending;
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +125,8 @@ class ProgressBar extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final w = box.maxWidth;
+        final filled = value.clamp(0, 1).toDouble();
+        final upTo = (filled + pending.clamp(0, 1)).clamp(0, 1).toDouble();
         return SizedBox(
           height: height + (tick != null ? 4 : 0),
           child: Stack(
@@ -133,8 +139,19 @@ class ProgressBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(height / 2),
                 ),
               ),
+              if (upTo > filled)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(height / 2),
+                  child: SizedBox(
+                    width: w * upTo,
+                    height: height,
+                    child: CustomPaint(
+                      painter: _PendingStripes(c.withValues(alpha: 0.4)),
+                    ),
+                  ),
+                ),
               Container(
-                width: w * value.clamp(0, 1),
+                width: w * filled,
                 height: height,
                 decoration: BoxDecoration(
                   color: c,
@@ -154,6 +171,32 @@ class ProgressBar extends StatelessWidget {
       },
     );
   }
+}
+
+/// Diagonal hairline stripes over a light fill, so the pending part of a
+/// [ProgressBar] does not rely on colour alone.
+class _PendingStripes extends CustomPainter {
+  const _PendingStripes(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = color.withValues(alpha: color.a * 0.6),
+    );
+    final stroke = Paint()
+      ..color = color
+      ..strokeWidth = 1.5;
+    final h = size.height;
+    for (var x = -h; x < size.width; x += 4) {
+      canvas.drawLine(Offset(x, h), Offset(x + h, 0), stroke);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PendingStripes old) => old.color != color;
 }
 
 /// Small rounded status badge (e.g. "92%", "€24.90 over", "Pending").

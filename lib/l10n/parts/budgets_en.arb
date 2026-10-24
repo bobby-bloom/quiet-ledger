@@ -280,5 +280,252 @@
         "type": "String"
       }
     }
-  }
+  },
+  "budgetsPlannedAmount": "{amount} planned",
+  "@budgetsPlannedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsPlannedOver": "Planned: {amount} over",
+  "@budgetsPlannedOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAfterPlanned": "After planned: {amount} left",
+  "@budgetsAfterPlanned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAfterPlannedOver": "After planned: {amount} over",
+  "@budgetsAfterPlannedOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsOutstanding": "Outstanding",
+  "budgetsOutstandingHint": "Not spent yet. Counts once it is booked.",
+  "budgetsUpcoming": "Upcoming",
+  "budgetsDue": "Due",
+  "budgetsOverdue": "Overdue",
+  "budgetsExpectedIncome": "{amount} expected income, not included until it arrives",
+  "@budgetsExpectedIncome": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeat": "Repeat",
+  "budgetsRepeatOnce": "This period only",
+  "budgetsRepeatEvery": "Every period",
+  "budgetsRepeatCount": "For a number of periods",
+  "budgetsRepeatUntil": "Until a date",
+  "budgetsRepeatPeriods": "How many times",
+  "budgetsRepeatInterval": "Interval",
+  "budgetsRepeatNumberInvalid": "Enter 1 or more",
+  "budgetsRepeatUntilDate": "Until {date}",
+  "@budgetsRepeatUntilDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsEveryN": "{every, plural, =1{every period} other{every {every} periods}}",
+  "@budgetsEveryN": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsRepeatsEvery": "Repeats {every} from {period}",
+  "@budgetsRepeatsEvery": {
+    "placeholders": {
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsCount": "{count, plural, =1{Only in {period}} other{Repeats {every} from {period}, {count} times}}",
+  "@budgetsRepeatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsUntil": "Repeats {every} from {period} until {date}",
+  "@budgetsRepeatsUntil": {
+    "placeholders": {
+      "every": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsScopeChangeTitle": "Change a repeating budget",
+  "budgetsScopeRemoveTitle": "Remove a repeating budget",
+  "budgetsScopeThis": "Only this period",
+  "budgetsScopeFollowing": "This and following periods",
+  "budgetsScopeHint": "Budgets you set by hand in later periods stay as they are.",
+  "budgetsRemoved": "Budget for {category} removed",
+  "@budgetsRemoved": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatOption": "Repeats",
+  "budgetsStopRepeating": "Stop repeating",
+  "budgetsStopRepeatingTitle": "Stop repeating {category}?",
+  "@budgetsStopRepeatingTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStopRepeatingMessage": "The budget of this period stays. Later periods get no budget for {category}, except budgets you set by hand.",
+  "@budgetsStopRepeatingMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStoppedRepeating": "{category} no longer repeats",
+  "@budgetsStoppedRepeating": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatAll": "Repeat these budgets every period",
+  "budgetsRepeatAllDone": "{count, plural, =1{1 budget now repeats every period} other{{count} budgets now repeat every period}}",
+  "@budgetsRepeatAllDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsLength": "Length",
+  "budgetsLengthPeriod": "Budget period ({type})",
+  "@budgetsLengthPeriod": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsLengthWeek": "One week",
+  "budgetsLengthMonth": "One month",
+  "budgetsLengthQuarter": "One quarter",
+  "budgetsLengthYear": "One year",
+  "budgetsEveryWeek": "{every, plural, =1{every week} other{every {every} weeks}}",
+  "@budgetsEveryWeek": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryMonth": "{every, plural, =1{every month} other{every {every} months}}",
+  "@budgetsEveryMonth": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryQuarter": "{every, plural, =1{every quarter} other{every {every} quarters}}",
+  "@budgetsEveryQuarter": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryYear": "{every, plural, =1{every year} other{every {every} years}}",
+  "@budgetsEveryYear": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOnlyIn": "Only {period}",
+  "@budgetsOnlyIn": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsWindowLabel": "{length} · {period}",
+  "@budgetsWindowLabel": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsWindowsNote": "Totals don't include budgets with their own length.",
+  "budgetsWindowsInPeriod": "Within this period",
+  "budgetsRemovedFollowing": "{category} removed from this period on",
+  "@budgetsRemovedFollowing": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsBudgetedFor": "Budgeted for {period}",
+  "@budgetsBudgetedFor": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsTransactionsIn": "Transactions in {period}",
+  "@budgetsTransactionsIn": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsShort": "repeats"
 }

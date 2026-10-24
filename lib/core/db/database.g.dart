@@ -10357,6 +10357,26 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _ruleIdMeta = const VerificationMeta('ruleId');
+  @override
+  late final GeneratedColumn<String> ruleId = GeneratedColumn<String>(
+    'rule_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10368,6 +10388,8 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     periodStart,
     amountMinor,
     rolloverMinor,
+    ruleId,
+    periodEnd,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10458,6 +10480,18 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         ),
       );
     }
+    if (data.containsKey('rule_id')) {
+      context.handle(
+        _ruleIdMeta,
+        ruleId.isAcceptableOrUnknown(data['rule_id']!, _ruleIdMeta),
+      );
+    }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    }
     return context;
   }
 
@@ -10503,6 +10537,14 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         DriftSqlType.int,
         data['${effectivePrefix}rollover_minor'],
       )!,
+      ruleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rule_id'],
+      ),
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      ),
     );
   }
 
@@ -10525,6 +10567,15 @@ class Budget extends DataClass implements Insertable<Budget> {
   /// Rollover amount carried into this period (computed when the period is
   /// filled; may be adjusted by the user).
   final int rolloverMinor;
+
+  /// [BudgetRules] row that generated this budget; null for a budget set by
+  /// hand (which the rule never touches).
+  final String? ruleId;
+
+  /// Exclusive end of a budget with its own length (a week, month, quarter
+  /// or year window starting at [periodStart]); null for a budget of the
+  /// budget period starting at [periodStart].
+  final DateTime? periodEnd;
   const Budget({
     required this.id,
     required this.createdAt,
@@ -10535,6 +10586,8 @@ class Budget extends DataClass implements Insertable<Budget> {
     required this.periodStart,
     required this.amountMinor,
     required this.rolloverMinor,
+    this.ruleId,
+    this.periodEnd,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10550,6 +10603,12 @@ class Budget extends DataClass implements Insertable<Budget> {
     map['period_start'] = Variable<DateTime>(periodStart);
     map['amount_minor'] = Variable<int>(amountMinor);
     map['rollover_minor'] = Variable<int>(rolloverMinor);
+    if (!nullToAbsent || ruleId != null) {
+      map['rule_id'] = Variable<String>(ruleId);
+    }
+    if (!nullToAbsent || periodEnd != null) {
+      map['period_end'] = Variable<DateTime>(periodEnd);
+    }
     return map;
   }
 
@@ -10566,6 +10625,12 @@ class Budget extends DataClass implements Insertable<Budget> {
       periodStart: Value(periodStart),
       amountMinor: Value(amountMinor),
       rolloverMinor: Value(rolloverMinor),
+      ruleId: ruleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ruleId),
+      periodEnd: periodEnd == null && nullToAbsent
+          ? const Value.absent()
+          : Value(periodEnd),
     );
   }
 
@@ -10584,6 +10649,8 @@ class Budget extends DataClass implements Insertable<Budget> {
       periodStart: serializer.fromJson<DateTime>(json['periodStart']),
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       rolloverMinor: serializer.fromJson<int>(json['rolloverMinor']),
+      ruleId: serializer.fromJson<String?>(json['ruleId']),
+      periodEnd: serializer.fromJson<DateTime?>(json['periodEnd']),
     );
   }
   @override
@@ -10599,6 +10666,8 @@ class Budget extends DataClass implements Insertable<Budget> {
       'periodStart': serializer.toJson<DateTime>(periodStart),
       'amountMinor': serializer.toJson<int>(amountMinor),
       'rolloverMinor': serializer.toJson<int>(rolloverMinor),
+      'ruleId': serializer.toJson<String?>(ruleId),
+      'periodEnd': serializer.toJson<DateTime?>(periodEnd),
     };
   }
 
@@ -10612,6 +10681,8 @@ class Budget extends DataClass implements Insertable<Budget> {
     DateTime? periodStart,
     int? amountMinor,
     int? rolloverMinor,
+    Value<String?> ruleId = const Value.absent(),
+    Value<DateTime?> periodEnd = const Value.absent(),
   }) => Budget(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -10622,6 +10693,8 @@ class Budget extends DataClass implements Insertable<Budget> {
     periodStart: periodStart ?? this.periodStart,
     amountMinor: amountMinor ?? this.amountMinor,
     rolloverMinor: rolloverMinor ?? this.rolloverMinor,
+    ruleId: ruleId.present ? ruleId.value : this.ruleId,
+    periodEnd: periodEnd.present ? periodEnd.value : this.periodEnd,
   );
   Budget copyWithCompanion(BudgetsCompanion data) {
     return Budget(
@@ -10644,6 +10717,8 @@ class Budget extends DataClass implements Insertable<Budget> {
       rolloverMinor: data.rolloverMinor.present
           ? data.rolloverMinor.value
           : this.rolloverMinor,
+      ruleId: data.ruleId.present ? data.ruleId.value : this.ruleId,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
     );
   }
 
@@ -10658,7 +10733,9 @@ class Budget extends DataClass implements Insertable<Budget> {
           ..write('categoryId: $categoryId, ')
           ..write('periodStart: $periodStart, ')
           ..write('amountMinor: $amountMinor, ')
-          ..write('rolloverMinor: $rolloverMinor')
+          ..write('rolloverMinor: $rolloverMinor, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('periodEnd: $periodEnd')
           ..write(')'))
         .toString();
   }
@@ -10674,6 +10751,8 @@ class Budget extends DataClass implements Insertable<Budget> {
     periodStart,
     amountMinor,
     rolloverMinor,
+    ruleId,
+    periodEnd,
   );
   @override
   bool operator ==(Object other) =>
@@ -10687,7 +10766,9 @@ class Budget extends DataClass implements Insertable<Budget> {
           other.categoryId == this.categoryId &&
           other.periodStart == this.periodStart &&
           other.amountMinor == this.amountMinor &&
-          other.rolloverMinor == this.rolloverMinor);
+          other.rolloverMinor == this.rolloverMinor &&
+          other.ruleId == this.ruleId &&
+          other.periodEnd == this.periodEnd);
 }
 
 class BudgetsCompanion extends UpdateCompanion<Budget> {
@@ -10700,6 +10781,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   final Value<DateTime> periodStart;
   final Value<int> amountMinor;
   final Value<int> rolloverMinor;
+  final Value<String?> ruleId;
+  final Value<DateTime?> periodEnd;
   final Value<int> rowid;
   const BudgetsCompanion({
     this.id = const Value.absent(),
@@ -10711,6 +10794,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     this.periodStart = const Value.absent(),
     this.amountMinor = const Value.absent(),
     this.rolloverMinor = const Value.absent(),
+    this.ruleId = const Value.absent(),
+    this.periodEnd = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BudgetsCompanion.insert({
@@ -10723,6 +10808,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     required DateTime periodStart,
     required int amountMinor,
     this.rolloverMinor = const Value.absent(),
+    this.ruleId = const Value.absent(),
+    this.periodEnd = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -10741,6 +10828,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Expression<DateTime>? periodStart,
     Expression<int>? amountMinor,
     Expression<int>? rolloverMinor,
+    Expression<String>? ruleId,
+    Expression<DateTime>? periodEnd,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10753,6 +10842,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       if (periodStart != null) 'period_start': periodStart,
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (rolloverMinor != null) 'rollover_minor': rolloverMinor,
+      if (ruleId != null) 'rule_id': ruleId,
+      if (periodEnd != null) 'period_end': periodEnd,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10767,6 +10858,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Value<DateTime>? periodStart,
     Value<int>? amountMinor,
     Value<int>? rolloverMinor,
+    Value<String?>? ruleId,
+    Value<DateTime?>? periodEnd,
     Value<int>? rowid,
   }) {
     return BudgetsCompanion(
@@ -10779,6 +10872,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       periodStart: periodStart ?? this.periodStart,
       amountMinor: amountMinor ?? this.amountMinor,
       rolloverMinor: rolloverMinor ?? this.rolloverMinor,
+      ruleId: ruleId ?? this.ruleId,
+      periodEnd: periodEnd ?? this.periodEnd,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10813,6 +10908,12 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     if (rolloverMinor.present) {
       map['rollover_minor'] = Variable<int>(rolloverMinor.value);
     }
+    if (ruleId.present) {
+      map['rule_id'] = Variable<String>(ruleId.value);
+    }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -10831,6 +10932,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
           ..write('periodStart: $periodStart, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('rolloverMinor: $rolloverMinor, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('periodEnd: $periodEnd, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -11299,6 +11402,849 @@ class BudgetTemplatesCompanion extends UpdateCompanion<BudgetTemplate> {
           ..write('originDeviceId: $originDeviceId, ')
           ..write('name: $name, ')
           ..write('items: $items, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BudgetRulesTable extends BudgetRules
+    with TableInfo<$BudgetRulesTable, BudgetRule> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _originDeviceIdMeta = const VerificationMeta(
+    'originDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> originDeviceId = GeneratedColumn<String>(
+    'origin_device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMinorMeta = const VerificationMeta(
+    'amountMinor',
+  );
+  @override
+  late final GeneratedColumn<int> amountMinor = GeneratedColumn<int>(
+    'amount_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<BudgetCadence, String> cadence =
+      GeneratedColumn<String>(
+        'cadence',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(BudgetCadence.period.name),
+      ).withConverter<BudgetCadence>($BudgetRulesTable.$convertercadence);
+  static const VerificationMeta _everyMeta = const VerificationMeta('every');
+  @override
+  late final GeneratedColumn<int> every = GeneratedColumn<int>(
+    'every',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _periodTypeMeta = const VerificationMeta(
+    'periodType',
+  );
+  @override
+  late final GeneratedColumn<String> periodType = GeneratedColumn<String>(
+    'period_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _generatedUntilMeta = const VerificationMeta(
+    'generatedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> generatedUntil =
+      GeneratedColumn<DateTime>(
+        'generated_until',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    originDeviceId,
+    categoryId,
+    amountMinor,
+    cadence,
+    every,
+    periodType,
+    startDate,
+    endDate,
+    count,
+    generatedUntil,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budget_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BudgetRule> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('origin_device_id')) {
+      context.handle(
+        _originDeviceIdMeta,
+        originDeviceId.isAcceptableOrUnknown(
+          data['origin_device_id']!,
+          _originDeviceIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_originDeviceIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('amount_minor')) {
+      context.handle(
+        _amountMinorMeta,
+        amountMinor.isAcceptableOrUnknown(
+          data['amount_minor']!,
+          _amountMinorMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMinorMeta);
+    }
+    if (data.containsKey('every')) {
+      context.handle(
+        _everyMeta,
+        every.isAcceptableOrUnknown(data['every']!, _everyMeta),
+      );
+    }
+    if (data.containsKey('period_type')) {
+      context.handle(
+        _periodTypeMeta,
+        periodType.isAcceptableOrUnknown(data['period_type']!, _periodTypeMeta),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    }
+    if (data.containsKey('generated_until')) {
+      context.handle(
+        _generatedUntilMeta,
+        generatedUntil.isAcceptableOrUnknown(
+          data['generated_until']!,
+          _generatedUntilMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BudgetRule map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BudgetRule(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      originDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_device_id'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      amountMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor'],
+      )!,
+      cadence: $BudgetRulesTable.$convertercadence.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}cadence'],
+        )!,
+      ),
+      every: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}every'],
+      )!,
+      periodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_type'],
+      ),
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_date'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end_date'],
+      ),
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      ),
+      generatedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}generated_until'],
+      ),
+    );
+  }
+
+  @override
+  $BudgetRulesTable createAlias(String alias) {
+    return $BudgetRulesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<BudgetCadence, String, String> $convertercadence =
+      const EnumNameConverter<BudgetCadence>(BudgetCadence.values);
+}
+
+class BudgetRule extends DataClass implements Insertable<BudgetRule> {
+  final String id;
+  final int createdAt;
+  final String updatedAt;
+  final int? deletedAt;
+  final String originDeviceId;
+  final String categoryId;
+
+  /// Amount per window, >= 0.
+  final int amountMinor;
+  final BudgetCadence cadence;
+
+  /// Every n-th window, >= 1.
+  final int every;
+
+  /// For a `period` rule: the budget period type it was made for
+  /// (`BudgetPeriodType` name). After the period type changes, the rule
+  /// keeps that length as a budget with its own length.
+  final String? periodType;
+
+  /// Start of the first window.
+  final DateTime startDate;
+
+  /// Windows starting after this date are not covered.
+  final DateTime? endDate;
+
+  /// Number of windows covered (1 = once); null = no limit.
+  final int? count;
+
+  /// Start of the last window rows were generated for. Windows up to it
+  /// are never generated again, so a budget the user removed stays removed.
+  final DateTime? generatedUntil;
+  const BudgetRule({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.originDeviceId,
+    required this.categoryId,
+    required this.amountMinor,
+    required this.cadence,
+    required this.every,
+    this.periodType,
+    required this.startDate,
+    this.endDate,
+    this.count,
+    this.generatedUntil,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['origin_device_id'] = Variable<String>(originDeviceId);
+    map['category_id'] = Variable<String>(categoryId);
+    map['amount_minor'] = Variable<int>(amountMinor);
+    {
+      map['cadence'] = Variable<String>(
+        $BudgetRulesTable.$convertercadence.toSql(cadence),
+      );
+    }
+    map['every'] = Variable<int>(every);
+    if (!nullToAbsent || periodType != null) {
+      map['period_type'] = Variable<String>(periodType);
+    }
+    map['start_date'] = Variable<DateTime>(startDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<DateTime>(endDate);
+    }
+    if (!nullToAbsent || count != null) {
+      map['count'] = Variable<int>(count);
+    }
+    if (!nullToAbsent || generatedUntil != null) {
+      map['generated_until'] = Variable<DateTime>(generatedUntil);
+    }
+    return map;
+  }
+
+  BudgetRulesCompanion toCompanion(bool nullToAbsent) {
+    return BudgetRulesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      originDeviceId: Value(originDeviceId),
+      categoryId: Value(categoryId),
+      amountMinor: Value(amountMinor),
+      cadence: Value(cadence),
+      every: Value(every),
+      periodType: periodType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(periodType),
+      startDate: Value(startDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+      count: count == null && nullToAbsent
+          ? const Value.absent()
+          : Value(count),
+      generatedUntil: generatedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(generatedUntil),
+    );
+  }
+
+  factory BudgetRule.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BudgetRule(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      originDeviceId: serializer.fromJson<String>(json['originDeviceId']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      amountMinor: serializer.fromJson<int>(json['amountMinor']),
+      cadence: $BudgetRulesTable.$convertercadence.fromJson(
+        serializer.fromJson<String>(json['cadence']),
+      ),
+      every: serializer.fromJson<int>(json['every']),
+      periodType: serializer.fromJson<String?>(json['periodType']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      endDate: serializer.fromJson<DateTime?>(json['endDate']),
+      count: serializer.fromJson<int?>(json['count']),
+      generatedUntil: serializer.fromJson<DateTime?>(json['generatedUntil']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'originDeviceId': serializer.toJson<String>(originDeviceId),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'amountMinor': serializer.toJson<int>(amountMinor),
+      'cadence': serializer.toJson<String>(
+        $BudgetRulesTable.$convertercadence.toJson(cadence),
+      ),
+      'every': serializer.toJson<int>(every),
+      'periodType': serializer.toJson<String?>(periodType),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'endDate': serializer.toJson<DateTime?>(endDate),
+      'count': serializer.toJson<int?>(count),
+      'generatedUntil': serializer.toJson<DateTime?>(generatedUntil),
+    };
+  }
+
+  BudgetRule copyWith({
+    String? id,
+    int? createdAt,
+    String? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? originDeviceId,
+    String? categoryId,
+    int? amountMinor,
+    BudgetCadence? cadence,
+    int? every,
+    Value<String?> periodType = const Value.absent(),
+    DateTime? startDate,
+    Value<DateTime?> endDate = const Value.absent(),
+    Value<int?> count = const Value.absent(),
+    Value<DateTime?> generatedUntil = const Value.absent(),
+  }) => BudgetRule(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    originDeviceId: originDeviceId ?? this.originDeviceId,
+    categoryId: categoryId ?? this.categoryId,
+    amountMinor: amountMinor ?? this.amountMinor,
+    cadence: cadence ?? this.cadence,
+    every: every ?? this.every,
+    periodType: periodType.present ? periodType.value : this.periodType,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate.present ? endDate.value : this.endDate,
+    count: count.present ? count.value : this.count,
+    generatedUntil: generatedUntil.present
+        ? generatedUntil.value
+        : this.generatedUntil,
+  );
+  BudgetRule copyWithCompanion(BudgetRulesCompanion data) {
+    return BudgetRule(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      originDeviceId: data.originDeviceId.present
+          ? data.originDeviceId.value
+          : this.originDeviceId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      amountMinor: data.amountMinor.present
+          ? data.amountMinor.value
+          : this.amountMinor,
+      cadence: data.cadence.present ? data.cadence.value : this.cadence,
+      every: data.every.present ? data.every.value : this.every,
+      periodType: data.periodType.present
+          ? data.periodType.value
+          : this.periodType,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      count: data.count.present ? data.count.value : this.count,
+      generatedUntil: data.generatedUntil.present
+          ? data.generatedUntil.value
+          : this.generatedUntil,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetRule(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('originDeviceId: $originDeviceId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('cadence: $cadence, ')
+          ..write('every: $every, ')
+          ..write('periodType: $periodType, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('count: $count, ')
+          ..write('generatedUntil: $generatedUntil')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    originDeviceId,
+    categoryId,
+    amountMinor,
+    cadence,
+    every,
+    periodType,
+    startDate,
+    endDate,
+    count,
+    generatedUntil,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BudgetRule &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.originDeviceId == this.originDeviceId &&
+          other.categoryId == this.categoryId &&
+          other.amountMinor == this.amountMinor &&
+          other.cadence == this.cadence &&
+          other.every == this.every &&
+          other.periodType == this.periodType &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.count == this.count &&
+          other.generatedUntil == this.generatedUntil);
+}
+
+class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<String> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> originDeviceId;
+  final Value<String> categoryId;
+  final Value<int> amountMinor;
+  final Value<BudgetCadence> cadence;
+  final Value<int> every;
+  final Value<String?> periodType;
+  final Value<DateTime> startDate;
+  final Value<DateTime?> endDate;
+  final Value<int?> count;
+  final Value<DateTime?> generatedUntil;
+  final Value<int> rowid;
+  const BudgetRulesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.originDeviceId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.amountMinor = const Value.absent(),
+    this.cadence = const Value.absent(),
+    this.every = const Value.absent(),
+    this.periodType = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.count = const Value.absent(),
+    this.generatedUntil = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BudgetRulesCompanion.insert({
+    required String id,
+    required int createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String originDeviceId,
+    required String categoryId,
+    required int amountMinor,
+    this.cadence = const Value.absent(),
+    this.every = const Value.absent(),
+    this.periodType = const Value.absent(),
+    required DateTime startDate,
+    this.endDate = const Value.absent(),
+    this.count = const Value.absent(),
+    this.generatedUntil = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       originDeviceId = Value(originDeviceId),
+       categoryId = Value(categoryId),
+       amountMinor = Value(amountMinor),
+       startDate = Value(startDate);
+  static Insertable<BudgetRule> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? originDeviceId,
+    Expression<String>? categoryId,
+    Expression<int>? amountMinor,
+    Expression<String>? cadence,
+    Expression<int>? every,
+    Expression<String>? periodType,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? endDate,
+    Expression<int>? count,
+    Expression<DateTime>? generatedUntil,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (originDeviceId != null) 'origin_device_id': originDeviceId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (amountMinor != null) 'amount_minor': amountMinor,
+      if (cadence != null) 'cadence': cadence,
+      if (every != null) 'every': every,
+      if (periodType != null) 'period_type': periodType,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (count != null) 'count': count,
+      if (generatedUntil != null) 'generated_until': generatedUntil,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BudgetRulesCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<String>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? originDeviceId,
+    Value<String>? categoryId,
+    Value<int>? amountMinor,
+    Value<BudgetCadence>? cadence,
+    Value<int>? every,
+    Value<String?>? periodType,
+    Value<DateTime>? startDate,
+    Value<DateTime?>? endDate,
+    Value<int?>? count,
+    Value<DateTime?>? generatedUntil,
+    Value<int>? rowid,
+  }) {
+    return BudgetRulesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      originDeviceId: originDeviceId ?? this.originDeviceId,
+      categoryId: categoryId ?? this.categoryId,
+      amountMinor: amountMinor ?? this.amountMinor,
+      cadence: cadence ?? this.cadence,
+      every: every ?? this.every,
+      periodType: periodType ?? this.periodType,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      count: count ?? this.count,
+      generatedUntil: generatedUntil ?? this.generatedUntil,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (originDeviceId.present) {
+      map['origin_device_id'] = Variable<String>(originDeviceId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (amountMinor.present) {
+      map['amount_minor'] = Variable<int>(amountMinor.value);
+    }
+    if (cadence.present) {
+      map['cadence'] = Variable<String>(
+        $BudgetRulesTable.$convertercadence.toSql(cadence.value),
+      );
+    }
+    if (every.present) {
+      map['every'] = Variable<int>(every.value);
+    }
+    if (periodType.present) {
+      map['period_type'] = Variable<String>(periodType.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (generatedUntil.present) {
+      map['generated_until'] = Variable<DateTime>(generatedUntil.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('originDeviceId: $originDeviceId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('cadence: $cadence, ')
+          ..write('every: $every, ')
+          ..write('periodType: $periodType, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('count: $count, ')
+          ..write('generatedUntil: $generatedUntil, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -16572,6 +17518,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BudgetTemplatesTable budgetTemplates = $BudgetTemplatesTable(
     this,
   );
+  late final $BudgetRulesTable budgetRules = $BudgetRulesTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
   late final $ScenariosTable scenarios = $ScenariosTable(this);
   late final $SavedFiltersTable savedFilters = $SavedFiltersTable(this);
@@ -16672,6 +17619,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     recurringAmountChanges,
     budgets,
     budgetTemplates,
+    budgetRules,
     goals,
     scenarios,
     savedFilters,
@@ -21761,6 +22709,8 @@ typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   required DateTime periodStart,
   required int amountMinor,
   Value<int> rolloverMinor,
+  Value<String?> ruleId,
+  Value<DateTime?> periodEnd,
   Value<int> rowid,
 });
 typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
@@ -21773,6 +22723,8 @@ typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
   Value<DateTime> periodStart,
   Value<int> amountMinor,
   Value<int> rolloverMinor,
+  Value<String?> ruleId,
+  Value<DateTime?> periodEnd,
   Value<int> rowid,
 });
 
@@ -21827,6 +22779,16 @@ class $$BudgetsTableFilterComposer
 
   ColumnFilters<int> get rolloverMinor => $composableBuilder(
     column: $table.rolloverMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ruleId => $composableBuilder(
+    column: $table.ruleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -21884,6 +22846,16 @@ class $$BudgetsTableOrderingComposer
     column: $table.rolloverMinor,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ruleId => $composableBuilder(
+    column: $table.ruleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$BudgetsTableAnnotationComposer
@@ -21931,6 +22903,12 @@ class $$BudgetsTableAnnotationComposer
     column: $table.rolloverMinor,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get ruleId =>
+      $composableBuilder(column: $table.ruleId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
 }
 
 class $$BudgetsTableTableManager
@@ -21970,6 +22948,8 @@ class $$BudgetsTableTableManager
                 Value<DateTime> periodStart = const Value.absent(),
                 Value<int> amountMinor = const Value.absent(),
                 Value<int> rolloverMinor = const Value.absent(),
+                Value<String?> ruleId = const Value.absent(),
+                Value<DateTime?> periodEnd = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetsCompanion(
                 id: id,
@@ -21981,6 +22961,8 @@ class $$BudgetsTableTableManager
                 periodStart: periodStart,
                 amountMinor: amountMinor,
                 rolloverMinor: rolloverMinor,
+                ruleId: ruleId,
+                periodEnd: periodEnd,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -21994,6 +22976,8 @@ class $$BudgetsTableTableManager
                 required DateTime periodStart,
                 required int amountMinor,
                 Value<int> rolloverMinor = const Value.absent(),
+                Value<String?> ruleId = const Value.absent(),
+                Value<DateTime?> periodEnd = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetsCompanion.insert(
                 id: id,
@@ -22005,6 +22989,8 @@ class $$BudgetsTableTableManager
                 periodStart: periodStart,
                 amountMinor: amountMinor,
                 rolloverMinor: rolloverMinor,
+                ruleId: ruleId,
+                periodEnd: periodEnd,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -22291,6 +23277,397 @@ typedef $$BudgetTemplatesTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $BudgetTemplatesTable, BudgetTemplate>,
       ),
       BudgetTemplate,
+      PrefetchHooks Function()
+    >;
+typedef $$BudgetRulesTableCreateCompanionBuilder =
+    BudgetRulesCompanion Function({
+      required String id,
+      required int createdAt,
+      required String updatedAt,
+      Value<int?> deletedAt,
+      required String originDeviceId,
+      required String categoryId,
+      required int amountMinor,
+      Value<BudgetCadence> cadence,
+      Value<int> every,
+      Value<String?> periodType,
+      required DateTime startDate,
+      Value<DateTime?> endDate,
+      Value<int?> count,
+      Value<DateTime?> generatedUntil,
+      Value<int> rowid,
+    });
+typedef $$BudgetRulesTableUpdateCompanionBuilder =
+    BudgetRulesCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<String> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> originDeviceId,
+      Value<String> categoryId,
+      Value<int> amountMinor,
+      Value<BudgetCadence> cadence,
+      Value<int> every,
+      Value<String?> periodType,
+      Value<DateTime> startDate,
+      Value<DateTime?> endDate,
+      Value<int?> count,
+      Value<DateTime?> generatedUntil,
+      Value<int> rowid,
+    });
+
+class $$BudgetRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetRulesTable> {
+  $$BudgetRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originDeviceId => $composableBuilder(
+    column: $table.originDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<BudgetCadence, BudgetCadence, String>
+  get cadence => $composableBuilder(
+    column: $table.cadence,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get every => $composableBuilder(
+    column: $table.every,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get generatedUntil => $composableBuilder(
+    column: $table.generatedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BudgetRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetRulesTable> {
+  $$BudgetRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originDeviceId => $composableBuilder(
+    column: $table.originDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cadence => $composableBuilder(
+    column: $table.cadence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get every => $composableBuilder(
+    column: $table.every,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get generatedUntil => $composableBuilder(
+    column: $table.generatedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BudgetRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetRulesTable> {
+  $$BudgetRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get originDeviceId => $composableBuilder(
+    column: $table.originDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<BudgetCadence, String> get cadence =>
+      $composableBuilder(column: $table.cadence, builder: (column) => column);
+
+  GeneratedColumn<int> get every =>
+      $composableBuilder(column: $table.every, builder: (column) => column);
+
+  GeneratedColumn<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get generatedUntil => $composableBuilder(
+    column: $table.generatedUntil,
+    builder: (column) => column,
+  );
+}
+
+class $$BudgetRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetRulesTable,
+          BudgetRule,
+          $$BudgetRulesTableFilterComposer,
+          $$BudgetRulesTableOrderingComposer,
+          $$BudgetRulesTableAnnotationComposer,
+          $$BudgetRulesTableCreateCompanionBuilder,
+          $$BudgetRulesTableUpdateCompanionBuilder,
+          (
+            BudgetRule,
+            BaseReferences<_$AppDatabase, $BudgetRulesTable, BudgetRule>,
+          ),
+          BudgetRule,
+          PrefetchHooks Function()
+        > {
+  $$BudgetRulesTableTableManager(_$AppDatabase db, $BudgetRulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> originDeviceId = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<int> amountMinor = const Value.absent(),
+                Value<BudgetCadence> cadence = const Value.absent(),
+                Value<int> every = const Value.absent(),
+                Value<String?> periodType = const Value.absent(),
+                Value<DateTime> startDate = const Value.absent(),
+                Value<DateTime?> endDate = const Value.absent(),
+                Value<int?> count = const Value.absent(),
+                Value<DateTime?> generatedUntil = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetRulesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                originDeviceId: originDeviceId,
+                categoryId: categoryId,
+                amountMinor: amountMinor,
+                cadence: cadence,
+                every: every,
+                periodType: periodType,
+                startDate: startDate,
+                endDate: endDate,
+                count: count,
+                generatedUntil: generatedUntil,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required String updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String originDeviceId,
+                required String categoryId,
+                required int amountMinor,
+                Value<BudgetCadence> cadence = const Value.absent(),
+                Value<int> every = const Value.absent(),
+                Value<String?> periodType = const Value.absent(),
+                required DateTime startDate,
+                Value<DateTime?> endDate = const Value.absent(),
+                Value<int?> count = const Value.absent(),
+                Value<DateTime?> generatedUntil = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetRulesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                originDeviceId: originDeviceId,
+                categoryId: categoryId,
+                amountMinor: amountMinor,
+                cadence: cadence,
+                every: every,
+                periodType: periodType,
+                startDate: startDate,
+                endDate: endDate,
+                count: count,
+                generatedUntil: generatedUntil,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BudgetRulesTable, BudgetRule>(table),
+                  BaseReferences<_$AppDatabase, $BudgetRulesTable, BudgetRule>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BudgetRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetRulesTable,
+      BudgetRule,
+      $$BudgetRulesTableFilterComposer,
+      $$BudgetRulesTableOrderingComposer,
+      $$BudgetRulesTableAnnotationComposer,
+      $$BudgetRulesTableCreateCompanionBuilder,
+      $$BudgetRulesTableUpdateCompanionBuilder,
+      (
+        BudgetRule,
+        BaseReferences<_$AppDatabase, $BudgetRulesTable, BudgetRule>,
+      ),
+      BudgetRule,
       PrefetchHooks Function()
     >;
 typedef $$GoalsTableCreateCompanionBuilder = GoalsCompanion Function({
@@ -25023,6 +26400,8 @@ class $AppDatabaseManager {
       $$BudgetsTableTableManager(_db, _db.budgets);
   $$BudgetTemplatesTableTableManager get budgetTemplates =>
       $$BudgetTemplatesTableTableManager(_db, _db.budgetTemplates);
+  $$BudgetRulesTableTableManager get budgetRules =>
+      $$BudgetRulesTableTableManager(_db, _db.budgetRules);
   $$GoalsTableTableManager get goals =>
       $$GoalsTableTableManager(_db, _db.goals);
   $$ScenariosTableTableManager get scenarios =>

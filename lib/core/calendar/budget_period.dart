@@ -71,6 +71,17 @@ class BudgetPeriodConfig {
   /// When non-empty (salary-based start), each period starts on one of these
   /// dates (actual or expected salary arrivals), sorted ascending.
   final List<DateTime> salaryDates;
+
+  /// The same calendar settings with period [type] and no salary-based
+  /// start: the windows of a budget with its own length.
+  BudgetPeriodConfig withType(BudgetPeriodType type) => BudgetPeriodConfig(
+    type: type,
+    startDay: startDay,
+    shift: shift,
+    calendar: calendar,
+    firstDayOfWeek: firstDayOfWeek,
+    fiscalYearStartMonth: fiscalYearStartMonth,
+  );
 }
 
 /// Computes budget periods from a [BudgetPeriodConfig].

@@ -26,6 +26,7 @@ const syncedTableNames = <String>[
   'recurring_amount_changes',
   'budgets',
   'budget_templates',
+  'budget_rules',
   'goals',
   'scenarios',
   'saved_filters',
@@ -76,6 +77,7 @@ class NewerDatabaseException implements Exception {
     RecurringAmountChanges,
     Budgets,
     BudgetTemplates,
+    BudgetRules,
     Goals,
     Scenarios,
     SavedFilters,
@@ -96,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => currentSchemaVersion;
 
   /// Schema version this build creates and migrates to.
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +120,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         // v3: on-device safety copies.
         await m.createTable(safetyCopies);
+      }
+      if (from < 4) {
+        // v4: repeating budgets and budgets with their own length.
+        await m.createTable(budgetRules);
+        await m.addColumn(budgets, budgets.ruleId);
+        await m.addColumn(budgets, budgets.periodEnd);
       }
     },
     beforeOpen: (details) async {

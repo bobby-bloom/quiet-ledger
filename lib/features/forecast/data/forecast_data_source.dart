@@ -8,6 +8,7 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_dates.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_models.dart';
 
@@ -137,7 +138,7 @@ class ForecastDataSource {
         categoryNames: {for (final c in categories) c.id: c.name},
         monthlyNet: await _monthlyNet(day, netWorthIds),
       ),
-      budgets: await _budgets(day),
+      budgets: await _budgets(day, BudgetPeriods(periodConfig)),
       goals: await _goals(),
       primaryAccountId: primary,
       method: settings.get(ForecastSettings.variableMethod),
@@ -526,22 +527,59 @@ class ForecastDataSource {
     return v == null ? null : dayOf(v);
   }
 
-  Future<List<BudgetRow>> _budgets(DateTime today) async {
+  /// Budgets of the last two years per budget period. A budget with its own
+  /// length is spread evenly over the budget periods it covers
+  /// (`windowShare`), unless the category has a budget of that period.
+  Future<List<BudgetRow>> _budgets(
+    DateTime today,
+    BudgetPeriods periods,
+  ) async {
     final rows =
         await (db.select(db.budgets)..where(
               (b) =>
                   b.deletedAt.isNull() &
-                  b.periodStart.isBiggerOrEqualValue(
-                    DateTime(today.year - 2, today.month),
-                  ),
+                  (b.periodEnd.isNull() |
+                      b.periodEnd.isBiggerThanValue(
+                        DateTime(today.year - 2, today.month),
+                      )) &
+                  (b.periodEnd.isNotNull() |
+                      b.periodStart.isBiggerOrEqualValue(
+                        DateTime(today.year - 2, today.month),
+                      )),
             ))
             .get();
-    return [
+    final byPeriod = <(String, DateTime), int>{};
+    final shares = <(String, DateTime), int>{};
+    final windows = dropNestedWindows([
       for (final b in rows)
+        if (b.periodEnd != null) b,
+    ]);
+    for (final b in [
+      for (final b in rows)
+        if (b.periodEnd == null) b,
+      ...windows,
+    ]) {
+      final end = b.periodEnd;
+      if (end == null) {
+        byPeriod[(b.categoryId, dayOf(b.periodStart))] = b.amountMinor;
+        continue;
+      }
+      final window = DateRange(dayOf(b.periodStart), dayOf(end));
+      for (final p in windowTargets(periods, window)) {
+        final key = (b.categoryId, p.start);
+        shares[key] =
+            (shares[key] ?? 0) + windowShare(periods, window, b.amountMinor, p);
+      }
+    }
+    for (final e in shares.entries) {
+      byPeriod.putIfAbsent(e.key, () => e.value);
+    }
+    return [
+      for (final e in byPeriod.entries)
         BudgetRow(
-          categoryId: b.categoryId,
-          periodStart: dayOf(b.periodStart),
-          amountMinor: b.amountMinor,
+          categoryId: e.key.$1,
+          periodStart: e.key.$2,
+          amountMinor: e.value,
         ),
     ];
   }

@@ -8,6 +8,7 @@ import 'package:personal_finance/app/ui/app_icons.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
+import 'package:personal_finance/core/calendar/recurrence.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
@@ -16,9 +17,15 @@ import 'package:personal_finance/features/budgets/data/budget_period_provider.da
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
+import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 import 'package:personal_finance/features/budgets/presentation/budget_actions.dart';
+import 'package:personal_finance/features/plan/plan_providers.dart';
 import 'package:personal_finance/features/plan/presentation/money_text.dart';
 import 'package:personal_finance/features/plan/presentation/plan_widgets.dart';
+import 'package:personal_finance/features/recurring/data/recurring_repository.dart';
+import 'package:personal_finance/features/recurring/data/reminders.dart';
+import 'package:personal_finance/features/recurring/domain/recurring_logic.dart';
 
 /// Transactions and split lines of a category (with children) in a period.
 final categoryPeriodLinesProvider = StreamProvider.autoDispose
@@ -37,23 +44,33 @@ final categoryPeriodLinesProvider = StreamProvider.autoDispose
           .watchCategoryLines(ids, key.period);
     });
 
-/// Budget vs. spent of a category over the last periods (oldest first).
+/// Budget vs. spent of a category over the last periods (oldest first), or
+/// over the last windows of its budget with its own length when `window`
+/// is set.
 final categoryBudgetHistoryProvider = FutureProvider.autoDispose
     .family<
       List<({DateRange period, int? budgetMinor, int spentMinor})>,
-      ({String categoryId, DateRange period})
+      ({String categoryId, DateRange period, DateRange? window})
     >((ref, key) async {
-      final periods = ref.watch(budgetPeriodsProvider);
+      final board = ref.watch(budgetPeriodsProvider);
       final repo = ref.watch(budgetsRepositoryProvider);
       // Refresh with the shown period's data.
       ref.watch(periodActualsProvider(key.period));
       ref.watch(periodBudgetsProvider(key.period.start));
+      ref.watch(periodWindowRowsProvider(key.period));
       final cats = await ref.watch(categoriesProvider.future);
       final children = [
         for (final c in cats)
           if (c.parentId == key.categoryId) c.id,
       ];
-      final list = <DateRange>[key.period];
+      final window = key.window;
+      final periods = window == null
+          ? board
+          : windowPeriods(
+              board,
+              cadenceOfWindow(board, window) ?? BudgetCadence.month,
+            );
+      final list = <DateRange>[window ?? key.period];
       for (var i = 0; i < 5; i++) {
         list.insert(0, periods.previous(list.first));
       }
@@ -61,13 +78,45 @@ final categoryBudgetHistoryProvider = FutureProvider.autoDispose
         for (final p in list)
           (
             period: p,
-            budgetMinor: (await repo.period(p.start))
-                .where((b) => b.categoryId == key.categoryId)
-                .firstOrNull
-                ?.amountMinor,
+            budgetMinor: window == null
+                ? (await repo.period(p.start))
+                      .where((b) => b.categoryId == key.categoryId)
+                      .firstOrNull
+                      ?.amountMinor
+                : (await repo.windowBudget(key.categoryId, p))?.amountMinor,
             spentMinor: (await repo.actuals(p))
                 .spentOf(key.categoryId, children),
           ),
+      ];
+    });
+
+/// The windows of a category's budget with its own length that overlap a
+/// period (all weeks of a month, say), with budget and spending each.
+final categoryWindowsProvider = FutureProvider.autoDispose
+    .family<
+      List<({DateRange window, int budgetMinor, int spentMinor})>,
+      ({String categoryId, DateRange period})
+    >((ref, key) async {
+      final repo = ref.watch(budgetsRepositoryProvider);
+      ref.watch(periodActualsProvider(key.period));
+      final rowsF = ref.watch(periodWindowRowsProvider(key.period).future);
+      final catsF = ref.watch(categoriesProvider.future);
+      final rows = await rowsF;
+      final cats = await catsF;
+      final children = [
+        for (final c in cats)
+          if (c.parentId == key.categoryId) c.id,
+      ];
+      return [
+        for (final b in rows)
+          if (b.categoryId == key.categoryId)
+            (
+              window: DateRange(b.periodStart, b.periodEnd!),
+              budgetMinor: b.amountMinor,
+              spentMinor: (await repo.actuals(
+                DateRange(b.periodStart, b.periodEnd!),
+              )).spentOf(key.categoryId, children),
+            ),
       ];
     });
 
@@ -149,6 +198,7 @@ class BudgetDetailView extends ConsumerWidget {
     }
     final board = ref.watch(budgetBoardProvider(period)).value;
     final actuals = ref.watch(periodActualsProvider(period)).value;
+    final planned = ref.watch(periodPlannedProvider(period)).value;
     final settings = ref.watch(settingsProvider);
     final children = [
       for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
@@ -165,12 +215,23 @@ class BudgetDetailView extends ConsumerWidget {
           budgetedMinor: 0,
           rolloverMinor: 0,
           spentMinor: actuals?.spentOf(categoryId, children) ?? 0,
+          plannedMinor: planned?.spentOf(categoryId, children) ?? 0,
           thresholdPercent: warnThresholdFor(cat, settings),
           rolloverMode: rolloverModeFor(cat, settings),
         );
     final hasBudget = line.budgetId != null;
+    // A budget with its own length lists what is outstanding in its window.
+    final windowPlanned = line.window == null
+        ? planned
+        : ref.watch(periodPlannedProvider(line.window!)).value;
+    final outstanding =
+        windowPlanned?.itemsFor({categoryId, ...children}) ??
+        const <OutstandingItem>[];
     final lines = ref.watch(
-      categoryPeriodLinesProvider((categoryId: categoryId, period: period)),
+      categoryPeriodLinesProvider((
+        categoryId: categoryId,
+        period: line.window ?? period,
+      )),
     );
 
     return ListView(
@@ -205,14 +266,42 @@ class BudgetDetailView extends ConsumerWidget {
         _ProgressCard(
           line: line,
           hasBudget: hasBudget,
-          tick: board?.todayTick,
-          onEdit: () => hasBudget
-              ? editBudgetAmount(context, ref, period, line)
-              : _setBudget(context, ref, cat),
+          tick: board?.tickFor(line),
+          onEdit: () =>
+              editCategoryBudget(context, ref, period, cat.id, name: cat.name),
         ),
-        _OptionsCard(category: cat, line: line),
-        _HistoryCard(categoryId: categoryId, period: period),
-        PlanSectionHeader(l.budgetsTransactionsInPeriod),
+        _OptionsCard(category: cat, line: line, period: period),
+        if (line.windowed) _WindowsCard(categoryId: categoryId, period: period),
+        _HistoryCard(
+          categoryId: categoryId,
+          period: period,
+          window: line.window,
+        ),
+        if (outstanding.isNotEmpty) ...[
+          PlanSectionHeader(l.budgetsOutstanding),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Space.listInset,
+              0,
+              Space.listInset,
+              Space.xxs,
+            ),
+            child: Text(
+              l.budgetsOutstandingHint,
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          for (final i in outstanding) _OutstandingRow(item: i),
+        ],
+        PlanSectionHeader(
+          line.window == null
+              ? l.budgetsTransactionsInPeriod
+              : l.budgetsTransactionsIn(
+                  periodTitle(line.window!, ref.watch(formatLocaleProvider)),
+                ),
+        ),
         AsyncView(
           value: lines,
           data: (list) => list.isEmpty
@@ -230,18 +319,6 @@ class BudgetDetailView extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _setBudget(
-    BuildContext context,
-    WidgetRef ref,
-    Category cat,
-  ) async {
-    final r = await showBudgetAmountDialog(context, title: cat.name);
-    if (r == null) return;
-    await ref
-        .read(budgetsRepositoryProvider)
-        .setAmount(cat.id, period.start, r.amount);
   }
 }
 
@@ -262,6 +339,10 @@ class _ProgressCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final money = moneyText(ref);
+    final window = line.window;
+    final windowTitle = window == null
+        ? null
+        : periodTitle(window, ref.watch(formatLocaleProvider));
     final state = line.state;
     final stateLabel = switch (state) {
       BudgetState.over => l.budgetsOverBudget(money(line.overMinor)),
@@ -284,6 +365,34 @@ class _ProgressCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (windowTitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Space.xxs),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.date_range_outlined,
+                        size: 16,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          l.budgetsWindowLabel(
+                            lengthAdjective(
+                              l,
+                              line.cadence ?? BudgetCadence.month,
+                            ),
+                            windowTitle,
+                          ),
+                          style: context.text.labelLarge?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -314,6 +423,9 @@ class _ProgressCard extends ConsumerWidget {
                   value: state == BudgetState.over ? 1 : line.ratio,
                   state: progressStateOf(state),
                   tick: tick,
+                  pending: line.plannedMinor > 0 && state != BudgetState.over
+                      ? line.projectedRatio - line.ratio
+                      : 0,
                 ),
                 const SizedBox(height: Space.xs),
                 Text(
@@ -326,9 +438,26 @@ class _ProgressCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: Space.sm),
+                if (line.plannedMinor > 0)
+                  Text(
+                    line.plannedPushesOver
+                        ? l.budgetsPlannedOver(money(line.projectedOverMinor))
+                        : l.budgetsPlannedAmount(money(line.plannedMinor)),
+                    style: context.text.bodyMedium?.copyWith(
+                      color: line.plannedPushesOver
+                          ? context.finance.warning
+                          : context.colors.onSurfaceVariant,
+                      fontWeight: line.plannedPushesOver
+                          ? FontWeight.w700
+                          : null,
+                    ),
+                  ),
+                const SizedBox(height: Space.sm),
                 _kv(
                   context,
-                  l.budgetsBudgetedThisPeriod,
+                  windowTitle == null
+                      ? l.budgetsBudgetedThisPeriod
+                      : l.budgetsBudgetedFor(windowTitle),
                   money(line.budgetedMinor),
                 ),
                 if (line.rolloverMinor != 0)
@@ -383,10 +512,15 @@ class _ProgressCard extends ConsumerWidget {
 }
 
 class _OptionsCard extends ConsumerWidget {
-  const _OptionsCard({required this.category, required this.line});
+  const _OptionsCard({
+    required this.category,
+    required this.line,
+    required this.period,
+  });
 
   final Category category;
   final BudgetLine line;
+  final DateRange period;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -396,11 +530,47 @@ class _OptionsCard extends ConsumerWidget {
     final override = parseRolloverMode(category.rolloverOverride);
     final globalThreshold = settings.get(BudgetSettings.warnThreshold);
     final repo = ref.read(budgetsRepositoryProvider);
+    final rule = line.rule;
+    final periods = ref.watch(budgetPeriodsProvider);
+    final locale = ref.watch(formatLocaleProvider);
+    final dates = ref.watch(dateFormatsProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
       child: Card(
         child: Column(
           children: [
+            if (rule != null)
+              ListTile(
+                leading: const Icon(Icons.repeat),
+                title: Text(l.budgetsRepeatOption),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      repeatSummary(
+                        l,
+                        rule.repeatOn(periods),
+                        periodTitle(
+                          windowPeriods(
+                            periods,
+                            rule.lengthOn(periods),
+                          ).periodOf(rule.start),
+                          locale,
+                        ),
+                        dates.short,
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.centerLeft,
+                      ),
+                      onPressed: () => _stopRepeating(context, ref, periods),
+                      child: Text(l.budgetsStopRepeating),
+                    ),
+                  ],
+                ),
+              ),
             ListTile(
               leading: const Icon(Icons.redo),
               title: Text(l.budgetsRolloverOption),
@@ -454,6 +624,31 @@ class _OptionsCard extends ConsumerWidget {
     );
   }
 
+  Future<void> _stopRepeating(
+    BuildContext context,
+    WidgetRef ref,
+    BudgetPeriods periods,
+  ) async {
+    final l = context.l10n;
+    final ok = await confirmDialog(
+      context,
+      title: l.budgetsStopRepeatingTitle(category.name),
+      message: l.budgetsStopRepeatingMessage(category.name),
+      confirmLabel: l.budgetsStopRepeating,
+    );
+    if (!ok) return;
+    await ref
+        .read(budgetsRepositoryProvider)
+        .stopRepeating(
+          category.id,
+          line.window?.end ?? periods.next(period).start,
+        );
+    if (!context.mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(l.budgetsStoppedRepeating(category.name))),
+    );
+  }
+
   /// Returns the new percent, -1 to reset, or null when cancelled.
   Future<int?> _askThreshold(
     BuildContext context,
@@ -503,10 +698,15 @@ class _OptionsCard extends ConsumerWidget {
 }
 
 class _HistoryCard extends ConsumerWidget {
-  const _HistoryCard({required this.categoryId, required this.period});
+  const _HistoryCard({
+    required this.categoryId,
+    required this.period,
+    this.window,
+  });
 
   final String categoryId;
   final DateRange period;
+  final DateRange? window;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -518,6 +718,7 @@ class _HistoryCard extends ConsumerWidget {
           categoryBudgetHistoryProvider((
             categoryId: categoryId,
             period: period,
+            window: window,
           )),
         )
         .value;
@@ -545,15 +746,17 @@ class _HistoryCard extends ConsumerWidget {
                   excludeSemantics: true,
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 110,
+                      Expanded(
+                        flex: 3,
                         child: Text(
                           periodTitle(h.period, locale),
                           style: context.text.bodySmall,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       Expanded(
+                        flex: 2,
                         child: ProgressBar(
                           value: h.spentMinor <= 0 ? 0 : h.spentMinor / max,
                           state:
@@ -597,6 +800,89 @@ class _HistoryCard extends ConsumerWidget {
   }
 }
 
+/// The windows of a budget with its own length within the shown period
+/// (for a weekly budget: every week of the month).
+class _WindowsCard extends ConsumerWidget {
+  const _WindowsCard({required this.categoryId, required this.period});
+
+  final String categoryId;
+  final DateRange period;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final money = moneyText(ref);
+    final locale = ref.watch(formatLocaleProvider);
+    final today = ref.watch(planTodayProvider);
+    final list = ref
+        .watch(
+          categoryWindowsProvider((categoryId: categoryId, period: period)),
+        )
+        .value;
+    if (list == null || list.length < 2) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      child: SectionCard(
+        title: l.budgetsWindowsInPeriod,
+        child: Column(
+          children: [
+            for (final w in list)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Semantics(
+                  label: l.budgetsHistoryRow(
+                    periodTitle(w.window, locale),
+                    money(w.spentMinor),
+                    money(w.budgetMinor),
+                  ),
+                  excludeSemantics: true,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          periodTitle(w.window, locale),
+                          style: context.text.bodySmall,
+                          maxLines: 2,
+                        ),
+                      ),
+                      const SizedBox(width: Space.xs),
+                      Expanded(
+                        flex: 2,
+                        child: ProgressBar(
+                          value: w.budgetMinor <= 0
+                              ? (w.spentMinor > 0 ? 1 : 0)
+                              : w.spentMinor / w.budgetMinor,
+                          state: w.spentMinor > w.budgetMinor
+                              ? ProgressState.over
+                              : ProgressState.onTrack,
+                          tick: w.window.contains(today)
+                              ? w.window.progressAt(today)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: Space.xs),
+                      SizedBox(
+                        width: 120,
+                        child: Text(
+                          '${money(w.spentMinor)} / ${money(w.budgetMinor)}',
+                          textAlign: TextAlign.end,
+                          style: context.text.bodySmall?.copyWith(
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TxnRow extends ConsumerWidget {
   const _TxnRow({required this.line});
 
@@ -625,5 +911,144 @@ class _TxnRow extends ConsumerWidget {
       trailing: AmountText(line.amountMinor),
       onTap: () => context.push('/transactions/${line.transactionId}'),
     );
+  }
+}
+
+/// A planned entry or unposted recurring occurrence of the category. Planned
+/// entries open the transaction; recurring ones open the rule and, for the
+/// rule's next remind & confirm occurrence, offer confirm and skip.
+class _OutstandingRow extends ConsumerWidget {
+  const _OutstandingRow({required this.item});
+
+  final OutstandingItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final accounts = ref.watch(accountMapProvider);
+    final cats = ref.watch(categoryMapProvider);
+    final dates = ref.watch(dateFormatsProvider);
+    final today = ref.watch(planTodayProvider);
+    final calendar = ref.watch(holidayCalendarProvider);
+    final plan = item.plan;
+    final occurrence = item.occurrence;
+    final recurring = item.source == OutstandingSource.recurring;
+    final badge = item.overdue
+        ? l.budgetsOverdue
+        : !recurring
+        ? l.statusPlanned
+        : item.date == today
+        ? l.budgetsDue
+        : l.budgetsUpcoming;
+    final title = (item.title?.isNotEmpty ?? false)
+        ? item.title!
+        : (cats[item.categoryId]?.name ?? '');
+    final sub = [
+      dates.short(item.date),
+      accounts[item.accountId]?.name ?? '',
+      if (item.isSplit) l.budgetsSplitLine,
+    ].where((s) => s.isNotEmpty).join(' · ');
+    final canAct =
+        recurring &&
+        plan != null &&
+        occurrence != null &&
+        plan.mode == PostingMode.remindConfirm &&
+        plan.nextPending(calendar) == occurrence;
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: Space.listInset,
+          ),
+          leading: Icon(
+            recurring ? Icons.repeat : Icons.schedule,
+            color: colors.onSurfaceVariant,
+          ),
+          title: Row(
+            children: [
+              Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+              const SizedBox(width: Space.xs),
+              StatusBadge(
+                badge,
+                background: item.overdue
+                    ? context.finance.warningContainer
+                    : null,
+                foreground: item.overdue
+                    ? context.finance.onWarningContainer
+                    : null,
+              ),
+            ],
+          ),
+          subtitle: Text(sub, overflow: TextOverflow.ellipsis),
+          trailing: AmountText(item.amountMinor, type: item.type),
+          onTap: recurring
+              ? (plan == null
+                    ? null
+                    : () => context.push('/plan/recurring/${plan.id}'))
+              : () => context.push('/transactions/${item.transactionId}'),
+        ),
+        if (canAct)
+          Padding(
+            padding: const EdgeInsets.only(right: Space.listInset),
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => _skip(context, ref, plan, occurrence),
+                  child: Text(l.recurringSkip),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => _confirm(context, ref, plan, occurrence),
+                  child: Text(l.commonConfirm),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _confirm(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringPlan plan,
+    Occurrence o,
+  ) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    try {
+      await ref.read(recurringRepositoryProvider).confirm(plan, o);
+      await rescheduleRuleReminders(ref.read, plan.id);
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.recurringConfirmed(plan.name))),
+      );
+    } on Object catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.commonError(e.toString()))),
+      );
+    }
+  }
+
+  Future<void> _skip(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringPlan plan,
+    Occurrence o,
+  ) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    try {
+      await ref.read(recurringRepositoryProvider).skip(plan, o);
+      await rescheduleRuleReminders(ref.read, plan.id);
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.recurringSkipped(plan.name))),
+      );
+    } on Object catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.commonError(e.toString()))),
+      );
+    }
   }
 }

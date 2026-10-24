@@ -1873,6 +1873,330 @@ abstract class AppLocalizations {
   /// **'Balance {balance} is below {threshold}.'**
   String budgetsAlertLowBalanceBody(String balance, String threshold);
 
+  /// No description provided for @budgetsPlannedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} planned'**
+  String budgetsPlannedAmount(String amount);
+
+  /// No description provided for @budgetsPlannedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned: {amount} over'**
+  String budgetsPlannedOver(String amount);
+
+  /// No description provided for @budgetsAfterPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'After planned: {amount} left'**
+  String budgetsAfterPlanned(String amount);
+
+  /// No description provided for @budgetsAfterPlannedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'After planned: {amount} over'**
+  String budgetsAfterPlannedOver(String amount);
+
+  /// No description provided for @budgetsOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get budgetsOutstanding;
+
+  /// No description provided for @budgetsOutstandingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not spent yet. Counts once it is booked.'**
+  String get budgetsOutstandingHint;
+
+  /// No description provided for @budgetsUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get budgetsUpcoming;
+
+  /// No description provided for @budgetsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get budgetsDue;
+
+  /// No description provided for @budgetsOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get budgetsOverdue;
+
+  /// No description provided for @budgetsExpectedIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} expected income, not included until it arrives'**
+  String budgetsExpectedIncome(String amount);
+
+  /// No description provided for @budgetsRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get budgetsRepeat;
+
+  /// No description provided for @budgetsRepeatOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'This period only'**
+  String get budgetsRepeatOnce;
+
+  /// No description provided for @budgetsRepeatEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every period'**
+  String get budgetsRepeatEvery;
+
+  /// No description provided for @budgetsRepeatCount.
+  ///
+  /// In en, this message translates to:
+  /// **'For a number of periods'**
+  String get budgetsRepeatCount;
+
+  /// No description provided for @budgetsRepeatUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until a date'**
+  String get budgetsRepeatUntil;
+
+  /// No description provided for @budgetsRepeatPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'How many times'**
+  String get budgetsRepeatPeriods;
+
+  /// No description provided for @budgetsRepeatInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get budgetsRepeatInterval;
+
+  /// No description provided for @budgetsRepeatNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 or more'**
+  String get budgetsRepeatNumberInvalid;
+
+  /// No description provided for @budgetsRepeatUntilDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String budgetsRepeatUntilDate(String date);
+
+  /// No description provided for @budgetsEveryN.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every period} other{every {every} periods}}'**
+  String budgetsEveryN(int every);
+
+  /// No description provided for @budgetsRepeatsEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats {every} from {period}'**
+  String budgetsRepeatsEvery(String every, String period);
+
+  /// No description provided for @budgetsRepeatsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Only in {period}} other{Repeats {every} from {period}, {count} times}}'**
+  String budgetsRepeatsCount(int count, String every, String period);
+
+  /// No description provided for @budgetsRepeatsUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats {every} from {period} until {date}'**
+  String budgetsRepeatsUntil(String every, String period, String date);
+
+  /// No description provided for @budgetsScopeChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change a repeating budget'**
+  String get budgetsScopeChangeTitle;
+
+  /// No description provided for @budgetsScopeRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove a repeating budget'**
+  String get budgetsScopeRemoveTitle;
+
+  /// No description provided for @budgetsScopeThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this period'**
+  String get budgetsScopeThis;
+
+  /// No description provided for @budgetsScopeFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'This and following periods'**
+  String get budgetsScopeFollowing;
+
+  /// No description provided for @budgetsScopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets you set by hand in later periods stay as they are.'**
+  String get budgetsScopeHint;
+
+  /// No description provided for @budgetsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget for {category} removed'**
+  String budgetsRemoved(String category);
+
+  /// No description provided for @budgetsRepeatOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get budgetsRepeatOption;
+
+  /// No description provided for @budgetsStopRepeating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop repeating'**
+  String get budgetsStopRepeating;
+
+  /// No description provided for @budgetsStopRepeatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop repeating {category}?'**
+  String budgetsStopRepeatingTitle(String category);
+
+  /// No description provided for @budgetsStopRepeatingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The budget of this period stays. Later periods get no budget for {category}, except budgets you set by hand.'**
+  String budgetsStopRepeatingMessage(String category);
+
+  /// No description provided for @budgetsStoppedRepeating.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} no longer repeats'**
+  String budgetsStoppedRepeating(String category);
+
+  /// No description provided for @budgetsRepeatAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat these budgets every period'**
+  String get budgetsRepeatAll;
+
+  /// No description provided for @budgetsRepeatAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget now repeats every period} other{{count} budgets now repeat every period}}'**
+  String budgetsRepeatAllDone(int count);
+
+  /// No description provided for @budgetsLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get budgetsLength;
+
+  /// No description provided for @budgetsLengthPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget period ({type})'**
+  String budgetsLengthPeriod(String type);
+
+  /// No description provided for @budgetsLengthWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'One week'**
+  String get budgetsLengthWeek;
+
+  /// No description provided for @budgetsLengthMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'One month'**
+  String get budgetsLengthMonth;
+
+  /// No description provided for @budgetsLengthQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'One quarter'**
+  String get budgetsLengthQuarter;
+
+  /// No description provided for @budgetsLengthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'One year'**
+  String get budgetsLengthYear;
+
+  /// No description provided for @budgetsEveryWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every week} other{every {every} weeks}}'**
+  String budgetsEveryWeek(int every);
+
+  /// No description provided for @budgetsEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every month} other{every {every} months}}'**
+  String budgetsEveryMonth(int every);
+
+  /// No description provided for @budgetsEveryQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every quarter} other{every {every} quarters}}'**
+  String budgetsEveryQuarter(int every);
+
+  /// No description provided for @budgetsEveryYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every year} other{every {every} years}}'**
+  String budgetsEveryYear(int every);
+
+  /// No description provided for @budgetsOnlyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {period}'**
+  String budgetsOnlyIn(String period);
+
+  /// No description provided for @budgetsWindowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{length} · {period}'**
+  String budgetsWindowLabel(String length, String period);
+
+  /// No description provided for @budgetsWindowsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals don\'t include budgets with their own length.'**
+  String get budgetsWindowsNote;
+
+  /// No description provided for @budgetsWindowsInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Within this period'**
+  String get budgetsWindowsInPeriod;
+
+  /// No description provided for @budgetsRemovedFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} removed from this period on'**
+  String budgetsRemovedFollowing(String category);
+
+  /// No description provided for @budgetsBudgetedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted for {period}'**
+  String budgetsBudgetedFor(String period);
+
+  /// No description provided for @budgetsTransactionsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions in {period}'**
+  String budgetsTransactionsIn(String period);
+
+  /// No description provided for @budgetsRepeatsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'repeats'**
+  String get budgetsRepeatsShort;
+
   /// No description provided for @categoriesTitle.
   ///
   /// In en, this message translates to:
@@ -2140,7 +2464,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoriesMergeConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted.'**
+  /// **'Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted. Budgets of the same period are added up. Repeating budgets of \"{target}\" stay; those of \"{source}\" take over when they end.'**
   String categoriesMergeConfirm(String source, String target);
 
   /// No description provided for @categoriesMerged.
@@ -9545,6 +9869,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The period starts when the chosen income arrives'**
   String get setSalaryBasedDesc;
+
+  /// No description provided for @setShowOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Show planned and upcoming'**
+  String get setShowOutstanding;
+
+  /// No description provided for @setShowOutstandingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned entries and recurring items not booked yet appear in budgets, marked as outstanding'**
+  String get setShowOutstandingDesc;
 
   /// No description provided for @setSalaryRule.
   ///

@@ -772,6 +772,18 @@ abstract final class BudgetSettings {
     module: AppModule.budgets.name,
   );
 
+  /// Show planned entries and unposted recurring occurrences in budgets
+  /// (marked as outstanding, never counted as spent).
+  static final showOutstanding = SettingDef.boolean(
+    key: 'budgets.showOutstanding',
+    section: SettingSection.budgets,
+    defaultValue: true,
+    label: (l) => l.setShowOutstanding,
+    description: (l) => l.setShowOutstandingDesc,
+    keywords: const ['planned', 'geplant', 'upcoming', 'offen'],
+    module: AppModule.budgets.name,
+  );
+
   static final all = <SettingDef<Object?>>[
     periodType,
     startDay,
@@ -783,6 +795,7 @@ abstract final class BudgetSettings {
     mode,
     defaultRollover,
     warnThreshold,
+    showOutstanding,
   ];
 }
 

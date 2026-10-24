@@ -9,6 +9,7 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/budgets/data/budget_period_provider.dart';
 import 'package:personal_finance/features/categories/data/categories_repository.dart';
 import 'package:personal_finance/features/categories/domain/drafts.dart';
 import 'package:personal_finance/features/categories/presentation/appearance_pickers.dart';
@@ -395,7 +396,13 @@ Future<void> mergeCategoryFlow(
     await withSafetyCopy(
       ref.read,
       SafetyReason.merge,
-      () => ref.read(categoriesRepositoryProvider).merge(source.id, target.id),
+      () => ref
+          .read(categoriesRepositoryProvider)
+          .merge(
+            source.id,
+            target.id,
+            periods: ref.read(budgetPeriodsProvider),
+          ),
     );
     if (context.mounted) {
       showSnack(context, l.categoriesMerged(source.name, target.name));

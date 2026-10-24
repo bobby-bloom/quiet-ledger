@@ -100,6 +100,9 @@ Non-goals for v1: actual sync, bank connections (PSD2/FinTS), multi-currency, mu
     - *envelope / zero-based*: every euro of income gets assigned to a category
   - **warning thresholds**: 80 % by default, configurable globally and per category
   - filling a period by copying the previous one, starting from the N-period average, or using a template
+  - **outstanding** amounts: planned entries and recurring items not posted yet are shown in each budget, marked as not spent (`docs/BUDGETS.md`)
+  - **repeating budgets**: set a budget once for this period only, every (n-th) period, a number of periods or until a date; changes apply to this period only or to this and the following periods
+  - **budgets with their own length**: a week, month, quarter or year next to the budget period (e.g. a yearly holiday budget on a monthly board); spread evenly over the budget periods for "left to assign" and the forecast
 - **Recurring rules**:
   - Recurrence is stored as an iCal RRULE (any frequency, "last business day", "every 3 months on the 15th").
   - Each rule has start/end dates or a number of occurrences, a template transaction (including splits/tags), and *auto-post* or *remind & confirm*.
@@ -311,7 +314,8 @@ TransactionTemplate  name, fields(JSON)
 RecurringRule    name, rrule, startDate, endDate?, count?, template(JSON), postingMode,
                  remindDaysBefore, notifyTime, lastPostedDate
 RecurringAmountChange  ruleId, fromDate, amountMinor
-Budget           categoryId, periodStart, amountMinor, rollover
+Budget           categoryId, periodStart, periodEnd?, amountMinor, rollover, ruleId?
+BudgetRule       categoryId, amountMinor, cadence, every, startDate, endDate?, count?, generatedUntil?
 BudgetTemplate   name, items(JSON)
 Goal             name, targetMinor, targetDate?, accountId?, contributionMinor?, priority
 Scenario         name, color, adjustments(JSON → freezed union)

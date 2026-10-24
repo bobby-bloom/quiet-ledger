@@ -78,7 +78,7 @@
   "categoriesAddDefaults": "Add default categories",
   "categoriesMergeAction": "Merge",
   "categoriesMergeTitle": "Merge?",
-  "categoriesMergeConfirm": "Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted.",
+  "categoriesMergeConfirm": "Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted. Budgets of the same period are added up. Repeating budgets of \"{target}\" stay; those of \"{source}\" take over when they end.",
   "@categoriesMergeConfirm": {
     "placeholders": {
       "source": {

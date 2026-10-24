@@ -78,10 +78,11 @@ Future<void> planAlertsTask(ProviderContainer c) async {
       final sub = c.listen(budgetSummaryProvider, (_, _) {});
       try {
         final summary = await c.read(budgetSummaryProvider.future);
-        final start = summary.period.start;
-        final periodKey = '${start.year}-${start.month}-${start.day}';
         for (final line in summary.lines) {
           if (line.state == BudgetState.onTrack) continue;
+          // A budget with its own length alerts once per window.
+          final start = line.window?.start ?? summary.period.start;
+          final periodKey = '${start.year}-${start.month}-${start.day}';
           final key = 'b|$periodKey|${line.categoryId}|${line.state.name}';
           next.add(key);
           if (done.contains(key)) continue;

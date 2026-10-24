@@ -505,6 +505,10 @@ class ImportRepository {
           await _used(
             'SELECT 1 FROM budgets WHERE category_id = ? AND deleted_at IS NULL LIMIT 1',
             id,
+          ) ||
+          await _used(
+            'SELECT 1 FROM budget_rules WHERE category_id = ? AND deleted_at IS NULL LIMIT 1',
+            id,
           );
       if (!used) await writer.delete(db.categories, id);
     }
