@@ -155,8 +155,6 @@ String formatRecoveryKey(Uint8List key) {
   ].join('-');
 }
 
-/// Parses a typed recovery key; tolerant of case, spaces, dashes and the
-/// look-alikes 0/O, 1/I, 8/B. Null when it is not 20 bytes.
 /// Typed recovery key text as base32: upper case, without spaces and
 /// dashes, and with the look-alikes 0 → O, 1 → I, 8 → B (none of them is
 /// in the alphabet). Used for unlocking and for the confirmation step.
@@ -167,6 +165,9 @@ String normalizeRecoveryKey(String input) => input
     .replaceAll('1', 'I')
     .replaceAll('8', 'B');
 
+/// Parses a typed recovery key; tolerant of case, spaces, dashes and the
+/// look-alikes 0/O, 1/I, 8/B ([normalizeRecoveryKey]). Null when it is not
+/// 20 bytes.
 Uint8List? parseRecoveryKey(String input) {
   final s = normalizeRecoveryKey(input);
   if (s.length != 32) return null;
@@ -490,36 +491,32 @@ Future<Uint8List> decryptBackup(Uint8List bytes, BackupUnlock unlock) async {
 }
 
 Future<Uint8List> _decrypt(Uint8List bytes, BackupUnlock unlock) async {
+  // Validates the header, including that the payload has room for the tag.
   final h = readEncryptedHeader(bytes);
-  final pwSlot = h.passwordSlot;
-  final recSlot = h.recoverySlot;
 
   Uint8List? dataKey;
   for (final k in unlock.known) {
     if (dataKey != null) break;
     if (sameKey(k.salt, h.salt) && k.iterations == h.iterations) {
-      dataKey = await _unwrap(k.passwordKek, pwSlot, 'password');
+      dataKey = await _unwrap(k.passwordKek, h.passwordSlot, 'password');
     }
     if (dataKey == null && sameKey(k.recoverySalt, h.recoverySalt)) {
-      dataKey = await _unwrap(k.recoveryKek, recSlot, 'recovery');
+      dataKey = await _unwrap(k.recoveryKek, h.recoverySlot, 'recovery');
     }
   }
   if (dataKey == null && unlock.password != null) {
     final kek = await derivePasswordKek(unlock.password!, h.salt, h.iterations);
-    dataKey = await _unwrap(kek, pwSlot, 'password');
+    dataKey = await _unwrap(kek, h.passwordSlot, 'password');
   }
   if (dataKey == null && unlock.recoveryKey != null) {
     final kek = await deriveRecoveryKek(unlock.recoveryKey!, h.recoverySalt);
-    dataKey = await _unwrap(kek, recSlot, 'recovery');
+    dataKey = await _unwrap(kek, h.recoverySlot, 'recovery');
   }
   if (dataKey == null) {
     throw const BackupCryptoException(BackupCryptoError.wrongKey);
   }
 
   final macLength = _aes.macAlgorithm.macLength;
-  if (bytes.length < h.payloadOffset + macLength) {
-    throw const BackupCryptoException(BackupCryptoError.damaged);
-  }
   try {
     final clear = await _aes.decrypt(
       SecretBox(

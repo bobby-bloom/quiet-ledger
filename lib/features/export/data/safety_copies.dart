@@ -70,9 +70,11 @@ Future<String> takeSafetyCopy(
                 ])
                 ..limit(1))
               .getSingleOrNull();
-      if (newest != null &&
-          _sameTables(readBundle(db, newest.data).manifest, manifest)) {
-        return newest.id;
+      // Only the stored manifest is read: an old copy that no longer
+      // parses (damaged, older schema) simply counts as different.
+      final previous = newest == null ? null : readBundleManifest(newest.data);
+      if (previous != null && _sameTables(previous, manifest)) {
+        return newest!.id;
       }
     }
     final rows = manifest.totalRows;

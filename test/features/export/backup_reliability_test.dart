@@ -395,6 +395,13 @@ void main() {
       expect(after, hasLength(maxSafetyCopies + 1));
     });
 
+    test('a damaged newest copy does not block new copies', () async {
+      final first = await takeSafetyCopy(db, SafetyReason.merge, deviceId: 'd');
+      await db.customStatement("UPDATE safety_copies SET data = x'00'");
+      final next = await takeSafetyCopy(db, SafetyReason.merge, deviceId: 'd');
+      expect(next, isNot(first));
+    });
+
     test(
       'a restore always gets its own copy, even of unchanged data',
       () async {

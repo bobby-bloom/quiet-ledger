@@ -189,6 +189,21 @@ Future<Uint8List> withReceiptFiles(
   return ZipEncoder().encodeBytes(archive);
 }
 
+/// Only the manifest of bundle [bytes], without checking or parsing the
+/// tables; null when it cannot be read. For comparing bundles cheaply.
+BundleManifest? readBundleManifest(Uint8List bytes) {
+  try {
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final file = archive.files
+        .where((f) => f.isFile && f.name == bundleManifestFile)
+        .first;
+    final json = jsonDecode(utf8.decode(file.content));
+    return BundleManifest.fromJson((json as Map).cast<String, Object?>());
+  } on Object {
+    return null;
+  }
+}
+
 /// Reads and fully validates a bundle against [db]'s schema: manifest,
 /// versions, checksums, row counts, columns and every value. Throws
 /// [BundleException]; never touches the data.
