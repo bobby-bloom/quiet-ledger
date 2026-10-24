@@ -19,7 +19,8 @@ a dated release section.
   encryption is on; the app asks for the password once a month.
 - Safety copies, taken automatically before restoring, resetting, undoing
   an import, merging categories or tags and purging old deleted entries.
-  They can be restored from Export & backup › Safety copies.
+  They can be restored from Export & backup › Safety copies. The copy from
+  before the last restore or reset is always kept.
 - A copy of the database file before every schema migration.
 - Scheduled backups to folders picked on Android (Storage Access
   Framework), iOS and macOS (security-scoped bookmarks), including cloud
@@ -30,13 +31,16 @@ a dated release section.
 - List of the backups in the backup folder with restore and "Check a
   backup".
 - The restore summary shows how many newer changes it would replace.
-- If the database cannot be opened, the app explains why and can start
-  empty while keeping the old file.
+- If the database cannot be opened, the app explains why. When the file
+  itself is unreadable, it can start empty while keeping the old file.
 
 ### Changed
 
 - Scheduled backups are read back and verified before old ones are
-  pruned, retried after a failure and checked while the app stays open.
+  pruned, retried after a failure (after 1, 4 and 12 hours, then daily)
+  and checked while the app stays open.
+- Settings that describe this device (backup folder, schedule and status,
+  storage location) are kept by a restore and never synced.
 - Receipt paths are stored relative to the app's folder.
 - Android Auto Backup and device transfer are off, because a restored
   database could not be opened without its key.

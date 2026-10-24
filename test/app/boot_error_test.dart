@@ -81,9 +81,7 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
   });
 
-  testWidgets('a file that is not a database can start fresh', (
-    tester,
-  ) async {
+  testWidgets('a file that is not a database can start fresh', (tester) async {
     await pumpError(
       tester,
       SqliteException(
@@ -91,7 +89,10 @@ void main() {
         message: 'file is not a database',
       ),
     );
-    expect(find.textContaining('damaged or cannot be unlocked'), findsOneWidget);
+    expect(
+      find.textContaining('damaged or cannot be unlocked'),
+      findsOneWidget,
+    );
     expect(find.text('Start with an empty database'), findsOneWidget);
   });
 
