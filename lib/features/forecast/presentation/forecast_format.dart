@@ -54,5 +54,6 @@ Color scenarioColor(BuildContext context, int index, {int? argb}) {
   };
 }
 
-/// Colour of the line with all compared scenarios combined (chart4).
-Color combinedScenarioColor(BuildContext context) => context.finance.chartAt(3);
+/// Colour of the line with all compared scenarios combined (chart5; chart4
+/// is too close to tertiary).
+Color combinedScenarioColor(BuildContext context) => context.finance.chartAt(4);
