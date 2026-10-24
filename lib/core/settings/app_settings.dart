@@ -396,15 +396,7 @@ abstract final class DashboardSettings {
     label: (l) => l.setUpcomingDays,
   );
 
-  static final editLayout = SettingDef.string(
-    key: 'dashboard.editLayout',
-    section: SettingSection.dashboard,
-    defaultValue: '',
-    label: (l) => l.setDashboardWidgets,
-    editor: const CustomEditor('/home/edit'),
-  );
-
-  static final all = <SettingDef<Object?>>[period, upcomingDays, editLayout];
+  static final all = <SettingDef<Object?>>[period, upcomingDays];
 }
 
 abstract final class EntrySettings {

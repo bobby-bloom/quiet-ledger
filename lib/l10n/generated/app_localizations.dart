@@ -3271,18 +3271,6 @@ abstract class AppLocalizations {
   /// **'Remove'**
   String get dashRemove;
 
-  /// No description provided for @dashMakeWide.
-  ///
-  /// In en, this message translates to:
-  /// **'Make wide'**
-  String get dashMakeWide;
-
-  /// No description provided for @dashMakeNormal.
-  ///
-  /// In en, this message translates to:
-  /// **'Make normal width'**
-  String get dashMakeNormal;
-
   /// No description provided for @dashChooseAccount.
   ///
   /// In en, this message translates to:
@@ -3294,18 +3282,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to default'**
   String get dashResetLayout;
-
-  /// No description provided for @dashLayoutPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get dashLayoutPhone;
-
-  /// No description provided for @dashLayoutWide.
-  ///
-  /// In en, this message translates to:
-  /// **'Tablet & desktop'**
-  String get dashLayoutWide;
 
   /// No description provided for @dashPrevPeriod.
   ///
@@ -3408,6 +3384,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recent transactions'**
   String get dashWTyperecentTransactions;
+
+  /// No description provided for @dashLayoutMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard layout'**
+  String get dashLayoutMenu;
+
+  /// No description provided for @dashLayoutMenuCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard layout · Custom'**
+  String get dashLayoutMenuCustom;
+
+  /// No description provided for @dashLayoutLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get dashLayoutLabel;
+
+  /// No description provided for @dashLayoutAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get dashLayoutAuto;
+
+  /// No description provided for @dashLayoutCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get dashLayoutCustom;
+
+  /// No description provided for @dashLayoutAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet Ledger\'s arrangement, adapts to the window'**
+  String get dashLayoutAutoHint;
+
+  /// No description provided for @dashLayoutCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your arrangement, shared by your wider screens'**
+  String get dashLayoutCustomHint;
+
+  /// No description provided for @dashLayoutFitsUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits up to {count} columns. Your layout shows in full on wider screens.'**
+  String dashLayoutFitsUpTo(int count);
+
+  /// No description provided for @dashLayoutFitsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits one column. Your layout shows in full on wider screens.'**
+  String get dashLayoutFitsOne;
+
+  /// No description provided for @dashLayoutSplitFits.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits up to {count} columns'**
+  String dashLayoutSplitFits(int count);
+
+  /// No description provided for @dashLayoutPhoneAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet Ledger\'s order'**
+  String get dashLayoutPhoneAutoHint;
+
+  /// No description provided for @dashLayoutPhoneCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order, shared by your phones'**
+  String get dashLayoutPhoneCustomHint;
+
+  /// No description provided for @dashLayoutArrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrange widgets…'**
+  String get dashLayoutArrange;
+
+  /// No description provided for @dashLayoutArrangeNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Widen the window to two columns to arrange'**
+  String get dashLayoutArrangeNeeds;
+
+  /// No description provided for @dashLayoutEditMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit dashboard…'**
+  String get dashLayoutEditMenu;
+
+  /// No description provided for @dashLayoutAddMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Add widget…'**
+  String get dashLayoutAddMenu;
+
+  /// No description provided for @dashLayoutExpandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand all'**
+  String get dashLayoutExpandAll;
+
+  /// No description provided for @dashLayoutCollapseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse all'**
+  String get dashLayoutCollapseAll;
+
+  /// No description provided for @dashLayoutArrangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrange widgets'**
+  String get dashLayoutArrangeTitle;
+
+  /// No description provided for @dashLayoutArrangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to move'**
+  String get dashLayoutArrangeHint;
+
+  /// No description provided for @dashLayoutReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get dashLayoutReset;
+
+  /// No description provided for @dashLayoutRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}'**
+  String dashLayoutRow(int row);
+
+  /// No description provided for @dashLayoutRowOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} of {count}'**
+  String dashLayoutRowOf(int row, int count);
+
+  /// No description provided for @dashLayoutRowMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} options'**
+  String dashLayoutRowMenu(int row);
+
+  /// No description provided for @dashLayoutNewRow.
+  ///
+  /// In en, this message translates to:
+  /// **'New row'**
+  String get dashLayoutNewRow;
+
+  /// No description provided for @dashLayoutRowTooWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a wider window'**
+  String get dashLayoutRowTooWide;
+
+  /// No description provided for @dashLayoutRowSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Row layout'**
+  String get dashLayoutRowSplit;
+
+  /// No description provided for @dashLayoutAddRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add row'**
+  String get dashLayoutAddRow;
+
+  /// No description provided for @dashLayoutSplitOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One column'**
+  String get dashLayoutSplitOne;
+
+  /// No description provided for @dashLayoutSplitHalves.
+  ///
+  /// In en, this message translates to:
+  /// **'Two equal columns'**
+  String get dashLayoutSplitHalves;
+
+  /// No description provided for @dashLayoutSplitWideNarrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide and narrow'**
+  String get dashLayoutSplitWideNarrow;
+
+  /// No description provided for @dashLayoutSplitNarrowWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow and wide'**
+  String get dashLayoutSplitNarrowWide;
+
+  /// No description provided for @dashLayoutSplitThirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Three columns'**
+  String get dashLayoutSplitThirds;
+
+  /// No description provided for @dashLayoutMoveRowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move row up'**
+  String get dashLayoutMoveRowUp;
+
+  /// No description provided for @dashLayoutMoveRowDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move row down'**
+  String get dashLayoutMoveRowDown;
+
+  /// No description provided for @dashLayoutRemoveRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove row'**
+  String get dashLayoutRemoveRow;
+
+  /// No description provided for @dashLayoutMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}”'**
+  String dashLayoutMove(String widget);
+
+  /// No description provided for @dashLayoutMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get dashLayoutMoveUp;
+
+  /// No description provided for @dashLayoutMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get dashLayoutMoveDown;
+
+  /// No description provided for @dashLayoutMoveLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'One column left'**
+  String get dashLayoutMoveLeft;
+
+  /// No description provided for @dashLayoutMoveRight.
+  ///
+  /// In en, this message translates to:
+  /// **'One column right'**
+  String get dashLayoutMoveRight;
+
+  /// No description provided for @dashLayoutRemoveFromDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from dashboard'**
+  String get dashLayoutRemoveFromDashboard;
+
+  /// No description provided for @dashLayoutEmptyColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a widget here'**
+  String get dashLayoutEmptyColumn;
+
+  /// No description provided for @dashLayoutRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} removed'**
+  String dashLayoutRemoved(String widget);
+
+  /// No description provided for @dashLayoutFlattened.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout set to {count} columns'**
+  String dashLayoutFlattened(int count);
+
+  /// No description provided for @dashLayoutReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout replaced'**
+  String get dashLayoutReplaced;
+
+  /// No description provided for @dashLayoutDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes discarded'**
+  String get dashLayoutDiscarded;
+
+  /// No description provided for @dashLayoutResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard reset to default'**
+  String get dashLayoutResetDone;
+
+  /// No description provided for @dashLayoutMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget}: row {row}, column {column}, position {position} of {count}'**
+  String dashLayoutMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  );
+
+  /// No description provided for @dashLayoutMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} moved to position {position} of {count}'**
+  String dashLayoutMovedTo(String widget, int position, int count);
+
+  /// No description provided for @dashLayoutPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} picked up'**
+  String dashLayoutPickedUp(String widget);
+
+  /// No description provided for @dashLayoutDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} dropped'**
+  String dashLayoutDropped(String widget);
+
+  /// No description provided for @dashLayoutSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply right away.'**
+  String get dashLayoutSheetSubtitle;
+
+  /// No description provided for @dashLayoutNotOnDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on your dashboard'**
+  String get dashLayoutNotOnDashboard;
+
+  /// No description provided for @dashLayoutNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get dashLayoutNew;
+
+  /// No description provided for @dashLayoutRemovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed · its settings are kept'**
+  String get dashLayoutRemovedHint;
+
+  /// No description provided for @dashLayoutEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your dashboard is empty'**
+  String get dashLayoutEmptyTitle;
+
+  /// No description provided for @dashLayoutEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add widgets to see your money at a glance.'**
+  String get dashLayoutEmptyBody;
+
+  /// No description provided for @dashLayoutHeroRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown at the top'**
+  String get dashLayoutHeroRow;
+
+  /// No description provided for @dashLayoutMoveUpWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}” up'**
+  String dashLayoutMoveUpWidget(String widget);
+
+  /// No description provided for @dashLayoutMoveDownWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}” down'**
+  String dashLayoutMoveDownWidget(String widget);
+
+  /// No description provided for @dashLayoutRemoveWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove “{widget}”'**
+  String dashLayoutRemoveWidget(String widget);
+
+  /// No description provided for @dashLayoutDescnetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Total across your accounts over 12 months'**
+  String get dashLayoutDescnetWorth;
+
+  /// No description provided for @dashLayoutDescmonthSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Income, expenses and savings rate this month'**
+  String get dashLayoutDescmonthSummary;
+
+  /// No description provided for @dashLayoutDescbudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'How each budget is tracking this period'**
+  String get dashLayoutDescbudgets;
+
+  /// No description provided for @dashLayoutDescupcomingBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills and income due soon'**
+  String get dashLayoutDescupcomingBills;
+
+  /// No description provided for @dashLayoutDescforecast.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected balance of one account'**
+  String get dashLayoutDescforecast;
+
+  /// No description provided for @dashLayoutDescaccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Balances of your accounts'**
+  String get dashLayoutDescaccounts;
+
+  /// No description provided for @dashLayoutDescgoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress towards your savings goals'**
+  String get dashLayoutDescgoals;
+
+  /// No description provided for @dashLayoutDesctopCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Where your money went this period'**
+  String get dashLayoutDesctopCategories;
+
+  /// No description provided for @dashLayoutDescrecentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest entries'**
+  String get dashLayoutDescrecentTransactions;
 
   /// No description provided for @exportTitle.
   ///
@@ -9101,12 +9509,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dashboard period'**
   String get setDashboardPeriod;
-
-  /// No description provided for @setDashboardWidgets.
-  ///
-  /// In en, this message translates to:
-  /// **'Dashboard widgets'**
-  String get setDashboardWidgets;
 
   /// No description provided for @setDateFormat.
   ///

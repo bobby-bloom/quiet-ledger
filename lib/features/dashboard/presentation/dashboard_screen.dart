@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,106 +9,390 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
-import 'package:personal_finance/app/ui/pickers.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_grid.dart';
+import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
+import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
+import 'package:personal_finance/features/dashboard/presentation/board/arrange_board.dart';
+import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
+import 'package:personal_finance/features/dashboard/presentation/dashboard_menu.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_period.dart';
+import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 
-DashboardBreakpoint breakpointOf(WindowSize s) =>
-    s.isCompact ? DashboardBreakpoint.compact : DashboardBreakpoint.expanded;
-
-/// Home: configurable widgets — a stack on phones, a grid on wide screens.
-class DashboardScreen extends ConsumerWidget {
+/// Home: configurable widgets (docs/DASHBOARD.md) — the phone's ordered
+/// list, or on wider windows rows of columns, the app's Auto layout or the
+/// person's own, arranged in place.
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  /// The layout button: focus comes back to it when arrange mode ends.
+  final _layoutButton = FocusNode(debugLabel: 'dashboard layout');
+
+  @override
+  void dispose() {
+    _layoutButton.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final size = WindowSize.of(context);
-    final bp = breakpointOf(size);
-    final items =
-        ref.watch(dashboardLayoutProvider(bp)).value ?? defaultLayouts[bp]!;
-    final width = MediaQuery.sizeOf(context).width;
-    final columns = size.isCompact ? 1 : (width >= 1400 ? 3 : 2);
-
-    List<DashOption> optionsFor(int index) {
-      final l = context.l10n;
-      final item = items[index];
-      final repo = ref.read(dashboardLayoutRepositoryProvider);
-      void save(List<DashboardItem> next) => repo.save(bp, next);
-      return [
-        ...widgetOptions(context, ref, item, (updated) {
-          save([...items]..[index] = updated);
-        }),
-        if (!size.isCompact)
-          DashOption(
-            item.size == WidgetSize.wide ? l.dashMakeNormal : l.dashMakeWide,
-            item.size == WidgetSize.wide
-                ? Icons.close_fullscreen
-                : Icons.open_in_full,
-            () => save(
-              [...items]
-                ..[index] = item.copyWith(
-                  size: item.size == WidgetSize.wide
-                      ? WidgetSize.normal
-                      : WidgetSize.wide,
-                ),
-            ),
-          ),
-        DashOption(l.dashRemove, Icons.remove_circle_outline, () {
-          save([...items]..removeAt(index));
-        }),
-        DashOption(
-          l.dashEdit,
-          Icons.dashboard_customize_outlined,
-          () => context.push('/home/edit'),
-        ),
-      ];
-    }
-
-    final children = <Widget>[
-      for (final (i, item) in items.indexed)
-        buildDashboardWidget(
-          context,
-          item,
-          compact: size.isCompact,
-          options: optionsFor(i),
-        ),
-    ];
-
+    final view = size.isCompact
+        ? DashboardView.compact
+        : DashboardView.expanded;
+    final saved =
+        ref.watch(dashboardViewProvider(view)).value ??
+        DashboardViewState.empty;
+    final session = ref.watch(arrangeSessionProvider);
+    ref.listen(arrangeSessionProvider, (previous, next) {
+      if (previous != null && next == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _layoutButton.requestFocus();
+        });
+      }
+    });
     final gutter = size.isCompact ? Space.phoneGutter : Space.xxl;
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: size.isCompact
-                  ? const _PhoneHeader()
-                  : const _WideHeader(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth - 2 * gutter;
+            final Widget header;
+            final Widget board;
+            if (view == DashboardView.compact) {
+              header = _PhoneHeader(
+                saved: saved,
+                layoutButtonFocus: _layoutButton,
+              );
+              final order = phoneOrder(saved);
+              board = order.isEmpty
+                  ? const _EmptyDashboard(view: DashboardView.compact)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 10,
+                      children: [
+                        for (final t in order)
+                          KeyedSubtree(
+                            key: ValueKey(t),
+                            child: _card(context, view, saved, null, t),
+                          ),
+                      ],
+                    );
+            } else {
+              final layout = wideLayout(saved, fittingColumns(width));
+              final arranging = session != null && layout.canArrange;
+              final l = context.l10n;
+              String title(String id) =>
+                  widgetTypeLabel(l, DashboardWidgetType.values.byName(id));
+              IconData icon(String id) =>
+                  widgetIcon(DashboardWidgetType.values.byName(id));
+              header = arranging
+                  ? _ArrangeBar(session: session, fits: layout.fits)
+                  : _WideHeader(
+                      saved: saved,
+                      layout: layout,
+                      layoutButtonFocus: _layoutButton,
+                    );
+              board = arranging
+                  ? ArrangeBoard(
+                      rows: session.rows,
+                      present: presentIds(
+                        session.working,
+                        DashboardView.expanded,
+                      ).toSet(),
+                      fits: layout.fits,
+                      title: title,
+                      icon: icon,
+                      onChanged: ref
+                          .read(arrangeSessionProvider.notifier)
+                          .update,
+                      onRemove: ref
+                          .read(arrangeSessionProvider.notifier)
+                          .remove,
+                    )
+                  : layout.rows.isEmpty
+                  ? const _EmptyDashboard(view: DashboardView.expanded)
+                  : _WideBoard(
+                      layout: layout,
+                      width: width,
+                      card: (t) => _card(context, view, saved, layout, t),
+                    );
+            }
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: header),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: gutter),
+                  sliver: const SliverToBoxAdapter(child: BackupHealthBanner()),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 32),
+                  sliver: SliverToBoxAdapter(child: board),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// The widget [type] with its ⋮ menu: its own options, Remove (with
+  /// Undo) and the way to arrange — Arrange widgets… on wide windows that
+  /// fit two columns, Edit dashboard… on phones.
+  Widget _card(
+    BuildContext context,
+    DashboardView view,
+    DashboardViewState saved,
+    BoardLayout? layout,
+    DashboardWidgetType type,
+  ) {
+    final l = context.l10n;
+    final item = DashboardItem(type, options: saved.optionsOf(type));
+    final options = [
+      ...widgetOptions(context, ref, item, (updated) {
+        unawaited(setWidgetOptions(ref, view, type, updated.options));
+      }),
+      DashOption(
+        l.dashRemove,
+        Icons.remove_circle_outline,
+        () => unawaited(removeWidget(context, ref, view, type)),
+      ),
+      if (layout != null && layout.canArrange)
+        DashOption(
+          l.dashLayoutArrange,
+          Icons.drag_indicator,
+          () => ref
+              .read(arrangeSessionProvider.notifier)
+              .enter(saved, layout.placed),
+        )
+      else if (view == DashboardView.compact)
+        DashOption(
+          l.dashLayoutEditMenu,
+          Icons.dashboard_customize_outlined,
+          () => unawaited(showPhoneEditor(context)),
+        ),
+    ];
+    return buildDashboardWidget(
+      context,
+      item,
+      compact: view == DashboardView.compact,
+      options: options,
+    );
+  }
+}
+
+/// The wide board: [layout]'s rows top to bottom, each split into columns
+/// as wide as its weights make them in [width], widgets stacked in each
+/// column. A widget keeps its state wherever it moves.
+class _WideBoard extends StatefulWidget {
+  const _WideBoard({
+    required this.layout,
+    required this.width,
+    required this.card,
+  });
+
+  final BoardLayout layout;
+  final double width;
+  final Widget Function(DashboardWidgetType type) card;
+
+  @override
+  State<_WideBoard> createState() => _WideBoardState();
+}
+
+class _WideBoardState extends State<_WideBoard> {
+  final _keys = <String, GlobalKey>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = widget.layout.order.toSet();
+    _keys.removeWhere((id, _) => !shown.contains(id));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: boardGap,
+      children: [
+        for (final row in widget.layout.rows)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: boardGap,
+            children: [
+              for (final (c, width) in columnWidths(
+                row.split,
+                widget.width,
+              ).indexed)
+                SizedBox(
+                  width: width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: boardGap,
+                    children: [
+                      for (final id in row.columns[c])
+                        KeyedSubtree(
+                          key: _keys.putIfAbsent(
+                            id,
+                            () => GlobalKey(debugLabel: id),
+                          ),
+                          child: widget.card(
+                            DashboardWidgetType.values.byName(id),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// No widget shows: Add widget, or Reset to default (with Undo).
+class _EmptyDashboard extends ConsumerWidget {
+  const _EmptyDashboard({required this.view});
+
+  final DashboardView view;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final state =
+        ref.watch(dashboardViewProvider(view)).value ??
+        DashboardViewState.empty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Space.xxxl),
+      child: Column(
+        spacing: Space.sm,
+        children: [
+          Icon(
+            Icons.dashboard_customize_outlined,
+            size: 40,
+            color: context.colors.onSurfaceVariant,
+          ),
+          Text(l.dashLayoutEmptyTitle, style: context.text.titleMedium),
+          Text(
+            l.dashLayoutEmptyBody,
+            textAlign: TextAlign.center,
+            style: context.text.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
             ),
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: gutter),
-              sliver: const SliverToBoxAdapter(child: BackupHealthBanner()),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 32),
-              sliver: SliverToBoxAdapter(
-                child: DashboardGrid(
-                  columns: columns,
-                  gap: size.isCompact ? 10 : 20,
-                  spans: [for (final i in items) i.span],
-                  children: children,
+          ),
+          Wrap(
+            spacing: Space.xs,
+            runSpacing: Space.xs,
+            alignment: WrapAlignment.center,
+            children: [
+              FilledButton.tonalIcon(
+                onPressed: () => unawaited(
+                  showAddWidget(
+                    context,
+                    view: view,
+                    state: state,
+                    onAdd: (t) => unawaited(addWidget(ref, view, t)),
+                  ),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(l.dashAddWidget),
+              ),
+              TextButton(
+                onPressed: () => unawaited(resetToDefault(context, ref, view)),
+                child: Text(l.dashResetLayout),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The bar in place of the header while arranging: "Arrange widgets · Drag
+/// to move", Add widget, Reset (the default rows inside the session;
+/// disabled while they show), Cancel and Done.
+class _ArrangeBar extends ConsumerWidget {
+  const _ArrangeBar({required this.session, required this.fits});
+
+  final ArrangeSession session;
+  final int fits;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final notifier = ref.read(arrangeSessionProvider.notifier);
+    final present = presentIds(session.working, DashboardView.expanded);
+    final defaults = wideLayout(
+      session.working.copyWith(mode: LayoutMode.auto),
+      fits,
+    ).placed;
+    final isDefault = listEquals(
+      visibleRows(session.rows, present),
+      visibleRows(defaults, present),
+    );
+    return Container(
+      color: context.colors.surfaceContainerHigh,
+      padding: const EdgeInsets.fromLTRB(32, 14, 28, 14),
+      child: Wrap(
+        spacing: Space.sm,
+        runSpacing: Space.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        alignment: WrapAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: Space.sm,
+            children: [
+              Text(l.dashLayoutArrangeTitle, style: context.text.titleLarge),
+              Text(
+                l.dashLayoutArrangeHint,
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.colors.onSurfaceVariant,
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: Space.xs,
+            children: [
+              TextButton.icon(
+                onPressed: () => unawaited(
+                  showAddWidget(
+                    context,
+                    view: DashboardView.expanded,
+                    state: session.working,
+                    onAdd: (t) => notifier.add(t, fits),
+                  ),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(l.dashAddWidget),
+              ),
+              TextButton.icon(
+                onPressed: isDefault ? null : () => notifier.reset(fits),
+                icon: const Icon(Icons.restart_alt),
+                label: Text(l.dashLayoutReset),
+              ),
+              OutlinedButton(
+                onPressed: () => cancelArrange(context, ref),
+                child: Text(l.commonCancel),
+              ),
+              FilledButton(
+                onPressed: () => unawaited(finishArrange(context, ref)),
+                child: Text(l.commonDone),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -185,7 +470,10 @@ class _PeriodButton extends ConsumerWidget {
 }
 
 class _PhoneHeader extends ConsumerWidget {
-  const _PhoneHeader();
+  const _PhoneHeader({required this.saved, required this.layoutButtonFocus});
+
+  final DashboardViewState saved;
+  final FocusNode layoutButtonFocus;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -221,10 +509,11 @@ class _PhoneHeader extends ConsumerWidget {
               icon: const Icon(Icons.bar_chart),
               onPressed: () => context.push('/reports'),
             ),
-            IconButton(
-              tooltip: l.dashEdit,
-              icon: const Icon(Icons.dashboard_customize_outlined),
-              onPressed: () => context.push('/home/edit'),
+            DashboardLayoutButton(
+              view: DashboardView.compact,
+              saved: saved,
+              layout: null,
+              focusNode: layoutButtonFocus,
             ),
           ],
         ),
@@ -234,7 +523,15 @@ class _PhoneHeader extends ConsumerWidget {
 }
 
 class _WideHeader extends ConsumerWidget {
-  const _WideHeader();
+  const _WideHeader({
+    required this.saved,
+    required this.layout,
+    required this.layoutButtonFocus,
+  });
+
+  final DashboardViewState saved;
+  final BoardLayout layout;
+  final FocusNode layoutButtonFocus;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -300,156 +597,13 @@ class _WideHeader extends ConsumerWidget {
                 onPressed: () =>
                     ref.read(privacyModeProvider.notifier).toggle(),
               ),
-              IconButton(
-                tooltip: l.dashEdit,
-                icon: const Icon(Icons.dashboard_customize_outlined),
-                onPressed: () => context.push('/home/edit'),
+              DashboardLayoutButton(
+                view: DashboardView.expanded,
+                saved: saved,
+                layout: layout,
+                focusNode: layoutButtonFocus,
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Dashboard editor: choose, order and size widgets per layout.
-class DashboardEditorScreen extends ConsumerStatefulWidget {
-  const DashboardEditorScreen({super.key});
-
-  @override
-  ConsumerState<DashboardEditorScreen> createState() =>
-      _DashboardEditorScreenState();
-}
-
-class _DashboardEditorScreenState extends ConsumerState<DashboardEditorScreen> {
-  DashboardBreakpoint? _bp;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final bp = _bp ?? breakpointOf(WindowSize.of(context));
-    final items =
-        ref.watch(dashboardLayoutProvider(bp)).value ?? defaultLayouts[bp]!;
-    final repo = ref.read(dashboardLayoutRepositoryProvider);
-    final missing = DashboardWidgetType.values
-        .where((t) => !items.any((i) => i.type == t))
-        .toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l.dashEditTitle),
-        actions: [
-          TextButton(
-            onPressed: () => repo.reset(bp),
-            child: Text(l.dashResetLayout),
-          ),
-        ],
-      ),
-      floatingActionButton: missing.isEmpty
-          ? null
-          : FloatingActionButton.extended(
-              heroTag: 'dash-add',
-              onPressed: () async {
-                final type = await showAdaptiveSheet<DashboardWidgetType>(
-                  context,
-                  builder: (ctx) => ListView(
-                    shrinkWrap: true,
-                    children: [
-                      for (final t in missing)
-                        ListTile(
-                          leading: Icon(widgetIcon(t)),
-                          title: Text(widgetTypeLabel(ctx.l10n, t)),
-                          onTap: () => Navigator.pop(ctx, t),
-                        ),
-                    ],
-                  ),
-                );
-                if (type != null) {
-                  await repo.save(bp, [...items, DashboardItem(type)]);
-                }
-              },
-              icon: const Icon(Icons.add),
-              label: Text(l.dashAddWidget),
-            ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SegmentedButton<DashboardBreakpoint>(
-              segments: [
-                ButtonSegment(
-                  value: DashboardBreakpoint.compact,
-                  icon: const Icon(Icons.smartphone),
-                  label: Text(l.dashLayoutPhone),
-                ),
-                ButtonSegment(
-                  value: DashboardBreakpoint.expanded,
-                  icon: const Icon(Icons.desktop_windows_outlined),
-                  label: Text(l.dashLayoutWide),
-                ),
-              ],
-              selected: {bp},
-              onSelectionChanged: (s) => setState(() => _bp = s.first),
-            ),
-          ),
-          Expanded(
-            child: ReorderableListView.builder(
-              buildDefaultDragHandles: false,
-              padding: const EdgeInsets.only(bottom: 96),
-              itemCount: items.length,
-              onReorderItem: (from, to) {
-                final next = [...items];
-                final item = next.removeAt(from);
-                next.insert(to, item);
-                unawaited(repo.save(bp, next));
-              },
-              itemBuilder: (context, i) {
-                final item = items[i];
-                return ListTile(
-                  key: ValueKey(item.type),
-                  leading: Icon(widgetIcon(item.type)),
-                  title: Text(widgetTypeLabel(l, item.type)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (bp == DashboardBreakpoint.expanded)
-                        IconButton(
-                          tooltip: item.size == WidgetSize.wide
-                              ? l.dashMakeNormal
-                              : l.dashMakeWide,
-                          icon: Icon(
-                            item.size == WidgetSize.wide
-                                ? Icons.close_fullscreen
-                                : Icons.open_in_full,
-                          ),
-                          onPressed: () => repo.save(
-                            bp,
-                            [...items]
-                              ..[i] = item.copyWith(
-                                size: item.size == WidgetSize.wide
-                                    ? WidgetSize.normal
-                                    : WidgetSize.wide,
-                              ),
-                          ),
-                        ),
-                      IconButton(
-                        tooltip: l.dashRemove,
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => repo.save(bp, [...items]..removeAt(i)),
-                      ),
-                      ReorderableDragStartListener(
-                        index: i,
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
           ),
         ],
       ),

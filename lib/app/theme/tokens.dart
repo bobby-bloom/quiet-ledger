@@ -149,3 +149,24 @@ abstract final class Fonts {
   static const ui = 'Manrope';
   static const mono = 'IBMPlexMono';
 }
+
+/// Durations and curves. Things move because they changed; reduced motion
+/// ([isReduced]) drops travel and keeps at most a short fade.
+abstract final class Motion {
+  /// Hover, press, lift.
+  static const quick = Duration(milliseconds: 120);
+
+  /// Expand and collapse, slots opening, neighbours sliding.
+  static const standard = Duration(milliseconds: 220);
+
+  /// A dropped card settling into its place.
+  static const expressive = Duration(milliseconds: 380);
+
+  static const curve = Curves.easeOutCubic;
+
+  /// Overshoots slightly, like a spring.
+  static const spring = Curves.easeOutBack;
+
+  static bool isReduced(BuildContext context) =>
+      MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+}

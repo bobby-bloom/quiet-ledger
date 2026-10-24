@@ -2081,22 +2081,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashRemove => 'Entfernen';
 
   @override
-  String get dashMakeWide => 'Breit anzeigen';
-
-  @override
-  String get dashMakeNormal => 'Normale Breite';
-
-  @override
   String get dashChooseAccount => 'Konto wählen';
 
   @override
   String get dashResetLayout => 'Auf Standard zurücksetzen';
-
-  @override
-  String get dashLayoutPhone => 'Smartphone';
-
-  @override
-  String get dashLayoutWide => 'Tablet & Desktop';
 
   @override
   String get dashPrevPeriod => 'Vorheriger Zeitraum';
@@ -2151,6 +2139,266 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dashWTyperecentTransactions => 'Letzte Buchungen';
+
+  @override
+  String get dashLayoutMenu => 'Dashboard-Anordnung';
+
+  @override
+  String get dashLayoutMenuCustom => 'Dashboard-Anordnung · Eigene';
+
+  @override
+  String get dashLayoutLabel => 'Anordnung';
+
+  @override
+  String get dashLayoutAuto => 'Auto';
+
+  @override
+  String get dashLayoutCustom => 'Eigene';
+
+  @override
+  String get dashLayoutAutoHint =>
+      'Anordnung von Quiet Ledger, passt sich dem Fenster an';
+
+  @override
+  String get dashLayoutCustomHint =>
+      'Deine Anordnung, gilt für alle größeren Bildschirme';
+
+  @override
+  String dashLayoutFitsUpTo(int count) {
+    return 'In dieses Fenster passen bis zu $count Spalten. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
+  }
+
+  @override
+  String get dashLayoutFitsOne =>
+      'In dieses Fenster passt eine Spalte. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
+
+  @override
+  String dashLayoutSplitFits(int count) {
+    return 'In dieses Fenster passen bis zu $count Spalten';
+  }
+
+  @override
+  String get dashLayoutPhoneAutoHint => 'Reihenfolge von Quiet Ledger';
+
+  @override
+  String get dashLayoutPhoneCustomHint =>
+      'Deine Reihenfolge, gilt für alle Smartphones';
+
+  @override
+  String get dashLayoutArrange => 'Widgets anordnen…';
+
+  @override
+  String get dashLayoutArrangeNeeds =>
+      'Zum Anordnen das Fenster auf zwei Spalten verbreitern';
+
+  @override
+  String get dashLayoutEditMenu => 'Dashboard bearbeiten…';
+
+  @override
+  String get dashLayoutAddMenu => 'Widget hinzufügen…';
+
+  @override
+  String get dashLayoutExpandAll => 'Alle aufklappen';
+
+  @override
+  String get dashLayoutCollapseAll => 'Alle zuklappen';
+
+  @override
+  String get dashLayoutArrangeTitle => 'Widgets anordnen';
+
+  @override
+  String get dashLayoutArrangeHint => 'Zum Verschieben ziehen';
+
+  @override
+  String get dashLayoutReset => 'Zurücksetzen';
+
+  @override
+  String dashLayoutRow(int row) {
+    return 'Zeile $row';
+  }
+
+  @override
+  String dashLayoutRowOf(int row, int count) {
+    return 'Zeile $row von $count';
+  }
+
+  @override
+  String dashLayoutRowMenu(int row) {
+    return 'Optionen für Zeile $row';
+  }
+
+  @override
+  String get dashLayoutNewRow => 'Neue Zeile';
+
+  @override
+  String get dashLayoutRowTooWide => 'Braucht ein breiteres Fenster';
+
+  @override
+  String get dashLayoutRowSplit => 'Zeilenaufteilung';
+
+  @override
+  String get dashLayoutAddRow => 'Zeile hinzufügen';
+
+  @override
+  String get dashLayoutSplitOne => 'Eine Spalte';
+
+  @override
+  String get dashLayoutSplitHalves => 'Zwei gleiche Spalten';
+
+  @override
+  String get dashLayoutSplitWideNarrow => 'Breit und schmal';
+
+  @override
+  String get dashLayoutSplitNarrowWide => 'Schmal und breit';
+
+  @override
+  String get dashLayoutSplitThirds => 'Drei Spalten';
+
+  @override
+  String get dashLayoutMoveRowUp => 'Zeile nach oben';
+
+  @override
+  String get dashLayoutMoveRowDown => 'Zeile nach unten';
+
+  @override
+  String get dashLayoutRemoveRow => 'Zeile entfernen';
+
+  @override
+  String dashLayoutMove(String widget) {
+    return '„$widget“ verschieben';
+  }
+
+  @override
+  String get dashLayoutMoveUp => 'Nach oben';
+
+  @override
+  String get dashLayoutMoveDown => 'Nach unten';
+
+  @override
+  String get dashLayoutMoveLeft => 'Eine Spalte nach links';
+
+  @override
+  String get dashLayoutMoveRight => 'Eine Spalte nach rechts';
+
+  @override
+  String get dashLayoutRemoveFromDashboard => 'Vom Dashboard entfernen';
+
+  @override
+  String get dashLayoutEmptyColumn => 'Widget hierher ziehen';
+
+  @override
+  String dashLayoutRemoved(String widget) {
+    return '$widget entfernt';
+  }
+
+  @override
+  String dashLayoutFlattened(int count) {
+    return 'Anordnung auf $count Spalten gesetzt';
+  }
+
+  @override
+  String get dashLayoutReplaced => 'Anordnung ersetzt';
+
+  @override
+  String get dashLayoutDiscarded => 'Änderungen verworfen';
+
+  @override
+  String get dashLayoutResetDone => 'Dashboard auf Standard zurückgesetzt';
+
+  @override
+  String dashLayoutMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  ) {
+    return '$widget: Zeile $row, Spalte $column, Position $position von $count';
+  }
+
+  @override
+  String dashLayoutMovedTo(String widget, int position, int count) {
+    return '$widget auf Position $position von $count verschoben';
+  }
+
+  @override
+  String dashLayoutPickedUp(String widget) {
+    return '$widget aufgenommen';
+  }
+
+  @override
+  String dashLayoutDropped(String widget) {
+    return '$widget abgelegt';
+  }
+
+  @override
+  String get dashLayoutSheetSubtitle => 'Änderungen gelten sofort.';
+
+  @override
+  String get dashLayoutNotOnDashboard => 'Nicht auf deinem Dashboard';
+
+  @override
+  String get dashLayoutNew => 'Neu';
+
+  @override
+  String get dashLayoutRemovedHint =>
+      'Entfernt · Einstellungen bleiben erhalten';
+
+  @override
+  String get dashLayoutEmptyTitle => 'Dein Dashboard ist leer';
+
+  @override
+  String get dashLayoutEmptyBody =>
+      'Füge Widgets hinzu, um deine Finanzen auf einen Blick zu sehen.';
+
+  @override
+  String get dashLayoutHeroRow => 'Steht oben als Kopfzeile';
+
+  @override
+  String dashLayoutMoveUpWidget(String widget) {
+    return '„$widget“ nach oben';
+  }
+
+  @override
+  String dashLayoutMoveDownWidget(String widget) {
+    return '„$widget“ nach unten';
+  }
+
+  @override
+  String dashLayoutRemoveWidget(String widget) {
+    return '„$widget“ entfernen';
+  }
+
+  @override
+  String get dashLayoutDescnetWorth => 'Summe deiner Konten über 12 Monate';
+
+  @override
+  String get dashLayoutDescmonthSummary =>
+      'Einnahmen, Ausgaben und Sparquote in diesem Monat';
+
+  @override
+  String get dashLayoutDescbudgets =>
+      'Wie jedes Budget in diesem Zeitraum läuft';
+
+  @override
+  String get dashLayoutDescupcomingBills =>
+      'Bald fällige Rechnungen und Einnahmen';
+
+  @override
+  String get dashLayoutDescforecast => 'Erwarteter Kontostand eines Kontos';
+
+  @override
+  String get dashLayoutDescaccounts => 'Salden deiner Konten';
+
+  @override
+  String get dashLayoutDescgoals => 'Fortschritt deiner Sparziele';
+
+  @override
+  String get dashLayoutDesctopCategories =>
+      'Wofür dein Geld in diesem Zeitraum ging';
+
+  @override
+  String get dashLayoutDescrecentTransactions => 'Deine neuesten Buchungen';
 
   @override
   String get exportTitle => 'Export & Sicherung';
@@ -5673,9 +5921,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setDashboardPeriod => 'Zeitraum im Dashboard';
-
-  @override
-  String get setDashboardWidgets => 'Dashboard-Widgets';
 
   @override
   String get setDateFormat => 'Datumsformat';
