@@ -91,11 +91,14 @@ class BudgetBoard extends ConsumerWidget {
     final board = ref.watch(budgetBoardProvider(period));
     final selector = ref.read(selectedBudgetPeriodProvider.notifier);
 
-    final header = PeriodSwitcher(
-      period: period,
-      onPrevious: () => selector.select(periods.previous(period)),
-      onNext: () => selector.select(periods.next(period)),
-      onToday: period == current ? null : selector.reset,
+    final header = Padding(
+      padding: const EdgeInsets.all(Space.xs),
+      child: PeriodSwitcher(
+        period: period,
+        onPrevious: () => selector.select(periods.previous(period)),
+        onNext: () => selector.select(periods.next(period)),
+        onToday: period == current ? null : selector.reset,
+      ),
     );
 
     final summary = board.value;
