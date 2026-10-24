@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:personal_finance/core/db/database.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 /// Whether database files can be moved aside on this platform.
 const bool canQuarantineDatabase = true;
@@ -50,6 +51,36 @@ Future<String?> quarantineDatabaseFiles({
     await f.delete();
   }
   return to.path;
+}
+
+/// Schema version (`PRAGMA user_version`) of the database file in
+/// [directory] (default: app support), read before Drift opens and
+/// migrates it. [encryptionKey] is the hex key, null for a plain file.
+/// Null when there is no file or it cannot be read (wrong key, damaged).
+///
+/// Opens read-only, so nothing is written and the WAL is not checkpointed
+/// before [copyDatabaseBeforeMigration] copies the files.
+Future<int?> readDatabaseFileVersion({
+  String? directory,
+  String? encryptionKey,
+  String? supportDirectory,
+}) async {
+  final support =
+      supportDirectory ?? (await getApplicationSupportDirectory()).path;
+  final file = File(p.join(directory ?? support, '$appDbName.sqlite'));
+  if (!file.existsSync()) return null;
+  Database? raw;
+  try {
+    raw = sqlite3.open(file.path, mode: OpenMode.readOnly);
+    if (encryptionKey != null) {
+      raw.execute("PRAGMA key = \"x'$encryptionKey'\"");
+    }
+    return raw.select('PRAGMA user_version').first.columnAt(0) as int;
+  } on Object {
+    return null;
+  } finally {
+    raw?.close();
+  }
 }
 
 /// Copies the database files in [directory] (default: app support) to

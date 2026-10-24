@@ -53,13 +53,20 @@ Future<BootstrapResult> bootstrap() async {
 
   final key = await _encryptionKey(prefs);
   final storage = bootstrapSnapshot(prefs).get(DataSettings.storageLocation);
-  // Copy the file aside before a schema migration (or once, when the
-  // version this device last opened is unknown).
+  // Copy the file aside before a schema migration. The file's own version
+  // decides (the storage location may point at an older file); only when
+  // it cannot be read, the version this device last opened does (or
+  // "unknown": copy once).
   final opened = prefs.getInt(_prefSchemaVersion);
-  if (opened == null || opened < AppDatabase.currentSchemaVersion) {
+  final directory = storage.isEmpty ? null : storage;
+  final fileVersion = await readDatabaseFileVersion(
+    directory: directory,
+    encryptionKey: key,
+  );
+  if (needsPreMigrationCopy(fileVersion: fileVersion, opened: opened)) {
     await copyDatabaseBeforeMigration(
-      label: 'v${opened ?? 'unknown'}',
-      directory: storage.isEmpty ? null : storage,
+      label: 'v${fileVersion ?? opened ?? 'unknown'}',
+      directory: directory,
     );
   }
   final db = AppDatabase(
@@ -124,6 +131,18 @@ Future<String?> _encryptionKey(SharedPreferencesWithCache prefs) async {
     await prefs.setBool(_prefDbEncrypted, false);
     return null;
   }
+}
+
+/// Whether the database file must be copied before it is opened: its
+/// schema version [fileVersion] (null: no file or unreadable) is older than
+/// the app's. 0 is a file without schema yet (nothing to keep). When the
+/// file cannot be read, [opened] (the version this device last opened)
+/// decides, and an unknown one copies.
+@visibleForTesting
+bool needsPreMigrationCopy({required int? fileVersion, required int? opened}) {
+  const current = AppDatabase.currentSchemaVersion;
+  if (fileVersion != null) return fileVersion > 0 && fileVersion < current;
+  return opened == null || opened < current;
 }
 
 /// The database is marked encrypted but its key is gone from secure

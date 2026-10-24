@@ -195,8 +195,12 @@ operation that replaces, merges or hard-deletes data. It throws
 **Before a schema migration**, bootstrap copies the database files
 byte-for-byte (an encrypted file stays encrypted with its key) to
 `<app support>/safety/pre-migration-v<old>-<time>/`. It keeps the newest 3.
-The schema version a device last opened is in shared preferences
-(`db.schemaVersion`). The web keeps no pre-migration copy.
+The file's own schema version decides (`readDatabaseFileVersion` reads
+`PRAGMA user_version` read-only with the key, before Drift opens it), so a
+storage location that points at an older file is copied too. Only when the
+file cannot be read does the version this device last opened decide
+(`db.schemaVersion` in shared preferences). The web keeps no pre-migration
+copy.
 
 ## Restore
 
