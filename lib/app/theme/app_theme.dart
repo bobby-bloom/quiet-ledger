@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:personal_finance/app/theme/finance_colors.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 
 /// Builds the Material 3 theme from the Quiet Ledger tokens.
@@ -351,6 +352,32 @@ class AppTheme {
         ),
         textStyle: text.labelMedium?.copyWith(color: cs.onInverseSurface),
       ),
+    );
+  }
+}
+
+/// Theme parts that depend on the window size; wraps every route through
+/// `MaterialApp.builder`. App bar actions end on the page margin (phone
+/// 16, wider windows 24), less the 4 px an IconButton's circle sits inside
+/// its tap target, so screens add no trailing spacer of their own.
+class WindowSizedTheme extends StatelessWidget {
+  const WindowSizedTheme({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gutter = WindowSize.of(context).isCompact
+        ? Space.phoneGutter
+        : Space.desktopGutter;
+    return Theme(
+      data: theme.copyWith(
+        appBarTheme: theme.appBarTheme.copyWith(
+          actionsPadding: EdgeInsetsDirectional.only(end: gutter - Space.xxs),
+        ),
+      ),
+      child: child,
     );
   }
 }

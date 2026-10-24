@@ -67,7 +67,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
                   onPressed: () => setState(() => _reordering = false),
                   child: Text(l.commonDone),
                 ),
-                const SizedBox(width: Space.xs),
               ]
             : [
                 IconButton(

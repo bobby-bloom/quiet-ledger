@@ -109,7 +109,6 @@ class _PlanScreenState extends ConsumerState<PlanScreen>
             icon: const Icon(Icons.calendar_month_outlined),
             onPressed: () => context.push('/plan/calendar'),
           ),
-          const SizedBox(width: 4),
         ],
         bottom: tabs.length < 2
             ? null

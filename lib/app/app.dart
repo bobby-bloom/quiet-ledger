@@ -61,7 +61,9 @@ class PersonalFinanceApp extends ConsumerWidget {
           data: mq.copyWith(
             textScaler: TextScaler.linear(mq.textScaler.scale(1) * textScale),
           ),
-          child: AppLockGate(child: child ?? const SizedBox.shrink()),
+          child: WindowSizedTheme(
+            child: AppLockGate(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );

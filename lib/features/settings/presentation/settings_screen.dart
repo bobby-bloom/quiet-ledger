@@ -80,10 +80,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return Scaffold(
         appBar: AppBar(
           title: Text(routePage.label(l)),
-          actions: [
-            if (section != null) ResetSectionButton(section: section),
-            const SizedBox(width: Space.xxs),
-          ],
+          actions: [if (section != null) ResetSectionButton(section: section)],
         ),
         body: SettingsSectionView(
           page: routePage,

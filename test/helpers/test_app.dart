@@ -72,6 +72,7 @@ Widget testApp(
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) => WindowSizedTheme(child: child!),
       home: child,
     ),
   );

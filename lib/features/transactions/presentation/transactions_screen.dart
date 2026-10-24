@@ -453,7 +453,8 @@ class _Header extends ConsumerWidget {
       return SizedBox(
         height: 56,
         child: Padding(
-          padding: const EdgeInsets.only(left: Space.lg, right: 4),
+          // The last icon's circle ends on the 16 px page margin.
+          padding: const EdgeInsets.only(left: Space.lg, right: Space.sm),
           child: Row(
             children: [
               Expanded(

@@ -155,7 +155,6 @@ class ReportDetailScreen extends ConsumerWidget {
                     ),
             ),
           ),
-          const SizedBox(width: Space.xxs),
         ],
       ),
       body: body,

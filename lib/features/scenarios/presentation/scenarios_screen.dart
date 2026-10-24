@@ -43,13 +43,10 @@ class ScenariosScreen extends ConsumerWidget {
         title: Text(l.scenariosTitle),
         actions: [
           if (!compact)
-            Padding(
-              padding: const EdgeInsets.only(right: Space.md),
-              child: FilledButton.icon(
-                onPressed: () => context.push('/forecast/scenarios/new'),
-                icon: const Icon(Icons.add),
-                label: Text(l.scenariosNew),
-              ),
+            FilledButton.icon(
+              onPressed: () => context.push('/forecast/scenarios/new'),
+              icon: const Icon(Icons.add),
+              label: Text(l.scenariosNew),
             ),
         ],
       ),

@@ -87,7 +87,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onPressed: () => setState(() => _reordering = false),
                 child: Text(l.commonDone),
               ),
-              const SizedBox(width: Space.xs),
             ],
           )
         : AppBar(
