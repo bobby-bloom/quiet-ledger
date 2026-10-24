@@ -35,6 +35,23 @@ const syncedTableNames = <String>[
   'settings',
 ];
 
+/// Tables deliberately left out of backups: sync bookkeeping (reset by a
+/// restore) and the full-text index (rebuilt from `transactions`). Every
+/// other table must be in [syncedTableNames]; a test enforces this.
+const backupExcludedTables = <String>{'change_log', 'sync_state', 'txn_search'};
+
+/// The database file was written by a newer app version (schema [found] >
+/// [supported]). Opening is refused so the file is never downgraded.
+class NewerDatabaseException implements Exception {
+  const NewerDatabaseException(this.found, this.supported);
+  final int found;
+  final int supported;
+
+  @override
+  String toString() =>
+      'Database schema $found is newer than this app supports ($supported)';
+}
+
 @DriftDatabase(
   tables: [
     AccountGroups,
@@ -77,6 +94,9 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (m, from, to) async {
+      // Drift also calls this for downgrades and would then stamp the
+      // older version on a newer file. Refuse instead; the file is kept.
+      if (from > to) throw NewerDatabaseException(from, to);
       if (from < 2) {
         // v2: lookup indexes and search refresh on category/tag rename.
         await m.createIndex(txnPayee);

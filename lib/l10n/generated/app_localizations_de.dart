@@ -507,6 +507,40 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get backupBootTitle => 'Deine Daten konnten nicht geöffnet werden';
+
+  @override
+  String get backupBootMissingKey =>
+      'Der Schlüssel, der die Datenbank entsperrt, fehlt auf diesem Gerät. Das passiert, wenn App-Daten ohne den sicheren Speicher des Geräts auf ein neues Gerät kopiert oder wiederhergestellt werden.';
+
+  @override
+  String get backupBootNewer =>
+      'Die Datenbank wurde von einer neueren Version der App erstellt. Installiere die neueste Version, um sie zu öffnen.';
+
+  @override
+  String get backupBootGeneric =>
+      'Die Datenbankdatei konnte nicht geöffnet werden.';
+
+  @override
+  String get backupBootKept =>
+      'Es wurde nichts gelöscht. Die Datenbankdatei bleibt auf diesem Gerät.';
+
+  @override
+  String get backupBootDetails => 'Technische Details';
+
+  @override
+  String get backupBootStartFresh => 'Mit leerer Datenbank starten';
+
+  @override
+  String get backupBootStartFreshConfirm =>
+      'Die aktuelle Datenbankdatei wird in einen eigenen Ordner verschoben, nicht gelöscht. Die App startet dann leer, und du kannst unter Mehr › Export & Sicherung eine Sicherung wiederherstellen.';
+
+  @override
+  String backupBootMoved(String path) {
+    return 'Die alte Datenbankdatei wurde verschoben nach:\n$path';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

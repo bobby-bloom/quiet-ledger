@@ -502,6 +502,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get backupBootTitle => 'Your data could not be opened';
+
+  @override
+  String get backupBootMissingKey =>
+      'The key that unlocks the database is missing on this device. This happens when app data is copied to a new device or restored without the device\'s secure storage.';
+
+  @override
+  String get backupBootNewer =>
+      'The database was created by a newer version of the app. Install the latest version to open it.';
+
+  @override
+  String get backupBootGeneric => 'The database file could not be opened.';
+
+  @override
+  String get backupBootKept =>
+      'Nothing has been deleted. The database file stays on this device.';
+
+  @override
+  String get backupBootDetails => 'Technical details';
+
+  @override
+  String get backupBootStartFresh => 'Start with an empty database';
+
+  @override
+  String get backupBootStartFreshConfirm =>
+      'The current database file is moved to a separate folder, not deleted. The app then starts empty, and you can restore a backup under More › Export & backup.';
+
+  @override
+  String backupBootMoved(String path) {
+    return 'The old database file was moved to:\n$path';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

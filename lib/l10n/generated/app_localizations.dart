@@ -877,6 +877,60 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No accounts} =1{1 account} other{{count} accounts}}'**
   String accountsGroupCount(int count);
 
+  /// No description provided for @backupBootTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data could not be opened'**
+  String get backupBootTitle;
+
+  /// No description provided for @backupBootMissingKey.
+  ///
+  /// In en, this message translates to:
+  /// **'The key that unlocks the database is missing on this device. This happens when app data is copied to a new device or restored without the device\'s secure storage.'**
+  String get backupBootMissingKey;
+
+  /// No description provided for @backupBootNewer.
+  ///
+  /// In en, this message translates to:
+  /// **'The database was created by a newer version of the app. Install the latest version to open it.'**
+  String get backupBootNewer;
+
+  /// No description provided for @backupBootGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The database file could not be opened.'**
+  String get backupBootGeneric;
+
+  /// No description provided for @backupBootKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been deleted. The database file stays on this device.'**
+  String get backupBootKept;
+
+  /// No description provided for @backupBootDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical details'**
+  String get backupBootDetails;
+
+  /// No description provided for @backupBootStartFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with an empty database'**
+  String get backupBootStartFresh;
+
+  /// No description provided for @backupBootStartFreshConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The current database file is moved to a separate folder, not deleted. The app then starts empty, and you can restore a backup under More › Export & backup.'**
+  String get backupBootStartFreshConfirm;
+
+  /// No description provided for @backupBootMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'The old database file was moved to:\n{path}'**
+  String backupBootMoved(String path);
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:
