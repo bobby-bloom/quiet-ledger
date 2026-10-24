@@ -1,0 +1,16 @@
+{
+  "dashCardExpand": "{widget} aufklappen",
+  "dashCardCollapse": "{widget} zuklappen",
+  "dashCardRows": "Zeilen",
+  "dashCardExpansionSetting": "Zugeklappte Dashboard-Widgets",
+  "dashCardBudgetsOver": "{count} drüber",
+  "dashCardBudgetsNear": "{count} fast erreicht",
+  "dashCardBudgetsOnTrack": "Alles im Plan",
+  "dashCardBudgetsCount": "{count, plural, =1{1 Budget} other{{count} Budgets}}",
+  "dashCardUpcomingNext": "Als Nächstes: {name} · {date}",
+  "dashCardUpcomingDue": "{count} fällig in {days, plural, =1{1 Tag} other{{days} Tagen}}",
+  "dashCardAccountsTotal": "{amount} über {count, plural, =1{1 Konto} other{{count} Konten}}",
+  "dashCardGoalsCount": "{count, plural, =1{1 Ziel} other{{count} Ziele}}",
+  "dashCardShareOfSpending": "{percent} der Ausgaben",
+  "dashCardLatest": "Zuletzt: {name}"
+}

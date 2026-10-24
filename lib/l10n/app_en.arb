@@ -1332,6 +1332,106 @@
   "privacyToggle": "Hide amounts",
   "moreTemplates": "Templates",
   "bootErrorTitle": "The database could not be opened",
+  "dashCardExpand": "Expand {widget}",
+  "dashCardCollapse": "Collapse {widget}",
+  "dashCardRows": "Rows",
+  "dashCardExpansionSetting": "Folded dashboard widgets",
+  "dashCardBudgetsOver": "{count} over",
+  "dashCardBudgetsNear": "{count} near limit",
+  "dashCardBudgetsOnTrack": "All on track",
+  "dashCardBudgetsCount": "{count, plural, =1{1 budget} other{{count} budgets}}",
+  "dashCardUpcomingNext": "Next: {name} · {date}",
+  "dashCardUpcomingDue": "{count} due in {days, plural, =1{1 day} other{{days} days}}",
+  "dashCardAccountsTotal": "{amount} across {count, plural, =1{1 account} other{{count} accounts}}",
+  "dashCardGoalsCount": "{count, plural, =1{1 goal} other{{count} goals}}",
+  "dashCardShareOfSpending": "{percent} of spending",
+  "dashCardLatest": "Latest: {name}",
+  "@dashCardExpand": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashCardCollapse": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashCardBudgetsOver": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardBudgetsNear": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardBudgetsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardUpcomingNext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashCardUpcomingDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardAccountsTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardGoalsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashCardShareOfSpending": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashCardLatest": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "dashWidgetOptions": "Widget options",
   "dashNetWorth": "Net worth",
   "dashThisMonth": "this month",

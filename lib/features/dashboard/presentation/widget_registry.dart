@@ -33,7 +33,41 @@ IconData widgetIcon(DashboardWidgetType t) => switch (t) {
   DashboardWidgetType.recentTransactions => Icons.receipt_long_outlined,
 };
 
-/// Widget-specific entries for the options menu.
+/// Row counts a list widget offers in its "⋮" (Rows 3 · 5 · 10, plus the
+/// widget's own default where that is not one of them), or null for widgets
+/// that are not lists. The default is today's length.
+({List<int> values, int defaultValue})? rowChoices(DashboardWidgetType t) =>
+    switch (t) {
+      DashboardWidgetType.budgets || DashboardWidgetType.upcomingBills => (
+        values: const [3, 4, 5, 10],
+        defaultValue: 4,
+      ),
+      DashboardWidgetType.goals => (values: const [3, 5, 10], defaultValue: 3),
+      DashboardWidgetType.topCategories ||
+      DashboardWidgetType.recentTransactions => (
+        values: const [3, 5, 10],
+        defaultValue: 5,
+      ),
+      DashboardWidgetType.accounts => (
+        values: const [3, 5, 8, 10],
+        defaultValue: 8,
+      ),
+      DashboardWidgetType.netWorth ||
+      DashboardWidgetType.monthSummary ||
+      DashboardWidgetType.forecast => null,
+    };
+
+/// Rows a list widget shows: `options['limit']` when it is positive, else
+/// the widget's default; null for widgets that are not lists.
+int? rowLimit(DashboardItem item) {
+  final choices = rowChoices(item.type);
+  if (choices == null) return null;
+  final v = item.options['limit'];
+  return v is num && v >= 1 && v <= 50 ? v.toInt() : choices.defaultValue;
+}
+
+/// Widget-specific entries for the options menu: the forecast's account and,
+/// for lists, the Rows group.
 List<DashOption> widgetOptions(
   BuildContext context,
   WidgetRef ref,
@@ -41,8 +75,10 @@ List<DashOption> widgetOptions(
   ValueChanged<DashboardItem> update,
 ) {
   final l = context.l10n;
-  return switch (item.type) {
-    DashboardWidgetType.forecast => [
+  final choices = rowChoices(item.type);
+  final limit = rowLimit(item);
+  return [
+    if (item.type == DashboardWidgetType.forecast)
       DashOption(l.dashChooseAccount, Icons.account_balance_outlined, () async {
         final id = await showAccountPicker(
           context,
@@ -52,9 +88,16 @@ List<DashOption> widgetOptions(
           update(item.copyWith(options: {...item.options, 'accountId': id}));
         }
       }),
-    ],
-    _ => const [],
-  };
+    if (choices != null)
+      for (final n in choices.values)
+        DashOption(
+          '$n',
+          Icons.format_list_numbered,
+          () => update(item.copyWith(options: {...item.options, 'limit': n})),
+          group: l.dashCardRows,
+          checked: n == limit,
+        ),
+  ];
 }
 
 Widget buildDashboardWidget(
@@ -63,23 +106,38 @@ Widget buildDashboardWidget(
   required bool compact,
   required List<DashOption> options,
 }) {
+  // Non-null for every list widget below.
+  final limit = rowLimit(item) ?? 0;
   return switch (item.type) {
     DashboardWidgetType.netWorth => NetWorthWidget(
       card: !compact,
       options: options,
     ),
     DashboardWidgetType.monthSummary => MonthSummaryWidget(options: options),
-    DashboardWidgetType.topCategories => TopCategoriesWidget(options: options),
+    DashboardWidgetType.topCategories => TopCategoriesWidget(
+      options: options,
+      limit: limit,
+    ),
     DashboardWidgetType.forecast => MiniForecastWidget(
       accountId: item.options['accountId'] as String?,
       options: options,
     ),
-    DashboardWidgetType.accounts => AccountsWidget(options: options),
-    DashboardWidgetType.budgets => BudgetsWidget(options: options),
-    DashboardWidgetType.upcomingBills => UpcomingBillsWidget(options: options),
-    DashboardWidgetType.goals => GoalsWidget(options: options),
+    DashboardWidgetType.accounts => AccountsWidget(
+      options: options,
+      limit: limit,
+    ),
+    DashboardWidgetType.budgets => BudgetsWidget(
+      options: options,
+      limit: limit,
+    ),
+    DashboardWidgetType.upcomingBills => UpcomingBillsWidget(
+      options: options,
+      limit: limit,
+    ),
+    DashboardWidgetType.goals => GoalsWidget(options: options, limit: limit),
     DashboardWidgetType.recentTransactions => RecentTransactionsWidget(
       options: options,
+      limit: limit,
     ),
   };
 }
