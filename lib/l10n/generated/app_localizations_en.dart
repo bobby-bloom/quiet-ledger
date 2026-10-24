@@ -724,10 +724,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupPasswordMismatch => 'The passwords do not match';
 
   @override
-  String get backupPasswordMissing =>
-      'Backups are paused until you set a backup password.';
-
-  @override
   String get backupPasswordNewRecovery => 'New recovery key';
 
   @override
@@ -735,10 +731,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupPasswordRepeat => 'Repeat the password';
-
-  @override
-  String get backupPasswordRequired =>
-      'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.';
 
   @override
   String get backupPasswordSet => 'Set backup password';
@@ -869,6 +861,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupFolderMissing =>
       'The backup folder was not found. Connect the drive it is on, or choose the folder again.';
+
+  @override
+  String get backupUnencryptedWarning =>
+      'Backups are not encrypted. Anyone who gets a backup file can read all your financial data.';
+
+  @override
+  String get backupSavedUnencrypted =>
+      'Not encrypted: anyone who has the file can read it.';
 
   @override
   String get budgetsTitle => 'Budgets';

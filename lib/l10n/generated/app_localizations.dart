@@ -1225,12 +1225,6 @@ abstract class AppLocalizations {
   /// **'The passwords do not match'**
   String get backupPasswordMismatch;
 
-  /// No description provided for @backupPasswordMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'Backups are paused until you set a backup password.'**
-  String get backupPasswordMissing;
-
   /// No description provided for @backupPasswordNewRecovery.
   ///
   /// In en, this message translates to:
@@ -1248,12 +1242,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repeat the password'**
   String get backupPasswordRepeat;
-
-  /// No description provided for @backupPasswordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.'**
-  String get backupPasswordRequired;
 
   /// No description provided for @backupPasswordSet.
   ///
@@ -1458,6 +1446,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The backup folder was not found. Connect the drive it is on, or choose the folder again.'**
   String get backupFolderMissing;
+
+  /// No description provided for @backupUnencryptedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are not encrypted. Anyone who gets a backup file can read all your financial data.'**
+  String get backupUnencryptedWarning;
+
+  /// No description provided for @backupSavedUnencrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encrypted: anyone who has the file can read it.'**
+  String get backupSavedUnencrypted;
 
   /// No description provided for @budgetsTitle.
   ///

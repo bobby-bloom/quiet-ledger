@@ -20,6 +20,7 @@ import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/export/presentation/backup_password_screen.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 
 import '../../helpers/test_app.dart';
 import 'auto_export_test.dart' show caps;
@@ -33,7 +34,7 @@ void main() {
     keys = await createBackupKeys('correct horse', recovery, iterations: 1000);
   });
 
-  group('backups with a password', () {
+  group('backup encryption', () {
     late AppDatabase db;
     late MemoryExportFolder folder;
 
@@ -44,11 +45,10 @@ void main() {
     });
     tearDown(() => db.close());
 
-    ProviderContainer container({bool required = false}) {
+    ProviderContainer container() {
       final c = testContainer(
         db,
         overrides: [
-          backupEncryptionRequiredProvider.overrideWithValue(required),
           platformCapabilitiesProvider.overrideWithValue(caps(folders: true)),
           exportFolderFactoryProvider.overrideWithValue((path) => folder),
           notificationServiceProvider.overrideWithValue(
@@ -60,39 +60,33 @@ void main() {
       return c;
     }
 
-    test('no password, not required: a plain bundle', () async {
+    test('no password: a plain bundle', () async {
       final b = await createVerifiedBackup(container().read);
       expect(b.encrypted, isFalse);
       expect(b.extension, '.zip');
     });
 
-    test('no password but required: refused, never written plain', () async {
-      final c = container(required: true);
-      await expectLater(
-        createVerifiedBackup(c.read),
-        throwsA(isA<BackupPasswordMissingException>()),
-      );
-
+    test('no password: scheduled backups still run, plain', () async {
+      // Even with the app lock on: a missing password only warns, it never
+      // stops a backup.
+      final c = container();
       final s = c.read(settingsProvider.notifier);
+      await s.set(SecuritySettings.appLock, true);
       await s.set(ImportExportSettings.autoExport, AutoExportSchedule.daily);
       await s.set(ImportExportSettings.autoExportFolder, '/b');
-      final r = await runAutoExportNow(c.read);
-      expect(r.written, isFalse);
-      expect(folder.files, isEmpty);
-      expect(
-        c.read(settingsProvider).get(BackupSettings.lastError),
-        contains('Sicherungspasswort'), // fixture language: German
-      );
-      c.listen(hasLedgerDataProvider, (_, _) {});
-      await c.read(hasLedgerDataProvider.future);
-      await c.read(backupKeyringProvider.future);
-      expect(c.read(backupHealthProvider).status, BackupStatus.needsPassword);
+
+      final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
+      expect(r.written, isTrue);
+      expect(r.fileName, endsWith('.zip'));
+      expect(isEncryptedBackup(folder.files.values.single), isFalse);
+      expect(c.read(settingsProvider).get(BackupSettings.lastError), isNull);
+      expect(c.read(backupHealthProvider).status, isNot(BackupStatus.failing));
     });
 
     test(
       'with a password: encrypted, verified, restorable elsewhere',
       () async {
-        final c = container(required: true);
+        final c = container();
         await c.read(backupKeyRepositoryProvider).save(keys);
         final s = c.read(settingsProvider.notifier);
         await s.set(ImportExportSettings.autoExport, AutoExportSchedule.daily);
@@ -272,6 +266,58 @@ void main() {
       expect(sameKey(kek!, ring!.current.recoveryKek), isTrue);
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 1));
+    });
+
+    testWidgets('without a password: warned, gone once one is set', (
+      tester,
+    ) async {
+      const warning =
+          'Backups are not encrypted. Anyone who gets a backup file can '
+          'read all your financial data.';
+      await pump(
+        tester,
+        Scaffold(
+          body: Consumer(
+            builder: (context, ref, _) => Column(
+              children: [
+                const UnencryptedBackupNotice(),
+                FilledButton(
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    backupSavedSnackBar(context, 'Saved', encrypted: false),
+                  ),
+                  child: const Text('saved'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.text(warning), findsOneWidget);
+      expect(find.text('Set backup password'), findsOneWidget);
+
+      await tester.tap(find.text('saved'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Saved\nNot encrypted: anyone who has the file can read it.'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(SnackBarAction, 'Set backup password'),
+        findsOneWidget,
+      );
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(UnencryptedBackupNotice)),
+      );
+      await tester.runAsync(
+        () => container.read(backupKeyRepositoryProvider).save(keys),
+      );
+      container.invalidate(backupKeyringProvider);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(warning), findsNothing);
     });
 
     testWidgets('restore asks for the password of a foreign backup', (

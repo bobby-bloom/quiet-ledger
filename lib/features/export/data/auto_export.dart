@@ -13,7 +13,6 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/sync_providers.dart';
 import 'package:personal_finance/core/sync/tombstone_purge.dart'
     show countPurgeableTombstones;
-import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
@@ -158,7 +157,7 @@ Future<AutoExportResult> _runAutoExport(
 }
 
 /// Forgets a scheduled backup failure, so the next run is due right away
-/// (a success, a new folder, a new backup password).
+/// (a success, a new folder).
 Future<void> clearBackupFailure(ProviderReader read) async {
   final settings = read(settingsProvider.notifier);
   await settings.reset(BackupSettings.lastError);
@@ -189,7 +188,6 @@ Future<void> _recordFailure(
     await settings.set(BackupSettings.lastError, switch (error) {
       BackupFolderAccessException() => l.backupFolderAccessLost,
       BackupFolderMissingException() => l.backupFolderMissing,
-      BackupPasswordMissingException() => l.backupPasswordMissing,
       _ => '$error',
     });
     if (!first) return;
@@ -198,7 +196,6 @@ Future<void> _recordFailure(
       await service.showBackupProblem(
         title: l.backupNotifyFailedTitle,
         body: switch (error) {
-          BackupPasswordMissingException() => l.backupPasswordMissing,
           BackupFolderAccessException() => l.backupFolderAccessLost,
           BackupFolderMissingException() => l.backupFolderMissing,
           _ => l.backupNotifyFailedBody,

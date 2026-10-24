@@ -736,10 +736,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get backupPasswordMismatch => 'Die Passwörter stimmen nicht überein';
 
   @override
-  String get backupPasswordMissing =>
-      'Sicherungen sind pausiert, bis du ein Sicherungspasswort festlegst.';
-
-  @override
   String get backupPasswordNewRecovery => 'Neuer Wiederherstellungsschlüssel';
 
   @override
@@ -747,10 +743,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupPasswordRepeat => 'Passwort wiederholen';
-
-  @override
-  String get backupPasswordRequired =>
-      'Erforderlich: Die App-Sperre oder die Datenbankverschlüsselung ist aktiv, und eine unverschlüsselte Sicherung würde sie umgehen.';
 
   @override
   String get backupPasswordSet => 'Sicherungspasswort festlegen';
@@ -884,6 +876,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get backupFolderMissing =>
       'Der Sicherungsordner wurde nicht gefunden. Schließe das Laufwerk an, auf dem er liegt, oder wähle den Ordner erneut aus.';
+
+  @override
+  String get backupUnencryptedWarning =>
+      'Sicherungen sind nicht verschlüsselt. Wer eine Sicherungsdatei bekommt, kann alle deine Finanzdaten lesen.';
+
+  @override
+  String get backupSavedUnencrypted =>
+      'Nicht verschlüsselt: Wer die Datei hat, kann sie lesen.';
 
   @override
   String get budgetsTitle => 'Budgets';

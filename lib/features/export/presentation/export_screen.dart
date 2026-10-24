@@ -22,6 +22,7 @@ import 'package:personal_finance/features/export/presentation/csv_options_sheet.
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 import 'package:personal_finance/features/export/presentation/folder_backups.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 
 /// Rows shown in the preview.
 const _previewRows = 20;
@@ -642,6 +643,7 @@ class _BackupCard extends ConsumerWidget {
                 ],
               ),
             ),
+          const UnencryptedBackupNotice(showAction: false),
           Wrap(
             alignment: WrapAlignment.end,
             spacing: Space.xs,

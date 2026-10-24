@@ -126,7 +126,7 @@ your tests: `flutter test test/features/<yours>`.
 (backed up) or `backupExcludedTables`; a test enforces it. Operations that
 replace, merge or hard-delete data run inside
 `withSafetyCopy(read, SafetyReason.x, ...)`. Backups that leave the device
-are made only by `createVerifiedBackup` (encryption policy, verification)
+are made only by `createVerifiedBackup` (encryption when a password is set, verification)
 and opened by `openBackup`. Device-specific settings are marked
 `deviceLocal: true` and listed in `allSettings`: they are never synced
 (written without a `change_log` entry, skipped by `SyncEngine` both ways)

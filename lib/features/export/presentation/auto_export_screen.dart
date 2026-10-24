@@ -17,6 +17,7 @@ import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 import 'package:personal_finance/features/export/presentation/folder_backups.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 
 /// Automatic backup settings (`/more/export/folder`): schedule, folder,
 /// retention, last run and "Back up now". Native platforms only.
@@ -161,6 +162,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                         ),
                       ),
                       const SizedBox(height: Space.md),
+                      const UnencryptedBackupNotice(),
                       Text(
                         l.exportAutoSchedule,
                         style: context.text.labelLarge?.copyWith(

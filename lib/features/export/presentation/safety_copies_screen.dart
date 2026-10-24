@@ -10,11 +10,11 @@ import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
-import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 String safetyReasonLabel(AppLocalizations l, SafetyReason? r) => switch (r) {
@@ -96,15 +96,18 @@ class _SafetyCopiesScreenState extends ConsumerState<SafetyCopiesScreen> {
       );
       final backup = await createVerifiedBackup(ref.read, zip: zip);
       final stamp = DateFormat('yyyyMMdd-HHmmss').format(c.createdAt.toLocal());
-      await saveOrShareBytes(
+      final r = await saveOrShareBytes(
         bytes: backup.bytes,
         fileName: 'personal-finance-safety-$stamp${backup.extension}',
         mimeType: backup.mimeType,
         capabilities: ref.read(platformCapabilitiesProvider),
         sharePositionOrigin: origin,
       );
-    } on BackupPasswordMissingException {
-      messenger.showSnackBar(SnackBar(content: Text(l.backupPasswordMissing)));
+      if (r.ok && !backup.encrypted && mounted) {
+        messenger.showSnackBar(
+          backupSavedSnackBar(context, '', encrypted: false),
+        );
+      }
     } on Object catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(l.exportFailed('$e'))));
     }
