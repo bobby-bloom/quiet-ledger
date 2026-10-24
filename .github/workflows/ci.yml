@@ -3,14 +3,21 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
+  # Release tags run CI through release.yml, which passes the tag here.
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
 
 jobs:
   analyze-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -19,8 +26,8 @@ jobs:
       - run: flutter pub get
       - run: dart run tool/l10n.dart --check
       - run: dart run tool/version.dart --check
-      - if: startsWith(github.ref, 'refs/tags/v')
-        run: dart run tool/version.dart --check --tag "$GITHUB_REF_NAME"
+      - if: inputs.tag
+        run: dart run tool/version.dart --check --tag "${{ inputs.tag }}"
       - run: dart run build_runner build
       - run: dart format --output=none --set-exit-if-changed lib test tool
       - run: flutter analyze --no-fatal-infos
@@ -28,6 +35,8 @@ jobs:
 
   build:
     needs: analyze-test
+    # A release builds its selected platforms itself, in release mode.
+    if: ${{ !inputs.tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +50,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -61,6 +72,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
       - uses: subosito/flutter-action@v2
         with:
           channel: stable

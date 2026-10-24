@@ -1,0 +1,248 @@
+name: Release
+
+# Pushing a tag vMAJOR.MINOR.PATCH (on a commit in main, matching
+# pubspec.yaml) runs CI and publishes a GitHub release. A tag push builds the
+# platforms in the repository variable RELEASE_PLATFORMS (comma separated,
+# default: all); a manual run picks them and can add builds to an existing
+# release. See docs/VERSIONING.md.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag, e.g. v0.2.0
+        required: true
+        type: string
+      android:
+        description: Android (APK)
+        type: boolean
+        default: true
+      linux:
+        description: Linux (x64 tar.gz)
+        type: boolean
+        default: true
+      windows:
+        description: Windows (x64 zip)
+        type: boolean
+        default: true
+      macos:
+        description: macOS (unsigned zip)
+        type: boolean
+        default: true
+      web:
+        description: Web (zip)
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  GH_REPO: ${{ github.repository }}
+
+# Explicit bash adds pipefail, and gives Windows runners the same shell.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      version: ${{ steps.check.outputs.version }}
+      matrix: ${{ steps.check.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+      - id: check
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+          EVENT: ${{ github.event_name }}
+          DEFAULT_PLATFORMS: ${{ vars.RELEASE_PLATFORMS }}
+          IN_ANDROID: ${{ inputs.android }}
+          IN_LINUX: ${{ inputs.linux }}
+          IN_WINDOWS: ${{ inputs.windows }}
+          IN_MACOS: ${{ inputs.macos }}
+          IN_WEB: ${{ inputs.web }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::\"$TAG\" is not a vMAJOR.MINOR.PATCH tag."
+            exit 1
+          fi
+          if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::Tag $TAG does not exist."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$(git rev-list -n 1 "$TAG")" origin/main; then
+            echo "::error::$TAG is not on main. Tag a commit that is on main."
+            exit 1
+          fi
+
+          if [ "$EVENT" = workflow_dispatch ]; then
+            platforms=""
+            [ "$IN_ANDROID" = true ] && platforms+=" android"
+            [ "$IN_LINUX" = true ] && platforms+=" linux"
+            [ "$IN_WINDOWS" = true ] && platforms+=" windows"
+            [ "$IN_MACOS" = true ] && platforms+=" macos"
+            [ "$IN_WEB" = true ] && platforms+=" web"
+          else
+            platforms="${DEFAULT_PLATFORMS:-android linux windows macos web}"
+          fi
+          matrix=$(
+            for p in ${platforms//,/ }; do
+              case "$p" in
+                android | linux | web) os=ubuntu-latest ;;
+                windows) os=windows-latest ;;
+                macos) os=macos-latest ;;
+                *) echo "::error::Unknown platform \"$p\" (android, linux, windows, macos, web)." >&2; exit 1 ;;
+              esac
+              jq -nc --arg target "$p" --arg os "$os" '{target: $target, os: $os}'
+            done | jq -sc 'unique_by(.target) | {include: .}'
+          )
+          if [ "$(jq '.include | length' <<<"$matrix")" = 0 ]; then
+            echo "::error::No platform selected."
+            exit 1
+          fi
+
+          echo "Releasing $TAG for: $(jq -r '[.include[].target] | join(", ")' <<<"$matrix")"
+          {
+            echo "tag=$TAG"
+            echo "version=${TAG#v}"
+            echo "matrix=$matrix"
+          } >> "$GITHUB_OUTPUT"
+
+  ci:
+    needs: prepare
+    uses: ./.github/workflows/ci.yml
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+
+  build:
+    needs: [prepare, ci]
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    env:
+      NAME: quiet-ledger-${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.x
+          cache: true
+      - if: matrix.target == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev libsecret-1-dev
+      - if: matrix.target == 'android'
+        uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - if: matrix.target == 'android'
+        name: Android signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set: the APK is signed with a throwaway debug key and cannot update an earlier install."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+          printf '%s\n' \
+            "storeFile=release.jks" \
+            "storePassword=$KEYSTORE_PASSWORD" \
+            "keyAlias=$KEY_ALIAS" \
+            "keyPassword=$KEY_PASSWORD" > android/key.properties
+      - run: flutter pub get
+      - run: dart run tool/l10n.dart
+      - run: dart run build_runner build
+      - run: mkdir dist
+
+      - if: matrix.target == 'linux'
+        run: |
+          flutter build linux --release
+          cp -r build/linux/x64/release/bundle "$NAME"
+          tar -czf "dist/$NAME-linux-x64.tar.gz" "$NAME"
+      - if: matrix.target == 'web'
+        run: |
+          flutter build web --release
+          (cd build/web && zip -qr "../../dist/$NAME-web.zip" .)
+      - if: matrix.target == 'android'
+        run: |
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/$NAME-android.apk"
+      - if: matrix.target == 'windows'
+        run: |
+          flutter build windows --release
+          cp -r build/windows/x64/runner/Release "$NAME"
+          # App-local VC++ runtime, so users need no separate redistributable.
+          cp /c/Windows/System32/{msvcp140,vcruntime140,vcruntime140_1}.dll "$NAME/"
+          7z a -tzip "dist/$NAME-windows-x64.zip" "$NAME" > /dev/null
+      - if: matrix.target == 'macos'
+        run: |
+          flutter build macos --release
+          ditto -c -k --keepParent build/macos/Build/Products/Release/personal_finance.app "dist/$NAME-macos.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: dist-*
+          merge-multiple: true
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v head="## [$VERSION]" \
+            'index($0, head) == 1 { on = 1; next } on && /^## \[/ { exit } on' \
+            CHANGELOG.md > notes.md
+          cat notes.md
+      - name: Publish
+        run: |
+          state=$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null || echo none)
+          if [ "$state" = false ]; then
+            # Already published: add or replace these builds, merge checksums.
+            gh release download "$TAG" -p SHA256SUMS.txt -O old-sums.txt 2>/dev/null || touch old-sums.txt
+            (cd dist && sha256sum *) | cat old-sums.txt - |
+              awk '{ sums[$2] = $0 } END { for (f in sums) print sums[f] }' |
+              sort -k 2 > dist/SHA256SUMS.txt
+            gh release upload "$TAG" dist/* --clobber
+            exit 0
+          fi
+          if [ "$state" = true ]; then
+            gh release delete "$TAG" --yes   # draft left by a failed run
+          fi
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          # Upload as a draft first so a failed upload never shows up as a release.
+          gh release create "$TAG" dist/* \
+            --draft \
+            --verify-tag \
+            --title "Quiet Ledger $VERSION" \
+            --notes-file notes.md
+          gh release edit "$TAG" --draft=false

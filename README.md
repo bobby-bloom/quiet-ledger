@@ -186,8 +186,13 @@ migration at least a minor one.
 
 ```sh
 dart run tool/version.dart bump minor   # major | minor | patch | build
-git commit -am "Release X.Y.Z" && git tag -a vX.Y.Z -m vX.Y.Z
+git commit -am "Release X.Y.Z" && git push
+git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z
 ```
+
+The tag push runs CI and publishes a GitHub release with Android, Linux,
+Windows, macOS and web builds; platforms are selectable (see
+[`docs/VERSIONING.md`](docs/VERSIONING.md#releasing)).
 
 ## Known limitations
 
