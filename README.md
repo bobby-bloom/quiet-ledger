@@ -82,9 +82,18 @@ no telemetry, no cloud dependency.
   number formats, debit/credit columns and subtotal rows. It also checks a
   running-balance column, detects transfers and duplicates, and supports
   re-usable import profiles and fully undoable import batches.
-- **CSV export** of transactions, reports or everything as a zip bundle that
-  doubles as a full backup and can be restored. Scheduled auto-export can
-  write to a folder that a cloud client syncs.
+- **CSV export** of transactions and reports.
+- **Backups that do not lose data** ([`docs/BACKUP.md`](docs/BACKUP.md)):
+  - everything, receipt files included, in one verified file;
+  - encrypted with a backup password plus a recovery key, required while
+    the app lock or database encryption is on;
+  - scheduled to a folder (on Android, iOS and macOS also a cloud
+    provider's folder) and read back after writing;
+  - warnings when a backup fails or gets old;
+  - automatic safety copies before restore, reset, import undo, merges and
+    purges, restorable from the app;
+  - a copy of the database before every schema migration.
+  - Restore checks every byte, shows what changes, and can be undone.
 
 ### Privacy & personalisation
 - Encrypted SQLite database (SQLite3MultipleCiphers) with the key in the OS
@@ -172,6 +181,8 @@ only for version tags, as the first step of the release (see
 - [`PLAN.md`](PLAN.md): product plan and full feature scope
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): code conventions (read
   before contributing)
+- [`docs/BACKUP.md`](docs/BACKUP.md): backup format, encryption, safety
+  copies and the data-safety rules
 - [`docs/VERSIONING.md`](docs/VERSIONING.md): versioning policy and release
   steps
 - [`docs/design/`](docs/design/): the "Quiet Ledger" design draft, one file
@@ -199,8 +210,11 @@ Windows, macOS and web builds; platforms are selectable (see
 
 - Web database encryption is implemented but not yet verified in a real
   browser; the web key is only as safe as the browser profile.
-- Android auto-export to a picked folder may need a Storage Access Framework
-  writer under scoped storage.
+- The Android backup-folder channel compiles but still needs testing on
+  devices with local and cloud folders; the iOS and macOS folder channels
+  have not been compiled yet.
+- Backups are built in memory; very large receipt collections need that much
+  free memory.
 - Linux cannot schedule notifications (plugin limitation); immediate alerts
   work.
 - iOS, macOS and Windows builds have only been compiled in CI so far.

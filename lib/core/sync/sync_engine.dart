@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
 import 'package:personal_finance/core/db/database.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/sync/change.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
 import 'package:personal_finance/core/sync/raw_rows.dart';
@@ -90,6 +91,12 @@ class SyncEngine {
     return SyncResult(pushed: pushed, pulled: pulled);
   }
 
+  /// Device-local settings (`SettingDef.deviceLocal`) are never sent or
+  /// taken over. `SyncWriter` does not log them; this also covers entries
+  /// logged before a setting became device-local.
+  static bool _deviceLocal(String entity, String id) =>
+      entity == 'settings' && isDeviceLocalSettingRow(id);
+
   /// Number of local changes not yet pushed.
   Future<int> unsyncedCount() async {
     final rows = await db
@@ -141,7 +148,8 @@ class SyncEngine {
 
     for (final e in entries) {
       if (!_tables.containsKey(e.entity) ||
-          childSetTables.containsKey(e.entity)) {
+          childSetTables.containsKey(e.entity) ||
+          _deviceLocal(e.entity, e.entityId)) {
         continue;
       }
       final change = Change.fromLogEntry(e, originDeviceId: deviceId);
@@ -287,6 +295,7 @@ class SyncEngine {
       for (final c in changes) {
         final table = _tables[c.entity];
         if (table == null) continue; // unknown entity (newer schema)
+        if (_deviceLocal(c.entity, c.entityId)) continue;
         clock.receive(c.hlc);
         final merged =
             c.op == SyncOp.replaceSet && childSetTables.containsKey(c.entity)

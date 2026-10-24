@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,22 +7,33 @@ import 'package:intl/intl.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
+import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/features/export/data/auto_export.dart';
+import 'package:personal_finance/features/export/data/backup_keys.dart';
+import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
+import 'package:personal_finance/features/export/domain/backup_crypto.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
+import 'package:personal_finance/features/export/presentation/backup_password_screen.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 
-/// File name for a manual backup.
-String backupFileName(DateTime now) =>
-    'personal-finance-backup-${DateFormat('yyyyMMdd-HHmmss').format(now)}.zip';
+/// File name for a manual backup (`.zip`, or `.pfbackup` when encrypted).
+/// Differs from the scheduled backups' names, so retention never deletes a
+/// backup saved by hand into the backup folder.
+String backupFileName(DateTime now, [String extension = '.zip']) =>
+    'personal-finance-manual-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
+    '$extension';
 
 /// Creates a verified backup and hands it to save/share/download. Returns
-/// the save outcome, or null on error (a snackbar is shown).
+/// the save outcome, or null on error (a snackbar is shown). When a backup
+/// password is required but missing, the password setup opens instead.
 Future<SaveResult?> createBackup(
   BuildContext context,
   WidgetRef ref, {
@@ -30,62 +42,161 @@ Future<SaveResult?> createBackup(
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
   try {
-    final db = ref.read(databaseProvider);
-    final bytes = await exportBundle(db, deviceId: ref.read(deviceIdProvider));
-    final check = readBundle(db, bytes);
+    final backup = await createVerifiedBackup(ref.read);
     final r = await saveOrShareBytes(
-      bytes: bytes,
-      fileName: backupFileName(DateTime.now()),
-      mimeType: 'application/zip',
+      bytes: backup.bytes,
+      fileName: backupFileName(DateTime.now(), backup.extension),
+      mimeType: backup.mimeType,
       capabilities: ref.read(platformCapabilitiesProvider),
       sharePositionOrigin: origin,
     );
     if (r.ok) {
+      await recordVerifiedBackup(ref.read);
       messenger?.showSnackBar(
-        SnackBar(content: Text(l.exportBackupDone(check.manifest.totalRows))),
+        SnackBar(
+          content: Text(
+            backup.manifest.missingFiles.isEmpty
+                ? l.exportBackupDone(backup.manifest.totalRows)
+                : l.backupMissingReceipts(backup.manifest.missingFiles.length),
+          ),
+        ),
       );
     }
     return r;
+  } on BackupPasswordMissingException {
+    messenger?.showSnackBar(SnackBar(content: Text(l.backupPasswordMissing)));
+    if (context.mounted) await startBackupPasswordSetup(context, ref);
+    return null;
   } on Object catch (e) {
     messenger?.showSnackBar(SnackBar(content: Text(l.exportFailed('$e'))));
     return null;
   }
 }
 
-/// Pick → validate → summary → confirm (destructive, optional safety
-/// backup) → restore in one transaction → refresh.
+/// Lets the user pick a backup file. Mobile pickers know no MIME type for
+/// `.pfbackup`, so there any file is offered and the content decides.
+Future<PickedFile?> pickBackupFile(WidgetRef ref) => pickFileBytes(
+  extensions: ref.read(platformCapabilitiesProvider).isMobile
+      ? null
+      : const ['zip', 'pfbackup'],
+);
+
+/// Opens [file] (picked when null) without restoring and reports whether
+/// it is a complete, readable backup ("Check a backup").
+Future<void> checkBackupFile(
+  BuildContext context,
+  WidgetRef ref, {
+  PickedFile? file,
+}) async {
+  final l = context.l10n;
+  final picked = file ?? await pickBackupFile(ref);
+  if (picked == null || !context.mounted) return;
+  final contents = await openPickedBackup(context, ref, picked.bytes);
+  if (contents == null || !context.mounted) return;
+  final m = contents.manifest;
+  final dates = ref.read(dateFormatsProvider);
+  final created = m.createdAt.toLocal();
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      icon: Icon(Icons.verified_outlined, color: ctx.colors.primary),
+      title: Text(l.backupCheckOk),
+      content: Text(
+        l.backupCheckOkDesc(
+          picked.name,
+          '${dates.medium(created)} ${dates.time(created)}',
+          m.totalRows,
+          m.fileCount,
+        ),
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l.commonClose),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Opens a picked backup: plain bundles directly, encrypted ones with the
+/// keys on this device or, failing that, the password / recovery key the
+/// user types (asked again after a wrong one). Shows errors; null when it
+/// cannot be opened or the user gives up.
+Future<BundleContents?> openPickedBackup(
+  BuildContext context,
+  WidgetRef ref,
+  Uint8List bytes,
+) async {
+  final l = context.l10n;
+  Future<void> fail(String message) => showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      icon: Icon(Icons.error_outline, color: ctx.colors.error),
+      title: Text(l.exportErrTitle),
+      content: Text(message),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l.commonClose),
+        ),
+      ],
+    ),
+  );
+
+  BackupUnlock? unlock;
+  String? wrong;
+  for (;;) {
+    try {
+      return await openBackup(
+        ref.read,
+        bytes,
+        password: unlock?.password,
+        recoveryKey: unlock?.recoveryKey,
+      );
+    } on BundleException catch (e) {
+      if (context.mounted) await fail(bundleErrorMessage(l, e));
+      return null;
+    } on BackupCryptoException catch (e) {
+      if (!context.mounted) return null;
+      if (e.error != BackupCryptoError.wrongKey) {
+        await fail(switch (e.error) {
+          BackupCryptoError.newerVersion => l.exportErrNewerFormat,
+          BackupCryptoError.damaged => l.backupErrDamaged,
+          _ => l.exportErrNotBundle,
+        });
+        return null;
+      }
+      unlock = await askBackupUnlock(context, error: wrong);
+      if (unlock == null) return null;
+      wrong = l.backupUnlockWrong;
+    } on Object catch (e) {
+      // Never an unhandled error for a file the user picked.
+      if (context.mounted) await fail(l.commonError('$e'));
+      return null;
+    }
+  }
+}
+
+/// Pick → validate → summary → confirm (destructive, optional backup saved
+/// elsewhere) → safety copy on this device → restore in one transaction →
+/// refresh. Without a safety copy nothing is restored.
+/// [file] skips the file picker (a backup from the backup folder).
 Future<void> startRestore(
   BuildContext context,
   WidgetRef ref, {
   Rect? origin,
+  PickedFile? file,
 }) async {
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
-  final picked = await pickFileBytes(extensions: const ['zip']);
+  final picked = file ?? await pickBackupFile(ref);
   if (picked == null || !context.mounted) return;
 
   final db = ref.read(databaseProvider);
-  BundleContents contents;
-  try {
-    contents = readBundle(db, picked.bytes);
-  } on BundleException catch (e) {
-    if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: Icon(Icons.error_outline, color: ctx.colors.error),
-        title: Text(l.exportErrTitle),
-        content: Text(bundleErrorMessage(l, e)),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l.commonClose),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
+  final contents = await openPickedBackup(context, ref, picked.bytes);
+  if (contents == null || !context.mounted) return;
+  final newer = await rowsChangedAfter(db, contents);
   if (!context.mounted) return;
 
   final backupFirst = await showDialog<bool>(
@@ -93,6 +204,7 @@ Future<void> startRestore(
     builder: (ctx) => _RestoreSummaryDialog(
       manifest: contents.manifest,
       fileName: picked.name,
+      newerRows: newer,
       thisDevice: contents.manifest.deviceId == ref.read(deviceIdProvider),
     ),
   );
@@ -129,14 +241,24 @@ Future<void> startRestore(
     ),
   ).ignore();
   try {
-    final rows = await restoreBundle(
-      db,
-      contents,
-      clock: ref.read(hlcClockProvider),
+    final rows = await withSafetyCopy(
+      ref.read,
+      SafetyReason.restore,
+      () => restoreBundle(
+        db,
+        contents,
+        clock: ref.read(hlcClockProvider),
+        receipts: ref.read(receiptStoreProvider),
+      ),
     );
     navigator.pop();
     await refreshAfterDataReplace(ref);
     messenger?.showSnackBar(SnackBar(content: Text(l.exportRestoreDone(rows))));
+  } on SafetyCopyException catch (e) {
+    navigator.pop();
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l.backupSafetyFailed('${e.cause}'))),
+    );
   } on Object catch (e) {
     navigator.pop();
     messenger?.showSnackBar(
@@ -178,11 +300,15 @@ Future<void> refreshAfterDataReplace(WidgetRef ref) async {
 class _RestoreSummaryDialog extends ConsumerStatefulWidget {
   const _RestoreSummaryDialog({
     required this.manifest,
+    required this.newerRows,
     required this.fileName,
     required this.thisDevice,
   });
 
   final BundleManifest manifest;
+
+  /// Rows changed on this device after the backup was made.
+  final int newerRows;
   final String fileName;
   final bool thisDevice;
 
@@ -200,7 +326,8 @@ class _RestoreSummaryDialogState extends ConsumerState<_RestoreSummaryDialog> {
     final dates = ref.watch(dateFormatsProvider);
     final m = widget.manifest;
     final created = m.createdAt.toLocal();
-    final number = NumberFormat.decimalPattern(ref.watch(formatLocaleProvider));
+    final locale = ref.watch(formatLocaleProvider);
+    final number = NumberFormat.decimalPattern(locale);
 
     Widget row(String label, String value) => Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.xxs),
@@ -259,6 +386,33 @@ class _RestoreSummaryDialogState extends ConsumerState<_RestoreSummaryDialog> {
             row(l.navTransactions, number.format(m.rowsOf('transactions'))),
             row(l.navCategories, number.format(m.rowsOf('categories'))),
             row(l.exportRestoreTotalRows, number.format(m.totalRows)),
+            if (m.fileCount > 0)
+              row(
+                l.backupReceipts,
+                l.backupReceiptsValue(
+                  m.fileCount,
+                  formatBytes(m.fileBytes, locale),
+                ),
+              ),
+            if (widget.newerRows > 0) ...[
+              const SizedBox(height: Space.xs),
+              Text(
+                l.backupRestoreNewer(widget.newerRows),
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.finance.warning,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            if (m.missingFiles.isNotEmpty) ...[
+              const SizedBox(height: Space.xs),
+              Text(
+                l.backupRestoreMissing(m.missingFiles.length),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.finance.warning,
+                ),
+              ),
+            ],
             const SizedBox(height: Space.md),
             Container(
               padding: const EdgeInsets.all(Space.sm),

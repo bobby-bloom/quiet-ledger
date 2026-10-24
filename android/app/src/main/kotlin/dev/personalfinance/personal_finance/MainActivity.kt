@@ -1,5 +1,6 @@
 package dev.personalfinance.personal_finance
 
+import android.content.Intent
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -11,10 +12,16 @@ import io.flutter.plugin.common.MethodChannel
  * The `personal_finance/privacy` channel toggles FLAG_SECURE, which blanks
  * the app-switcher thumbnail and blocks screenshots and screen recording
  * (Settings › Privacy › Hide content in app switcher / Block screenshots).
+ *
+ * [BackupFolderChannel] gives scheduled backups access to a folder picked
+ * through the Storage Access Framework.
  */
 class MainActivity : FlutterFragmentActivity() {
+    private var backupFolder: BackupFolderChannel? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        backupFolder = BackupFolderChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRIVACY_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -32,6 +39,13 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    @Deprecated("Activity result API; FlutterFragmentActivity forwards it")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (backupFolder?.onActivityResult(requestCode, resultCode, data) == true) return
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private companion object {

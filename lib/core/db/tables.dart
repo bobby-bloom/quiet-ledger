@@ -369,3 +369,20 @@ class SyncState extends Table {
   @override
   Set<Column<Object>> get primaryKey => {backendId};
 }
+
+/// On-device safety copies (backup bundles without receipt files) taken
+/// before destructive operations; see `features/export/data/safety_copies.dart`.
+/// Not synced and not part of backups; restore and reset keep them.
+@DataClassName('SafetyCopy')
+class SafetyCopies extends Table {
+  TextColumn get id => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  /// `SafetyReason` name.
+  TextColumn get reason => text()();
+  IntColumn get rowCount => integer()();
+  BlobColumn get data => blob()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

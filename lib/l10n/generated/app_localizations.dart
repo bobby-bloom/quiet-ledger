@@ -877,6 +877,588 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No accounts} =1{1 account} other{{count} accounts}}'**
   String accountsGroupCount(int count);
 
+  /// No description provided for @backupBootTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data could not be opened'**
+  String get backupBootTitle;
+
+  /// No description provided for @backupBootMissingKey.
+  ///
+  /// In en, this message translates to:
+  /// **'The key that unlocks the database is missing on this device. This happens when app data is copied to a new device or restored without the device\'s secure storage.'**
+  String get backupBootMissingKey;
+
+  /// No description provided for @backupBootNewer.
+  ///
+  /// In en, this message translates to:
+  /// **'The database was created by a newer version of the app. Install the latest version to open it.'**
+  String get backupBootNewer;
+
+  /// No description provided for @backupBootGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The app could not start. This can be temporary, for example when storage is full or the device is still locked. Try again; the database file was not changed.'**
+  String get backupBootGeneric;
+
+  /// No description provided for @backupBootKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been deleted. The database file stays on this device.'**
+  String get backupBootKept;
+
+  /// No description provided for @backupBootDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical details'**
+  String get backupBootDetails;
+
+  /// No description provided for @backupBootStartFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with an empty database'**
+  String get backupBootStartFresh;
+
+  /// No description provided for @backupBootStartFreshConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The current database file is moved to a separate folder, not deleted. The app then starts empty, and you can restore a backup under More › Export & backup.'**
+  String get backupBootStartFreshConfirm;
+
+  /// No description provided for @backupBootMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'The old database file was moved to:\n{path}'**
+  String backupBootMoved(String path);
+
+  /// No description provided for @backupMissingReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved. {count} receipt files were already missing on this device and are not in it.'**
+  String backupMissingReceipts(int count);
+
+  /// No description provided for @backupReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get backupReceipts;
+
+  /// No description provided for @backupReceiptsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files, {size}'**
+  String backupReceiptsValue(int count, String size);
+
+  /// No description provided for @backupRestoreMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} receipt files were already missing when this backup was made and cannot be restored.'**
+  String backupRestoreMissing(int count);
+
+  /// No description provided for @backupChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups'**
+  String get backupChannel;
+
+  /// No description provided for @backupHealthBackUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get backupHealthBackUp;
+
+  /// No description provided for @backupHealthDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get backupHealthDetails;
+
+  /// No description provided for @backupHealthFailing.
+  ///
+  /// In en, this message translates to:
+  /// **'The automatic backup failed: {message}'**
+  String backupHealthFailing(String message);
+
+  /// No description provided for @backupHealthInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'The last automatic backup did not finish.'**
+  String get backupHealthInterrupted;
+
+  /// No description provided for @backupHealthNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data has not been backed up yet.'**
+  String get backupHealthNever;
+
+  /// No description provided for @backupHealthStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}. Back up again so recent changes are safe.'**
+  String backupHealthStale(String date);
+
+  /// No description provided for @backupNotifyFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get backupNotifyFailedTitle;
+
+  /// No description provided for @backupNotifyFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your automatic backup could not be written. Open the app to fix it.'**
+  String get backupNotifyFailedBody;
+
+  /// No description provided for @backupResetKeepCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a safety copy on this device'**
+  String get backupResetKeepCopy;
+
+  /// No description provided for @backupResetKeepCopyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.'**
+  String get backupResetKeepCopyDesc;
+
+  /// No description provided for @backupSafetyActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get backupSafetyActions;
+
+  /// No description provided for @backupSafetyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get backupSafetyDelete;
+
+  /// No description provided for @backupSafetyDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the safety copy from {date}?'**
+  String backupSafetyDeleteConfirm(String date);
+
+  /// No description provided for @backupSafetyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.'**
+  String get backupSafetyDesc;
+
+  /// No description provided for @backupSafetyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety copies yet.'**
+  String get backupSafetyEmpty;
+
+  /// No description provided for @backupSafetyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety copy could be taken, so nothing was changed: {message}'**
+  String backupSafetyFailed(String message);
+
+  /// No description provided for @backupSafetyReasonImportUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Before undoing an import'**
+  String get backupSafetyReasonImportUndo;
+
+  /// No description provided for @backupSafetyReasonMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Before merging'**
+  String get backupSafetyReasonMerge;
+
+  /// No description provided for @backupSafetyReasonPurge.
+  ///
+  /// In en, this message translates to:
+  /// **'Before removing old deleted entries'**
+  String get backupSafetyReasonPurge;
+
+  /// No description provided for @backupSafetyReasonReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Before resetting the app'**
+  String get backupSafetyReasonReset;
+
+  /// No description provided for @backupSafetyReasonRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before restoring a backup'**
+  String get backupSafetyReasonRestore;
+
+  /// No description provided for @backupSafetyReasonRestoreCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Before restoring a safety copy'**
+  String get backupSafetyReasonRestoreCopy;
+
+  /// No description provided for @backupSafetyRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupSafetyRestore;
+
+  /// No description provided for @backupSafetyRestoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all current data with the safety copy from {date}? A safety copy of the current data is taken first, so you can go back.'**
+  String backupSafetyRestoreConfirm(String date);
+
+  /// No description provided for @backupSafetyRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety copy restored ({count} rows)'**
+  String backupSafetyRestored(int count);
+
+  /// No description provided for @backupSafetyRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{rows} rows · {size}'**
+  String backupSafetyRows(String rows, String size);
+
+  /// No description provided for @backupSafetySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save elsewhere'**
+  String get backupSafetySave;
+
+  /// No description provided for @backupSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety copies'**
+  String get backupSafetyTitle;
+
+  /// No description provided for @backupStaleDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Warn when the last backup is older than'**
+  String get backupStaleDays;
+
+  /// No description provided for @backupStaleDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String backupStaleDaysValue(int days);
+
+  /// No description provided for @backupFolderAccessLost.
+  ///
+  /// In en, this message translates to:
+  /// **'The app no longer has access to the backup folder. Choose the folder again.'**
+  String get backupFolderAccessLost;
+
+  /// No description provided for @backupUseAppDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Use “On My iPhone” in Files'**
+  String get backupUseAppDocuments;
+
+  /// No description provided for @backupErrDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup file is damaged or was changed. It cannot be restored.'**
+  String get backupErrDamaged;
+
+  /// No description provided for @backupHealthCheckPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you still know your backup password? Type it once to make sure.'**
+  String get backupHealthCheckPassword;
+
+  /// No description provided for @backupPasswordChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get backupPasswordChange;
+
+  /// No description provided for @backupPasswordCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check password'**
+  String get backupPasswordCheck;
+
+  /// No description provided for @backupPasswordCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s right. Your backup password is confirmed.'**
+  String get backupPasswordCorrect;
+
+  /// No description provided for @backupPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.'**
+  String get backupPasswordDesc;
+
+  /// No description provided for @backupPasswordField.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPasswordField;
+
+  /// No description provided for @backupPasswordFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get backupPasswordFinish;
+
+  /// No description provided for @backupPasswordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get backupPasswordHide;
+
+  /// No description provided for @backupPasswordLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last confirmed on {date}'**
+  String backupPasswordLastChecked(String date);
+
+  /// No description provided for @backupPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters'**
+  String backupPasswordMinLength(int count);
+
+  /// No description provided for @backupPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match'**
+  String get backupPasswordMismatch;
+
+  /// No description provided for @backupPasswordMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are paused until you set a backup password.'**
+  String get backupPasswordMissing;
+
+  /// No description provided for @backupPasswordNewRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'New recovery key'**
+  String get backupPasswordNewRecovery;
+
+  /// No description provided for @backupPasswordOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are encrypted'**
+  String get backupPasswordOn;
+
+  /// No description provided for @backupPasswordRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat the password'**
+  String get backupPasswordRepeat;
+
+  /// No description provided for @backupPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.'**
+  String get backupPasswordRequired;
+
+  /// No description provided for @backupPasswordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set backup password'**
+  String get backupPasswordSet;
+
+  /// No description provided for @backupPasswordShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get backupPasswordShow;
+
+  /// No description provided for @backupPasswordSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Password set on {date}'**
+  String backupPasswordSince(String date);
+
+  /// No description provided for @backupPasswordStepIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.'**
+  String get backupPasswordStepIntro;
+
+  /// No description provided for @backupPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPasswordTitle;
+
+  /// No description provided for @backupPasswordWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get backupPasswordWrong;
+
+  /// No description provided for @backupPasswordWrongDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.'**
+  String get backupPasswordWrongDesc;
+
+  /// No description provided for @backupRecoveryConfirmIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'To make sure you have the recovery key, type two of its groups.'**
+  String get backupRecoveryConfirmIntro;
+
+  /// No description provided for @backupRecoveryCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get backupRecoveryCopy;
+
+  /// No description provided for @backupRecoveryFileIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.'**
+  String get backupRecoveryFileIntro;
+
+  /// No description provided for @backupRecoveryGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {number}'**
+  String backupRecoveryGroup(int number);
+
+  /// No description provided for @backupRecoveryIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.'**
+  String get backupRecoveryIntro;
+
+  /// No description provided for @backupRecoveryKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key'**
+  String get backupRecoveryKey;
+
+  /// No description provided for @backupRecoverySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as file'**
+  String get backupRecoverySave;
+
+  /// No description provided for @backupRecoveryShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the recovery key again'**
+  String get backupRecoveryShowAgain;
+
+  /// No description provided for @backupRecoveryStored.
+  ///
+  /// In en, this message translates to:
+  /// **'I have stored the recovery key in a safe place'**
+  String get backupRecoveryStored;
+
+  /// No description provided for @backupRecoveryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.'**
+  String get backupRecoveryWarning;
+
+  /// No description provided for @backupUnlockDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is encrypted. Enter its backup password or the recovery key.'**
+  String get backupUnlockDesc;
+
+  /// No description provided for @backupUnlockOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get backupUnlockOpen;
+
+  /// No description provided for @backupUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup'**
+  String get backupUnlockTitle;
+
+  /// No description provided for @backupUnlockWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That does not open this backup. Try again.'**
+  String get backupUnlockWrong;
+
+  /// No description provided for @backupCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check a backup'**
+  String get backupCheck;
+
+  /// No description provided for @backupCheckOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is complete'**
+  String get backupCheckOk;
+
+  /// No description provided for @backupCheckOkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{file}\nMade on {date}. All checksums match: {rows} rows and {files} receipt files can be restored.'**
+  String backupCheckOkDesc(String file, String date, int rows, int files);
+
+  /// No description provided for @backupFolderFileGone.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup is no longer in the folder.'**
+  String get backupFolderFileGone;
+
+  /// No description provided for @backupFolderList.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups in the folder'**
+  String get backupFolderList;
+
+  /// No description provided for @backupFolderListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups in this folder yet.'**
+  String get backupFolderListEmpty;
+
+  /// No description provided for @backupRestoreNewer.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).} other{{count} changes on this device are newer than this backup and will be replaced (they stay in the safety copy).}}'**
+  String backupRestoreNewer(int count);
+
+  /// No description provided for @backupWebStorageNotPersistent.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser may clear the app\'s data when space runs low. Back up regularly.'**
+  String get backupWebStorageNotPersistent;
+
+  /// No description provided for @backupWebStoragePersistent.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser keeps the app\'s data and does not clear it on its own.'**
+  String get backupWebStoragePersistent;
+
+  /// No description provided for @backupBootUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The database file is damaged or cannot be unlocked with the key on this device.'**
+  String get backupBootUnreadable;
+
+  /// No description provided for @backupBootCopyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy details'**
+  String get backupBootCopyDetails;
+
+  /// No description provided for @backupAppDocumentsFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'On My iPhone › Quiet Ledger › Backups'**
+  String get backupAppDocumentsFolder;
+
+  /// No description provided for @backupFolderMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup folder was not found. Connect the drive it is on, or choose the folder again.'**
+  String get backupFolderMissing;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:
@@ -2860,13 +3442,13 @@ abstract class AppLocalizations {
   /// No description provided for @exportRestoreWarning.
   ///
   /// In en, this message translates to:
-  /// **'This replaces all data and settings on this device with the backup. It cannot be undone.'**
+  /// **'This replaces all data and settings on this device with the backup. A safety copy of the current data is kept on this device first (Export & backup › Safety copies).'**
   String get exportRestoreWarning;
 
   /// No description provided for @exportRestoreBackupFirst.
   ///
   /// In en, this message translates to:
-  /// **'Save a backup of the current data first'**
+  /// **'Also save a backup of the current data elsewhere'**
   String get exportRestoreBackupFirst;
 
   /// No description provided for @exportRestoreConfirm.
@@ -9609,7 +10191,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsUiResetAppMessage.
   ///
   /// In en, this message translates to:
-  /// **'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.'**
+  /// **'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type {word} to confirm.'**
   String settingsUiResetAppMessage(String word);
 
   /// No description provided for @settingsUiResetAppWord.

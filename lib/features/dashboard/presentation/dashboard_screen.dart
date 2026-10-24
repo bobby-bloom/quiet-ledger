@@ -17,6 +17,7 @@ import 'package:personal_finance/features/dashboard/presentation/dashboard_grid.
 import 'package:personal_finance/features/dashboard/presentation/dashboard_period.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
+import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/transactions/presentation/quick_add.dart';
 
 DashboardBreakpoint breakpointOf(WindowSize s) =>
@@ -90,6 +91,10 @@ class DashboardScreen extends ConsumerWidget {
               child: size.isCompact
                   ? const _PhoneHeader()
                   : const _WideHeader(),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: gutter),
+              sliver: const SliverToBoxAdapter(child: BackupHealthBanner()),
             ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 32),

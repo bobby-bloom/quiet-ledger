@@ -11,6 +11,7 @@ import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/import/data/import_repository.dart';
 import 'package:personal_finance/features/import/data/profile_repository.dart';
 
@@ -93,7 +94,18 @@ class _BatchCard extends ConsumerWidget {
       confirmLabel: l.importHistoryUndoAction,
     );
     if (!ok) return;
-    await ref.read(importRepositoryProvider).undo(info.batch.id);
+    try {
+      await withSafetyCopy(
+        ref.read,
+        SafetyReason.importUndo,
+        () => ref.read(importRepositoryProvider).undo(info.batch.id),
+      );
+    } on SafetyCopyException catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.backupSafetyFailed('${e.cause}'))),
+      );
+      return;
+    }
     messenger.showSnackBar(SnackBar(content: Text(l.importUndone)));
   }
 

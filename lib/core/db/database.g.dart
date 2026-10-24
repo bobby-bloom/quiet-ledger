@@ -15138,7 +15138,7 @@ class SettingRow extends DataClass implements Insertable<SettingRow> {
   /// JSON-encoded value.
   final String value;
 
-  /// 'global' | 'account:<id>' | 'category:<id>'.
+  /// `global`, `account:<id>` or `category:<id>`.
   final String scope;
   const SettingRow({
     required this.id,
@@ -16158,6 +16158,366 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
   }
 }
 
+class $SafetyCopiesTable extends SafetyCopies
+    with TableInfo<$SafetyCopiesTable, SafetyCopy> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SafetyCopiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowCountMeta = const VerificationMeta(
+    'rowCount',
+  );
+  @override
+  late final GeneratedColumn<int> rowCount = GeneratedColumn<int>(
+    'row_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<Uint8List> data = GeneratedColumn<Uint8List>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, createdAt, reason, rowCount, data];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'safety_copies';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SafetyCopy> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('row_count')) {
+      context.handle(
+        _rowCountMeta,
+        rowCount.isAcceptableOrUnknown(data['row_count']!, _rowCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowCountMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SafetyCopy map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SafetyCopy(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      rowCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_count'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}data'],
+      )!,
+    );
+  }
+
+  @override
+  $SafetyCopiesTable createAlias(String alias) {
+    return $SafetyCopiesTable(attachedDatabase, alias);
+  }
+}
+
+class SafetyCopy extends DataClass implements Insertable<SafetyCopy> {
+  final String id;
+  final DateTime createdAt;
+
+  /// `SafetyReason` name.
+  final String reason;
+  final int rowCount;
+  final Uint8List data;
+  const SafetyCopy({
+    required this.id,
+    required this.createdAt,
+    required this.reason,
+    required this.rowCount,
+    required this.data,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['reason'] = Variable<String>(reason);
+    map['row_count'] = Variable<int>(rowCount);
+    map['data'] = Variable<Uint8List>(data);
+    return map;
+  }
+
+  SafetyCopiesCompanion toCompanion(bool nullToAbsent) {
+    return SafetyCopiesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      reason: Value(reason),
+      rowCount: Value(rowCount),
+      data: Value(data),
+    );
+  }
+
+  factory SafetyCopy.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SafetyCopy(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      reason: serializer.fromJson<String>(json['reason']),
+      rowCount: serializer.fromJson<int>(json['rowCount']),
+      data: serializer.fromJson<Uint8List>(json['data']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'reason': serializer.toJson<String>(reason),
+      'rowCount': serializer.toJson<int>(rowCount),
+      'data': serializer.toJson<Uint8List>(data),
+    };
+  }
+
+  SafetyCopy copyWith({
+    String? id,
+    DateTime? createdAt,
+    String? reason,
+    int? rowCount,
+    Uint8List? data,
+  }) => SafetyCopy(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    reason: reason ?? this.reason,
+    rowCount: rowCount ?? this.rowCount,
+    data: data ?? this.data,
+  );
+  SafetyCopy copyWithCompanion(SafetyCopiesCompanion data) {
+    return SafetyCopy(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      rowCount: data.rowCount.present ? data.rowCount.value : this.rowCount,
+      data: data.data.present ? data.data.value : this.data,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SafetyCopy(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('reason: $reason, ')
+          ..write('rowCount: $rowCount, ')
+          ..write('data: $data')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    reason,
+    rowCount,
+    $driftBlobEquality.hash(data),
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SafetyCopy &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.reason == this.reason &&
+          other.rowCount == this.rowCount &&
+          $driftBlobEquality.equals(other.data, this.data));
+}
+
+class SafetyCopiesCompanion extends UpdateCompanion<SafetyCopy> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<String> reason;
+  final Value<int> rowCount;
+  final Value<Uint8List> data;
+  final Value<int> rowid;
+  const SafetyCopiesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rowCount = const Value.absent(),
+    this.data = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SafetyCopiesCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required String reason,
+    required int rowCount,
+    required Uint8List data,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       reason = Value(reason),
+       rowCount = Value(rowCount),
+       data = Value(data);
+  static Insertable<SafetyCopy> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<String>? reason,
+    Expression<int>? rowCount,
+    Expression<Uint8List>? data,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (reason != null) 'reason': reason,
+      if (rowCount != null) 'row_count': rowCount,
+      if (data != null) 'data': data,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SafetyCopiesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<String>? reason,
+    Value<int>? rowCount,
+    Value<Uint8List>? data,
+    Value<int>? rowid,
+  }) {
+    return SafetyCopiesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      reason: reason ?? this.reason,
+      rowCount: rowCount ?? this.rowCount,
+      data: data ?? this.data,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rowCount.present) {
+      map['row_count'] = Variable<int>(rowCount.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<Uint8List>(data.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SafetyCopiesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('reason: $reason, ')
+          ..write('rowCount: $rowCount, ')
+          ..write('data: $data, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -16223,6 +16583,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $ChangeLogTable changeLog = $ChangeLogTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $SafetyCopiesTable safetyCopies = $SafetyCopiesTable(this);
   late final Index txnAccountDate = Index(
     'txn_account_date',
     'CREATE INDEX txn_account_date ON transactions (account_id, date)',
@@ -16320,6 +16681,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settings,
     changeLog,
     syncState,
+    safetyCopies,
     txnAccountDate,
     txnDate,
     txnCategory,
@@ -24412,6 +24774,215 @@ typedef $$SyncStateTableProcessedTableManager =
       SyncStateRow,
       PrefetchHooks Function()
     >;
+typedef $$SafetyCopiesTableCreateCompanionBuilder =
+    SafetyCopiesCompanion Function({
+      required String id,
+      required DateTime createdAt,
+      required String reason,
+      required int rowCount,
+      required Uint8List data,
+      Value<int> rowid,
+    });
+typedef $$SafetyCopiesTableUpdateCompanionBuilder =
+    SafetyCopiesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<String> reason,
+      Value<int> rowCount,
+      Value<Uint8List> data,
+      Value<int> rowid,
+    });
+
+class $$SafetyCopiesTableFilterComposer
+    extends Composer<_$AppDatabase, $SafetyCopiesTable> {
+  $$SafetyCopiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowCount => $composableBuilder(
+    column: $table.rowCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SafetyCopiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SafetyCopiesTable> {
+  $$SafetyCopiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowCount => $composableBuilder(
+    column: $table.rowCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SafetyCopiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SafetyCopiesTable> {
+  $$SafetyCopiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<int> get rowCount =>
+      $composableBuilder(column: $table.rowCount, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+}
+
+class $$SafetyCopiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SafetyCopiesTable,
+          SafetyCopy,
+          $$SafetyCopiesTableFilterComposer,
+          $$SafetyCopiesTableOrderingComposer,
+          $$SafetyCopiesTableAnnotationComposer,
+          $$SafetyCopiesTableCreateCompanionBuilder,
+          $$SafetyCopiesTableUpdateCompanionBuilder,
+          (
+            SafetyCopy,
+            BaseReferences<_$AppDatabase, $SafetyCopiesTable, SafetyCopy>,
+          ),
+          SafetyCopy,
+          PrefetchHooks Function()
+        > {
+  $$SafetyCopiesTableTableManager(_$AppDatabase db, $SafetyCopiesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SafetyCopiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SafetyCopiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SafetyCopiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<int> rowCount = const Value.absent(),
+                Value<Uint8List> data = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SafetyCopiesCompanion(
+                id: id,
+                createdAt: createdAt,
+                reason: reason,
+                rowCount: rowCount,
+                data: data,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required String reason,
+                required int rowCount,
+                required Uint8List data,
+                Value<int> rowid = const Value.absent(),
+              }) => SafetyCopiesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                reason: reason,
+                rowCount: rowCount,
+                data: data,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SafetyCopiesTable, SafetyCopy>(table),
+                  BaseReferences<_$AppDatabase, $SafetyCopiesTable, SafetyCopy>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SafetyCopiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SafetyCopiesTable,
+      SafetyCopy,
+      $$SafetyCopiesTableFilterComposer,
+      $$SafetyCopiesTableOrderingComposer,
+      $$SafetyCopiesTableAnnotationComposer,
+      $$SafetyCopiesTableCreateCompanionBuilder,
+      $$SafetyCopiesTableUpdateCompanionBuilder,
+      (
+        SafetyCopy,
+        BaseReferences<_$AppDatabase, $SafetyCopiesTable, SafetyCopy>,
+      ),
+      SafetyCopy,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -24470,4 +25041,6 @@ class $AppDatabaseManager {
       $$ChangeLogTableTableManager(_db, _db.changeLog);
   $$SyncStateTableTableManager get syncState =>
       $$SyncStateTableTableManager(_db, _db.syncState);
+  $$SafetyCopiesTableTableManager get safetyCopies =>
+      $$SafetyCopiesTableTableManager(_db, _db.safetyCopies);
 }

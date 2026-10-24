@@ -502,6 +502,375 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get backupBootTitle => 'Your data could not be opened';
+
+  @override
+  String get backupBootMissingKey =>
+      'The key that unlocks the database is missing on this device. This happens when app data is copied to a new device or restored without the device\'s secure storage.';
+
+  @override
+  String get backupBootNewer =>
+      'The database was created by a newer version of the app. Install the latest version to open it.';
+
+  @override
+  String get backupBootGeneric =>
+      'The app could not start. This can be temporary, for example when storage is full or the device is still locked. Try again; the database file was not changed.';
+
+  @override
+  String get backupBootKept =>
+      'Nothing has been deleted. The database file stays on this device.';
+
+  @override
+  String get backupBootDetails => 'Technical details';
+
+  @override
+  String get backupBootStartFresh => 'Start with an empty database';
+
+  @override
+  String get backupBootStartFreshConfirm =>
+      'The current database file is moved to a separate folder, not deleted. The app then starts empty, and you can restore a backup under More › Export & backup.';
+
+  @override
+  String backupBootMoved(String path) {
+    return 'The old database file was moved to:\n$path';
+  }
+
+  @override
+  String backupMissingReceipts(int count) {
+    return 'Backup saved. $count receipt files were already missing on this device and are not in it.';
+  }
+
+  @override
+  String get backupReceipts => 'Receipts';
+
+  @override
+  String backupReceiptsValue(int count, String size) {
+    return '$count files, $size';
+  }
+
+  @override
+  String backupRestoreMissing(int count) {
+    return '$count receipt files were already missing when this backup was made and cannot be restored.';
+  }
+
+  @override
+  String get backupChannel => 'Backups';
+
+  @override
+  String get backupHealthBackUp => 'Back up now';
+
+  @override
+  String get backupHealthDetails => 'Details';
+
+  @override
+  String backupHealthFailing(String message) {
+    return 'The automatic backup failed: $message';
+  }
+
+  @override
+  String get backupHealthInterrupted =>
+      'The last automatic backup did not finish.';
+
+  @override
+  String get backupHealthNever => 'Your data has not been backed up yet.';
+
+  @override
+  String backupHealthStale(String date) {
+    return 'Last backup: $date. Back up again so recent changes are safe.';
+  }
+
+  @override
+  String get backupNotifyFailedTitle => 'Backup failed';
+
+  @override
+  String get backupNotifyFailedBody =>
+      'Your automatic backup could not be written. Open the app to fix it.';
+
+  @override
+  String get backupResetKeepCopy => 'Keep a safety copy on this device';
+
+  @override
+  String get backupResetKeepCopyDesc =>
+      'Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.';
+
+  @override
+  String get backupSafetyActions => 'Actions';
+
+  @override
+  String get backupSafetyDelete => 'Delete';
+
+  @override
+  String backupSafetyDeleteConfirm(String date) {
+    return 'Delete the safety copy from $date?';
+  }
+
+  @override
+  String get backupSafetyDesc =>
+      'Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.';
+
+  @override
+  String get backupSafetyEmpty => 'No safety copies yet.';
+
+  @override
+  String backupSafetyFailed(String message) {
+    return 'No safety copy could be taken, so nothing was changed: $message';
+  }
+
+  @override
+  String get backupSafetyReasonImportUndo => 'Before undoing an import';
+
+  @override
+  String get backupSafetyReasonMerge => 'Before merging';
+
+  @override
+  String get backupSafetyReasonPurge => 'Before removing old deleted entries';
+
+  @override
+  String get backupSafetyReasonReset => 'Before resetting the app';
+
+  @override
+  String get backupSafetyReasonRestore => 'Before restoring a backup';
+
+  @override
+  String get backupSafetyReasonRestoreCopy => 'Before restoring a safety copy';
+
+  @override
+  String get backupSafetyRestore => 'Restore';
+
+  @override
+  String backupSafetyRestoreConfirm(String date) {
+    return 'Replace all current data with the safety copy from $date? A safety copy of the current data is taken first, so you can go back.';
+  }
+
+  @override
+  String backupSafetyRestored(int count) {
+    return 'Safety copy restored ($count rows)';
+  }
+
+  @override
+  String backupSafetyRows(String rows, String size) {
+    return '$rows rows · $size';
+  }
+
+  @override
+  String get backupSafetySave => 'Save elsewhere';
+
+  @override
+  String get backupSafetyTitle => 'Safety copies';
+
+  @override
+  String get backupStaleDays => 'Warn when the last backup is older than';
+
+  @override
+  String backupStaleDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupFolderAccessLost =>
+      'The app no longer has access to the backup folder. Choose the folder again.';
+
+  @override
+  String get backupUseAppDocuments => 'Use “On My iPhone” in Files';
+
+  @override
+  String get backupErrDamaged =>
+      'The backup file is damaged or was changed. It cannot be restored.';
+
+  @override
+  String get backupHealthCheckPassword =>
+      'Do you still know your backup password? Type it once to make sure.';
+
+  @override
+  String get backupPasswordChange => 'Change password';
+
+  @override
+  String get backupPasswordCheck => 'Check password';
+
+  @override
+  String get backupPasswordCorrect =>
+      'That\'s right. Your backup password is confirmed.';
+
+  @override
+  String get backupPasswordDesc =>
+      'Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.';
+
+  @override
+  String get backupPasswordField => 'Backup password';
+
+  @override
+  String get backupPasswordFinish => 'Finish';
+
+  @override
+  String get backupPasswordHide => 'Hide password';
+
+  @override
+  String backupPasswordLastChecked(String date) {
+    return 'Last confirmed on $date';
+  }
+
+  @override
+  String backupPasswordMinLength(int count) {
+    return 'At least $count characters';
+  }
+
+  @override
+  String get backupPasswordMismatch => 'The passwords do not match';
+
+  @override
+  String get backupPasswordMissing =>
+      'Backups are paused until you set a backup password.';
+
+  @override
+  String get backupPasswordNewRecovery => 'New recovery key';
+
+  @override
+  String get backupPasswordOn => 'Backups are encrypted';
+
+  @override
+  String get backupPasswordRepeat => 'Repeat the password';
+
+  @override
+  String get backupPasswordRequired =>
+      'Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.';
+
+  @override
+  String get backupPasswordSet => 'Set backup password';
+
+  @override
+  String get backupPasswordShow => 'Show password';
+
+  @override
+  String backupPasswordSince(String date) {
+    return 'Password set on $date';
+  }
+
+  @override
+  String get backupPasswordStepIntro =>
+      'Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.';
+
+  @override
+  String get backupPasswordTitle => 'Backup password';
+
+  @override
+  String get backupPasswordWrong => 'Wrong password';
+
+  @override
+  String get backupPasswordWrongDesc =>
+      'That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.';
+
+  @override
+  String get backupRecoveryConfirmIntro =>
+      'To make sure you have the recovery key, type two of its groups.';
+
+  @override
+  String get backupRecoveryCopy => 'Copy';
+
+  @override
+  String get backupRecoveryFileIntro =>
+      'Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.';
+
+  @override
+  String backupRecoveryGroup(int number) {
+    return 'Group $number';
+  }
+
+  @override
+  String get backupRecoveryIntro =>
+      'This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.';
+
+  @override
+  String get backupRecoveryKey => 'Recovery key';
+
+  @override
+  String get backupRecoverySave => 'Save as file';
+
+  @override
+  String get backupRecoveryShowAgain => 'Show the recovery key again';
+
+  @override
+  String get backupRecoveryStored =>
+      'I have stored the recovery key in a safe place';
+
+  @override
+  String get backupRecoveryWarning =>
+      'It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.';
+
+  @override
+  String get backupUnlockDesc =>
+      'This backup is encrypted. Enter its backup password or the recovery key.';
+
+  @override
+  String get backupUnlockOpen => 'Open';
+
+  @override
+  String get backupUnlockTitle => 'Encrypted backup';
+
+  @override
+  String get backupUnlockWrong => 'That does not open this backup. Try again.';
+
+  @override
+  String get backupCheck => 'Check a backup';
+
+  @override
+  String get backupCheckOk => 'Backup is complete';
+
+  @override
+  String backupCheckOkDesc(String file, String date, int rows, int files) {
+    return '$file\nMade on $date. All checksums match: $rows rows and $files receipt files can be restored.';
+  }
+
+  @override
+  String get backupFolderFileGone => 'The backup is no longer in the folder.';
+
+  @override
+  String get backupFolderList => 'Backups in the folder';
+
+  @override
+  String get backupFolderListEmpty => 'No backups in this folder yet.';
+
+  @override
+  String backupRestoreNewer(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count changes on this device are newer than this backup and will be replaced (they stay in the safety copy).',
+      one: '1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupWebStorageNotPersistent =>
+      'This browser may clear the app\'s data when space runs low. Back up regularly.';
+
+  @override
+  String get backupWebStoragePersistent =>
+      'This browser keeps the app\'s data and does not clear it on its own.';
+
+  @override
+  String get backupBootUnreadable =>
+      'The database file is damaged or cannot be unlocked with the key on this device.';
+
+  @override
+  String get backupBootCopyDetails => 'Copy details';
+
+  @override
+  String get backupAppDocumentsFolder =>
+      'On My iPhone › Quiet Ledger › Backups';
+
+  @override
+  String get backupFolderMissing =>
+      'The backup folder was not found. Connect the drive it is on, or choose the folder again.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -1725,11 +2094,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportRestoreWarning =>
-      'This replaces all data and settings on this device with the backup. It cannot be undone.';
+      'This replaces all data and settings on this device with the backup. A safety copy of the current data is kept on this device first (Export & backup › Safety copies).';
 
   @override
   String get exportRestoreBackupFirst =>
-      'Save a backup of the current data first';
+      'Also save a backup of the current data elsewhere';
 
   @override
   String get exportRestoreConfirm => 'Replace all data';
@@ -5794,7 +6163,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsUiResetAppMessage(String word) {
-    return 'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type $word to confirm.';
+    return 'This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type $word to confirm.';
   }
 
   @override

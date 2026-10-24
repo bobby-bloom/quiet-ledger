@@ -164,7 +164,7 @@
   "settingsUiResetApp": "Reset app",
   "settingsUiResetAppDesc": "Delete all data on this device and start over",
   "settingsUiResetAppTitle": "Delete all data?",
-  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.",
+  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type {word} to confirm.",
   "@settingsUiResetAppMessage": {
     "placeholders": {
       "word": {

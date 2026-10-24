@@ -35,6 +35,29 @@ const syncedTableNames = <String>[
   'settings',
 ];
 
+/// Tables deliberately left out of backups: sync bookkeeping (reset by a
+/// restore), the full-text index (rebuilt from `transactions`) and the
+/// on-device safety copies. Every other table must be in
+/// [syncedTableNames]; a test enforces this.
+const backupExcludedTables = <String>{
+  'change_log',
+  'sync_state',
+  'txn_search',
+  'safety_copies',
+};
+
+/// The database file was written by a newer app version (schema [found] >
+/// [supported]). Opening is refused so the file is never downgraded.
+class NewerDatabaseException implements Exception {
+  const NewerDatabaseException(this.found, this.supported);
+  final int found;
+  final int supported;
+
+  @override
+  String toString() =>
+      'Database schema $found is newer than this app supports ($supported)';
+}
+
 @DriftDatabase(
   tables: [
     AccountGroups,
@@ -62,6 +85,7 @@ const syncedTableNames = <String>[
     Settings,
     ChangeLog,
     SyncState,
+    SafetyCopies,
   ],
   include: {'search.drift'},
 )
@@ -69,7 +93,10 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => currentSchemaVersion;
+
+  /// Schema version this build creates and migrates to.
+  static const currentSchemaVersion = 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,6 +104,9 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (m, from, to) async {
+      // Drift also calls this for downgrades and would then stamp the
+      // older version on a newer file. Refuse instead; the file is kept.
+      if (from > to) throw NewerDatabaseException(from, to);
       if (from < 2) {
         // v2: lookup indexes and search refresh on category/tag rename.
         await m.createIndex(txnPayee);
@@ -84,6 +114,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createIndex(changeLogEntity);
         await m.createTrigger(txnSearchCatAu);
         await m.createTrigger(txnSearchTagnameAu);
+      }
+      if (from < 3) {
+        // v3: on-device safety copies.
+        await m.createTable(safetyCopies);
       }
     },
     beforeOpen: (details) async {

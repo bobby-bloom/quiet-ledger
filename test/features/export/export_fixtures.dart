@@ -168,6 +168,45 @@ Future<Fixture> seed(AppDatabase db, {SyncWriter? writer}) async {
   return f;
 }
 
+/// Writes three raw rows into every synced table, driven by the schema so
+/// new tables and columns are covered automatically: one with every column
+/// set to an awkward non-default value, one with every nullable column null
+/// and the rest at their "empty" value (`''`, 0, empty blob), and one
+/// tombstone. Bypasses `SyncWriter` on purpose (see `raw_rows.dart`).
+Future<void> fillEveryColumn(AppDatabase db) async {
+  for (final name in syncedTableNames) {
+    final table = db.tableByName(name);
+    final cols = [for (final c in table.$columns) c.name];
+    final rows = <List<Object?>>[];
+    for (var i = 0; i < 3; i++) {
+      rows.add([for (final c in table.$columns) _fillValue(name, c, i)]);
+    }
+    await insertRawRows(db, table, cols, rows);
+  }
+}
+
+Object? _fillValue(String table, GeneratedColumn<Object> c, int row) {
+  final full = row != 1;
+  switch (c.name) {
+    case 'id':
+      return 'fill-$table-$row';
+    case 'updated_at':
+      return '${(1700000000000 + row).toString().padLeft(15, '0')}-0000$row-dev-fill';
+    case 'deleted_at':
+      return row == 2 ? 1767225600 : null;
+  }
+  if (!full && c.$nullable) return null;
+  return switch (c.type) {
+    DriftSqlType.bool => full ? 1 : 0,
+    DriftSqlType.int || DriftSqlType.bigInt => full ? -9007199254740991 : 0,
+    DriftSqlType.dateTime => full ? 4102444799 : 0,
+    DriftSqlType.double => full ? -1234.5678 : 0.0,
+    DriftSqlType.blob =>
+      full ? Uint8List.fromList(List.generate(256, (b) => b)) : Uint8List(0),
+    _ => full ? '$table.${c.name} "q"; ä€😀,\r\nline 2 ' : '',
+  };
+}
+
 /// Raw rows of every synced table ordered by id.
 Future<Map<String, List<Map<String, Object?>>>> dumpTables(
   AppDatabase db,

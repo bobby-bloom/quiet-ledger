@@ -28,8 +28,9 @@ database, backup bundles and export files, and the features people rely on.
 | **BUILD** | Every build that is distributed | +1 on every bump, never reset (stores require a strictly increasing `versionCode`/`CFBundleVersion`) |
 
 A `schemaVersion` bump is MINOR: newer apps migrate older databases and
-restore older bundles. Downgrades are not supported (an older app rejects a
-bundle with a newer schema), which SemVer allows.
+restore older bundles. Downgrades are not supported, which SemVer allows: an
+older app rejects a bundle with a newer schema and refuses to open a newer
+database file (it is kept, never downgraded).
 
 While on `0.x` the data formats may still change in a MINOR release. `1.0.0`
 is the first release after the M2 acceptance check against the owner's real
@@ -40,7 +41,11 @@ spreadsheet and the open items in the README's known limitations.
 ```sh
 # 1. Notes are already under "## [Unreleased]" in CHANGELOG.md.
 dart run tool/version.dart bump minor     # or major / patch / build
-# 2. Review pubspec.yaml, lib/core/app_version.dart, CHANGELOG.md.
+# 2. Freeze this version's backup format as a test fixture (docs/BACKUP.md):
+flutter test tool/backup_fixture/backup_fixture_test.dart
+# 3. Review pubspec.yaml, lib/core/app_version.dart, CHANGELOG.md and the
+#    new test/fixtures/bundles/vX.Y.Z.zip.
+git add test/fixtures/bundles
 git commit -am "Release 0.2.0"
 git push                                  # or merge the PR; the tag must be on main
 git tag -a v0.2.0 -m v0.2.0

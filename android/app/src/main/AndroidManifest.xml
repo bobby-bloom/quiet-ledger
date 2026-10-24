@@ -4,7 +4,14 @@
     <application
         android:label="personal_finance"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
+        <!-- No Android Auto Backup or device transfer: the database key
+             lives in the Keystore, which is never restored, so a restored
+             database could not be opened. The app's own backups are the
+             supported path (docs/BACKUP.md). -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

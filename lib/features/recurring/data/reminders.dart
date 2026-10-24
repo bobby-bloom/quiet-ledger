@@ -24,6 +24,7 @@ Map<NotificationKind, String> notificationChannelNames(AppLocalizations l) => {
   NotificationKind.income: l.recurringChannelIncome,
   NotificationKind.lowBalance: l.recurringChannelLowBalance,
   NotificationKind.budget: l.recurringChannelBudgets,
+  NotificationKind.backup: l.backupChannel,
 };
 
 /// Reminder requests for the next pending occurrences of [plan].

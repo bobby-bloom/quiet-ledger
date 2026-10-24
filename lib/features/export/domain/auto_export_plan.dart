@@ -6,8 +6,25 @@ import 'package:personal_finance/core/settings/app_settings.dart';
 const autoExportPrefix = 'personal-finance-backup-';
 
 final _fileName = RegExp(
-  r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.zip$',
+  r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.(?:zip|pfbackup)$',
 );
+
+/// How long to wait after [failures] scheduled backups failed in a row
+/// before trying again: 1 h, 4 h, 12 h, then once a day. The health banner
+/// shows the failure all the time; this only spaces out the work.
+Duration backupRetryDelay(int failures) => switch (failures) {
+  <= 1 => const Duration(hours: 1),
+  2 => const Duration(hours: 4),
+  3 => const Duration(hours: 12),
+  _ => const Duration(days: 1),
+};
+
+/// Whether a failed scheduled backup should be tried again at [now], given
+/// the start of the last attempt.
+bool isBackupRetryDue(int failures, DateTime? lastAttempt, DateTime now) =>
+    lastAttempt == null ||
+    lastAttempt.isAfter(now) ||
+    !now.isBefore(lastAttempt.add(backupRetryDelay(failures)));
 
 /// Whether an automatic backup is due at [now]. Daily: once per calendar
 /// day. Weekly: when the last one is at least 7 calendar days old. A
@@ -30,17 +47,23 @@ bool isAutoExportDue(
 }
 
 /// `personal-finance-backup-20261023-081500.zip` (local time; sorts
-/// chronologically).
-String autoExportFileName(DateTime now) =>
-    '$autoExportPrefix${DateFormat('yyyyMMdd-HHmmss').format(now)}.zip';
+/// chronologically), `.pfbackup` when [extension] says so.
+String autoExportFileName(DateTime now, [String extension = '.zip']) =>
+    '$autoExportPrefix${DateFormat('yyyyMMdd-HHmmss').format(now)}$extension';
 
 /// Whether [name] was written by the automatic backup.
 bool isAutoExportFile(String name) => _fileName.hasMatch(name);
 
 /// Automatic backup files to delete so that only the newest [keep] remain.
-/// Other files in the folder are never touched.
-List<String> autoExportFilesToPrune(Iterable<String> names, int keep) {
-  final ours = names.where(isAutoExportFile).toList()
+/// Other files in the folder are never touched, and neither is [protect]
+/// (the backup just written: after a clock change it may sort as oldest).
+List<String> autoExportFilesToPrune(
+  Iterable<String> names,
+  int keep, {
+  String? protect,
+}) {
+  final ours = names.where((n) => isAutoExportFile(n) && n != protect).toList()
     ..sort((a, b) => b.compareTo(a));
-  return ours.length <= keep ? const [] : ours.sublist(keep);
+  final rest = protect == null ? keep : keep - 1;
+  return ours.length <= rest ? const [] : ours.sublist(rest.clamp(0, keep));
 }

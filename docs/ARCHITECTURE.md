@@ -2,7 +2,8 @@
 
 Read this before changing code. `PLAN.md` is the approved product plan; the
 design draft ("Quiet Ledger") is mirrored in `docs/design/` (one `.dc.html`
-per screen, `Foundations.dc.html` holds the tokens).
+per screen, `Foundations.dc.html` holds the tokens). `docs/BACKUP.md`
+describes backups, restore and the data-safety rules below.
 
 ## Layout
 
@@ -16,8 +17,11 @@ lib/
                   showAdaptiveSheet, MoneyField)
   core/
     money/        Money (int minor units), MoneyFormatter, money_input.dart (parseAmountInput)
-    db/           tables.dart (schema v1), database.dart (+ .g.dart), search.drift (FTS5),
-                  sync_writer.dart (THE write path), db_providers.dart, connection/
+    db/           tables.dart (schema), database.dart (+ .g.dart; syncedTableNames,
+                  backupExcludedTables), search.drift (FTS5), sync_writer.dart (THE write
+                  path), db_providers.dart, db_files.dart (quarantine, pre-migration
+                  copy), connection/
+    attachments/  attachment_files.dart (receipt files, relative names), receipt_store.dart
     sync/         hlc.dart
     settings/     setting_def.dart, app_settings.dart (catalogue), settings_controller.dart
     ledger/       txn_draft.dart, ledger_repository.dart, lookups.dart
@@ -116,6 +120,17 @@ errors or warnings.
 via `newTestDb()` from `test/helpers/test_app.dart`; containers via
 `testContainer(db)`; widget tests via `testApp(widget, db: db)`. Run only
 your tests: `flutter test test/features/<yours>`.
+
+**Data safety** (`docs/BACKUP.md`). Every table is in `syncedTableNames`
+(backed up) or `backupExcludedTables`; a test enforces it. Operations that
+replace, merge or hard-delete data run inside
+`withSafetyCopy(read, SafetyReason.x, ...)`. Backups that leave the device
+are made only by `createVerifiedBackup` (encryption policy, verification)
+and opened by `openBackup`. Device-specific settings are marked
+`deviceLocal: true` and listed in `allSettings`: they are never synced
+(written without a `change_log` entry, skipped by `SyncEngine` both ways)
+and a restore keeps them (`deviceLocalSettingKeys`). Migrations are
+forward-only; a newer database is refused, never downgraded.
 
 **Startup tasks** (post due recurring entries, auto-export, purge): register
 in `app/startup_tasks.dart` (idempotent, never throw).

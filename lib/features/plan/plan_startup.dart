@@ -37,6 +37,8 @@ Future<void> planRemindersTask(ProviderContainer c) async {
           router.go('/plan/budgets/${payload.substring(7)}');
         } else if (payload.startsWith('account:')) {
           router.go('/accounts');
+        } else if (payload == 'backup') {
+          router.go('/more/export');
         }
       } on Object {
         // Navigation is best effort.

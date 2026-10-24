@@ -84,6 +84,7 @@ class SettingsController extends Notifier<SettingsSnapshot> {
     final encoded = jsonEncode(def.encodeValue(value));
     final id = SettingsSnapshot.rowId(def.key, scope);
     final writer = ref.read(syncWriterProvider);
+    final log = !def.deviceLocal;
     await writer.transaction(() async {
       final existing = await (_db.select(
         _db.settings,
@@ -97,15 +98,17 @@ class SettingsController extends Notifier<SettingsSnapshot> {
             scope: Value(scope),
           ),
           id: id,
+          log: log,
         );
       } else {
         if (existing.deletedAt != null) {
-          await writer.undelete(_db.settings, id);
+          await writer.undelete(_db.settings, id, log: log);
         }
         await writer.update(
           _db.settings,
           id,
           SettingsCompanion(value: Value(encoded)),
+          log: log,
         );
       }
     });
@@ -122,7 +125,9 @@ class SettingsController extends Notifier<SettingsSnapshot> {
     final existing = await (_db.select(
       _db.settings,
     )..where((t) => t.id.equals(id) & t.deletedAt.isNull())).getSingleOrNull();
-    if (existing != null) await writer.delete(_db.settings, id);
+    if (existing != null) {
+      await writer.delete(_db.settings, id, log: !def.deviceLocal);
+    }
     state = SettingsSnapshot({...state.raw}..remove(id));
     if (def.bootstrap) {
       await ref.read(sharedPreferencesProvider)?.remove(def.key);

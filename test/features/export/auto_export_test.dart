@@ -14,7 +14,6 @@ import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 import 'package:personal_finance/features/export/data/export_folder_io.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
-import 'package:personal_finance/features/export/domain/export_settings.dart';
 import 'package:personal_finance/features/export/export_startup.dart';
 
 import '../../helpers/test_app.dart';
@@ -179,10 +178,28 @@ void main() {
       await autoExportStartupTask(failing);
     });
 
+    test('a missing folder is an error, never recreated', () async {
+      // E.g. on a drive that is not connected: recreating the path would put
+      // the backups on the system disk.
+      final dir = await Directory.systemTemp.createTemp('pf-export');
+      addTearDown(() => dir.delete(recursive: true));
+      final io = IoExportFolder('${dir.path}/usb/backups');
+      await expectLater(
+        io.listFiles(),
+        throwsA(isA<BackupFolderMissingException>()),
+      );
+      await expectLater(
+        io.writeFile('a.zip', Uint8List(1)),
+        throwsA(isA<BackupFolderMissingException>()),
+      );
+      expect(Directory('${dir.path}/usb').existsSync(), isFalse);
+    });
+
     test('io folder writes atomically and lists files', () async {
       final dir = await Directory.systemTemp.createTemp('pf-export');
       addTearDown(() => dir.delete(recursive: true));
       final io = IoExportFolder('${dir.path}/sub');
+      Directory('${dir.path}/sub').createSync();
       await io.writeFile('a.zip', Uint8List.fromList([1, 2, 3]));
       await io.writeFile('a.zip', Uint8List.fromList([4]));
       expect(await io.listFiles(), ['a.zip']);
@@ -209,7 +226,7 @@ void main() {
       // The seeded tombstones are a year "old" at `later`.
       expect(await runTombstonePurgeIfDue(c, now: later), greaterThan(0));
       expect(
-        c.read(settingsProvider).get(ExportSettings.lastTombstonePurge),
+        c.read(settingsProvider).get(DataSettings.lastTombstonePurge),
         later.toIso8601String(),
       );
       // Within a week: skipped.

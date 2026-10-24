@@ -12,7 +12,10 @@ import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
+import 'package:personal_finance/core/sync/tombstone_purge.dart'
+    show countPurgeableTombstones;
 import 'package:personal_finance/features/export/data/data_tools.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
 import 'package:personal_finance/features/rules/presentation/rerun_rules_dialog.dart';
 import 'package:personal_finance/features/security/data/secret_store.dart';
@@ -115,12 +118,20 @@ Future<void> _purge(BuildContext context, WidgetRef ref) async {
   );
   if (!ok || !context.mounted) return;
   try {
-    final n = await purgeTombstones(
-      ref.read(databaseProvider),
-      Duration(days: days),
-    );
+    final db = ref.read(databaseProvider);
+    final age = Duration(days: days);
+    // Nothing to purge: no safety copy, which would push an older one out.
+    final n = await countPurgeableTombstones(db, age) == 0
+        ? 0
+        : await withSafetyCopy(
+            ref.read,
+            SafetyReason.purge,
+            () => purgeTombstones(db, age),
+          );
     ref.invalidate(dbStatisticsProvider);
     if (context.mounted) _snack(context, l.settingsUiPurgeDone(n));
+  } on SafetyCopyException catch (e) {
+    if (context.mounted) _snack(context, l.backupSafetyFailed('${e.cause}'));
   } on Object catch (e) {
     if (context.mounted) _snack(context, l.commonError(e.toString()));
   }
@@ -129,21 +140,31 @@ Future<void> _purge(BuildContext context, WidgetRef ref) async {
 /// Type-to-confirm reset: wipes the database (export's `resetAppData`) and
 /// the lock credential, clears the bootstrap-mirrored preferences, then
 /// returns to onboarding. The database file and its key stay (the file is
-/// still encrypted with it); device id and storage location are kept.
+/// still encrypted with it); device id and storage location are kept. By
+/// default a safety copy is taken first and kept; unticking it wipes the
+/// safety copies as well (a real "delete everything").
 Future<void> _resetApp(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   if (!await confirmIdentity(context, ref)) return;
   if (!context.mounted) return;
-  final ok = await showDialog<bool>(
+  final keepCopy = await showDialog<bool>(
     context: context,
     builder: (_) => const _ResetDialog(),
   );
-  if (!(ok ?? false) || !context.mounted) return;
+  if (keepCopy == null || !context.mounted) return;
   final router = GoRouter.of(context);
   final db = ref.read(databaseProvider);
   try {
+    if (keepCopy) {
+      await takeSafetyCopy(
+        db,
+        SafetyReason.reset,
+        deviceId: ref.read(deviceIdProvider),
+      );
+    }
     await ref.read(credentialRepositoryProvider).clear();
     await resetAppData(db);
+    if (!keepCopy) await db.delete(db.safetyCopies).go();
     // Scrub the deleted rows from free pages.
     try {
       await db.customStatement('VACUUM');
@@ -151,6 +172,9 @@ Future<void> _resetApp(BuildContext context, WidgetRef ref) async {
       debugPrint('VACUUM after reset failed: $e');
     }
     await refreshAfterDataReplace(ref);
+  } on SafetyCopyException catch (e) {
+    if (context.mounted) _snack(context, l.backupSafetyFailed('${e.cause}'));
+    return;
   } on Object catch (e) {
     if (context.mounted) _snack(context, l.commonError(e.toString()));
     return;
@@ -167,8 +191,11 @@ class _ResetDialog extends StatefulWidget {
   State<_ResetDialog> createState() => _ResetDialogState();
 }
 
+/// Pops the "keep a safety copy" choice when confirmed, null when
+/// cancelled.
 class _ResetDialogState extends State<_ResetDialog> {
   final _c = TextEditingController();
+  bool _keepCopy = true;
 
   @override
   void dispose() {
@@ -200,11 +227,20 @@ class _ResetDialogState extends State<_ResetDialog> {
               labelText: l.settingsUiTypeToConfirm(word),
             ),
           ),
+          const SizedBox(height: Space.xs),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _keepCopy,
+            onChanged: (v) => setState(() => _keepCopy = v ?? false),
+            title: Text(l.backupResetKeepCopy),
+            subtitle: Text(l.backupResetKeepCopyDesc),
+          ),
         ],
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context, false),
+          onPressed: () => Navigator.pop(context),
           child: Text(l.commonCancel),
         ),
         FilledButton(
@@ -212,7 +248,7 @@ class _ResetDialogState extends State<_ResetDialog> {
             backgroundColor: context.colors.error,
             foregroundColor: context.colors.onError,
           ),
-          onPressed: matches ? () => Navigator.pop(context, true) : null,
+          onPressed: matches ? () => Navigator.pop(context, _keepCopy) : null,
           child: Text(l.settingsUiResetAppConfirm),
         ),
       ],

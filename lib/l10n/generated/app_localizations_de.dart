@@ -507,6 +507,385 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get backupBootTitle => 'Deine Daten konnten nicht geöffnet werden';
+
+  @override
+  String get backupBootMissingKey =>
+      'Der Schlüssel, der die Datenbank entsperrt, fehlt auf diesem Gerät. Das passiert, wenn App-Daten ohne den sicheren Speicher des Geräts auf ein neues Gerät kopiert oder wiederhergestellt werden.';
+
+  @override
+  String get backupBootNewer =>
+      'Die Datenbank wurde von einer neueren Version der App erstellt. Installiere die neueste Version, um sie zu öffnen.';
+
+  @override
+  String get backupBootGeneric =>
+      'Die App konnte nicht starten. Das kann vorübergehend sein, etwa wenn der Speicher voll oder das Gerät noch gesperrt ist. Versuche es erneut; die Datenbankdatei wurde nicht verändert.';
+
+  @override
+  String get backupBootKept =>
+      'Es wurde nichts gelöscht. Die Datenbankdatei bleibt auf diesem Gerät.';
+
+  @override
+  String get backupBootDetails => 'Technische Details';
+
+  @override
+  String get backupBootStartFresh => 'Mit leerer Datenbank starten';
+
+  @override
+  String get backupBootStartFreshConfirm =>
+      'Die aktuelle Datenbankdatei wird in einen eigenen Ordner verschoben, nicht gelöscht. Die App startet dann leer, und du kannst unter Mehr › Export & Sicherung eine Sicherung wiederherstellen.';
+
+  @override
+  String backupBootMoved(String path) {
+    return 'Die alte Datenbankdatei wurde verschoben nach:\n$path';
+  }
+
+  @override
+  String backupMissingReceipts(int count) {
+    return 'Sicherung gespeichert. $count Belegdateien fehlten bereits auf diesem Gerät und sind nicht enthalten.';
+  }
+
+  @override
+  String get backupReceipts => 'Belege';
+
+  @override
+  String backupReceiptsValue(int count, String size) {
+    return '$count Dateien, $size';
+  }
+
+  @override
+  String backupRestoreMissing(int count) {
+    return '$count Belegdateien fehlten bereits beim Erstellen dieser Sicherung und können nicht wiederhergestellt werden.';
+  }
+
+  @override
+  String get backupChannel => 'Sicherungen';
+
+  @override
+  String get backupHealthBackUp => 'Jetzt sichern';
+
+  @override
+  String get backupHealthDetails => 'Details';
+
+  @override
+  String backupHealthFailing(String message) {
+    return 'Die automatische Sicherung ist fehlgeschlagen: $message';
+  }
+
+  @override
+  String get backupHealthInterrupted =>
+      'Die letzte automatische Sicherung wurde nicht abgeschlossen.';
+
+  @override
+  String get backupHealthNever => 'Deine Daten wurden noch nicht gesichert.';
+
+  @override
+  String backupHealthStale(String date) {
+    return 'Letzte Sicherung: $date. Sichere erneut, damit auch neue Änderungen sicher sind.';
+  }
+
+  @override
+  String get backupNotifyFailedTitle => 'Sicherung fehlgeschlagen';
+
+  @override
+  String get backupNotifyFailedBody =>
+      'Deine automatische Sicherung konnte nicht geschrieben werden. Öffne die App, um das zu beheben.';
+
+  @override
+  String get backupResetKeepCopy =>
+      'Sicherheitskopie auf diesem Gerät behalten';
+
+  @override
+  String get backupResetKeepCopyDesc =>
+      'Damit lässt sich das Zurücksetzen unter Mehr › Export & Sicherung › Sicherheitskopien rückgängig machen. Abwählen, um auch die Sicherheitskopien zu löschen.';
+
+  @override
+  String get backupSafetyActions => 'Aktionen';
+
+  @override
+  String get backupSafetyDelete => 'Löschen';
+
+  @override
+  String backupSafetyDeleteConfirm(String date) {
+    return 'Sicherheitskopie vom $date löschen?';
+  }
+
+  @override
+  String get backupSafetyDesc =>
+      'Werden automatisch erstellt vor dem Wiederherstellen, dem Zurücksetzen, dem Rückgängigmachen eines Imports, dem Zusammenführen von Kategorien oder Tags und dem Entfernen alter gelöschter Einträge. Sie bleiben auf diesem Gerät und enthalten alle Daten außer Belegdateien, die diese Aktionen nie löschen. Die neuesten 10 werden behalten.';
+
+  @override
+  String get backupSafetyEmpty => 'Noch keine Sicherheitskopien.';
+
+  @override
+  String backupSafetyFailed(String message) {
+    return 'Es konnte keine Sicherheitskopie erstellt werden, deshalb wurde nichts geändert: $message';
+  }
+
+  @override
+  String get backupSafetyReasonImportUndo =>
+      'Vor dem Rückgängigmachen eines Imports';
+
+  @override
+  String get backupSafetyReasonMerge => 'Vor dem Zusammenführen';
+
+  @override
+  String get backupSafetyReasonPurge =>
+      'Vor dem Entfernen alter gelöschter Einträge';
+
+  @override
+  String get backupSafetyReasonReset => 'Vor dem Zurücksetzen der App';
+
+  @override
+  String get backupSafetyReasonRestore =>
+      'Vor dem Wiederherstellen einer Sicherung';
+
+  @override
+  String get backupSafetyReasonRestoreCopy =>
+      'Vor dem Wiederherstellen einer Sicherheitskopie';
+
+  @override
+  String get backupSafetyRestore => 'Wiederherstellen';
+
+  @override
+  String backupSafetyRestoreConfirm(String date) {
+    return 'Alle aktuellen Daten durch die Sicherheitskopie vom $date ersetzen? Vorher wird eine Sicherheitskopie der aktuellen Daten erstellt, damit du zurück kannst.';
+  }
+
+  @override
+  String backupSafetyRestored(int count) {
+    return 'Sicherheitskopie wiederhergestellt ($count Zeilen)';
+  }
+
+  @override
+  String backupSafetyRows(String rows, String size) {
+    return '$rows Zeilen · $size';
+  }
+
+  @override
+  String get backupSafetySave => 'Woanders speichern';
+
+  @override
+  String get backupSafetyTitle => 'Sicherheitskopien';
+
+  @override
+  String get backupStaleDays =>
+      'Warnen, wenn die letzte Sicherung älter ist als';
+
+  @override
+  String backupStaleDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tage',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupFolderAccessLost =>
+      'Die App hat keinen Zugriff mehr auf den Sicherungsordner. Wähle den Ordner erneut aus.';
+
+  @override
+  String get backupUseAppDocuments =>
+      '„Auf meinem iPhone“ in Dateien verwenden';
+
+  @override
+  String get backupErrDamaged =>
+      'Die Sicherungsdatei ist beschädigt oder wurde verändert. Sie kann nicht wiederhergestellt werden.';
+
+  @override
+  String get backupHealthCheckPassword =>
+      'Kennst du dein Sicherungspasswort noch? Gib es einmal ein, um sicherzugehen.';
+
+  @override
+  String get backupPasswordChange => 'Passwort ändern';
+
+  @override
+  String get backupPasswordCheck => 'Passwort prüfen';
+
+  @override
+  String get backupPasswordCorrect =>
+      'Richtig. Dein Sicherungspasswort ist bestätigt.';
+
+  @override
+  String get backupPasswordDesc =>
+      'Sicherungen, die dieses Gerät verlassen, werden mit einem Passwort deiner Wahl verschlüsselt. Ohne das Passwort oder den Wiederherstellungsschlüssel sieht man nur unlesbare Daten – auch du. Bewahre beides sicher auf.';
+
+  @override
+  String get backupPasswordField => 'Sicherungspasswort';
+
+  @override
+  String get backupPasswordFinish => 'Fertig';
+
+  @override
+  String get backupPasswordHide => 'Passwort verbergen';
+
+  @override
+  String backupPasswordLastChecked(String date) {
+    return 'Zuletzt bestätigt am $date';
+  }
+
+  @override
+  String backupPasswordMinLength(int count) {
+    return 'Mindestens $count Zeichen';
+  }
+
+  @override
+  String get backupPasswordMismatch => 'Die Passwörter stimmen nicht überein';
+
+  @override
+  String get backupPasswordMissing =>
+      'Sicherungen sind pausiert, bis du ein Sicherungspasswort festlegst.';
+
+  @override
+  String get backupPasswordNewRecovery => 'Neuer Wiederherstellungsschlüssel';
+
+  @override
+  String get backupPasswordOn => 'Sicherungen sind verschlüsselt';
+
+  @override
+  String get backupPasswordRepeat => 'Passwort wiederholen';
+
+  @override
+  String get backupPasswordRequired =>
+      'Erforderlich: Die App-Sperre oder die Datenbankverschlüsselung ist aktiv, und eine unverschlüsselte Sicherung würde sie umgehen.';
+
+  @override
+  String get backupPasswordSet => 'Sicherungspasswort festlegen';
+
+  @override
+  String get backupPasswordShow => 'Passwort anzeigen';
+
+  @override
+  String backupPasswordSince(String date) {
+    return 'Passwort festgelegt am $date';
+  }
+
+  @override
+  String get backupPasswordStepIntro =>
+      'Wähle ein Passwort für deine Sicherungen. Es ist unabhängig von der App-Sperre und wird gebraucht, um eine Sicherung auf einem anderen Gerät wiederherzustellen.';
+
+  @override
+  String get backupPasswordTitle => 'Sicherungspasswort';
+
+  @override
+  String get backupPasswordWrong => 'Falsches Passwort';
+
+  @override
+  String get backupPasswordWrongDesc =>
+      'Das ist nicht das Sicherungspasswort. Wenn du es nicht mehr weißt, lege jetzt ein neues fest: Neue Sicherungen verwenden es, ältere lassen sich weiter mit dem alten Passwort oder dem Wiederherstellungsschlüssel öffnen.';
+
+  @override
+  String get backupRecoveryConfirmIntro =>
+      'Gib zwei Gruppen des Wiederherstellungsschlüssels ein, um sicherzugehen, dass du ihn hast.';
+
+  @override
+  String get backupRecoveryCopy => 'Kopieren';
+
+  @override
+  String get backupRecoveryFileIntro =>
+      'Wiederherstellungsschlüssel für die Sicherungen von Quiet Ledger. Wer diesen Schlüssel hat, kann deine Sicherungen öffnen; bewahre ihn privat und sicher auf.';
+
+  @override
+  String backupRecoveryGroup(int number) {
+    return 'Gruppe $number';
+  }
+
+  @override
+  String get backupRecoveryIntro =>
+      'Das ist dein Wiederherstellungsschlüssel. Er öffnet deine Sicherungen, wenn du das Passwort vergisst. Schreib ihn auf oder speichere ihn außerhalb dieses Geräts, z. B. in einem Passwortmanager.';
+
+  @override
+  String get backupRecoveryKey => 'Wiederherstellungsschlüssel';
+
+  @override
+  String get backupRecoverySave => 'Als Datei speichern';
+
+  @override
+  String get backupRecoveryShowAgain =>
+      'Wiederherstellungsschlüssel noch einmal anzeigen';
+
+  @override
+  String get backupRecoveryStored =>
+      'Ich habe den Wiederherstellungsschlüssel sicher aufbewahrt';
+
+  @override
+  String get backupRecoveryWarning =>
+      'Er wird nur jetzt angezeigt. Ohne Passwort und Wiederherstellungsschlüssel kann niemand deine verschlüsselten Sicherungen öffnen.';
+
+  @override
+  String get backupUnlockDesc =>
+      'Diese Sicherung ist verschlüsselt. Gib ihr Sicherungspasswort oder den Wiederherstellungsschlüssel ein.';
+
+  @override
+  String get backupUnlockOpen => 'Öffnen';
+
+  @override
+  String get backupUnlockTitle => 'Verschlüsselte Sicherung';
+
+  @override
+  String get backupUnlockWrong =>
+      'Damit lässt sich diese Sicherung nicht öffnen. Versuche es noch einmal.';
+
+  @override
+  String get backupCheck => 'Sicherung prüfen';
+
+  @override
+  String get backupCheckOk => 'Sicherung ist vollständig';
+
+  @override
+  String backupCheckOkDesc(String file, String date, int rows, int files) {
+    return '$file\nErstellt am $date. Alle Prüfsummen stimmen: $rows Zeilen und $files Belegdateien lassen sich wiederherstellen.';
+  }
+
+  @override
+  String get backupFolderFileGone => 'Die Sicherung ist nicht mehr im Ordner.';
+
+  @override
+  String get backupFolderList => 'Sicherungen im Ordner';
+
+  @override
+  String get backupFolderListEmpty =>
+      'Noch keine Sicherungen in diesem Ordner.';
+
+  @override
+  String backupRestoreNewer(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count Änderungen auf diesem Gerät sind neuer als diese Sicherung und werden ersetzt (sie bleiben in der Sicherheitskopie).',
+      one: '1 Änderung auf diesem Gerät ist neuer als diese Sicherung und wird ersetzt (sie bleibt in der Sicherheitskopie).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupWebStorageNotPersistent =>
+      'Dieser Browser kann die Daten der App löschen, wenn der Speicher knapp wird. Sichere regelmäßig.';
+
+  @override
+  String get backupWebStoragePersistent =>
+      'Dieser Browser behält die Daten der App und löscht sie nicht von selbst.';
+
+  @override
+  String get backupBootUnreadable =>
+      'Die Datenbankdatei ist beschädigt oder lässt sich mit dem Schlüssel auf diesem Gerät nicht entsperren.';
+
+  @override
+  String get backupBootCopyDetails => 'Details kopieren';
+
+  @override
+  String get backupAppDocumentsFolder =>
+      'Auf meinem iPhone › Quiet Ledger › Backups';
+
+  @override
+  String get backupFolderMissing =>
+      'Der Sicherungsordner wurde nicht gefunden. Schließe das Laufwerk an, auf dem er liegt, oder wähle den Ordner erneut aus.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -1736,11 +2115,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exportRestoreWarning =>
-      'Alle Daten und Einstellungen auf diesem Gerät werden durch die Sicherung ersetzt. Das kann nicht rückgängig gemacht werden.';
+      'Alle Daten und Einstellungen auf diesem Gerät werden durch die Sicherung ersetzt. Vorher wird eine Sicherheitskopie der aktuellen Daten auf diesem Gerät behalten (Export & Sicherung › Sicherheitskopien).';
 
   @override
   String get exportRestoreBackupFirst =>
-      'Vorher eine Sicherung der aktuellen Daten speichern';
+      'Zusätzlich eine Sicherung der aktuellen Daten woanders speichern';
 
   @override
   String get exportRestoreConfirm => 'Alle Daten ersetzen';
@@ -5820,7 +6199,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String settingsUiResetAppMessage(String word) {
-    return 'Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Das lässt sich nicht rückgängig machen – exportiere vorher eine Sicherung, falls du die Daten noch brauchst. Gib zur Bestätigung $word ein.';
+    return 'Dadurch werden alle Konten, Buchungen, Budgets, Regeln und Einstellungen auf diesem Gerät sowie die App-Sperre gelöscht. Gib zur Bestätigung $word ein.';
   }
 
   @override

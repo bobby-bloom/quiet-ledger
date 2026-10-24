@@ -10,9 +10,10 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 // location is used (scheduled instants are converted to UTC).
 import 'package:timezone/timezone.dart' as tz;
 
-/// Kinds of local notifications; each maps to a per-type toggle in
-/// Settings › Recurring & reminders and to an Android channel.
-enum NotificationKind { bill, income, lowBalance, budget }
+/// Kinds of local notifications; each maps to an Android channel and, except
+/// [backup] (always on: a failing backup must not go unnoticed), to a
+/// per-type toggle in Settings › Recurring & reminders.
+enum NotificationKind { bill, income, lowBalance, budget, backup }
 
 /// A reminder to be shown at [at] (local time). Quiet hours are applied by
 /// the service.
@@ -124,6 +125,10 @@ abstract interface class NotificationService {
     String? payload,
   });
 
+  /// Shows a backup problem (failed or paused scheduled backup) now; tapping
+  /// it opens the export screen (payload `backup`).
+  Future<void> showBackupProblem({required String title, required String body});
+
   /// Payloads of tapped notifications (including the one that launched the
   /// app).
   Stream<String> get taps;
@@ -170,6 +175,12 @@ class NoopNotificationService implements NotificationService {
   }) async {}
 
   @override
+  Future<void> showBackupProblem({
+    required String title,
+    required String body,
+  }) async {}
+
+  @override
   Stream<String> get taps => const Stream.empty();
 }
 
@@ -196,6 +207,7 @@ class LocalNotificationService implements NotificationService {
     NotificationKind.income: 'income',
     NotificationKind.lowBalance: 'low_balance',
     NotificationKind.budget: 'budget',
+    NotificationKind.backup: 'backup',
   };
 
   static const _defaultChannelNames = {
@@ -203,6 +215,7 @@ class LocalNotificationService implements NotificationService {
     NotificationKind.income: 'Income',
     NotificationKind.lowBalance: 'Low balance',
     NotificationKind.budget: 'Budgets',
+    NotificationKind.backup: 'Backups',
   };
 
   @override
@@ -314,6 +327,7 @@ class LocalNotificationService implements NotificationService {
       NotificationKind.budget =>
         s.get(RecurringSettings.notifyBudget) &&
             s.moduleEnabled(AppModule.budgets),
+      NotificationKind.backup => true,
     };
   }
 
@@ -470,6 +484,12 @@ class LocalNotificationService implements NotificationService {
     required String body,
     String? payload,
   }) => _showNow('budget:$key', NotificationKind.budget, title, body, payload);
+
+  @override
+  Future<void> showBackupProblem({
+    required String title,
+    required String body,
+  }) => _showNow('backup', NotificationKind.backup, title, body, 'backup');
 
   void dispose() => unawaited(_taps.close());
 }

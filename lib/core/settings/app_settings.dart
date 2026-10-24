@@ -1,4 +1,5 @@
 import 'package:personal_finance/core/money/money_format.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/setting_def.dart';
 import 'package:personal_finance/core/settings/setting_enums.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
@@ -1188,6 +1189,7 @@ abstract final class ImportExportSettings {
       AutoExportSchedule.weekly => l.setOptWeekly,
     },
     keywords: const ['backup', 'sicherung'],
+    deviceLocal: true,
   );
 
   static final autoExportFolder = SettingDef.optionalString(
@@ -1195,6 +1197,7 @@ abstract final class ImportExportSettings {
     section: SettingSection.importExport,
     label: (l) => l.setAutoExportFolder,
     editor: const CustomEditor('/more/export/folder'),
+    deviceLocal: true,
   );
 
   static final autoExportKeep = SettingDef.integer(
@@ -1204,6 +1207,7 @@ abstract final class ImportExportSettings {
     min: 1,
     max: 100,
     label: (l) => l.setAutoExportKeep,
+    deviceLocal: true,
   );
 
   static final lastAutoExport = SettingDef.optionalString(
@@ -1211,6 +1215,7 @@ abstract final class ImportExportSettings {
     section: SettingSection.importExport,
     label: (l) => l.setAutoExport,
     hidden: true,
+    deviceLocal: true,
   );
 
   static final profiles = SettingDef.string(
@@ -1243,6 +1248,7 @@ abstract final class DataSettings {
     label: (l) => l.setStorageLocation,
     editor: const CustomEditor('/more/settings/data'),
     bootstrap: true,
+    deviceLocal: true,
   );
 
   static final tombstoneDays = SettingDef.integer(
@@ -1255,7 +1261,20 @@ abstract final class DataSettings {
     description: (l) => l.setTombstoneDaysDesc,
   );
 
-  static final all = <SettingDef<Object?>>[storageLocation, tombstoneDays];
+  /// ISO timestamp of the last tombstone purge (startup task, weekly).
+  static final lastTombstonePurge = SettingDef.optionalString(
+    key: 'data.lastTombstonePurge',
+    section: SettingSection.data,
+    label: (l) => l.exportPurgeLast,
+    hidden: true,
+    deviceLocal: true,
+  );
+
+  static final all = <SettingDef<Object?>>[
+    storageLocation,
+    tombstoneDays,
+    lastTombstonePurge,
+  ];
 }
 
 abstract final class SyncSettings {
@@ -1288,7 +1307,20 @@ final allSettings = <SettingDef<Object?>>[
   ...ImportExportSettings.all,
   ...DataSettings.all,
   ...SyncSettings.all,
+  ...BackupSettings.all,
 ];
+
+/// Keys of the [SettingDef.deviceLocal] settings: never synced, kept by a
+/// restore.
+final Set<String> deviceLocalSettingKeys = {
+  for (final d in allSettings)
+    if (d.deviceLocal) d.key,
+};
+
+/// Whether the `settings` row [rowId] (`<scope>|<key>`) holds a
+/// device-local setting.
+bool isDeviceLocalSettingRow(String rowId) =>
+    deviceLocalSettingKeys.contains(rowId.substring(rowId.indexOf('|') + 1));
 
 final Map<String, SettingDef<Object?>> settingsByKey = {
   for (final d in allSettings) d.key: d,

@@ -278,6 +278,244 @@
       }
     }
   },
+  "backupBootTitle": "Your data could not be opened",
+  "backupBootMissingKey": "The key that unlocks the database is missing on this device. This happens when app data is copied to a new device or restored without the device's secure storage.",
+  "backupBootNewer": "The database was created by a newer version of the app. Install the latest version to open it.",
+  "backupBootGeneric": "The app could not start. This can be temporary, for example when storage is full or the device is still locked. Try again; the database file was not changed.",
+  "backupBootKept": "Nothing has been deleted. The database file stays on this device.",
+  "backupBootDetails": "Technical details",
+  "backupBootStartFresh": "Start with an empty database",
+  "backupBootStartFreshConfirm": "The current database file is moved to a separate folder, not deleted. The app then starts empty, and you can restore a backup under More › Export & backup.",
+  "backupBootMoved": "The old database file was moved to:\n{path}",
+  "@backupBootMoved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "backupMissingReceipts": "Backup saved. {count} receipt files were already missing on this device and are not in it.",
+  "@backupMissingReceipts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupReceipts": "Receipts",
+  "backupReceiptsValue": "{count} files, {size}",
+  "@backupReceiptsValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreMissing": "{count} receipt files were already missing when this backup was made and cannot be restored.",
+  "@backupRestoreMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupChannel": "Backups",
+  "backupHealthBackUp": "Back up now",
+  "backupHealthDetails": "Details",
+  "backupHealthFailing": "The automatic backup failed: {message}",
+  "@backupHealthFailing": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "backupHealthInterrupted": "The last automatic backup did not finish.",
+  "backupHealthNever": "Your data has not been backed up yet.",
+  "backupHealthStale": "Last backup: {date}. Back up again so recent changes are safe.",
+  "@backupHealthStale": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNotifyFailedTitle": "Backup failed",
+  "backupNotifyFailedBody": "Your automatic backup could not be written. Open the app to fix it.",
+  "backupResetKeepCopy": "Keep a safety copy on this device",
+  "backupResetKeepCopyDesc": "Lets you undo the reset under More › Export & backup › Safety copies. Untick to also delete the safety copies.",
+  "backupSafetyActions": "Actions",
+  "backupSafetyDelete": "Delete",
+  "backupSafetyDeleteConfirm": "Delete the safety copy from {date}?",
+  "@backupSafetyDeleteConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyDesc": "Taken automatically before a restore, a reset, undoing an import, merging categories or tags and removing old deleted entries. They stay on this device and hold all data except receipt files, which these actions never delete. The newest 10 are kept.",
+  "backupSafetyEmpty": "No safety copies yet.",
+  "backupSafetyFailed": "No safety copy could be taken, so nothing was changed: {message}",
+  "@backupSafetyFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyReasonImportUndo": "Before undoing an import",
+  "backupSafetyReasonMerge": "Before merging",
+  "backupSafetyReasonPurge": "Before removing old deleted entries",
+  "backupSafetyReasonReset": "Before resetting the app",
+  "backupSafetyReasonRestore": "Before restoring a backup",
+  "backupSafetyReasonRestoreCopy": "Before restoring a safety copy",
+  "backupSafetyRestore": "Restore",
+  "backupSafetyRestoreConfirm": "Replace all current data with the safety copy from {date}? A safety copy of the current data is taken first, so you can go back.",
+  "@backupSafetyRestoreConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetyRestored": "Safety copy restored ({count} rows)",
+  "@backupSafetyRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupSafetyRows": "{rows} rows · {size}",
+  "@backupSafetyRows": {
+    "placeholders": {
+      "rows": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSafetySave": "Save elsewhere",
+  "backupSafetyTitle": "Safety copies",
+  "backupStaleDays": "Warn when the last backup is older than",
+  "backupStaleDaysValue": "{days, plural, =1{1 day} other{{days} days}}",
+  "@backupStaleDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "backupFolderAccessLost": "The app no longer has access to the backup folder. Choose the folder again.",
+  "backupUseAppDocuments": "Use “On My iPhone” in Files",
+  "backupErrDamaged": "The backup file is damaged or was changed. It cannot be restored.",
+  "backupHealthCheckPassword": "Do you still know your backup password? Type it once to make sure.",
+  "backupPasswordChange": "Change password",
+  "backupPasswordCheck": "Check password",
+  "backupPasswordCorrect": "That's right. Your backup password is confirmed.",
+  "backupPasswordDesc": "Backups that leave this device are encrypted with a password you choose. Anyone without the password or the recovery key sees only scrambled data, and so would you: keep both somewhere safe.",
+  "backupPasswordField": "Backup password",
+  "backupPasswordFinish": "Finish",
+  "backupPasswordHide": "Hide password",
+  "backupPasswordLastChecked": "Last confirmed on {date}",
+  "@backupPasswordLastChecked": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPasswordMinLength": "At least {count} characters",
+  "@backupPasswordMinLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupPasswordMismatch": "The passwords do not match",
+  "backupPasswordMissing": "Backups are paused until you set a backup password.",
+  "backupPasswordNewRecovery": "New recovery key",
+  "backupPasswordOn": "Backups are encrypted",
+  "backupPasswordRepeat": "Repeat the password",
+  "backupPasswordRequired": "Required: the app lock or the database encryption is on, and an unencrypted backup would get around it.",
+  "backupPasswordSet": "Set backup password",
+  "backupPasswordShow": "Show password",
+  "backupPasswordSince": "Password set on {date}",
+  "@backupPasswordSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPasswordStepIntro": "Choose a password for your backups. It is different from the app lock and is needed to restore a backup on another device.",
+  "backupPasswordTitle": "Backup password",
+  "backupPasswordWrong": "Wrong password",
+  "backupPasswordWrongDesc": "That is not the backup password. If you no longer know it, set a new one now: new backups use it, and older ones still open with the old password or the recovery key.",
+  "backupRecoveryConfirmIntro": "To make sure you have the recovery key, type two of its groups.",
+  "backupRecoveryCopy": "Copy",
+  "backupRecoveryFileIntro": "Recovery key for the backups of Quiet Ledger. Anyone with this key can open your backups; keep it private and safe.",
+  "backupRecoveryGroup": "Group {number}",
+  "@backupRecoveryGroup": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "backupRecoveryIntro": "This is your recovery key. It opens your backups if you forget the password. Write it down or save it outside this device, e.g. in a password manager.",
+  "backupRecoveryKey": "Recovery key",
+  "backupRecoverySave": "Save as file",
+  "backupRecoveryShowAgain": "Show the recovery key again",
+  "backupRecoveryStored": "I have stored the recovery key in a safe place",
+  "backupRecoveryWarning": "It is shown only now. Without the password and the recovery key, your encrypted backups cannot be opened by anyone.",
+  "backupUnlockDesc": "This backup is encrypted. Enter its backup password or the recovery key.",
+  "backupUnlockOpen": "Open",
+  "backupUnlockTitle": "Encrypted backup",
+  "backupUnlockWrong": "That does not open this backup. Try again.",
+  "backupCheck": "Check a backup",
+  "backupCheckOk": "Backup is complete",
+  "backupCheckOkDesc": "{file}\nMade on {date}. All checksums match: {rows} rows and {files} receipt files can be restored.",
+  "@backupCheckOkDesc": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "files": {
+        "type": "int"
+      }
+    }
+  },
+  "backupFolderFileGone": "The backup is no longer in the folder.",
+  "backupFolderList": "Backups in the folder",
+  "backupFolderListEmpty": "No backups in this folder yet.",
+  "backupRestoreNewer": "{count, plural, =1{1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).} other{{count} changes on this device are newer than this backup and will be replaced (they stay in the safety copy).}}",
+  "@backupRestoreNewer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupWebStorageNotPersistent": "This browser may clear the app's data when space runs low. Back up regularly.",
+  "backupWebStoragePersistent": "This browser keeps the app's data and does not clear it on its own.",
+  "backupBootUnreadable": "The database file is damaged or cannot be unlocked with the key on this device.",
+  "backupBootCopyDetails": "Copy details",
+  "backupAppDocumentsFolder": "On My iPhone › Quiet Ledger › Backups",
+  "backupFolderMissing": "The backup folder was not found. Connect the drive it is on, or choose the folder again.",
   "budgetsTitle": "Budgets",
   "budgetsBudgeted": "Budgeted",
   "budgetsSpent": "Spent",
@@ -1107,8 +1345,8 @@
   "exportRestoreThisDevice": "This device",
   "exportRestoreOtherDevice": "Another device",
   "exportRestoreTotalRows": "Rows in total",
-  "exportRestoreWarning": "This replaces all data and settings on this device with the backup. It cannot be undone.",
-  "exportRestoreBackupFirst": "Save a backup of the current data first",
+  "exportRestoreWarning": "This replaces all data and settings on this device with the backup. A safety copy of the current data is kept on this device first (Export & backup › Safety copies).",
+  "exportRestoreBackupFirst": "Also save a backup of the current data elsewhere",
   "exportRestoreConfirm": "Replace all data",
   "exportRestoreAborted": "Restore cancelled. Nothing was changed.",
   "exportRestoreDone": "Backup restored ({count} rows)",
@@ -3511,7 +3749,7 @@
   "settingsUiResetApp": "Reset app",
   "settingsUiResetAppDesc": "Delete all data on this device and start over",
   "settingsUiResetAppTitle": "Delete all data?",
-  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. It cannot be undone, so export a backup first if you may need the data. Type {word} to confirm.",
+  "settingsUiResetAppMessage": "This deletes every account, transaction, budget, rule and setting on this device, and the app lock. Type {word} to confirm.",
   "@settingsUiResetAppMessage": {
     "placeholders": {
       "word": {

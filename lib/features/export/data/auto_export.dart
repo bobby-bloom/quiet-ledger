@@ -1,20 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
+import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
+import 'package:personal_finance/core/platform/notifications.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/core/sync/sync_providers.dart';
-import 'package:personal_finance/features/export/data/bundle_service.dart';
+import 'package:personal_finance/core/sync/tombstone_purge.dart'
+    show countPurgeableTombstones;
+import 'package:personal_finance/features/export/data/backup_keys.dart';
+import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/data_tools.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
+import 'package:personal_finance/features/export/data/export_folder_native.dart';
+import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
-import 'package:personal_finance/features/export/domain/export_settings.dart';
-
-/// Reads a provider; both `ProviderContainer.read` and `WidgetRef.read`
-/// fit.
-typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
+import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Outcome of an automatic backup run.
 @immutable
@@ -29,11 +35,10 @@ class AutoExportResult {
   bool get written => fileName != null;
 }
 
-/// Runs the scheduled backup when it is due (PLAN.md §2.6): native
-/// platforms only, schedule not off, folder chosen. Writes a verified bundle
-/// to the folder, keeps the newest `autoExportKeep` backups and records
-/// `lastAutoExport`. Returns whether a backup was written. Errors are
-/// logged, never thrown.
+/// Runs the scheduled backup when it is due (docs/BACKUP.md): native
+/// platforms only, schedule not off, folder chosen. See [runAutoExportNow].
+/// Returns whether a backup was written. Errors are recorded and logged,
+/// never thrown.
 Future<bool> runAutoExportIfDue(
   ProviderContainer container, {
   DateTime? now,
@@ -47,7 +52,18 @@ Future<bool> runAutoExportIfDue(
     if (folder == null || folder.isEmpty) return false;
     final lastRaw = s.get(ImportExportSettings.lastAutoExport);
     final last = lastRaw == null ? null : DateTime.tryParse(lastRaw);
-    if (!isAutoExportDue(s.get(ImportExportSettings.autoExport), last, at)) {
+    final schedule = s.get(ImportExportSettings.autoExport);
+    if (schedule == AutoExportSchedule.off) return false;
+    // After a failure, retry with growing gaps (1 h, 4 h, 12 h, daily)
+    // instead of waiting for the next scheduled day.
+    final failed = s.get(BackupSettings.lastError) != null;
+    if (failed) {
+      final attempt = DateTime.tryParse(
+        s.get(BackupSettings.lastAttempt) ?? '',
+      );
+      final failures = s.get(BackupSettings.failureCount);
+      if (!isBackupRetryDue(failures, attempt, at)) return false;
+    } else if (!isAutoExportDue(schedule, last, at)) {
       return false;
     }
     final r = await runAutoExportNow(read, now: at);
@@ -58,45 +74,208 @@ Future<bool> runAutoExportIfDue(
   }
 }
 
+Future<AutoExportResult>? _running;
+
 /// Writes a backup to the configured folder now, regardless of the
-/// schedule ("Back up now"). Never throws; see [AutoExportResult.error].
+/// schedule ("Back up now"). Concurrent calls share one run.
+///
+/// Order (docs/BACKUP.md, "write → verify → then prune"): record the
+/// attempt; create a verified backup; write it; read it back from the
+/// folder and validate it again; only then prune old backups (never the
+/// file just written) and record success. A failure is recorded in
+/// [BackupSettings.lastError] and notified once. Never throws; see
+/// [AutoExportResult.error].
 Future<AutoExportResult> runAutoExportNow(
   ProviderReader read, {
   DateTime? now,
-}) async {
+}) {
+  final running = _running;
+  if (running != null) return running;
+  final run = _runAutoExport(read, now ?? DateTime.now());
+  _running = run;
+  return run.whenComplete(() => _running = null);
+}
+
+Future<AutoExportResult> _runAutoExport(
+  ProviderReader read,
+  DateTime at,
+) async {
+  final settings = read(settingsProvider.notifier);
+  final stamp = at.toIso8601String();
   try {
-    final at = now ?? DateTime.now();
+    await settings.set(BackupSettings.lastAttempt, stamp);
     final s = await loadSettings(read(databaseProvider));
-    final path = s.get(ImportExportSettings.autoExportFolder);
-    if (path == null || path.isEmpty) {
-      return AutoExportResult(error: StateError('No export folder'));
+    final saved = s.get(ImportExportSettings.autoExportFolder);
+    if (saved == null || saved.isEmpty) {
+      throw StateError('No export folder');
     }
-    final db = read(databaseProvider);
-    final bytes = await exportBundle(db, deviceId: read(deviceIdProvider));
-    // Verify before writing: a backup that cannot be read is worthless.
-    readBundle(db, bytes);
+    final path = await renewBackupFolderAccess(read, saved);
     final folder = read(exportFolderFactoryProvider)(path);
-    final name = autoExportFileName(at);
-    await folder.writeFile(name, bytes);
+    // Cheap check first: an unreachable folder (revoked, offline, drive not
+    // connected) fails here instead of after a full export and encryption.
+    await folder.listFiles();
+    final backup = await createVerifiedBackup(read);
+    final name = autoExportFileName(at, backup.extension);
+    await folder.writeFile(name, backup.bytes);
+
+    // Verify what actually landed in the folder: byte for byte the backup
+    // that createVerifiedBackup already decrypted and validated, so it
+    // opens too. A file that fails is removed again so it never counts as
+    // one of the backups to keep.
+    try {
+      final stored = await folder.readFile(name);
+      if (!listEquals(stored, backup.bytes)) {
+        throw StateError(
+          'The backup in the folder differs from what was written',
+        );
+      }
+    } on Object {
+      try {
+        await folder.deleteFile(name);
+      } on Object catch (e) {
+        debugPrint('Could not remove the unverified backup $name: $e');
+      }
+      rethrow;
+    }
+
     final prune = autoExportFilesToPrune(
       await folder.listFiles(),
       s.get(ImportExportSettings.autoExportKeep),
+      protect: name,
     );
     for (final f in prune) {
       await folder.deleteFile(f);
     }
-    await read(settingsProvider.notifier)
-        .set(ImportExportSettings.lastAutoExport, at.toIso8601String());
+    await settings.set(ImportExportSettings.lastAutoExport, stamp);
+    await settings.set(BackupSettings.lastVerified, stamp);
+    await clearBackupFailure(read);
     return AutoExportResult(fileName: name, pruned: prune);
   } on Object catch (e, st) {
     debugPrint('Auto-export failed: $e\n$st');
+    await _recordFailure(read, e);
     return AutoExportResult(error: e);
   }
 }
 
+/// Forgets a scheduled backup failure, so the next run is due right away
+/// (a success, a new folder, a new backup password).
+Future<void> clearBackupFailure(ProviderReader read) async {
+  final settings = read(settingsProvider.notifier);
+  await settings.reset(BackupSettings.lastError);
+  await settings.reset(BackupSettings.failureCount);
+}
+
+AppLocalizations _l10n(ProviderReader read) =>
+    lookupAppLocalizations(Locale(read(languageCodeProvider)));
+
+/// Records [error] as the current backup problem and notifies once.
+/// [attempt] false (a check, not a backup) leaves the retry count alone.
+Future<void> _recordFailure(
+  ProviderReader read,
+  Object error, {
+  bool attempt = true,
+}) async {
+  try {
+    final settings = read(settingsProvider.notifier);
+    final current = read(settingsProvider);
+    final first = current.get(BackupSettings.lastError) == null;
+    if (attempt) {
+      await settings.set(
+        BackupSettings.failureCount,
+        first ? 1 : current.get(BackupSettings.failureCount) + 1,
+      );
+    }
+    final l = _l10n(read);
+    await settings.set(BackupSettings.lastError, switch (error) {
+      BackupFolderAccessException() => l.backupFolderAccessLost,
+      BackupFolderMissingException() => l.backupFolderMissing,
+      BackupPasswordMissingException() => l.backupPasswordMissing,
+      _ => '$error',
+    });
+    if (!first) return;
+    final service = read(notificationServiceProvider);
+    if (await service.init()) {
+      await service.showBackupProblem(
+        title: l.backupNotifyFailedTitle,
+        body: switch (error) {
+          BackupPasswordMissingException() => l.backupPasswordMissing,
+          BackupFolderAccessException() => l.backupFolderAccessLost,
+          BackupFolderMissingException() => l.backupFolderMissing,
+          _ => l.backupNotifyFailedBody,
+        },
+      );
+    }
+  } on Object catch (e) {
+    debugPrint('Could not record the backup failure: $e');
+  }
+}
+
+/// Startup check: a platform backup folder whose permission is gone is
+/// reported right away (banner, notification) instead of at the next due
+/// backup. Never throws.
+Future<void> checkBackupFolderAccess(ProviderReader read) async {
+  try {
+    final folder = read(settingsProvider)
+        .get(ImportExportSettings.autoExportFolder);
+    if (folder == null || !isNativeFolderRef(folder)) return;
+    if (read(settingsProvider).get(ImportExportSettings.autoExport) ==
+        AutoExportSchedule.off) {
+      return;
+    }
+    if (!await nativeFolderAccessible(folder)) {
+      await _recordFailure(
+        read,
+        const BackupFolderAccessException(),
+        attempt: false,
+      );
+      return;
+    }
+    // Access is back (permission granted again, drive reconnected): a lost
+    // access no longer applies, so the backup is due at once.
+    final error = read(settingsProvider).get(BackupSettings.lastError);
+    if (error == _l10n(read).backupFolderAccessLost) {
+      await clearBackupFailure(read);
+    }
+    await renewBackupFolderAccess(read, folder);
+  } on Object catch (e) {
+    debugPrint('Backup folder check failed: $e');
+  }
+}
+
+/// Saves renewed access to the platform folder [folder] when the platform
+/// reports the saved one as outdated ([refreshNativeFolder]) and returns
+/// the folder to use. Never throws: on any problem [folder] is returned
+/// and the backup itself reports a lost access.
+Future<String> renewBackupFolderAccess(
+  ProviderReader read,
+  String folder,
+) async {
+  // Only bookmarks (iOS/macOS) go out of date; Android permissions do not.
+  if (!folder.startsWith('bookmark:')) return folder;
+  try {
+    final renewed = await refreshNativeFolder(folder);
+    if (renewed == null || renewed.ref == folder) return folder;
+    final settings = read(settingsProvider.notifier);
+    await settings.set(ImportExportSettings.autoExportFolder, renewed.ref);
+    await settings.set(BackupSettings.folderName, renewed.name);
+    return renewed.ref;
+  } on Object catch (e) {
+    debugPrint('Could not renew access to the backup folder: $e');
+    return folder;
+  }
+}
+
+/// Records that a backup was verified and stored outside the app (manual
+/// save, share or download).
+Future<void> recordVerifiedBackup(ProviderReader read, {DateTime? now}) => read(
+  settingsProvider.notifier,
+).set(BackupSettings.lastVerified, (now ?? DateTime.now()).toIso8601String());
+
 /// Purges tombstones older than `DataSettings.tombstoneDays`, at most once a
-/// week and only while no sync backend is configured. Returns the number of
-/// rows removed (0 when skipped). Errors are logged, never thrown.
+/// week and only while no sync backend is configured. When rows would be
+/// removed a safety copy is taken first; if that fails nothing is purged
+/// and the next start tries again. Returns the number of rows removed (0
+/// when skipped). Errors are logged, never thrown.
 Future<int> runTombstonePurgeIfDue(
   ProviderContainer container, {
   DateTime? now,
@@ -105,24 +284,64 @@ Future<int> runTombstonePurgeIfDue(
     final read = container.read;
     if (read(syncConfiguredProvider)) return 0;
     final at = now ?? DateTime.now();
-    final s = await loadSettings(read(databaseProvider));
-    final lastRaw = s.get(ExportSettings.lastTombstonePurge);
+    final db = read(databaseProvider);
+    final s = await loadSettings(db);
+    final lastRaw = s.get(DataSettings.lastTombstonePurge);
     final last = lastRaw == null ? null : DateTime.tryParse(lastRaw);
     if (last != null &&
         !last.isAfter(at) &&
         at.difference(last) < const Duration(days: 7)) {
       return 0;
     }
-    final removed = await purgeTombstones(
-      read(databaseProvider),
-      Duration(days: s.get(DataSettings.tombstoneDays)),
-      now: at,
-    );
+    final age = Duration(days: s.get(DataSettings.tombstoneDays));
+    var removed = 0;
+    if (await countPurgeableTombstones(db, age, now: at) > 0) {
+      await takeSafetyCopy(
+        db,
+        SafetyReason.purge,
+        deviceId: read(deviceIdProvider),
+        now: at,
+      );
+      removed = await purgeTombstones(db, age, now: at);
+    }
     await read(settingsProvider.notifier)
-        .set(ExportSettings.lastTombstonePurge, at.toIso8601String());
+        .set(DataSettings.lastTombstonePurge, at.toIso8601String());
     return removed;
   } on Object catch (e, st) {
     debugPrint('Tombstone purge failed: $e\n$st');
     return 0;
   }
 }
+
+/// Runs the scheduled backup while the app stays open: when it returns to
+/// the foreground and every hour (the run itself checks whether it is due).
+/// Started by the export startup task; stopped when the container is
+/// disposed.
+class BackupScheduler {
+  AppLifecycleListener? _lifecycle;
+  Timer? _timer;
+
+  void start(Future<void> Function() tick) {
+    if (_timer != null) return;
+    void run() => unawaited(tick());
+    _timer = Timer.periodic(const Duration(hours: 1), (_) => run());
+    try {
+      _lifecycle = AppLifecycleListener(onResume: run);
+    } on Object catch (e) {
+      // No widgets binding (tests, headless): the timer still runs.
+      debugPrint('Backup scheduler without lifecycle events: $e');
+    }
+  }
+
+  void dispose() {
+    _lifecycle?.dispose();
+    _timer?.cancel();
+    _timer = null;
+  }
+}
+
+final backupSchedulerProvider = Provider<BackupScheduler>((ref) {
+  final s = BackupScheduler();
+  ref.onDispose(s.dispose);
+  return s;
+});

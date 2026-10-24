@@ -8,6 +8,8 @@ import 'package:personal_finance/app/theme/app_theme.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
+import 'package:personal_finance/features/export/data/backup_keys.dart';
+import 'package:personal_finance/features/security/data/secret_store.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Opens a fresh in-memory database.
@@ -22,6 +24,13 @@ HlcClock testClock({String node = 'test-device', int start = 1700000000000}) {
   return HlcClock(node, now: () => t++);
 }
 
+/// Backup keys in memory instead of the platform keystore.
+List<Override> testBackupKeyOverrides() => [
+  backupKeyRepositoryProvider.overrideWithValue(
+    BackupKeyRepository(MemorySecretStore()),
+  ),
+];
+
 /// A [ProviderContainer] wired to [db].
 ProviderContainer testContainer(
   AppDatabase db, {
@@ -30,6 +39,7 @@ ProviderContainer testContainer(
   final c = ProviderContainer(
     overrides: [
       ...dbOverrides(db, 'test-device', clock: testClock()),
+      ...testBackupKeyOverrides(),
       ...overrides,
     ],
   );
@@ -47,6 +57,7 @@ Widget testApp(
   return ProviderScope(
     overrides: [
       ...dbOverrides(db, 'test-device', clock: testClock()),
+      ...testBackupKeyOverrides(),
       ...overrides,
     ],
     child: MaterialApp(
