@@ -28,14 +28,17 @@ void main() {
     // Before the update the container is `old`, afterwards `new`; iOS
     // moves the files along.
     var container = p.join(root.path, 'old');
-    final folder = AppDocumentsExportFolder(
+    AppDocumentsExportFolder open() => AppDocumentsExportFolder(
       resolve: () async => p.join(container, 'Documents', 'Backups'),
     );
-    await folder.writeFile('a.zip', Uint8List.fromList([1, 2, 3]));
+    // The folder is created on first use.
+    await open().writeFile('a.zip', Uint8List.fromList([1, 2, 3]));
 
     final moved = p.join(root.path, 'new');
     Directory(container).renameSync(moved);
     container = moved;
+    // The next backup run opens the folder again.
+    final folder = open();
 
     expect(await folder.listFiles(), ['a.zip']);
     expect(await folder.readFile('a.zip'), [1, 2, 3]);

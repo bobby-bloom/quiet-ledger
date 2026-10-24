@@ -136,7 +136,12 @@ void main() {
       expect(native.calls, containsAllInOrder(['write', 'read']));
     });
 
+    Future<void> useBookmark() => c
+        .read(settingsProvider.notifier)
+        .set(ImportExportSettings.autoExportFolder, 'bookmark:old');
+
     test('outdated access is renewed and saved before writing', () async {
+      await useBookmark();
       native.renewTo = 'bookmark:renewed';
       final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
       expect(r.written, isTrue);
@@ -147,6 +152,7 @@ void main() {
     });
 
     test('the startup check renews outdated access too', () async {
+      await useBookmark();
       native.renewTo = 'bookmark:renewed';
       await checkBackupFolderAccess(c.read);
       expect(
@@ -156,7 +162,19 @@ void main() {
       expect(c.read(settingsProvider).get(BackupSettings.lastError), isNull);
     });
 
+    test('Android folders are never asked to renew', () async {
+      native.renewTo = 'bookmark:renewed';
+      await checkBackupFolderAccess(c.read);
+      await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
+      expect(native.calls, isNot(contains('refresh')));
+      expect(
+        c.read(settingsProvider).get(ImportExportSettings.autoExportFolder),
+        'content://tree/backups',
+      );
+    });
+
     test('a platform without refresh keeps the saved folder', () async {
+      await useBookmark();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(backupFolderChannel, (call) {
             if (call.method == 'refresh') throw MissingPluginException();
@@ -166,8 +184,23 @@ void main() {
       expect(r.written, isTrue);
       expect(
         c.read(settingsProvider).get(ImportExportSettings.autoExportFolder),
-        'content://tree/backups',
+        'bookmark:old',
       );
+    });
+
+    test('the startup check is no attempt and clears a lost access', () async {
+      native.access = false;
+      for (var i = 0; i < 3; i++) {
+        await checkBackupFolderAccess(c.read);
+      }
+      final s = c.read(settingsProvider);
+      expect(s.get(BackupSettings.lastError), isNotNull);
+      // Only real backups count towards the retry backoff.
+      expect(s.get(BackupSettings.failureCount), 0);
+
+      native.access = true;
+      await checkBackupFolderAccess(c.read);
+      expect(c.read(settingsProvider).get(BackupSettings.lastError), isNull);
     });
 
     test('a lost permission is reported at startup in plain words', () async {

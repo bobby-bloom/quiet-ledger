@@ -867,6 +867,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'On My iPhone › Quiet Ledger › Backups';
 
   @override
+  String get backupFolderMissing =>
+      'The backup folder was not found. Connect the drive it is on, or choose the folder again.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

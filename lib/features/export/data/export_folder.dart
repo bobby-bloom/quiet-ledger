@@ -49,35 +49,39 @@ class AppDocumentsExportFolder implements ExportFolder {
 
   final Future<String?> Function() _resolve;
 
+  /// Resolved on first use; the container does not move while the app runs.
+  late final Future<ExportFolder> _folder = _open();
+
   Future<ExportFolder> _open() async {
     final path = await _resolve();
     if (path == null) throw UnsupportedError('No app Documents folder');
-    return impl.openExportFolder(path);
+    return impl.openExportFolder(path, create: true);
   }
 
   @override
-  Future<void> writeFile(String name, Uint8List bytes) async {
-    final folder = await _open();
-    await folder.writeFile(name, bytes);
-  }
+  Future<void> writeFile(String name, Uint8List bytes) =>
+      _folder.then((f) => f.writeFile(name, bytes));
 
   @override
-  Future<Uint8List?> readFile(String name) async {
-    final folder = await _open();
-    return await folder.readFile(name);
-  }
+  Future<Uint8List?> readFile(String name) =>
+      _folder.then((f) => f.readFile(name));
 
   @override
-  Future<List<String>> listFiles() async {
-    final folder = await _open();
-    return await folder.listFiles();
-  }
+  Future<List<String>> listFiles() => _folder.then((f) => f.listFiles());
 
   @override
-  Future<void> deleteFile(String name) async {
-    final folder = await _open();
-    await folder.deleteFile(name);
-  }
+  Future<void> deleteFile(String name) =>
+      _folder.then((f) => f.deleteFile(name));
+}
+
+/// The backup folder (a plain path) does not exist, e.g. because the drive
+/// it is on is not connected.
+class BackupFolderMissingException implements Exception {
+  const BackupFolderMissingException(this.path);
+  final String path;
+
+  @override
+  String toString() => 'Backup folder not found: $path';
 }
 
 /// Factory used by auto-export; override in tests.

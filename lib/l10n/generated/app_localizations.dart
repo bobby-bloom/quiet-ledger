@@ -1453,6 +1453,12 @@ abstract class AppLocalizations {
   /// **'On My iPhone › Quiet Ledger › Backups'**
   String get backupAppDocumentsFolder;
 
+  /// No description provided for @backupFolderMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup folder was not found. Connect the drive it is on, or choose the folder again.'**
+  String get backupFolderMissing;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:

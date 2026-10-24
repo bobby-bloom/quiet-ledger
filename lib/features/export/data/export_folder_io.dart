@@ -5,22 +5,37 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:personal_finance/features/export/data/export_folder.dart';
 
-ExportFolder openExportFolder(String path) => IoExportFolder(path);
+ExportFolder openExportFolder(String path, {bool create = false}) =>
+    IoExportFolder(path, create: create);
 
 /// `<app Documents>/Backups` (iOS: visible in Files › On My iPhone).
 Future<String?> appDocumentsBackupPath() async =>
     p.join((await getApplicationDocumentsDirectory()).path, 'Backups');
 
 /// [ExportFolder] backed by `dart:io`.
+///
+/// A missing folder is an error ([BackupFolderMissingException]) unless
+/// [create] is set: a picked folder that is gone is usually on a drive that
+/// is not connected, and recreating the path would put the backups on the
+/// system disk instead.
 class IoExportFolder implements ExportFolder {
-  IoExportFolder(this.path);
+  IoExportFolder(this.path, {this.create = false});
   final String path;
+
+  /// Create the folder when it does not exist (the app's own folders).
+  final bool create;
 
   Directory get _dir => Directory(path);
 
+  Future<void> _requireDir() async {
+    if (_dir.existsSync()) return;
+    if (!create) throw BackupFolderMissingException(path);
+    await _dir.create(recursive: true);
+  }
+
   @override
   Future<void> writeFile(String name, Uint8List bytes) async {
-    await _dir.create(recursive: true);
+    await _requireDir();
     final target = File(p.join(path, name));
     final tmp = File(p.join(path, '.$name.tmp'));
     await tmp.writeAsBytes(bytes, flush: true);
@@ -39,7 +54,10 @@ class IoExportFolder implements ExportFolder {
 
   @override
   Future<List<String>> listFiles() async {
-    if (!_dir.existsSync()) return const [];
+    if (!_dir.existsSync()) {
+      if (!create) throw BackupFolderMissingException(path);
+      return const [];
+    }
     return await _dir
         .list()
         .where((e) => e is File)

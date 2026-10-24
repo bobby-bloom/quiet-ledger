@@ -129,7 +129,10 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
   `personal-finance-manual-…`, so a manual backup saved into the backup
   folder is never pruned.
 - **Folder access.**
-  - Linux and Windows: a plain path.
+  - Linux and Windows: a plain path. A missing folder is an error
+    (`BackupFolderMissingException`, "Connect the drive it is on"), never
+    recreated: on a drive that is not connected that would put the backups
+    on the system disk.
   - Android: a Storage Access Framework tree with a persisted permission
     (`BackupFolderChannel.kt`). It works with local storage and cloud
     providers.
@@ -141,12 +144,15 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
     iPhone. It is stored as `appdocs:Backups` and resolved on every use,
     because iOS moves the app container on updates.
   - A revoked permission is detected at start and shown as "Choose the
-    folder again".
+    folder again". This check does not count as a failed backup for the
+    retry gaps, and when it finds access back it clears that error so the
+    backup runs at once.
   - An outdated bookmark (folder moved or renamed) still resolves for a
     while. At start and before every scheduled backup the channel's
     `refresh` creates a new one, which is saved as the folder
     (`renewBackupFolderAccess`). Android SAF permissions do not go out of
-    date. Not yet tested on a device.
+    date, so `content://` folders are never asked. Not yet tested on a
+    device.
 - **Health** (`backupHealth`, shown by `BackupHealthBanner` on the
   dashboard and the export screen). The states, in order: password needed,
   failing (with the error), interrupted (started more than 10 minutes ago,
@@ -171,8 +177,10 @@ the copy's rows still find them. Restore and reset leave the table alone.
 The newest 10 copies are kept, plus the newest copy taken before a
 restore, a reset and restoring a safety copy (`protectedSafetyReasons`),
 so later small operations cannot push out the state before the last
-restore or reset. When nothing changed since the newest copy (same table
-hashes), other operations reuse that copy instead of storing a new one.
+restore or reset. When nothing changed since the newest copy (same schema
+and table hashes, read from its manifest only), other operations reuse
+that copy instead of storing a new one; a newest copy that cannot be read
+just counts as different.
 Saving a copy elsewhere adds the receipt files from disk
 (`withReceiptFiles`), and encrypts it like any backup.
 
@@ -196,7 +204,8 @@ operation that replaces, merges or hard-deletes data. It throws
 byte-for-byte (an encrypted file stays encrypted with its key) to
 `<app support>/safety/pre-migration-v<old>-<time>/`. It keeps the newest 3.
 The file's own schema version decides (`readDatabaseFileVersion` reads
-`PRAGMA user_version` read-only with the key, before Drift opens it), so a
+`PRAGMA user_version` read-only with the key before Drift opens it, or the
+main file alone as `immutable` if that fails), so a
 storage location that points at an older file is copied too. Only when the
 file cannot be read does the version this device last opened decide
 (`db.schemaVersion` in shared preferences). The web keeps no pre-migration

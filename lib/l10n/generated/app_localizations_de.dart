@@ -882,6 +882,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf meinem iPhone › Quiet Ledger › Backups';
 
   @override
+  String get backupFolderMissing =>
+      'Der Sicherungsordner wurde nicht gefunden. Schließe das Laufwerk an, auf dem er liegt, oder wähle den Ordner erneut aus.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

@@ -235,5 +235,6 @@
   "backupWebStoragePersistent": "This browser keeps the app's data and does not clear it on its own.",
   "backupBootUnreadable": "The database file is damaged or cannot be unlocked with the key on this device.",
   "backupBootCopyDetails": "Copy details",
-  "backupAppDocumentsFolder": "On My iPhone › Quiet Ledger › Backups"
+  "backupAppDocumentsFolder": "On My iPhone › Quiet Ledger › Backups",
+  "backupFolderMissing": "The backup folder was not found. Connect the drive it is on, or choose the folder again."
 }

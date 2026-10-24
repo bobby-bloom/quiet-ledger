@@ -111,8 +111,8 @@ Future<AutoExportResult> _runAutoExport(
     }
     final path = await renewBackupFolderAccess(read, saved);
     final folder = read(exportFolderFactoryProvider)(path);
-    // Cheap check first: an unreachable folder (revoked, offline, unplugged)
-    // fails here instead of after a full export and encryption.
+    // Cheap check first: an unreachable folder (revoked, offline, drive not
+    // connected) fails here instead of after a full export and encryption.
     await folder.listFiles();
     final backup = await createVerifiedBackup(read);
     final name = autoExportFileName(at, backup.extension);
@@ -165,18 +165,30 @@ Future<void> clearBackupFailure(ProviderReader read) async {
   await settings.reset(BackupSettings.failureCount);
 }
 
-Future<void> _recordFailure(ProviderReader read, Object error) async {
+AppLocalizations _l10n(ProviderReader read) =>
+    lookupAppLocalizations(Locale(read(languageCodeProvider)));
+
+/// Records [error] as the current backup problem and notifies once.
+/// [attempt] false (a check, not a backup) leaves the retry count alone.
+Future<void> _recordFailure(
+  ProviderReader read,
+  Object error, {
+  bool attempt = true,
+}) async {
   try {
     final settings = read(settingsProvider.notifier);
     final current = read(settingsProvider);
     final first = current.get(BackupSettings.lastError) == null;
-    await settings.set(
-      BackupSettings.failureCount,
-      first ? 1 : current.get(BackupSettings.failureCount) + 1,
-    );
-    final l = lookupAppLocalizations(Locale(read(languageCodeProvider)));
+    if (attempt) {
+      await settings.set(
+        BackupSettings.failureCount,
+        first ? 1 : current.get(BackupSettings.failureCount) + 1,
+      );
+    }
+    final l = _l10n(read);
     await settings.set(BackupSettings.lastError, switch (error) {
       BackupFolderAccessException() => l.backupFolderAccessLost,
+      BackupFolderMissingException() => l.backupFolderMissing,
       BackupPasswordMissingException() => l.backupPasswordMissing,
       _ => '$error',
     });
@@ -188,6 +200,7 @@ Future<void> _recordFailure(ProviderReader read, Object error) async {
         body: switch (error) {
           BackupPasswordMissingException() => l.backupPasswordMissing,
           BackupFolderAccessException() => l.backupFolderAccessLost,
+          BackupFolderMissingException() => l.backupFolderMissing,
           _ => l.backupNotifyFailedBody,
         },
       );
@@ -210,8 +223,18 @@ Future<void> checkBackupFolderAccess(ProviderReader read) async {
       return;
     }
     if (!await nativeFolderAccessible(folder)) {
-      await _recordFailure(read, const BackupFolderAccessException());
+      await _recordFailure(
+        read,
+        const BackupFolderAccessException(),
+        attempt: false,
+      );
       return;
+    }
+    // Access is back (permission granted again, drive reconnected): a lost
+    // access no longer applies, so the backup is due at once.
+    final error = read(settingsProvider).get(BackupSettings.lastError);
+    if (error == _l10n(read).backupFolderAccessLost) {
+      await clearBackupFailure(read);
     }
     await renewBackupFolderAccess(read, folder);
   } on Object catch (e) {
@@ -227,7 +250,8 @@ Future<String> renewBackupFolderAccess(
   ProviderReader read,
   String folder,
 ) async {
-  if (!isNativeFolderRef(folder)) return folder;
+  // Only bookmarks (iOS/macOS) go out of date; Android permissions do not.
+  if (!folder.startsWith('bookmark:')) return folder;
   try {
     final renewed = await refreshNativeFolder(folder);
     if (renewed == null || renewed.ref == folder) return folder;
