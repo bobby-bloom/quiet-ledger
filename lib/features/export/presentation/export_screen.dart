@@ -14,6 +14,7 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/transaction_export.dart';
+import 'package:personal_finance/features/export/data/web_storage.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/domain/export_period.dart';
 import 'package:personal_finance/features/export/domain/txn_export.dart';
@@ -224,6 +225,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       onBackup: (ctx) => _run(() async {
         await createBackup(context, ref, origin: _originOf(ctx));
       }),
+      onCheck: () => _run(() => checkBackupFile(context, ref)),
       onRestore: (ctx) => _run(() async {
         await startRestore(context, ref, origin: _originOf(ctx));
         // Data may have been replaced: reload fields and preview.
@@ -588,31 +590,68 @@ class _PreviewCard extends StatelessWidget {
   }
 }
 
-class _BackupCard extends StatelessWidget {
+/// Web: whether the browser keeps the site's storage.
+final _webStoragePersistentProvider = FutureProvider<bool?>(
+  (ref) => isStoragePersistent(),
+);
+
+class _BackupCard extends ConsumerWidget {
   const _BackupCard({
     required this.busy,
     required this.onBackup,
     required this.onRestore,
+    required this.onCheck,
   });
 
   final bool busy;
+  final VoidCallback onCheck;
   final void Function(BuildContext buttonContext) onBackup;
   final void Function(BuildContext buttonContext) onRestore;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    final persistent = ref.watch(_webStoragePersistentProvider).value;
     return SectionCard(
       title: l.exportBackupTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _CardIntro(description: l.exportBackupDesc),
+          if (persistent != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.sm),
+              child: Row(
+                children: [
+                  Icon(
+                    persistent ? Icons.verified_outlined : Icons.info_outline,
+                    size: 18,
+                    color: persistent
+                        ? context.colors.primary
+                        : context.finance.warning,
+                  ),
+                  const SizedBox(width: Space.xs),
+                  Expanded(
+                    child: Text(
+                      persistent
+                          ? l.backupWebStoragePersistent
+                          : l.backupWebStorageNotPersistent,
+                      style: context.text.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Wrap(
             alignment: WrapAlignment.end,
             spacing: Space.xs,
             runSpacing: Space.xs,
             children: [
+              TextButton.icon(
+                onPressed: busy ? null : onCheck,
+                icon: const Icon(Icons.verified_outlined),
+                label: Text(l.backupCheck),
+              ),
               TextButton.icon(
                 onPressed: busy
                     ? null

@@ -37,6 +37,11 @@ Future<VerifiedBackup> createVerifiedBackup(
   ProviderReader read, {
   Uint8List? zip,
 }) async {
+  // Policy first: a paused backup must not cost a full export each retry.
+  final ring = await read(backupKeyRepositoryProvider).load();
+  if (ring == null && read(backupEncryptionRequiredProvider)) {
+    throw const BackupPasswordMissingException();
+  }
   final db = read(databaseProvider);
   final bundle =
       zip ??
@@ -46,13 +51,7 @@ Future<VerifiedBackup> createVerifiedBackup(
         receipts: read(receiptStoreProvider),
       );
   final manifest = readBundle(db, bundle).manifest;
-  final ring = await read(backupKeyRepositoryProvider).load();
-  if (ring == null) {
-    if (read(backupEncryptionRequiredProvider)) {
-      throw const BackupPasswordMissingException();
-    }
-    return VerifiedBackup(bundle, manifest);
-  }
+  if (ring == null) return VerifiedBackup(bundle, manifest);
   final encrypted = await encryptInBackground(bundle, ring.current);
   final back = await decryptInBackground(
     encrypted,

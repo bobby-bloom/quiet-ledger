@@ -1381,6 +1381,60 @@ abstract class AppLocalizations {
   /// **'That does not open this backup. Try again.'**
   String get backupUnlockWrong;
 
+  /// No description provided for @backupCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check a backup'**
+  String get backupCheck;
+
+  /// No description provided for @backupCheckOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is complete'**
+  String get backupCheckOk;
+
+  /// No description provided for @backupCheckOkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{file}\nMade on {date}. All checksums match: {rows} rows and {files} receipt files can be restored.'**
+  String backupCheckOkDesc(String file, String date, int rows, int files);
+
+  /// No description provided for @backupFolderFileGone.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup is no longer in the folder.'**
+  String get backupFolderFileGone;
+
+  /// No description provided for @backupFolderList.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups in the folder'**
+  String get backupFolderList;
+
+  /// No description provided for @backupFolderListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups in this folder yet.'**
+  String get backupFolderListEmpty;
+
+  /// No description provided for @backupRestoreNewer.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).} other{{count} changes on this device are newer than this backup and will be replaced (they stay in the safety copy).}}'**
+  String backupRestoreNewer(int count);
+
+  /// No description provided for @backupWebStorageNotPersistent.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser may clear the app\'s data when space runs low. Back up regularly.'**
+  String get backupWebStorageNotPersistent;
+
+  /// No description provided for @backupWebStoragePersistent.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser keeps the app\'s data and does not clear it on its own.'**
+  String get backupWebStoragePersistent;
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:

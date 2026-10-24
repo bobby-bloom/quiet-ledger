@@ -815,6 +815,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupUnlockWrong => 'That does not open this backup. Try again.';
 
   @override
+  String get backupCheck => 'Check a backup';
+
+  @override
+  String get backupCheckOk => 'Backup is complete';
+
+  @override
+  String backupCheckOkDesc(String file, String date, int rows, int files) {
+    return '$file\nMade on $date. All checksums match: $rows rows and $files receipt files can be restored.';
+  }
+
+  @override
+  String get backupFolderFileGone => 'The backup is no longer in the folder.';
+
+  @override
+  String get backupFolderList => 'Backups in the folder';
+
+  @override
+  String get backupFolderListEmpty => 'No backups in this folder yet.';
+
+  @override
+  String backupRestoreNewer(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count changes on this device are newer than this backup and will be replaced (they stay in the safety copy).',
+      one: '1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupWebStorageNotPersistent =>
+      'This browser may clear the app\'s data when space runs low. Back up regularly.';
+
+  @override
+  String get backupWebStoragePersistent =>
+      'This browser keeps the app\'s data and does not clear it on its own.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

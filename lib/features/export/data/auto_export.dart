@@ -151,7 +151,11 @@ Future<void> _recordFailure(ProviderReader read, Object error) async {
     if (await service.init()) {
       await service.showBackupProblem(
         title: l.backupNotifyFailedTitle,
-        body: l.backupNotifyFailedBody,
+        body: switch (error) {
+          BackupPasswordMissingException() => l.backupPasswordMissing,
+          BackupFolderAccessException() => l.backupFolderAccessLost,
+          _ => l.backupNotifyFailedBody,
+        },
       );
     }
   } on Object catch (e) {

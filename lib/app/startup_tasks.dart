@@ -10,5 +10,6 @@ final startupTasks = StartupTasks([
   planRemindersTask,
   planAlertsTask,
   autoExportStartupTask,
+  webStorageStartupTask,
   tombstonePurgeStartupTask,
 ]);

@@ -284,6 +284,40 @@ Object? _parseValue(GeneratedColumn<Object> col, String v) {
   return v;
 }
 
+/// The newest change (HLC) in [contents], null when it holds no rows.
+String? newestChangeOf(BundleContents contents) {
+  String? max;
+  for (final t in contents.tables.values) {
+    final u = t.columns.indexOf('updated_at');
+    if (u < 0) continue;
+    for (final r in t.rows) {
+      final h = r[u] as String?;
+      if (h != null && (max == null || h.compareTo(max) > 0)) max = h;
+    }
+  }
+  return max;
+}
+
+/// Rows of [db] changed after [contents] was made (their HLC is newer than
+/// everything in it). A restore replaces these; they stay in the safety
+/// copy.
+Future<int> rowsChangedAfter(AppDatabase db, BundleContents contents) async {
+  final newest = newestChangeOf(contents);
+  var n = 0;
+  for (final name in syncedTableNames) {
+    if (name == 'settings') continue; // device settings change constantly
+    final r = await db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM "$name"'
+          '${newest == null ? '' : ' WHERE updated_at > ?'}',
+          variables: [if (newest != null) Variable<String>(newest)],
+        )
+        .getSingle();
+    n += r.data['n']! as int;
+  }
+  return n;
+}
+
 /// Replaces the contents of all synced tables with [contents] in one DB
 /// transaction, preserving ids and sync columns. Clears `change_log` and
 /// `sync_state` (recording a single restore marker so the HLC clock stays

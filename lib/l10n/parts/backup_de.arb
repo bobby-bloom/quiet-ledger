@@ -82,5 +82,14 @@
   "backupUnlockDesc": "Diese Sicherung ist verschlüsselt. Gib ihr Sicherungspasswort oder den Wiederherstellungsschlüssel ein.",
   "backupUnlockOpen": "Öffnen",
   "backupUnlockTitle": "Verschlüsselte Sicherung",
-  "backupUnlockWrong": "Damit lässt sich diese Sicherung nicht öffnen. Versuche es noch einmal."
+  "backupUnlockWrong": "Damit lässt sich diese Sicherung nicht öffnen. Versuche es noch einmal.",
+  "backupCheck": "Sicherung prüfen",
+  "backupCheckOk": "Sicherung ist vollständig",
+  "backupCheckOkDesc": "{file}\nErstellt am {date}. Alle Prüfsummen stimmen: {rows} Zeilen und {files} Belegdateien lassen sich wiederherstellen.",
+  "backupFolderFileGone": "Die Sicherung ist nicht mehr im Ordner.",
+  "backupFolderList": "Sicherungen im Ordner",
+  "backupFolderListEmpty": "Noch keine Sicherungen in diesem Ordner.",
+  "backupRestoreNewer": "{count, plural, =1{1 Änderung auf diesem Gerät ist neuer als diese Sicherung und wird ersetzt (sie bleibt in der Sicherheitskopie).} other{{count} Änderungen auf diesem Gerät sind neuer als diese Sicherung und werden ersetzt (sie bleiben in der Sicherheitskopie).}}",
+  "backupWebStorageNotPersistent": "Dieser Browser kann die Daten der App löschen, wenn der Speicher knapp wird. Sichere regelmäßig.",
+  "backupWebStoragePersistent": "Dieser Browser behält die Daten der App und löscht sie nicht von selbst."
 }

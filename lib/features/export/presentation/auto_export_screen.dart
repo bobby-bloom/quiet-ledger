@@ -16,6 +16,7 @@ import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
+import 'package:personal_finance/features/export/presentation/folder_backups.dart';
 
 /// Automatic backup settings (`/more/export/folder`): schedule, folder,
 /// retention, last run and "Back up now". Native platforms only.
@@ -80,6 +81,10 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
     final r = await runAutoExportNow(ref.read);
     if (!mounted) return;
     setState(() => _running = false);
+    final folder = ref
+        .read(settingsProvider)
+        .get(ImportExportSettings.autoExportFolder);
+    if (folder != null) ref.invalidate(folderBackupsProvider(folder));
     messenger.showSnackBar(
       SnackBar(
         content: Text(
@@ -326,6 +331,15 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
                 ),
               ),
             ),
+            if (hasFolder) ...[
+              const SizedBox(height: Space.md),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: FolderBackupsCard(folder: folder),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -71,6 +71,52 @@ Future<SaveResult?> createBackup(
   }
 }
 
+/// Lets the user pick a backup file. Mobile pickers know no MIME type for
+/// `.pfbackup`, so there any file is offered and the content decides.
+Future<PickedFile?> pickBackupFile(WidgetRef ref) => pickFileBytes(
+  extensions: ref.read(platformCapabilitiesProvider).isMobile
+      ? null
+      : const ['zip', 'pfbackup'],
+);
+
+/// Opens [file] (picked when null) without restoring and reports whether
+/// it is a complete, readable backup ("Check a backup").
+Future<void> checkBackupFile(
+  BuildContext context,
+  WidgetRef ref, {
+  PickedFile? file,
+}) async {
+  final l = context.l10n;
+  final picked = file ?? await pickBackupFile(ref);
+  if (picked == null || !context.mounted) return;
+  final contents = await openPickedBackup(context, ref, picked.bytes);
+  if (contents == null || !context.mounted) return;
+  final m = contents.manifest;
+  final dates = ref.read(dateFormatsProvider);
+  final created = m.createdAt.toLocal();
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      icon: Icon(Icons.verified_outlined, color: ctx.colors.primary),
+      title: Text(l.backupCheckOk),
+      content: Text(
+        l.backupCheckOkDesc(
+          picked.name,
+          '${dates.medium(created)} ${dates.time(created)}',
+          m.totalRows,
+          m.fileCount,
+        ),
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l.commonClose),
+        ),
+      ],
+    ),
+  );
+}
+
 /// Opens a picked backup: plain bundles directly, encrypted ones with the
 /// keys on this device or, failing that, the password / recovery key the
 /// user types (asked again after a wrong one). Shows errors; null when it
@@ -129,30 +175,30 @@ Future<BundleContents?> openPickedBackup(
 /// Pick → validate → summary → confirm (destructive, optional backup saved
 /// elsewhere) → safety copy on this device → restore in one transaction →
 /// refresh. Without a safety copy nothing is restored.
+/// [file] skips the file picker (a backup from the backup folder).
 Future<void> startRestore(
   BuildContext context,
   WidgetRef ref, {
   Rect? origin,
+  PickedFile? file,
 }) async {
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
-  // Mobile pickers know no MIME type for `.pfbackup`; the content decides.
-  final picked = await pickFileBytes(
-    extensions: ref.read(platformCapabilitiesProvider).isMobile
-        ? null
-        : const ['zip', 'pfbackup'],
-  );
+  final picked = file ?? await pickBackupFile(ref);
   if (picked == null || !context.mounted) return;
 
   final db = ref.read(databaseProvider);
   final contents = await openPickedBackup(context, ref, picked.bytes);
   if (contents == null || !context.mounted) return;
+  final newer = await rowsChangedAfter(db, contents);
+  if (!context.mounted) return;
 
   final backupFirst = await showDialog<bool>(
     context: context,
     builder: (ctx) => _RestoreSummaryDialog(
       manifest: contents.manifest,
       fileName: picked.name,
+      newerRows: newer,
       thisDevice: contents.manifest.deviceId == ref.read(deviceIdProvider),
     ),
   );
@@ -248,11 +294,15 @@ Future<void> refreshAfterDataReplace(WidgetRef ref) async {
 class _RestoreSummaryDialog extends ConsumerStatefulWidget {
   const _RestoreSummaryDialog({
     required this.manifest,
+    required this.newerRows,
     required this.fileName,
     required this.thisDevice,
   });
 
   final BundleManifest manifest;
+
+  /// Rows changed on this device after the backup was made.
+  final int newerRows;
   final String fileName;
   final bool thisDevice;
 
@@ -338,6 +388,16 @@ class _RestoreSummaryDialogState extends ConsumerState<_RestoreSummaryDialog> {
                   formatBytes(m.fileBytes, locale),
                 ),
               ),
+            if (widget.newerRows > 0) ...[
+              const SizedBox(height: Space.xs),
+              Text(
+                l.backupRestoreNewer(widget.newerRows),
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.finance.warning,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             if (m.missingFiles.isNotEmpty) ...[
               const SizedBox(height: Space.xs),
               Text(

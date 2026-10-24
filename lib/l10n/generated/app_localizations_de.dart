@@ -830,6 +830,47 @@ class AppLocalizationsDe extends AppLocalizations {
       'Damit lässt sich diese Sicherung nicht öffnen. Versuche es noch einmal.';
 
   @override
+  String get backupCheck => 'Sicherung prüfen';
+
+  @override
+  String get backupCheckOk => 'Sicherung ist vollständig';
+
+  @override
+  String backupCheckOkDesc(String file, String date, int rows, int files) {
+    return '$file\nErstellt am $date. Alle Prüfsummen stimmen: $rows Zeilen und $files Belegdateien lassen sich wiederherstellen.';
+  }
+
+  @override
+  String get backupFolderFileGone => 'Die Sicherung ist nicht mehr im Ordner.';
+
+  @override
+  String get backupFolderList => 'Sicherungen im Ordner';
+
+  @override
+  String get backupFolderListEmpty =>
+      'Noch keine Sicherungen in diesem Ordner.';
+
+  @override
+  String backupRestoreNewer(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count Änderungen auf diesem Gerät sind neuer als diese Sicherung und werden ersetzt (sie bleiben in der Sicherheitskopie).',
+      one: '1 Änderung auf diesem Gerät ist neuer als diese Sicherung und wird ersetzt (sie bleibt in der Sicherheitskopie).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupWebStorageNotPersistent =>
+      'Dieser Browser kann die Daten der App löschen, wenn der Speicher knapp wird. Sichere regelmäßig.';
+
+  @override
+  String get backupWebStoragePersistent =>
+      'Dieser Browser behält die Daten der App und löscht sie nicht von selbst.';
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override

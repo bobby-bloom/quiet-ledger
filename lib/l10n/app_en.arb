@@ -480,6 +480,38 @@
   "backupUnlockOpen": "Open",
   "backupUnlockTitle": "Encrypted backup",
   "backupUnlockWrong": "That does not open this backup. Try again.",
+  "backupCheck": "Check a backup",
+  "backupCheckOk": "Backup is complete",
+  "backupCheckOkDesc": "{file}\nMade on {date}. All checksums match: {rows} rows and {files} receipt files can be restored.",
+  "@backupCheckOkDesc": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "files": {
+        "type": "int"
+      }
+    }
+  },
+  "backupFolderFileGone": "The backup is no longer in the folder.",
+  "backupFolderList": "Backups in the folder",
+  "backupFolderListEmpty": "No backups in this folder yet.",
+  "backupRestoreNewer": "{count, plural, =1{1 change on this device is newer than this backup and will be replaced (it stays in the safety copy).} other{{count} changes on this device are newer than this backup and will be replaced (they stay in the safety copy).}}",
+  "@backupRestoreNewer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupWebStorageNotPersistent": "This browser may clear the app's data when space runs low. Back up regularly.",
+  "backupWebStoragePersistent": "This browser keeps the app's data and does not clear it on its own.",
   "budgetsTitle": "Budgets",
   "budgetsBudgeted": "Budgeted",
   "budgetsSpent": "Spent",
