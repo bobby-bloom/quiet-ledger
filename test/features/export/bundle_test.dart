@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_finance/core/app_version.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
@@ -60,7 +61,7 @@ void main() {
     final m = contents.manifest;
     expect(m.formatVersion, bundleFormatVersion);
     expect(m.schemaVersion, source.schemaVersion);
-    expect(m.appVersion, kAppVersion);
+    expect(m.appVersion, appVersion);
     expect(m.deviceId, 'dev-1');
     expect(m.createdAt, DateTime.utc(2026, 10, 23, 8));
     expect(m.tables.keys, syncedTableNames);

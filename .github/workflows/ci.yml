@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
 
 jobs:
@@ -17,8 +18,11 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run tool/l10n.dart --check
+      - run: dart run tool/version.dart --check
+      - if: startsWith(github.ref, 'refs/tags/v')
+        run: dart run tool/version.dart --check --tag "$GITHUB_REF_NAME"
       - run: dart run build_runner build
-      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: dart format --output=none --set-exit-if-changed lib test tool
       - run: flutter analyze --no-fatal-infos
       - run: flutter test
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/core/app_version.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/setting_def.dart';
@@ -11,10 +12,6 @@ import 'package:personal_finance/features/settings/presentation/font_licenses.da
 import 'package:personal_finance/features/settings/presentation/nav_tabs_editor.dart';
 import 'package:personal_finance/features/settings/presentation/setting_tiles.dart';
 import 'package:personal_finance/features/settings/presentation/settings_catalog.dart';
-
-/// App version shown under About (package_info is not a dependency; keep in
-/// sync with `version:` in pubspec.yaml).
-const appVersion = '1.0.0+1';
 
 typedef RowWrap = Widget Function(String id, Widget child);
 

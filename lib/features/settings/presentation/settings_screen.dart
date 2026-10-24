@@ -7,10 +7,10 @@ import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
+import 'package:personal_finance/core/app_version.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/settings/presentation/section_view.dart';
-import 'package:personal_finance/features/settings/presentation/sections/other_sections.dart';
 import 'package:personal_finance/features/settings/presentation/settings_catalog.dart';
 
 /// Settings: search on top, then the sections. Phones show the list and

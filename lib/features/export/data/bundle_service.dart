@@ -4,6 +4,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
+import 'package:personal_finance/core/app_version.dart' as app;
 import 'package:personal_finance/core/csv/csv_reader.dart';
 import 'package:personal_finance/core/csv/csv_writer.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -55,7 +56,7 @@ String _sha256(List<int> bytes) => sha256.convert(bytes).toString();
 Future<Uint8List> exportBundle(
   AppDatabase db, {
   required String deviceId,
-  String appVersion = kAppVersion,
+  String appVersion = app.appVersion,
   DateTime? now,
 }) async {
   final writer = CsvWriter(CsvOptions.bundle);

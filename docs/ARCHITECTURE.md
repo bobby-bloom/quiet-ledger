@@ -120,6 +120,13 @@ your tests: `flutter test test/features/<yours>`.
 **Startup tasks** (post due recurring entries, auto-export, purge): register
 in `app/startup_tasks.dart` (idempotent, never throw).
 
+**Versioning.** `version:` in `pubspec.yaml` is the only source; read it in
+Dart via `lib/core/app_version.dart` (generated, never hand-edited). Change
+it with `dart run tool/version.dart bump <part>` and note user-visible
+changes under "Unreleased" in `CHANGELOG.md`. A `bundleFormatVersion` bump
+is a MAJOR release, a `schemaVersion` bump at least MINOR (see
+`docs/VERSIONING.md`).
+
 **Platform differences** go through `platformCapabilitiesProvider`
 (biometrics, notifications, folders, encryption, ...). On the web there is
 no `dart:io`; guard file-system code with conditional imports.

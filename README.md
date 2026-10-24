@@ -24,6 +24,7 @@ The database is encrypted with SQLite3MultipleCiphers on native platforms
 ```sh
 dart format --output=none --set-exit-if-changed lib test tool
 dart run tool/l10n.dart --check  # fails on missing German strings
+dart run tool/version.dart --check   # app_version.dart + CHANGELOG in sync
 dart analyze
 flutter test                     # unit, DB, widget and app-flow tests
 flutter test tool/screenshots/screenshots_test.dart   # PNGs in build/screenshots
@@ -31,6 +32,17 @@ flutter test tool/screenshots/screenshots_test.dart   # PNGs in build/screenshot
 
 CI (`.github/workflows/ci.yml`) runs the same checks plus a build matrix for
 all six platforms and the integration tests on Linux.
+
+## Versioning
+
+Semantic versioning (`MAJOR.MINOR.PATCH+BUILD`) from `version:` in
+`pubspec.yaml`; release notes in [`CHANGELOG.md`](CHANGELOG.md). Policy and
+release steps: [`docs/VERSIONING.md`](docs/VERSIONING.md).
+
+```sh
+dart run tool/version.dart bump minor   # major | minor | patch | build
+git commit -am "Release X.Y.Z" && git tag -a vX.Y.Z -m vX.Y.Z
+```
 
 ## Layout
 

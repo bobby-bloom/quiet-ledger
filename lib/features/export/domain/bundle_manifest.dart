@@ -1,9 +1,5 @@
 import 'package:meta/meta.dart';
 
-/// App version written into bundles. Keep in sync with `pubspec.yaml`
-/// (there is no package_info dependency yet).
-const kAppVersion = '1.0.0+1';
-
 /// Identifies the bundle format in `manifest.json`.
 const bundleFormatId = 'personal-finance-bundle';
 
