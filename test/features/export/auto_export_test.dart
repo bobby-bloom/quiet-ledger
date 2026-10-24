@@ -63,19 +63,53 @@ void main() {
 
     test('file names and retention', () {
       final name = autoExportFileName(DateTime(2026, 1, 2, 3, 4, 5));
-      expect(name, 'personal-finance-backup-20260102-030405.zip');
+      expect(name, 'quiet-ledger-backup-20260102-030405.zip');
       expect(isAutoExportFile(name), isTrue);
       expect(isAutoExportFile('notes.txt'), isFalse);
       final names = [
-        'personal-finance-backup-20260101-000000.zip',
-        'personal-finance-backup-20260103-000000.zip',
+        'quiet-ledger-backup-20260101-000000.zip',
+        'quiet-ledger-backup-20260103-000000.zip',
         'holiday.jpg',
-        'personal-finance-backup-20260102-000000.zip',
+        'quiet-ledger-backup-20260102-000000.zip',
       ];
       expect(autoExportFilesToPrune(names, 2), [
-        'personal-finance-backup-20260101-000000.zip',
+        'quiet-ledger-backup-20260101-000000.zip',
       ]);
       expect(autoExportFilesToPrune(names, 5), isEmpty);
+    });
+
+    test('backups from before the rename still count, by their time', () {
+      expect(
+        isAutoExportFile('personal-finance-backup-20260101-000000.pfbackup'),
+        isTrue,
+      );
+      expect(
+        isAutoExportFile('personal-finance-manual-20260101-000000.zip'),
+        isFalse,
+      );
+      expect(
+        isAutoExportFile('quiet-ledger-manual-20260101-000000.zip'),
+        isFalse,
+      );
+      final names = [
+        'personal-finance-backup-20260105-000000.zip', // newer than q…0104
+        'quiet-ledger-backup-20260104-000000.zip',
+        'personal-finance-backup-20260102-000000.zip',
+        'quiet-ledger-backup-20260103-000000.zip',
+        'quiet-ledger-backup-20260103-000000-1.zip',
+        'personal-finance-manual-20260101-000000.zip',
+      ];
+      expect(sortedAutoExportFiles(names), [
+        'personal-finance-backup-20260105-000000.zip',
+        'quiet-ledger-backup-20260104-000000.zip',
+        'quiet-ledger-backup-20260103-000000-1.zip',
+        'quiet-ledger-backup-20260103-000000.zip',
+        'personal-finance-backup-20260102-000000.zip',
+      ]);
+      expect(autoExportFilesToPrune(names, 3), [
+        'quiet-ledger-backup-20260103-000000.zip',
+        'personal-finance-backup-20260102-000000.zip',
+      ]);
     });
   });
 

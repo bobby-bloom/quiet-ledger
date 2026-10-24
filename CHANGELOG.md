@@ -100,7 +100,10 @@ a dated release section.
   screen, in the macOS menu bar and the released `Quiet Ledger.app`, in
   the Linux and Windows window titles, the Windows task manager and the
   web app's title and install name (some still said `personal_finance`
-  or "Personal Finance"). Data stays where it is.
+  or "Personal Finance"). Data stays where it is. New backup files are
+  named `quiet-ledger-backup-…` (manual: `quiet-ledger-manual-…`); older
+  `personal-finance-backup-…` files are still listed for restore and
+  cleaned up as before.
 - The app bar's last button lines up with the page margin on every
   screen instead of sitting at the window edge (or wherever each screen
   put its own spacer); the phone headers of Home and Transactions match.

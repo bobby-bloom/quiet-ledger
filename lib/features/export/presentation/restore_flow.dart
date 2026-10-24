@@ -28,7 +28,7 @@ import 'package:personal_finance/features/export/presentation/unencrypted_backup
 /// Differs from the scheduled backups' names, so retention never deletes a
 /// backup saved by hand into the backup folder.
 String backupFileName(DateTime now, [String extension = '.zip']) =>
-    'personal-finance-manual-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
+    'quiet-ledger-manual-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
     '$extension';
 
 /// Creates a verified backup and hands it to save/share/download. Returns

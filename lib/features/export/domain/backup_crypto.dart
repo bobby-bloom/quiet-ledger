@@ -36,6 +36,8 @@ const maxPbkdf2Iterations = 10000000;
 /// Shortest backup password accepted.
 const minBackupPasswordLength = 8;
 
+/// Key-derivation context of the recovery key. Never change it (it predates
+/// the name Quiet Ledger): existing backups could no longer be opened.
 const _recoveryInfo = 'personal-finance backup recovery v1';
 final _aes = AesGcm.with256bits();
 

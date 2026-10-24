@@ -208,6 +208,7 @@ void main() {
     });
 
     test('a backup written after a clock change is never pruned', () async {
+      // Names from before the rename: pruned alongside the new one.
       for (final d in ['20270101', '20270102', '20270103']) {
         folder.files['personal-finance-backup-$d-000000.zip'] = Uint8List(1);
       }

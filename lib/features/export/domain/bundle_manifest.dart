@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
-/// Identifies the bundle format in `manifest.json`.
+/// Identifies the bundle format in `manifest.json`. Never change it (it
+/// predates the name Quiet Ledger): existing backups carry it.
 const bundleFormatId = 'personal-finance-bundle';
 
 /// Current bundle format. Bump when the layout changes incompatibly; readers

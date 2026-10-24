@@ -98,7 +98,7 @@ class _SafetyCopiesScreenState extends ConsumerState<SafetyCopiesScreen> {
       final stamp = DateFormat('yyyyMMdd-HHmmss').format(c.createdAt.toLocal());
       final r = await saveOrShareBytes(
         bytes: backup.bytes,
-        fileName: 'personal-finance-safety-$stamp${backup.extension}',
+        fileName: 'quiet-ledger-safety-$stamp${backup.extension}',
         mimeType: backup.mimeType,
         capabilities: ref.read(platformCapabilitiesProvider),
         sharePositionOrigin: origin,
