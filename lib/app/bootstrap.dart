@@ -134,14 +134,13 @@ Future<String?> _encryptionKey(SharedPreferencesWithCache prefs) async {
 }
 
 /// Whether the database file must be copied before it is opened: its
-/// schema version [fileVersion] (null: no file or unreadable) is older than
-/// the app's. 0 is a file without schema yet (nothing to keep). When the
-/// file cannot be read, [opened] (the version this device last opened)
-/// decides, and an unknown one copies.
+/// schema version [fileVersion] is older than the app's. When it is
+/// unknown (null: no file, unreadable or 0), [opened] (the version this
+/// device last opened) decides, and an unknown one copies.
 @visibleForTesting
 bool needsPreMigrationCopy({required int? fileVersion, required int? opened}) {
   const current = AppDatabase.currentSchemaVersion;
-  if (fileVersion != null) return fileVersion > 0 && fileVersion < current;
+  if (fileVersion != null) return fileVersion < current;
   return opened == null || opened < current;
 }
 
@@ -173,7 +172,12 @@ const _sqliteCorrupt = 11;
 const _sqliteNotADatabase = 26;
 
 BootFailure classifyBootError(Object error) {
-  final cause = error is DriftRemoteException ? error.remoteCause : error;
+  // Errors from migrations come back from the database isolate wrapped
+  // more than once.
+  var cause = error;
+  while (cause is DriftRemoteException) {
+    cause = cause.remoteCause;
+  }
   return switch (cause) {
     MissingDatabaseKeyException() => BootFailure.unreadable,
     NewerDatabaseException() => BootFailure.newer,

@@ -56,10 +56,14 @@ Future<String?> quarantineDatabaseFiles({
 /// Schema version (`PRAGMA user_version`) of the database file in
 /// [directory] (default: app support), read before Drift opens and
 /// migrates it. [encryptionKey] is the hex key, null for a plain file.
-/// Null when there is no file or it cannot be read (wrong key, damaged).
+/// Null when there is no file, it cannot be read (wrong key, damaged) or
+/// it reports 0 (no schema yet, or the version is not readable yet).
 ///
-/// Opens read-only, so nothing is written and the WAL is not checkpointed
-/// before [copyDatabaseBeforeMigration] copies the files.
+/// Opens read-only, so nothing is written or checkpointed; SQLite may add
+/// empty `-wal`/`-shm` files, as Drift does a moment later. If that open
+/// fails, the main file alone is read (`immutable`), which can only miss a
+/// newer version still in the WAL (versions only grow), so it errs
+/// towards taking a copy.
 Future<int?> readDatabaseFileVersion({
   String? directory,
   String? encryptionKey,
@@ -69,18 +73,25 @@ Future<int?> readDatabaseFileVersion({
       supportDirectory ?? (await getApplicationSupportDirectory()).path;
   final file = File(p.join(directory ?? support, '$appDbName.sqlite'));
   if (!file.existsSync()) return null;
-  Database? raw;
-  try {
-    raw = sqlite3.open(file.path, mode: OpenMode.readOnly);
-    if (encryptionKey != null) {
-      raw.execute("PRAGMA key = \"x'$encryptionKey'\"");
+  final immutable = Uri.file(file.path)
+      .replace(queryParameters: {'immutable': '1'})
+      .toString();
+  for (final (name, uri) in [(file.path, false), (immutable, true)]) {
+    Database? raw;
+    try {
+      raw = sqlite3.open(name, mode: OpenMode.readOnly, uri: uri);
+      if (encryptionKey != null) {
+        raw.execute("PRAGMA key = \"x'$encryptionKey'\"");
+      }
+      final v = raw.select('PRAGMA user_version').first.columnAt(0) as int;
+      return v > 0 ? v : null;
+    } on Object {
+      continue;
+    } finally {
+      raw?.close();
     }
-    return raw.select('PRAGMA user_version').first.columnAt(0) as int;
-  } on Object {
-    return null;
-  } finally {
-    raw?.close();
   }
+  return null;
 }
 
 /// Copies the database files in [directory] (default: app support) to

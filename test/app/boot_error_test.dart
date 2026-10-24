@@ -1,11 +1,21 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart' show DatabaseConnection;
+import 'package:drift/isolate.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/app/boot_error.dart';
 import 'package:personal_finance/app/bootstrap.dart';
 import 'package:personal_finance/core/db/database.dart';
-import 'package:sqlite3/common.dart' show SqliteException;
+
+/// A database written by a newer app version, served from another isolate
+/// like the app's (`shareAcrossIsolates`).
+DatabaseConnection _newerDatabase() => DatabaseConnection(
+  NativeDatabase.memory(
+    setup: (raw) => raw.execute('PRAGMA user_version = 99'),
+  ),
+);
 
 void main() {
   testWidgets('missing key: explains, keeps data, can start fresh', (
@@ -94,6 +104,20 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Start with an empty database'), findsOneWidget);
+  });
+
+  test('a newer database behind the database isolate is "newer"', () async {
+    final isolate = await DriftIsolate.spawn(_newerDatabase);
+    final db = AppDatabase(await isolate.connect(singleClientMode: true));
+    Object? error;
+    try {
+      await db.customSelect('SELECT 1').get();
+    } on Object catch (e) {
+      error = e;
+    }
+    await db.close();
+    expect(error, isNotNull);
+    expect(classifyBootError(error!), BootFailure.newer);
   });
 
   test('classifyBootError', () {

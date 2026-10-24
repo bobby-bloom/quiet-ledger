@@ -126,8 +126,23 @@ void main() {
       final wal = db(tmp.path, '-wal');
       expect(wal.existsSync(), isTrue);
       final before = wal.readAsBytesSync();
+      // The version is only in the WAL, and still found.
       expect(await readDatabaseFileVersion(supportDirectory: tmp.path), 2);
       expect(wal.readAsBytesSync(), before);
+    });
+
+    test('a cleanly closed WAL file is read, its data unchanged', () async {
+      final raw = sqlite3.open(db(tmp.path).path)
+        ..execute('PRAGMA journal_mode = WAL')
+        ..execute('CREATE TABLE t (x)')
+        ..execute('PRAGMA user_version = 2');
+      raw.close();
+      final before = db(tmp.path).readAsBytesSync();
+      expect(await readDatabaseFileVersion(supportDirectory: tmp.path), 2);
+      expect(db(tmp.path).readAsBytesSync(), before);
+      // SQLite may leave an empty WAL, as any open does.
+      final wal = db(tmp.path, '-wal');
+      if (wal.existsSync()) expect(wal.lengthSync(), 0);
     });
 
     test('an encrypted file needs its key', () async {
@@ -163,12 +178,11 @@ void main() {
         needsPreMigrationCopy(fileVersion: current, opened: current - 1),
         isFalse,
       );
-      // Newer files are refused, never migrated; empty ones have nothing.
+      // Newer files are refused, never migrated.
       expect(
         needsPreMigrationCopy(fileVersion: current + 1, opened: null),
         isFalse,
       );
-      expect(needsPreMigrationCopy(fileVersion: 0, opened: null), isFalse);
       // Unreadable or no file: the preference decides.
       expect(needsPreMigrationCopy(fileVersion: null, opened: null), isTrue);
       expect(
