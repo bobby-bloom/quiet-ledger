@@ -182,11 +182,12 @@ generated rows from the given period on.
 - A category with rules counts as in use, so deleting it is refused.
 - Merging (`mergeRules`, before the rows are merged) first generates the
   rows of both categories' rules through a horizon (the end of the next
-  period, or the furthest watermark), so the merged rows of those periods
-  add up. After the horizon: if the target has a repeating budget that
-  goes on, it stays as it is and the source's rules end; otherwise every
-  source rule with periods left continues, unchanged, as a new rule of
-  the target. The merge dialog says so. Merged
+  period, the furthest watermark, or the last budget the source has, set
+  by hand or not), so the merged rows of those periods add up. The source
+  rules end there. After it the target's repeating budgets stay as they
+  are, and the source's rules continue, unchanged, as new rules of the
+  target once the target's have ended (never, if one is open-ended). The
+  merge dialog says so. Merged
   period rows become hand-set.
 - `budget_rules` is in `syncedTableNames`, so it is backed up, restored
   and synced like every other table. A restore brings back the rules

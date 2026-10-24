@@ -35,8 +35,8 @@ a dated release section.
   the period; in envelope mode and the forecast a long window's amount is
   spread evenly over the budget periods it covers.
 - Merging categories with repeating budgets: budgets of the same period
-  are added up through the next period; the target's repeating budget
-  stays, or, if it has none, the source's repeating budgets move over.
+  are added up; the target's repeating budgets stay, and the source's
+  take over when they end.
 - Backups include receipt files.
 - Encrypted backups (`.pfbackup`) with a backup password and a recovery key
   that must be confirmed. Required while the app lock or the database

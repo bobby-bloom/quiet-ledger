@@ -420,6 +420,34 @@ void main() {
       expect(await monthsFrom(now, 6), List.filled(6, 10000));
     });
 
+    test('merge: a hand-set source budget adds to the target rule', () async {
+      final now = board.periodOf(DateTime.now());
+      final snacks = await f.category('Snacks');
+      await repeatMonthly(now, 30000);
+      final later = board.next(board.next(now));
+      await repo.setAmount(snacks, later.start, 5000);
+      await categories().merge(snacks, food, periods: board);
+      expect(await monthsFrom(now, 4), [30000, 30000, 35000, 30000]);
+    });
+
+    test('merge: the source rule takes over when a limited target rule '
+        'ends', () async {
+      final now = board.periodOf(DateTime.now());
+      final snacks = await f.category('Snacks');
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: now,
+        amountMinor: 30000,
+        repeat: const BudgetRepeat.forPeriods(3),
+      );
+      await repeatMonthlyFor(snacks, now, 10000);
+      await categories().merge(snacks, food, periods: board);
+      expect(await monthsFrom(now, 6), [
+        40000, 40000, 30000, 10000, 10000, 10000, //
+      ]);
+    });
+
     test('rows a removed rule left on another device are removed', () async {
       final ruleId = await repeatMonthly(oct, 40000);
       // Another device generated November, then the rule was replaced from

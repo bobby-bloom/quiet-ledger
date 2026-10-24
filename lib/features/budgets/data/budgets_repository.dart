@@ -830,7 +830,9 @@ class BudgetsRepository {
     return [for (final b in rows) b.id];
   });
 
-  /// Undoes [removeFromPeriod] or [stopRepeating] for the rows [ids].
+  /// Undoes [removeFromPeriod] or [removeWindow] for the rows [ids]. (Not
+  /// meant for [stopRepeating]: rows of a rule it removed would be dropped
+  /// again.)
   Future<void> restoreBudgets(List<String> ids) => writer.transaction(() async {
     for (final id in ids) {
       await writer.undelete(db.budgets, id);
@@ -1034,12 +1036,12 @@ class BudgetsRepository {
   /// Category merge, before the budget rows are merged. No rule is changed
   /// in place (devices that generated its rows would disagree):
   /// - both categories' rules generate their rows through a horizon (the
-  ///   end of the next period, or the furthest watermark), so the merged
-  ///   rows of those periods add up;
-  /// - if the target has a repeating budget that goes on after the
-  ///   horizon, it stays as it is and the source's rules end;
-  /// - otherwise every source rule with periods after the horizon
-  ///   continues as a new rule of the target, unchanged.
+  ///   end of the next period, the furthest watermark, or the last budget
+  ///   the source has, set by hand or not), so the merged rows of those
+  ///   periods add up;
+  /// - after the horizon the target's repeating budgets stay as they are;
+  ///   the source's rules continue, unchanged, as new rules of the target
+  ///   once the target's have ended (never, if one is open-ended).
   Future<void> mergeRules(
     BudgetPeriods periods, {
     required String sourceId,
@@ -1051,16 +1053,31 @@ class BudgetsRepository {
       for (final r in all)
         if (r.categoryId == sourceId) r,
     ];
-    if (source.isEmpty) return;
     final target = [
       for (final r in all)
         if (r.categoryId == targetId) r,
     ];
+    if (target.isEmpty && source.isEmpty) return;
     final now = dateOnly(today ?? DateTime.now());
     var horizon = periods.next(periods.periodOf(now)).last;
     for (final r in [...source, ...target]) {
       final g = r.generatedUntil;
       if (g != null && g.isAfter(horizon)) horizon = g;
+    }
+    // A budget the source already has (e.g. set by hand months ahead) must
+    // meet the target's generated budget so the two add up.
+    final latest = db.budgets.periodStart.max();
+    final lastSource =
+        await (db.selectOnly(db.budgets)
+              ..addColumns([latest])
+              ..where(
+                db.budgets.categoryId.equals(sourceId) &
+                    db.budgets.deletedAt.isNull(),
+              ))
+            .map((r) => r.read(latest))
+            .getSingleOrNull();
+    if (lastSource != null && lastSource.isAfter(horizon)) {
+      horizon = dateOnly(lastSource);
     }
     await ensureFromRules(
       periods,
@@ -1070,15 +1087,24 @@ class BudgetsRepository {
       },
     );
     final next = horizon.add(const Duration(days: 1));
-    final targetGoesOn = target.any(
-      (r) => _nextPeriod(r, periods, next) != null,
-    );
-    for (final r in source) {
-      if (targetGoesOn) {
-        await _endRules([r], next);
-      } else {
-        await _continueRule(r, periods, after: next, categoryId: targetId);
+    // The source's rules take over once the target's have ended.
+    DateTime? takeOver = next;
+    for (final t in target) {
+      if (_nextPeriod(t, periods, next) == null) continue;
+      if (t.end == null && t.count == null) {
+        takeOver = null; // the target's goes on for good
+        break;
       }
+      final far = DateTime(next.year + 100, next.month, next.day);
+      final last = t.periodsUpTo(periods, far).last.end;
+      if (last.isAfter(takeOver!)) takeOver = last;
+    }
+    for (final r in source) {
+      if (takeOver != null) {
+        await _continueRule(r, periods, after: takeOver, categoryId: targetId);
+      }
+      // The source category goes away: its rule ends at the horizon.
+      await _endRules([r], next);
     }
   });
 
