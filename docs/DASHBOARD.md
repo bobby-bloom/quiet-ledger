@@ -150,14 +150,20 @@ situational, never synced, and a restore keeps the device's own.
   All skips are logged once.
 - Nothing this build cannot read in full is lost: before a save replaces a
   stored value that is malformed, of another version (`v` ≠ 2) or carries
-  fields this build does not know, a copy goes to a `<key>.unreadable` row
-  (one per distinct value).
+  fields this build does not know (also the other view's `rows` / `order`),
+  a copy goes to a `<key>.unreadable` row (one per distinct value).
 - Ids and items of types this build does not know (a newer build's) are
   kept and written back unchanged; they never show.
-- Two `*.v2` rows of one key (two devices before they synced): a row that
-  reads as a state counts before one that does not, then the last written.
-  The next save that changes something moves the others to
-  `<key>.conflict`, data and all; nothing is deleted.
+- Two `*.v2` rows of one key (two devices that each started one before
+  they synced) are both kept. Every device reads and writes the same one: a
+  row that reads as a state before one that does not, then the last written,
+  then the smallest id. Nothing is moved or deleted. Changes made on two
+  devices before a sync are resolved like any synced data: the later write
+  wins.
+- At most ten copies are kept aside per view; a save that would make an
+  eleventh logs it and keeps none.
+- A save that would write the same state as stored (in whatever key order
+  it was written) writes nothing.
 - The 0.1 rows `compact` / `expanded` (a flat list of `{type, size, options}`)
   stay as they are, because a 0.1 build would fail on the new shape. While no
   `*.v2` row exists they are migrated on read: a list equal to the old

@@ -400,15 +400,15 @@ void main() {
       final live = await (db.select(
         db.dashboardLayouts,
       )..where((r) => r.deletedAt.isNull())).get();
+      // Both rows stay where they are; the change went to the one that
+      // counts, which every device picks alike.
+      expect(live.map((r) => r.breakpoint).toSet(), {storageKey(expanded)});
+      final changed = live.singleWhere((r) => r.id == 'other-device');
       expect(
-        live.singleWhere((r) => r.breakpoint == storageKey(expanded)).id,
-        'other-device',
+        decodeViewState(expanded, changed.widgets).mode,
+        LayoutMode.custom,
       );
-      // The other row is kept, out of the way.
-      expect(
-        live.singleWhere((r) => r.breakpoint == conflictKey(expanded)).id,
-        first.id,
-      );
+      expect(live.singleWhere((r) => r.id == first.id).widgets, first.widgets);
     });
 
     Future<void> insertRaw(String id, String updatedAt, String widgets) => db
@@ -448,15 +448,13 @@ void main() {
             s.withVisible(expanded, DashboardWidgetType.goals, visible: false),
       );
       final rows = await live();
-      final current = rows.singleWhere(
-        (r) => r.breakpoint == storageKey(expanded),
-      );
-      expect(current.id, 'mine');
+      final current = rows.singleWhere((r) => r.id == 'mine');
       expect(decodeViewState(expanded, current.widgets).rows, defaultRows(2));
       expect(
-        rows.singleWhere((r) => r.breakpoint == conflictKey(expanded)).widgets,
+        rows.singleWhere((r) => r.id == 'broken').widgets,
         '{"v": 3, oops',
       );
+      expect(rows.map((r) => r.breakpoint).toSet(), {storageKey(expanded)});
     });
 
     test(
@@ -477,9 +475,12 @@ void main() {
           ],
           'seen': [n],
         });
-        expect(readsInFull(partly(1)), isFalse);
+        expect(readsInFull(expanded, partly(1)), isFalse);
         expect(
-          readsInFull(encodeViewState(expanded, DashboardViewState.empty)),
+          readsInFull(
+            expanded,
+            encodeViewState(expanded, DashboardViewState.empty),
+          ),
           isTrue,
         );
 
@@ -502,5 +503,40 @@ void main() {
         ], unorderedEquals([partly(1), partly(2)]));
       },
     );
+
+    test(
+      'a field of the other view counts as unknown and is kept aside',
+      () async {
+        final withOrder = jsonEncode({
+          'v': 2,
+          'mode': 'custom',
+          'items': <String, Object?>{},
+          'order': ['goals', 'netWorth'],
+        });
+        expect(readsInFull(expanded, withOrder), isFalse);
+        expect(readsInFull(compact, withOrder), isTrue);
+        await insertRaw('row', '1', withOrder);
+        await repo.update(expanded, (s) => s.copyWith(mode: LayoutMode.auto));
+        expect(
+          [
+            for (final r in await live())
+              if (r.breakpoint == unreadableKey(expanded)) r.widgets,
+          ],
+          [withOrder],
+        );
+      },
+    );
+
+    test('the same state in another key order is no change', () async {
+      final ours = encodeViewState(expanded, DashboardViewState.empty);
+      final reordered = jsonEncode(
+        Map.fromEntries(
+          (jsonDecode(ours) as Map<String, Object?>).entries.toList().reversed,
+        ),
+      );
+      await insertRaw('row', '1', reordered);
+      await repo.update(expanded, (s) => s);
+      expect((await live()).single.widgets, reordered);
+    });
   });
 }

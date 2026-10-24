@@ -34,9 +34,8 @@ String storageKey(DashboardView view) => '${view.name}.v2';
 /// save replaces it (one row per distinct value).
 String unreadableKey(DashboardView view) => '${storageKey(view)}.unreadable';
 
-/// Where the other v2 rows of a view go when two devices each started one
-/// before they synced: kept, out of the way.
-String conflictKey(DashboardView view) => '${storageKey(view)}.conflict';
+/// At most this many copies are kept aside per view.
+const _maxKeptAside = 10;
 
 /// The dashboard's saved views, synced and backed up like any table.
 class DashboardLayoutRepository {
@@ -90,22 +89,21 @@ class DashboardLayoutRepository {
         );
         return (before, after);
       }
-      if (v2.widgets == json) return (before, after);
+      // Nothing to write when the stored value already says the same, in
+      // whatever key order another build wrote it.
+      if (v2.widgets == json ||
+          (readsInFull(view, v2.widgets) &&
+              encodeViewState(view, decodeViewState(view, v2.widgets)) ==
+                  json)) {
+        return (before, after);
+      }
 
       // Nothing this build cannot read in full is lost: a copy of each such
       // value stays before the save replaces it.
-      if (!readsInFull(v2.widgets)) await _keepAside(view, v2.widgets);
-      // Two devices each started a v2 row before they synced: the one that
-      // counts takes the change, the others move aside with their data.
-      for (final other in rows.where((r) => r.breakpoint == key)) {
-        if (other.id != v2.id) {
-          await writer.update(
-            _db.dashboardLayouts,
-            other.id,
-            DashboardLayoutsCompanion(breakpoint: Value(conflictKey(view))),
-          );
-        }
-      }
+      if (!readsInFull(view, v2.widgets)) await _keepAside(view, v2.widgets);
+      // Two devices that each started a v2 row before they synced keep
+      // both: every device picks the same one to read and write (_current),
+      // the other stays as it is — nothing is moved or deleted.
       await writer.update(
         _db.dashboardLayouts,
         v2.id,
@@ -118,6 +116,10 @@ class DashboardLayoutRepository {
   Future<void> _keepAside(DashboardView view, String widgets) async {
     final kept = await _rows([unreadableKey(view)]).get();
     if (kept.any((r) => r.widgets == widgets)) return;
+    if (kept.length >= _maxKeptAside) {
+      _logMalformed(view, 'a copy: $_maxKeptAside are kept already');
+      return;
+    }
     await _ref
         .read(syncWriterProvider)
         .insert(
@@ -219,10 +221,10 @@ bool isReadableViewState(String json) {
   }
 }
 
-/// Whether this build reads all of [json] — nothing skipped, nothing it
-/// does not know (another version, more fields) — so writing over it loses
-/// nothing.
-bool readsInFull(String json) {
+/// Whether this build reads all of [json] as a state of [view] — nothing
+/// skipped, nothing it does not know (another version, more fields, a field
+/// of the other view) — so writing over it loses nothing.
+bool readsInFull(DashboardView view, String json) {
   final Object? raw;
   try {
     raw = jsonDecode(json);
@@ -233,8 +235,9 @@ bool readsInFull(String json) {
       list is List && list.every((id) => id is String);
   bool onlyKeys(Map<Object?, Object?> map, Set<String> keys) =>
       map.keys.every(keys.contains);
+  final arrangement = view == DashboardView.expanded ? 'rows' : 'order';
   if (raw is! Map ||
-      !onlyKeys(raw, const {'v', 'mode', 'items', 'rows', 'order'}) ||
+      !onlyKeys(raw, {'v', 'mode', 'items', arrangement}) ||
       raw['v'] != 2 ||
       !const {null, 'auto', 'custom'}.contains(raw['mode'])) {
     return false;
