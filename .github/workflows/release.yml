@@ -58,7 +58,7 @@ jobs:
       version: ${{ steps.check.outputs.version }}
       matrix: ${{ steps.check.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
@@ -134,7 +134,7 @@ jobs:
     env:
       NAME: quiet-ledger-${{ needs.prepare.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
       - uses: subosito/flutter-action@v2
@@ -145,7 +145,7 @@ jobs:
       - if: matrix.target == 'linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev libsecret-1-dev
       - if: matrix.target == 'android'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with: { distribution: temurin, java-version: "17" }
       - if: matrix.target == 'android'
         name: Android signing key
@@ -195,7 +195,7 @@ jobs:
           flutter build macos --release
           ditto -c -k --keepParent build/macos/Build/Products/Release/personal_finance.app "dist/$NAME-macos.zip"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist-${{ matrix.target }}
           path: dist/*
@@ -209,10 +209,10 @@ jobs:
       TAG: ${{ needs.prepare.outputs.tag }}
       VERSION: ${{ needs.prepare.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           pattern: dist-*
