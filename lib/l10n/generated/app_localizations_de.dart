@@ -1965,6 +1965,94 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bootErrorTitle => 'Die Datenbank konnte nicht geöffnet werden';
 
   @override
+  String dashCardExpand(String widget) {
+    return '$widget aufklappen';
+  }
+
+  @override
+  String dashCardCollapse(String widget) {
+    return '$widget zuklappen';
+  }
+
+  @override
+  String get dashCardRows => 'Zeilen';
+
+  @override
+  String get dashCardExpansionSetting => 'Zugeklappte Dashboard-Widgets';
+
+  @override
+  String dashCardBudgetsOver(int count) {
+    return '$count drüber';
+  }
+
+  @override
+  String dashCardBudgetsNear(int count) {
+    return '$count fast erreicht';
+  }
+
+  @override
+  String get dashCardBudgetsOnTrack => 'Alles im Plan';
+
+  @override
+  String dashCardBudgetsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Budgets',
+      one: '1 Budget',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardUpcomingNext(String name, String date) {
+    return 'Als Nächstes: $name · $date';
+  }
+
+  @override
+  String dashCardUpcomingDue(int count, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tagen',
+      one: '1 Tag',
+    );
+    return '$count fällig in $_temp0';
+  }
+
+  @override
+  String dashCardAccountsTotal(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Konten',
+      one: '1 Konto',
+    );
+    return '$amount über $_temp0';
+  }
+
+  @override
+  String dashCardGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ziele',
+      one: '1 Ziel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardShareOfSpending(String percent) {
+    return '$percent der Ausgaben';
+  }
+
+  @override
+  String dashCardLatest(String name) {
+    return 'Zuletzt: $name';
+  }
+
+  @override
   String get dashWidgetOptions => 'Widget-Optionen';
 
   @override

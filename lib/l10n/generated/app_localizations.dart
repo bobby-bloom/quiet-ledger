@@ -3079,6 +3079,90 @@ abstract class AppLocalizations {
   /// **'The database could not be opened'**
   String get bootErrorTitle;
 
+  /// No description provided for @dashCardExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand {widget}'**
+  String dashCardExpand(String widget);
+
+  /// No description provided for @dashCardCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse {widget}'**
+  String dashCardCollapse(String widget);
+
+  /// No description provided for @dashCardRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows'**
+  String get dashCardRows;
+
+  /// No description provided for @dashCardExpansionSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Folded dashboard widgets'**
+  String get dashCardExpansionSetting;
+
+  /// No description provided for @dashCardBudgetsOver.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} over'**
+  String dashCardBudgetsOver(int count);
+
+  /// No description provided for @dashCardBudgetsNear.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} near limit'**
+  String dashCardBudgetsNear(int count);
+
+  /// No description provided for @dashCardBudgetsOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'All on track'**
+  String get dashCardBudgetsOnTrack;
+
+  /// No description provided for @dashCardBudgetsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget} other{{count} budgets}}'**
+  String dashCardBudgetsCount(int count);
+
+  /// No description provided for @dashCardUpcomingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {name} · {date}'**
+  String dashCardUpcomingNext(String name, String date);
+
+  /// No description provided for @dashCardUpcomingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} due in {days, plural, =1{1 day} other{{days} days}}'**
+  String dashCardUpcomingDue(int count, int days);
+
+  /// No description provided for @dashCardAccountsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} across {count, plural, =1{1 account} other{{count} accounts}}'**
+  String dashCardAccountsTotal(String amount, int count);
+
+  /// No description provided for @dashCardGoalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 goal} other{{count} goals}}'**
+  String dashCardGoalsCount(int count);
+
+  /// No description provided for @dashCardShareOfSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} of spending'**
+  String dashCardShareOfSpending(String percent);
+
+  /// No description provided for @dashCardLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest: {name}'**
+  String dashCardLatest(String name);
+
   /// No description provided for @dashWidgetOptions.
   ///
   /// In en, this message translates to:

@@ -1945,6 +1945,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bootErrorTitle => 'The database could not be opened';
 
   @override
+  String dashCardExpand(String widget) {
+    return 'Expand $widget';
+  }
+
+  @override
+  String dashCardCollapse(String widget) {
+    return 'Collapse $widget';
+  }
+
+  @override
+  String get dashCardRows => 'Rows';
+
+  @override
+  String get dashCardExpansionSetting => 'Folded dashboard widgets';
+
+  @override
+  String dashCardBudgetsOver(int count) {
+    return '$count over';
+  }
+
+  @override
+  String dashCardBudgetsNear(int count) {
+    return '$count near limit';
+  }
+
+  @override
+  String get dashCardBudgetsOnTrack => 'All on track';
+
+  @override
+  String dashCardBudgetsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets',
+      one: '1 budget',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardUpcomingNext(String name, String date) {
+    return 'Next: $name · $date';
+  }
+
+  @override
+  String dashCardUpcomingDue(int count, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$count due in $_temp0';
+  }
+
+  @override
+  String dashCardAccountsTotal(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return '$amount across $_temp0';
+  }
+
+  @override
+  String dashCardGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals',
+      one: '1 goal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardShareOfSpending(String percent) {
+    return '$percent of spending';
+  }
+
+  @override
+  String dashCardLatest(String name) {
+    return 'Latest: $name';
+  }
+
+  @override
   String get dashWidgetOptions => 'Widget options';
 
   @override

@@ -9,14 +9,17 @@ import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/money/money.dart';
+import 'package:personal_finance/core/money/money_format.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/accounts/data/net_worth.dart';
+import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_period.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_models.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/reports/data/report_queries.dart';
+import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// Hero amount with the cents in a lighter step (design: displaySmall).
 class HeroAmount extends ConsumerWidget {
@@ -117,7 +120,7 @@ class NetWorthWidget extends ConsumerWidget {
       ],
     );
 
-    final body = Column(
+    final peek = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -155,36 +158,44 @@ class NetWorthWidget extends ConsumerWidget {
               ),
           ],
         ),
-        if (card && series.length >= 2) ...[
-          const SizedBox(height: 12),
-          Sparkline(
-            values: [for (final p in series.skip(1)) p.netWorthMinor],
-            height: 96,
-            fill: true,
-            semanticLabel: l.dashNetWorthChart,
-          ),
-          const SizedBox(height: 4),
-          _MonthAxis(months: [for (final p in series.skip(1)) p.range.start]),
-        ],
       ],
     );
 
+    // The phone hero never folds.
     if (!card) {
       return InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.go('/accounts'),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
-          child: body,
+          child: peek,
         ),
       );
     }
     return DashCard(
+      type: DashboardWidgetType.netWorth,
       title: l.dashNetWorth,
       subtitle: l.dashLast12Months,
       options: options,
       onTap: () => context.push('/reports/net-worth'),
-      child: body,
+      peek: peek,
+      child: series.length < 2
+          ? const SizedBox.shrink()
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Sparkline(
+                  values: [for (final p in series.skip(1)) p.netWorthMinor],
+                  height: 96,
+                  fill: true,
+                  semanticLabel: l.dashNetWorthChart,
+                ),
+                const SizedBox(height: 4),
+                _MonthAxis(
+                  months: [for (final p in series.skip(1)) p.range.start],
+                ),
+              ],
+            ),
     );
   }
 }
@@ -271,65 +282,56 @@ class MonthSummaryWidget extends ConsumerWidget {
         );
 
     return DashCard(
+      type: DashboardWidgetType.monthSummary,
       title: current
           ? l.dashSoFar(dates.monthYear(range.start))
           : dates.monthYear(range.start),
       options: options,
       onTap: () => context.push('/reports/income-expense'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      peek: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: col(
-                  l.typeIncome,
-                  AmountText(
-                    income,
-                    explicitPlus: false,
-                    style: context.text.titleMedium?.copyWith(
-                      color: fin.income,
-                    ),
-                  ),
-                  dot: fin.income,
-                ),
+          Expanded(
+            child: col(
+              l.typeIncome,
+              AmountText(
+                income,
+                explicitPlus: false,
+                style: context.text.titleMedium?.copyWith(color: fin.income),
               ),
-              Expanded(
-                child: col(
-                  l.dashExpenses,
-                  AmountText(
-                    expense,
-                    colored: false,
-                    style: context.text.titleMedium?.copyWith(
-                      color: fin.expense,
-                    ),
-                  ),
-                  dot: fin.expenseFill,
-                ),
-              ),
-              Expanded(
-                child: col(
-                  l.dashSavingsRate,
-                  Text(
-                    rate == null ? '—' : '${(rate / 100).toStringAsFixed(1)}%',
-                    style: context.text.titleMedium,
-                  ),
-                  end: true,
-                ),
-              ),
-            ],
+              dot: fin.income,
+            ),
           ),
-          const SizedBox(height: 12),
-          ExcludeSemantics(
-            child: Column(
-              children: [
-                ProgressBar(value: income > 0 ? 1 : 0, color: fin.income),
-                const SizedBox(height: 4),
-                ProgressBar(value: ratio, color: fin.expenseFill),
-              ],
+          Expanded(
+            child: col(
+              l.dashExpenses,
+              AmountText(
+                expense,
+                colored: false,
+                style: context.text.titleMedium?.copyWith(color: fin.expense),
+              ),
+              dot: fin.expenseFill,
+            ),
+          ),
+          Expanded(
+            child: col(
+              l.dashSavingsRate,
+              Text(
+                rate == null ? '—' : '${(rate / 100).toStringAsFixed(1)}%',
+                style: context.text.titleMedium,
+              ),
+              end: true,
             ),
           ),
         ],
+      ),
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            ProgressBar(value: income > 0 ? 1 : 0, color: fin.income),
+            const SizedBox(height: 4),
+            ProgressBar(value: ratio, color: fin.expenseFill),
+          ],
+        ),
       ),
     );
   }
@@ -354,18 +356,33 @@ class TopCategoriesWidget extends ConsumerWidget {
         .watch(topCategoriesProvider((range: range, limit: limit)))
         .value;
     final total = (rows ?? const []).fold(0, (a, r) => a + r.amountMinor);
+    final spent =
+        ref.watch(monthSummaryProvider(range)).value?.expenseMinor ?? 0;
+    final top = rows == null || rows.isEmpty ? null : rows.first;
     return DashCard(
+      type: DashboardWidgetType.topCategories,
       title: l.dashTopCategories,
       actionLabel: l.navReports,
       onAction: () => context.push('/reports/spending'),
       options: options,
+      peek: rows == null
+          ? null
+          : top == null
+          ? Text(l.dashNoSpending, style: context.text.bodySmall)
+          : PeekText(
+              [
+                '${top.name ?? l.dashUncategorised} ${PeekText.slot()}',
+                if (spent > 0)
+                  l.dashCardShareOfSpending(
+                    '${(top.amountMinor * 100 / spent).round()}%',
+                  ),
+              ].join(' · '),
+              amounts: [top.amountMinor],
+            ),
       child: rows == null
           ? const SizedBox(height: 80)
           : rows.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(l.dashNoSpending, style: context.text.bodySmall),
-            )
+          ? const SizedBox.shrink()
           : Column(
               children: [
                 for (final (i, r) in rows.indexed)
@@ -443,80 +460,99 @@ class MiniForecastWidget extends ConsumerWidget {
     final dates = ref.watch(dateFormatsProvider);
     final name = id == null ? l.dashAllAccounts : accounts[id]?.name ?? '';
 
+    final m = mini.value;
+    Widget? peek;
+    if (m != null) {
+      // Amounts go in as slots so privacy mode masks them.
+      final low = PeekText.slot();
+      final date = dates.medium(m.lowest.date);
+      final warn = m.warning != null;
+      final String sentence;
+      if (m.warning == WarningKind.belowZero) {
+        sentence = l.forecastLowestBelowZero(low, date);
+      } else if (m.warning == WarningKind.belowThreshold &&
+          m.thresholdMinor != null) {
+        sentence = l.forecastLowestBelowThreshold(low, date, PeekText.slot(1));
+      } else {
+        sentence = l.forecastLowestOk(low, date);
+      }
+      final color = warn
+          ? context.finance.warning
+          : context.colors.onSurfaceVariant;
+      peek = Row(
+        children: [
+          if (warn) ...[
+            Icon(
+              Icons.warning_amber_rounded,
+              size: 16,
+              color: context.finance.warning,
+            ),
+            const SizedBox(width: 6),
+          ],
+          Expanded(
+            child: PeekText(
+              sentence,
+              amounts: [m.lowest.amountMinor, m.thresholdMinor ?? 0],
+              style: context.text.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return DashCard(
+      type: DashboardWidgetType.forecast,
       title: l.navForecast,
       subtitle: name,
       options: options,
       onTap: () => context.go('/forecast'),
+      peek: peek,
       child: mini.when(
         loading: () => const SizedBox(height: 96),
         error: (e, _) =>
             Text(l.commonError('$e'), style: context.text.bodySmall),
-        data: (m) {
-          final low = fmt.format(Money(m.lowest.amountMinor));
-          final date = dates.medium(m.lowest.date);
-          final warn = m.warning != null;
-          final String sentence;
-          if (m.warning == WarningKind.belowZero) {
-            sentence = l.forecastLowestBelowZero(low, date);
-          } else if (m.warning == WarningKind.belowThreshold &&
-              m.thresholdMinor != null) {
-            sentence = l.forecastLowestBelowThreshold(
-              low,
-              date,
-              fmt.format(Money(m.thresholdMinor!)),
-            );
-          } else {
-            sentence = l.forecastLowestOk(low, date);
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Sparkline(
-                values: [for (final p in m.points) p.balanceMinor],
-                threshold: m.thresholdMinor,
-                markLowest: true,
-                semanticLabel: sentence,
-              ),
-              const SizedBox(height: 6),
-              ExcludeSemantics(
-                child: Row(
-                  children: [
-                    if (warn) ...[
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 16,
-                        color: context.finance.warning,
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    Expanded(
-                      child: Text(
-                        sentence,
-                        style: context.text.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: warn
-                              ? context.finance.warning
-                              : context.colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+        data: (m) => Sparkline(
+          values: [for (final p in m.points) p.balanceMinor],
+          threshold: m.thresholdMinor,
+          markLowest: true,
+          semanticLabel: _lowestSentence(l, fmt, dates, m),
+        ),
       ),
     );
+  }
+
+  /// The lowest point in words, for the chart's semantics label.
+  static String _lowestSentence(
+    AppLocalizations l,
+    MoneyFormatter fmt,
+    DateFormats dates,
+    MiniForecast m,
+  ) {
+    final low = fmt.format(Money(m.lowest.amountMinor));
+    final date = dates.medium(m.lowest.date);
+    if (m.warning == WarningKind.belowZero) {
+      return l.forecastLowestBelowZero(low, date);
+    }
+    if (m.warning == WarningKind.belowThreshold && m.thresholdMinor != null) {
+      return l.forecastLowestBelowThreshold(
+        low,
+        date,
+        fmt.format(Money(m.thresholdMinor!)),
+      );
+    }
+    return l.forecastLowestOk(low, date);
   }
 }
 
 /// Account list with balances.
 class AccountsWidget extends ConsumerWidget {
-  const AccountsWidget({super.key, this.options = const []});
+  const AccountsWidget({super.key, this.options = const [], this.limit = 8});
 
   final List<DashOption> options;
+  final int limit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -525,19 +561,25 @@ class AccountsWidget extends ConsumerWidget {
         .where((a) => !a.archived)
         .toList();
     final balances = ref.watch(accountBalancesProvider).value ?? const {};
+    int balance(Account a) => balances[a.id] ?? a.openingBalanceMinor;
+    final total = accounts.fold(0, (sum, a) => sum + balance(a));
     return DashCard(
+      type: DashboardWidgetType.accounts,
       title: l.navAccounts,
       actionLabel: l.dashViewAll,
       onAction: () => context.go('/accounts'),
       options: options,
+      peek: accounts.isEmpty
+          ? Text(l.commonEmpty, style: context.text.bodySmall)
+          : PeekText(
+              l.dashCardAccountsTotal(PeekText.slot(), accounts.length),
+              amounts: [total],
+            ),
       child: accounts.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(l.commonEmpty, style: context.text.bodySmall),
-            )
+          ? const SizedBox.shrink()
           : Column(
               children: [
-                for (final (i, a) in accounts.take(8).indexed)
+                for (final (i, a) in accounts.take(limit).indexed)
                   InkWell(
                     onTap: () => context.push('/accounts/${a.id}'),
                     child: Container(
@@ -572,7 +614,7 @@ class AccountsWidget extends ConsumerWidget {
                             ),
                           ),
                           AmountText(
-                            balances[a.id] ?? a.openingBalanceMinor,
+                            balance(a),
                             colored: false,
                             style: context.text.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
