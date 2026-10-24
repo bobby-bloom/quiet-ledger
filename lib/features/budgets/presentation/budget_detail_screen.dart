@@ -787,7 +787,7 @@ class _OutstandingRow extends ConsumerWidget {
         ),
         if (canAct)
           Padding(
-            padding: const EdgeInsets.only(right: Space.sm),
+            padding: const EdgeInsets.only(right: Space.listInset),
             child: Wrap(
               alignment: WrapAlignment.end,
               children: [
