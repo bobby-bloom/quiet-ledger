@@ -3632,6 +3632,8 @@
   "setCombineScenarios": "Show all scenarios combined",
   "setCombineScenariosDesc": "Adds a line with all compared scenarios applied together. If several set a return or inflation rate, the last one wins.",
   "setConfirmDelete": "Confirm before deleting",
+  "setAccentAppIcon": "App icon in accent colour",
+  "setAccentAppIconDesc": "The home-screen icon uses the preset closest to your accent. iOS asks to confirm each change.",
   "setSidebarCollapsed": "Collapse the sidebar",
   "setForecastSidePanelHidden": "Hide the forecast side panel",
   "setCsvDateFormat": "CSV date format",

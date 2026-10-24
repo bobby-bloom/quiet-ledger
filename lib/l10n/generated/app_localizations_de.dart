@@ -5651,6 +5651,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setConfirmDelete => 'Vor dem Löschen bestätigen';
 
   @override
+  String get setAccentAppIcon => 'App-Symbol in Akzentfarbe';
+
+  @override
+  String get setAccentAppIconDesc =>
+      'Das Symbol auf dem Startbildschirm nimmt die Vorgabe, die deiner Akzentfarbe am nächsten kommt. iOS fragt bei jeder Änderung nach.';
+
+  @override
   String get setSidebarCollapsed => 'Seitenleiste einklappen';
 
   @override

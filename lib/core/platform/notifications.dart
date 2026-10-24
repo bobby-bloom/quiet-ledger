@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -97,6 +98,11 @@ abstract interface class NotificationService {
   /// action.
   Future<bool> requestPermission();
 
+  /// Accent colour for Android's notification icon and accents, kept in
+  /// sync with the theme (lib/app/app_icon). Applies to notifications
+  /// shown or scheduled from now on.
+  void setAccentColor(Color color);
+
   /// Replaces all scheduled reminders of [ruleId] with [reminders] (at most
   /// [maxRemindersPerRule]; past ones and disabled kinds are dropped).
   Future<void> scheduleRuleReminders(
@@ -146,6 +152,9 @@ class NoopNotificationService implements NotificationService {
 
   @override
   Future<bool> requestPermission() => Future.value(false);
+
+  @override
+  void setAccentColor(Color color) {}
 
   @override
   Future<void> scheduleRuleReminders(
@@ -201,6 +210,7 @@ class LocalNotificationService implements NotificationService {
   Future<bool>? _init;
   bool _ready = false;
   Map<NotificationKind, String> _channelNames = const {};
+  Color? _accent;
 
   static const _channelIds = {
     NotificationKind.bill: 'bills',
@@ -227,6 +237,9 @@ class LocalNotificationService implements NotificationService {
     return _init ??= _doInit();
   }
 
+  @override
+  void setAccentColor(Color color) => _accent = color;
+
   Future<bool> _doInit() async {
     try {
       const darwin = DarwinInitializationSettings(
@@ -236,7 +249,8 @@ class LocalNotificationService implements NotificationService {
       );
       final ok = await _plugin.initialize(
         settings: const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          // White mark from tool/app_icons, tinted with [setAccentColor].
+          android: AndroidInitializationSettings('@drawable/ic_notification'),
           iOS: darwin,
           macOS: darwin,
           linux: LinuxInitializationSettings(defaultActionName: 'Open'),
@@ -352,6 +366,7 @@ class LocalNotificationService implements NotificationService {
         importance: important ? Importance.high : Importance.defaultImportance,
         priority: important ? Priority.high : Priority.defaultPriority,
         category: AndroidNotificationCategory.reminder,
+        color: _accent,
       ),
       iOS: DarwinNotificationDetails(threadIdentifier: channel),
       macOS: DarwinNotificationDetails(threadIdentifier: channel),

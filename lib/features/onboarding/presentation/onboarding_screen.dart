@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/app_icons.dart';
+import 'package:personal_finance/app/ui/app_logo.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -276,19 +277,7 @@ class _WelcomeStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: Space.xxl),
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: context.colors.primary,
-            borderRadius: BorderRadius.circular(Radii.lg),
-          ),
-          child: Icon(
-            Icons.account_balance_wallet_outlined,
-            color: context.colors.onPrimary,
-            size: 32,
-          ),
-        ),
+        const AppLogo(size: 64),
         const SizedBox(height: Space.xl),
         Text(l.appTitle, style: context.text.displaySmall),
         const SizedBox(height: Space.xs),
