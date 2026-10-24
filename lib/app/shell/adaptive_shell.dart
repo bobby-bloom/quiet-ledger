@@ -342,8 +342,8 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-/// Desktop sidebar (DesktopDashboard board): logo, primary destinations as
-/// pill rows, secondary links, Settings pinned to the bottom.
+/// Desktop sidebar (DesktopDashboard board): logo, the configured nav tabs as
+/// pill rows, More pinned to the bottom (it holds every other screen).
 class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.dests,
@@ -361,18 +361,11 @@ class _Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cs = context.colors;
-    final shown = dests.where((d) => d.tab != NavTab.more).toList();
-    final shownTabs = {for (final d in shown) d.tab};
-
     bool active(String prefix) => path == prefix || path.startsWith('$prefix/');
-
-    final extras = <(IconData, String, String)>[
-      if (!shownTabs.contains(NavTab.accounts))
-        (Icons.account_balance_outlined, l.navAccounts, '/accounts'),
-      if (!shownTabs.contains(NavTab.reports))
-        (Icons.bar_chart_outlined, l.navReports, '/reports'),
-      (Icons.file_upload_outlined, l.navImport, '/more/import'),
-    ];
+    // Screens without their own tab (Settings, Import, ...) live under More.
+    final inTab = dests.any(
+      (d) => d.tab != NavTab.more && active(_branchRoot(d.branch)),
+    );
 
     return Container(
       width: 232,
@@ -431,26 +424,13 @@ class _Sidebar extends StatelessWidget {
                       selected: active(_branchRoot(d.branch)),
                       onTap: () => onSelect(i),
                     ),
-                for (final (icon, label, route) in extras)
-                  _SidebarItem(
-                    icon: icon,
-                    label: label,
-                    selected: active(route),
-                    onTap: () => context.go(route),
-                  ),
               ],
             ),
           ),
           _SidebarItem(
-            icon: Icons.settings_outlined,
-            label: l.navSettings,
-            selected: active('/more/settings'),
-            onTap: () => context.go('/more/settings'),
-          ),
-          _SidebarItem(
             icon: Icons.grid_view_outlined,
             label: l.navMore,
-            selected: path == '/more',
+            selected: !inTab,
             onTap: () => context.go('/more'),
           ),
         ],

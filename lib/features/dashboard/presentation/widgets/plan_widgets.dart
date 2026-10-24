@@ -448,6 +448,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
                       item: item,
                       showDate: true,
                       divider: i > 0,
+                      inset: 0,
                       onTap: () => context.push('/transactions/${item.id}'),
                     ),
                 ],

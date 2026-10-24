@@ -70,6 +70,10 @@ a dated release section.
 - Android Auto Backup and device transfer are off, because a restored
   database could not be opened without its key.
 - The web app asks the browser to keep its storage.
+- Dashboard: "Edit dashboard" and "New transaction" are icon buttons on
+  wide screens; phones get an "Edit dashboard" button too.
+- Desktop sidebar shows only the tabs chosen in Navigation & modules plus
+  More; Settings and Import are reached through More.
 
 ### Fixed
 
@@ -79,6 +83,10 @@ a dated release section.
 - A newer database file could be stamped down to an older schema version.
 - macOS: added the sandbox entitlements for user-selected files and
   bookmarks, which saving a backup and backing up to a picked folder need.
+- Dashboard: recent transaction rows were indented more than the rows of
+  other cards.
+- Desktop sidebar showed Accounts and Reports even when they were not
+  chosen as tabs.
 
 ## [0.1.0] - 2026-10-24
 
