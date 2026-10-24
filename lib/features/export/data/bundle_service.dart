@@ -31,6 +31,8 @@ const restoreMarkerEntity = '_restore';
 /// Settings that describe this device rather than the data set. A restore
 /// keeps the current device's values for these.
 final deviceLocalSettingKeys = {
+  'export.autoExport',
+  'export.autoExportKeep',
   'export.autoExportFolder',
   'export.lastAutoExport',
   'data.storageLocation',
@@ -100,11 +102,44 @@ Future<Uint8List> exportBundle(
     }
   });
 
+  final (:files, :missing) = await _addReceipts(
+    archive,
+    includeReceiptFiles ? attachments : const [],
+    receipts,
+  );
+
+  final manifest = BundleManifest(
+    formatVersion: bundleFormatVersion,
+    schemaVersion: db.schemaVersion,
+    appVersion: appVersion,
+    createdAt: (now ?? DateTime.now()).toUtc(),
+    deviceId: deviceId,
+    tables: infos,
+    files: files,
+    missingFiles: missing,
+  );
+  archive.add(
+    ArchiveFile.string(
+      bundleManifestFile,
+      const JsonEncoder.withIndent('  ').convert(manifest.toJson()),
+    ),
+  );
+  return ZipEncoder().encodeBytes(archive);
+}
+
+/// Adds the receipt files of [attachments] (raw rows) to [archive] as
+/// `files/<sha256>`, once per content. Rows with bytes in `data` (web) need
+/// no file.
+Future<({Map<String, BundleFileInfo> files, List<String> missing})>
+_addReceipts(
+  Archive archive,
+  Iterable<Map<String, Object?>> attachments,
+  ReceiptStore receipts,
+) async {
   final files = <String, BundleFileInfo>{};
   final written = <String>{};
   final missing = <String>[];
-  for (final a
-      in includeReceiptFiles ? attachments : const <Map<String, Object?>>[]) {
+  for (final a in attachments) {
     final path = a['file_path'] as String?;
     if (path == null || a['data'] != null) continue;
     final id = a['id']! as String;
@@ -120,14 +155,40 @@ Future<Uint8List> exportBundle(
     }
     files[id] = BundleFileInfo(file: file, size: bytes.length, sha256: hash);
   }
+  return (files: files, missing: missing);
+}
 
+/// [zip] (a bundle without receipt files, such as a safety copy) with the
+/// receipt files its attachment rows point to, read from [receipts] now.
+/// Receipts whose file is gone are listed in `missingFiles`. A bundle that
+/// already carries files is returned unchanged.
+Future<Uint8List> withReceiptFiles(
+  AppDatabase db,
+  Uint8List zip,
+  ReceiptStore receipts,
+) async {
+  final contents = readBundle(db, zip);
+  final att = contents.tables['attachments'];
+  if (contents.manifest.files.isNotEmpty || att == null) return zip;
+  final archive = Archive();
+  for (final f in ZipDecoder().decodeBytes(zip).files) {
+    if (f.isFile && f.name != bundleManifestFile) {
+      archive.add(ArchiveFile.bytes(f.name, f.content));
+    }
+  }
+  final rows = [
+    for (final r in att.rows)
+      {for (var c = 0; c < att.columns.length; c++) att.columns[c]: r[c]},
+  ];
+  final (:files, :missing) = await _addReceipts(archive, rows, receipts);
+  final m = contents.manifest;
   final manifest = BundleManifest(
-    formatVersion: bundleFormatVersion,
-    schemaVersion: db.schemaVersion,
-    appVersion: appVersion,
-    createdAt: (now ?? DateTime.now()).toUtc(),
-    deviceId: deviceId,
-    tables: infos,
+    formatVersion: m.formatVersion,
+    schemaVersion: m.schemaVersion,
+    appVersion: m.appVersion,
+    createdAt: m.createdAt,
+    deviceId: m.deviceId,
+    tables: m.tables,
     files: files,
     missingFiles: missing,
   );

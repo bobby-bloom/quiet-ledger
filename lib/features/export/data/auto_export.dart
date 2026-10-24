@@ -108,14 +108,24 @@ Future<AutoExportResult> _runAutoExport(
     await folder.writeFile(name, backup.bytes);
 
     // Verify what actually landed in the folder: same bytes, and it opens
-    // (decrypts) and validates.
-    final stored = await folder.readFile(name);
-    if (!listEquals(stored, backup.bytes)) {
-      throw StateError(
-        'The backup in the folder differs from what was written',
-      );
+    // (decrypts) and validates. A file that fails is removed again so it
+    // never counts as one of the backups to keep.
+    try {
+      final stored = await folder.readFile(name);
+      if (!listEquals(stored, backup.bytes)) {
+        throw StateError(
+          'The backup in the folder differs from what was written',
+        );
+      }
+      await openBackup(read, stored!);
+    } on Object {
+      try {
+        await folder.deleteFile(name);
+      } on Object catch (e) {
+        debugPrint('Could not remove the unverified backup $name: $e');
+      }
+      rethrow;
     }
-    await openBackup(read, stored!);
 
     final prune = autoExportFilesToPrune(
       await folder.listFiles(),

@@ -32,20 +32,22 @@ Future<String?> quarantineDatabaseFiles({
     to = Directory(p.join(support, 'unreadable', '$stamp-$n'));
   }
   await to.create(recursive: true);
+  // Copy all files (main, WAL, SHM, journal) and check them before any
+  // original is removed, so the set is never split.
+  final originals = <File>[];
   for (final s in _suffixes) {
     final f = File(p.join(from, '$appDbName.sqlite$s'));
     if (!f.existsSync()) continue;
-    final target = p.join(to.path, '$appDbName.sqlite$s');
-    try {
-      await f.rename(target);
-    } on FileSystemException {
-      // Other volume: copy, check, then remove the original.
-      await f.copy(target);
-      if (File(target).lengthSync() != f.lengthSync()) {
-        throw FileSystemException('Incomplete copy', target);
-      }
-      await f.delete();
+    final target = File(p.join(to.path, '$appDbName.sqlite$s'));
+    await f.copy(target.path);
+    if (target.lengthSync() != f.lengthSync()) {
+      throw FileSystemException('Incomplete copy', target.path);
     }
+    originals.add(f);
+  }
+  // Side files first, the main file last.
+  for (final f in originals.reversed) {
+    await f.delete();
   }
   return to.path;
 }

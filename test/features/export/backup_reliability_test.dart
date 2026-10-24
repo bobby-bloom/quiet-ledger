@@ -15,6 +15,7 @@ import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/domain/auto_export_plan.dart';
 import 'package:personal_finance/features/export/domain/backup_health.dart';
 import 'package:personal_finance/features/export/domain/backup_settings.dart';
+import 'package:personal_finance/features/export/presentation/restore_flow.dart';
 
 import '../../helpers/test_app.dart';
 import 'auto_export_test.dart' show caps;
@@ -114,8 +115,12 @@ void main() {
       folder.corruptReads = true;
       final r = await runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
       expect(r.written, isFalse);
-      // Nothing old was pruned, nothing recorded as done.
-      expect(folder.files, hasLength(3));
+      // Nothing old was pruned, the unverified file was removed again,
+      // nothing recorded as done.
+      expect(folder.files.keys, [
+        'personal-finance-backup-20260101-000000.zip',
+        'personal-finance-backup-20260102-000000.zip',
+      ]);
       expect(get(ImportExportSettings.lastAutoExport), isNull);
       expect(get(BackupSettings.lastVerified), isNull);
       expect(get(BackupSettings.lastError), contains('differs'));
@@ -161,6 +166,18 @@ void main() {
       expect(folder.files, hasLength(2));
     });
 
+    test('manual backups are never pruned by the schedule', () {
+      final manual = backupFileName(DateTime(2026, 10, 1, 8));
+      expect(isAutoExportFile(manual), isFalse);
+      expect(
+        autoExportFilesToPrune([
+          manual,
+          autoExportFileName(DateTime(2026, 10, 2)),
+        ], 1),
+        isEmpty,
+      );
+    });
+
     test('concurrent runs share one backup', () async {
       final a = runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
       final b = runAutoExportNow(c.read, now: DateTime(2026, 10, 1, 8));
@@ -185,6 +202,10 @@ void main() {
       await restoreBundle(other, readBundle(other, zip));
       final s = await loadSettings(other);
       expect(s.get(BackupSettings.lastVerified), '2020-01-01T00:00:00.000');
+      // The schedule and retention of the other device are not imported
+      // (a smaller "keep" would prune this device's backups at once).
+      expect(s.get(ImportExportSettings.autoExportKeep), 10);
+      expect(s.get(ImportExportSettings.autoExport), AutoExportSchedule.off);
     });
   });
 

@@ -19,7 +19,7 @@ Each one has a test; a failing test there means data could be lost.
 | 1 | **Lossless round trip.** Backup → restore into an empty database → backup gives byte-identical tables, for every column of every table (including soft-deleted rows, sync columns, blobs and receipt files). | `test/features/export/backup_invariants_test.dart`, `receipts_backup_test.dart` |
 | 2 | **Complete coverage.** Every table is either in `syncedTableNames` (backed up) or in `backupExcludedTables`. A new table fails the test until it is classified. | `backup_invariants_test.dart` |
 | 3 | **Old backups stay restorable.** A backup from every released version is kept in `test/fixtures/bundles/` and must restore without losing a value. | `backup_invariants_test.dart` |
-| 4 | **Write → verify → prune.** A scheduled backup counts only after it has been read back from its folder, decrypted and validated. Old backups are deleted only after that, and never the file just written. | `backup_reliability_test.dart` |
+| 4 | **Write → verify → prune.** A scheduled backup counts only after it has been read back from its folder, decrypted and validated; a file that fails is removed again. Old backups are deleted only after that, never the file just written and never a manual backup. | `backup_reliability_test.dart` |
 | 5 | **Copy before destroy.** Restore, reset, import undo, merging categories or tags, restoring a safety copy and purging old tombstones first take a verified safety copy. If the copy fails, the operation does not run. Schema migrations first copy the database file. | `backup_reliability_test.dart`, `test/core/db/db_safety_test.dart` |
 | 6 | **No silent failure.** A failed, interrupted or paused scheduled backup, a lost folder permission and a stale last backup are shown on the dashboard and the export screen. Failures also raise a notification once. | `backup_reliability_test.dart`, `backup_ui_test.dart` |
 | 7 | **Atomic restore.** A failed restore leaves the database and the receipt files exactly as they were. | `receipts_backup_test.dart` |
@@ -50,9 +50,11 @@ Readers reject a higher format or schema version.
 Not in a backup: `change_log`, `sync_state` (reset by a restore), the
 full-text index (rebuilt), `safety_copies` (on-device only), the database
 key, the app-lock credential and the backup keys (secure storage). Settings
-that describe the device (`deviceLocalSettingKeys`: backup folder, its
-name, last backup times and errors, password check, storage location,
-tombstone purge) keep their current value on restore.
+that describe the device (`deviceLocalSettingKeys`: backup schedule,
+retention, folder and its name, last backup times and errors, password
+check, storage location, tombstone purge) keep their current value on
+restore, so restoring another device's backup cannot shrink retention and
+prune this device's backups.
 
 ## Encrypted backups (`.pfbackup`)
 
@@ -109,8 +111,11 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
 - **Run** (`runAutoExportNow`): record the attempt → create and verify the
   backup (`createVerifiedBackup`) → write
   `personal-finance-backup-<yyyyMMdd-HHmmss>.zip|.pfbackup` → read it back,
-  compare bytes, decrypt and validate (`openBackup`) → prune to the newest
-  N, never the new file and never files of other apps → record success.
+  compare bytes, decrypt and validate (`openBackup`), deleting it again if
+  that fails → prune to the newest N, never the new file and never other
+  files → record success. Manual backups are named
+  `personal-finance-manual-…`, so a manual backup saved into the backup
+  folder is never pruned.
 - **Folder access.**
   - Linux and Windows: a plain path.
   - Android: a Storage Access Framework tree with a persisted permission
@@ -145,7 +150,8 @@ A safety copy is a full bundle **without** receipt files, stored in the
 the database and works on the web. Receipt files are never deleted by the
 guarded operations (restore writes new files and keeps the old ones), so
 the copy's rows still find them. Restore and reset leave the table alone.
-The newest 10 copies are kept.
+The newest 10 copies are kept. Saving a copy elsewhere adds the receipt
+files from disk (`withReceiptFiles`), and encrypts it like any backup.
 
 Taken before:
 - restoring a backup or another safety copy;
@@ -153,7 +159,8 @@ Taken before:
   safety copies for a real wipe);
 - undoing an import;
 - merging categories or tags;
-- purging tombstones older than `data.tombstoneDays`, when there are any.
+- purging tombstones older than `data.tombstoneDays` (weekly at start,
+  when there are any, and from Settings › Data).
 
 Bulk deletes are soft deletes with undo. The rows stay as tombstones until
 the purge, which is guarded.
@@ -199,7 +206,8 @@ schema or other. It says nothing was deleted and offers **Retry**. On
 native platforms it also offers **Start with an empty database**, which
 does the following:
 
-- moves the database files to `<app support>/unreadable/<time>/`;
+- moves the database files to `<app support>/unreadable/<time>/` (all of
+  them are copied and checked before any original is removed);
 - keeps their key in secure storage as `db.key.unreadable.<ms>`;
 - starts empty, so a backup can be restored.
 

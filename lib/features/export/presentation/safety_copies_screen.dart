@@ -6,11 +6,13 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
+import 'package:personal_finance/core/attachments/receipt_store.dart';
 import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
+import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
 import 'package:personal_finance/features/export/presentation/restore_flow.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
@@ -84,8 +86,14 @@ class _SafetyCopiesScreenState extends ConsumerState<SafetyCopiesScreen> {
     final l = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final zip = await safetyCopyBytes(ref.read(databaseProvider), c.id);
-      // Leaving the device: encrypted like any other backup.
+      final db = ref.read(databaseProvider);
+      // Leaving the device: with the receipt files (still on disk; no
+      // guarded action deletes them) and encrypted like any other backup.
+      final zip = await withReceiptFiles(
+        db,
+        await safetyCopyBytes(db, c.id),
+        ref.read(receiptStoreProvider),
+      );
       final backup = await createVerifiedBackup(ref.read, zip: zip);
       final stamp = DateFormat('yyyyMMdd-HHmmss').format(c.createdAt.toLocal());
       await saveOrShareBytes(

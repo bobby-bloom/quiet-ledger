@@ -25,8 +25,10 @@ import 'package:personal_finance/features/export/presentation/backup_password_sc
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
 
 /// File name for a manual backup (`.zip`, or `.pfbackup` when encrypted).
+/// Differs from the scheduled backups' names, so retention never deletes a
+/// backup saved by hand into the backup folder.
 String backupFileName(DateTime now, [String extension = '.zip']) =>
-    'personal-finance-backup-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
+    'personal-finance-manual-${DateFormat('yyyyMMdd-HHmmss').format(now)}'
     '$extension';
 
 /// Creates a verified backup and hands it to save/share/download. Returns

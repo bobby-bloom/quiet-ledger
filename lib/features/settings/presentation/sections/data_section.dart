@@ -116,12 +116,15 @@ Future<void> _purge(BuildContext context, WidgetRef ref) async {
   );
   if (!ok || !context.mounted) return;
   try {
-    final n = await purgeTombstones(
-      ref.read(databaseProvider),
-      Duration(days: days),
+    final n = await withSafetyCopy(
+      ref.read,
+      SafetyReason.purge,
+      () => purgeTombstones(ref.read(databaseProvider), Duration(days: days)),
     );
     ref.invalidate(dbStatisticsProvider);
     if (context.mounted) _snack(context, l.settingsUiPurgeDone(n));
+  } on SafetyCopyException catch (e) {
+    if (context.mounted) _snack(context, l.backupSafetyFailed('${e.cause}'));
   } on Object catch (e) {
     if (context.mounted) _snack(context, l.commonError(e.toString()));
   }

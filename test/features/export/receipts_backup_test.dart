@@ -164,6 +164,32 @@ void main() {
     );
   });
 
+  test('a saved safety copy gets its receipt files added', () async {
+    final a = await attach('a_beleg.png');
+    final lost = await attach('lost.png');
+    final copy = await exportBundle(
+      source,
+      deviceId: 'dev-1',
+      receipts: sourceFiles,
+      includeReceiptFiles: false,
+    );
+    expect(readBundle(source, copy).manifest.files, isEmpty);
+
+    final saved = await withReceiptFiles(source, copy, sourceFiles);
+    final m = readBundle(source, saved).manifest;
+    expect(m.files.keys, [a]);
+    expect(m.missingFiles, [lost]);
+
+    final targetFiles = MemoryReceiptStore();
+    await restoreBundle(
+      target,
+      readBundle(target, saved),
+      receipts: targetFiles,
+    );
+    final row = (await attachmentsOf(target)).firstWhere((r) => r.id == a);
+    expect(targetFiles.files[row.filePath], png);
+  });
+
   test(
     'a failed restore removes the files it wrote and keeps the data',
     () async {
