@@ -314,8 +314,8 @@ class CategoriesRepository {
         }
 
         // Repeating budgets, per length: moved to the target, or, where the
-        // target has its own of that length, the source's newest amount is
-        // added to them (like the amounts of a period above).
+        // target has its own of that length, the newest open-ended source
+        // amount is added to them (like the amounts of a period above).
         final targetRules =
             await (db.select(db.budgetRules)..where(
                   (r) => r.categoryId.equals(targetId) & r.deletedAt.isNull(),
@@ -336,6 +336,23 @@ class CategoriesRepository {
               if (r.cadence == cadence) r,
           ];
           if (sources.isEmpty) continue;
+          // A source rule with an end or a count moves as it is; adding its
+          // amount to the target would last forever.
+          if (targets.isNotEmpty) {
+            final limited = [
+              for (final r in sources)
+                if (r.endDate != null || r.count != null) r,
+            ];
+            for (final r in limited) {
+              await writer.update(
+                db.budgetRules,
+                r.id,
+                BudgetRulesCompanion(categoryId: Value(targetId)),
+              );
+            }
+            sources.removeWhere(limited.contains);
+            if (sources.isEmpty) continue;
+          }
           if (targets.isEmpty) {
             for (final r in sources) {
               await writer.update(

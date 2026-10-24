@@ -177,25 +177,34 @@ Future<void> editCategoryBudget(
     today,
   );
   final windowed = slot.cadence != BudgetCadence.period;
+  final rules = [
+    for (final r in await repo.rules())
+      if (r.categoryId == categoryId) r,
+  ];
   final rule = ruleFor(
-    await repo.rules(),
+    rules,
     periods,
     categoryId,
     slot.range.start,
     windowed: windowed,
   );
+  // A rule that skips this period (every n-th) or starts later is not
+  // replaced unless the user asks for it.
+  final otherRule = rules.any(
+    (r) => r.end == null || !r.end!.isBefore(period.start),
+  );
   if (!context.mounted) return;
   // A count is shown as what is left from this period on.
   final current = rule == null
-      ? (row == null
+      ? (row == null && !otherRule
             ? const BudgetRepeat.everyPeriod()
             : BudgetRepeat.single(cadence: slot.cadence))
       : rule.count == null
-      ? rule.repeat
+      ? rule.repeatOn(periods)
       : BudgetRepeat.forPeriods(
           rule.remainingCountFrom(periods, slot.range.start)!,
           every: rule.every,
-          cadence: rule.cadence,
+          cadence: rule.lengthOn(periods),
         );
   final r = await showBudgetAmountDialog(
     context,
@@ -225,7 +234,12 @@ Future<void> editCategoryBudget(
       if (following) ...await repo.stopRepeating(categoryId, slot.range.start),
       ...await removeSlot(),
     ];
-    if (!context.mounted || following || removed.isEmpty) return;
+    if (!context.mounted) return;
+    if (following) {
+      _snack(context, l.budgetsRemovedFollowing(name));
+      return;
+    }
+    if (removed.isEmpty) return;
     ScaffoldMessenger.maybeOf(context)
       ?..hideCurrentSnackBar()
       ..showSnackBar(
@@ -245,12 +259,14 @@ Future<void> editCategoryBudget(
   final target = sameLength
       ? slot.range
       : slotRangeFor(periods, period, repeat.cadence);
+  // The budget shown is the one replaced; earlier budgets stay.
   Future<void> repeatFromTarget() => repo.repeatFrom(
     periods: periods,
     categoryId: categoryId,
     from: target,
     amountMinor: amount,
     repeat: repeat,
+    replace: slot.range,
   );
   Future<void> setOnce(DateRange range, BudgetCadence cadence) =>
       cadence == BudgetCadence.period
@@ -295,20 +311,33 @@ Future<bool?> _askScope(BuildContext context, {required bool remove}) {
         remove ? l.budgetsScopeRemoveTitle : l.budgetsScopeChangeTitle,
       ),
       children: [
-        SimpleDialogOption(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: Text(l.budgetsScopeThis),
-        ),
-        SimpleDialogOption(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(l.budgetsScopeFollowing),
-        ),
+        for (final (value, label) in [
+          (false, l.budgetsScopeThis),
+          (true, l.budgetsScopeFollowing),
+        ])
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, value),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: Space.minTouch),
+              child: Align(alignment: Alignment.centerLeft, child: Text(label)),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
           child: Text(
             l.budgetsScopeHint,
             style: ctx.text.bodySmall?.copyWith(
               color: ctx.colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: Space.sm),
+            child: TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l.commonCancel),
             ),
           ),
         ),
@@ -325,6 +354,7 @@ String everyText(AppLocalizations l, BudgetCadence cadence, int every) =>
       BudgetCadence.month => l.budgetsEveryMonth(every),
       BudgetCadence.quarter => l.budgetsEveryQuarter(every),
       BudgetCadence.year => l.budgetsEveryYear(every),
+      BudgetCadence.biWeek => l.budgetsEveryWeek(every * 2),
     };
 
 /// "Weekly", "Monthly", ... (the adjective of a budget's own length).
@@ -334,6 +364,7 @@ String lengthAdjective(AppLocalizations l, BudgetCadence cadence) =>
       BudgetCadence.week => l.setOptWeekly,
       BudgetCadence.quarter => l.setOptQuarterly,
       BudgetCadence.year => l.setOptYearly,
+      BudgetCadence.biWeek => l.setOptBiWeekly,
     };
 
 /// "Repeats every period from November 2026" and friends; [periodLabel]
@@ -484,6 +515,8 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
       (BudgetCadence.month, l.budgetsLengthMonth),
       (BudgetCadence.quarter, l.budgetsLengthQuarter),
       (BudgetCadence.year, l.budgetsLengthYear),
+      if (_cadence == BudgetCadence.biWeek)
+        (BudgetCadence.biWeek, l.setOptBiWeekly),
     ].where((e) => e.$1 != sameAsPeriod || e.$1 == _cadence);
     return AlertDialog(
       title: Text(widget.title),
@@ -505,6 +538,8 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
               const SizedBox(height: Space.md),
               DropdownButtonFormField<BudgetCadence>(
                 key: const ValueKey('budget-length'),
+                isExpanded: true,
+                style: context.text.bodyLarge,
                 initialValue: _cadence,
                 decoration: InputDecoration(labelText: l.budgetsLength),
                 items: [
@@ -516,6 +551,8 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
               const SizedBox(height: Space.sm),
               DropdownButtonFormField<BudgetRepeatKind>(
                 key: const ValueKey('budget-repeat'),
+                isExpanded: true,
+                style: context.text.bodyLarge,
                 initialValue: _kind,
                 decoration: InputDecoration(labelText: l.budgetsRepeat),
                 items: [

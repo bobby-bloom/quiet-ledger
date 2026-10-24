@@ -252,19 +252,6 @@ class _SummaryCard extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  if (planned != 0)
-                    Expanded(
-                      child: Metric(
-                        label: l.budgetsPlanned,
-                        value: AmountText(
-                          planned,
-                          colored: false,
-                          style: TextStyle(
-                            color: context.colors.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
                   Expanded(
                     child: Metric(
                       alignEnd: true,
@@ -297,9 +284,8 @@ class _SummaryCard extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          projected < 0
-                              ? l.budgetsAfterPlannedOver(money(-projected))
-                              : l.budgetsAfterPlanned(money(projected)),
+                          '${l.budgetsPlannedAmount(money(planned))} · '
+                          '${projected < 0 ? l.budgetsAfterPlannedOver(money(-projected)) : l.budgetsAfterPlanned(money(projected))}',
                           style: context.text.bodySmall?.copyWith(
                             color: projected < 0
                                 ? context.finance.warning
@@ -519,7 +505,7 @@ class BudgetLineTile extends ConsumerWidget {
       label,
       ?plannedLabel,
       ?rolloverLabel,
-      if (line.repeats) l.budgetsRepeatOption,
+      if (line.repeats) l.budgetsRepeatsShort,
     ].join(', ');
 
     return Semantics(

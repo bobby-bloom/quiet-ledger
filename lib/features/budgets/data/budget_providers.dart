@@ -92,7 +92,8 @@ final budgetRulesSyncProvider = FutureProvider.autoDispose
       final next = periods.next(ref.watch(currentBudgetPeriodProvider));
       final rules = await ref.watch(budgetRulesProvider.future);
       if (rules.isEmpty) return rules;
-      final upTo = period.start.isAfter(next.start) ? period.start : next.start;
+      // Through the end of the period (or the next one): all its weeks.
+      final upTo = period.last.isAfter(next.last) ? period.last : next.last;
       await ref.read(budgetsRepositoryProvider).ensureFromRules(periods, upTo);
       return rules;
     });
@@ -137,8 +138,10 @@ Map<String, Budget> pickBoardWindows(
     }
     final rb = rank(b);
     final rc = rank(cur);
+    // Ties: the later start (the more specific window, or the last one
+    // before the day).
     if (rb > rc ||
-        (rb == rc && rb == 1 && b.periodStart.isAfter(cur.periodStart))) {
+        (rb == rc && rb > 0 && b.periodStart.isAfter(cur.periodStart))) {
       pick[b.categoryId] = b;
     }
   }
@@ -157,29 +160,44 @@ final boardWindowsProvider = FutureProvider.autoDispose
       final categoriesF = ref.watch(categoriesProvider.future);
       final rows = await rowsF;
       final categories = await categoriesF;
-      final out = <BoardWindow>[];
-      for (final b in pickBoardWindows(rows, period, today).values) {
-        final range = DateRange(b.periodStart, b.periodEnd!);
-        final actualsF = ref.watch(periodActualsProvider(range).future);
-        final plannedF = ref.watch(periodPlannedProvider(range).future);
-        final cat = categories.where((c) => c.id == b.categoryId).firstOrNull;
-        final children = [
-          for (final c in categories)
-            if (c.parentId == b.categoryId) c.id,
-        ];
-        out.add((
-          row: b,
-          range: range,
-          actuals: await actualsF,
-          planned: await plannedF,
-          rolloverMinor: await repo.windowRollover(
-            b,
-            rolloverModeFor(cat, settings),
-            children: children,
+      // Watch every window's figures first, then wait for all at once.
+      final pending = [
+        for (final b in pickBoardWindows(rows, period, today).values)
+          () {
+            final range = DateRange(b.periodStart, b.periodEnd!);
+            final cat = categories
+                .where((c) => c.id == b.categoryId)
+                .firstOrNull;
+            return (
+              row: b,
+              range: range,
+              actuals: ref.watch(periodActualsProvider(range).future),
+              planned: ref.watch(periodPlannedProvider(range).future),
+              rollover: repo.windowRollover(
+                b,
+                rolloverModeFor(cat, settings),
+                children: [
+                  for (final c in categories)
+                    if (c.parentId == b.categoryId) c.id,
+                ],
+              ),
+            );
+          }(),
+      ];
+      // Listens to all of them at once, so no error goes unhandled.
+      await Future.wait<Object>([
+        for (final w in pending) ...[w.actuals, w.planned, w.rollover],
+      ]);
+      return [
+        for (final w in pending)
+          (
+            row: w.row,
+            range: w.range,
+            actuals: await w.actuals,
+            planned: await w.planned,
+            rolloverMinor: await w.rollover,
           ),
-        ));
-      }
-      return out;
+      ];
     });
 
 /// Budget templates, sorted by name.
@@ -320,20 +338,15 @@ BudgetSummary buildBudgetSummary({
       ),
     );
   }
-  var windowAssigned = 0;
-  if (periods != null) {
-    for (final b in windowRows) {
-      final c = categories[b.categoryId];
-      if (c == null || budgeted.contains(c.id)) continue;
-      if (c.parentId != null && withBudget.contains(c.parentId)) continue;
-      windowAssigned += windowShare(
-        periods,
-        DateRange(b.periodStart, b.periodEnd!),
-        b.amountMinor,
-        period,
-      );
-    }
-  }
+  final windowAssigned = periods == null
+      ? 0
+      : assignedInPeriod(
+          periods: periods,
+          period: period,
+          periodRows: budgets,
+          windowRows: windowRows,
+          categories: categories,
+        ).windowMinor;
   var unbudgeted = actuals.uncategorizedSpentMinor;
   for (final e in actuals.netByCategory.entries) {
     final c = categories[e.key];

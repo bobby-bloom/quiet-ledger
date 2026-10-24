@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
-import 'package:personal_finance/core/db/tables.dart' show BudgetCadence;
+import 'package:personal_finance/core/db/database.dart'
+    show Budget, BudgetCadence, Category;
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 
@@ -328,6 +329,54 @@ class BudgetSummary {
     }
     return null;
   }
+}
+
+/// Envelope mode: money assigned to [period]. Budgets of the period count
+/// for root categories; a budget with its own length counts with its share
+/// of the period ([windowShare]) for a category without a budget of the
+/// period. A category is not a root when its parent has a budget of either
+/// kind. Rows of categories missing from [categories] are ignored. The
+/// board and the carry along the chain both use this.
+({int periodMinor, int windowMinor}) assignedInPeriod({
+  required BudgetPeriods periods,
+  required DateRange period,
+  required Iterable<Budget> periodRows,
+  required Iterable<Budget> windowRows,
+  required Map<String, Category> categories,
+}) {
+  final budgeted = {
+    for (final r in periodRows)
+      if (categories.containsKey(r.categoryId)) r.categoryId,
+  };
+  final windowed = {
+    for (final r in windowRows)
+      if (categories.containsKey(r.categoryId) &&
+          !budgeted.contains(r.categoryId))
+        r.categoryId,
+  };
+  bool root(String id) {
+    final parent = categories[id]?.parentId;
+    return parent == null ||
+        (!budgeted.contains(parent) && !windowed.contains(parent));
+  }
+
+  var periodMinor = 0;
+  for (final r in periodRows) {
+    if (budgeted.contains(r.categoryId) && root(r.categoryId)) {
+      periodMinor += r.amountMinor;
+    }
+  }
+  var windowMinor = 0;
+  for (final r in windowRows) {
+    if (!windowed.contains(r.categoryId) || !root(r.categoryId)) continue;
+    windowMinor += windowShare(
+      periods,
+      DateRange(r.periodStart, r.periodEnd!),
+      r.amountMinor,
+      period,
+    );
+  }
+  return (periodMinor: periodMinor, windowMinor: windowMinor);
 }
 
 /// Sorts lines by severity, then name.

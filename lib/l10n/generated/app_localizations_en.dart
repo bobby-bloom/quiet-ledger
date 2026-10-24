@@ -1159,9 +1159,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get budgetsPlanned => 'Planned';
-
-  @override
   String budgetsPlannedAmount(String amount) {
     return '$amount planned';
   }
@@ -1399,6 +1396,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetsWindowsInPeriod => 'Within this period';
+
+  @override
+  String budgetsRemovedFollowing(String category) {
+    return '$category removed from this period on';
+  }
+
+  @override
+  String budgetsBudgetedFor(String period) {
+    return 'Budgeted for $period';
+  }
+
+  @override
+  String budgetsTransactionsIn(String period) {
+    return 'Transactions in $period';
+  }
+
+  @override
+  String get budgetsRepeatsShort => 'repeats';
 
   @override
   String get categoriesTitle => 'Categories';

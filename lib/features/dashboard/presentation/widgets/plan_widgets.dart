@@ -73,6 +73,7 @@ class BudgetsWidget extends ConsumerWidget {
                     cents: false,
                   ),
                   fmtOver: fmt.format(Money(line.overMinor)),
+                  fmtPlanned: fmt.format(Money(line.plannedMinor)),
                   onTap: () => context.push(
                     '/plan/budgets/${line.categoryId}?period=${_iso(summary.period.start)}',
                   ),
@@ -94,6 +95,7 @@ class _BudgetRow extends StatelessWidget {
     required this.tick,
     required this.fmtAvailable,
     required this.fmtOver,
+    required this.fmtPlanned,
     required this.onTap,
   });
 
@@ -101,6 +103,7 @@ class _BudgetRow extends StatelessWidget {
   final double tick;
   final String fmtAvailable;
   final String fmtOver;
+  final String fmtPlanned;
   final VoidCallback onTap;
 
   @override
@@ -165,13 +168,19 @@ class _BudgetRow extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            ProgressBar(
-              value: line.ratio,
-              state: state,
-              tick: tick,
-              pending: line.plannedMinor > 0 && line.state != BudgetState.over
-                  ? line.projectedRatio - line.ratio
-                  : 0,
+            Semantics(
+              // The striped part of the bar, in words.
+              label: line.plannedMinor > 0
+                  ? l.budgetsPlannedAmount(fmtPlanned)
+                  : null,
+              child: ProgressBar(
+                value: line.ratio,
+                state: state,
+                tick: tick,
+                pending: line.plannedMinor > 0 && line.state != BudgetState.over
+                    ? line.projectedRatio - line.ratio
+                    : 0,
+              ),
             ),
           ],
         ),

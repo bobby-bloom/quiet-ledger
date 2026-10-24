@@ -1177,26 +1177,23 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get budgetsPlanned => 'Geplant';
-
-  @override
   String budgetsPlannedAmount(String amount) {
     return '$amount geplant';
   }
 
   @override
   String budgetsPlannedOver(String amount) {
-    return 'Geplant: $amount drüber';
+    return 'Geplant: $amount über Budget';
   }
 
   @override
   String budgetsAfterPlanned(String amount) {
-    return 'Nach Geplantem: $amount übrig';
+    return 'Nach allem Geplanten: $amount übrig';
   }
 
   @override
   String budgetsAfterPlannedOver(String amount) {
-    return 'Nach Geplantem: $amount drüber';
+    return 'Nach allem Geplanten: $amount über Budget';
   }
 
   @override
@@ -1282,10 +1279,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get budgetsScopeChangeTitle => 'Wiederholendes Budget ändern';
+  String get budgetsScopeChangeTitle => 'Wiederkehrendes Budget ändern';
 
   @override
-  String get budgetsScopeRemoveTitle => 'Wiederholendes Budget entfernen';
+  String get budgetsScopeRemoveTitle => 'Wiederkehrendes Budget entfernen';
 
   @override
   String get budgetsScopeThis => 'Nur dieser Zeitraum';
@@ -1417,6 +1414,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get budgetsWindowsInPeriod => 'In diesem Zeitraum';
+
+  @override
+  String budgetsRemovedFollowing(String category) {
+    return '$category ab diesem Zeitraum entfernt';
+  }
+
+  @override
+  String budgetsBudgetedFor(String period) {
+    return 'Budgetiert für $period';
+  }
+
+  @override
+  String budgetsTransactionsIn(String period) {
+    return 'Buchungen in $period';
+  }
+
+  @override
+  String get budgetsRepeatsShort => 'wiederholt sich';
 
   @override
   String get categoriesTitle => 'Kategorien';

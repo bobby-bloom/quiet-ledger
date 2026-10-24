@@ -1873,12 +1873,6 @@ abstract class AppLocalizations {
   /// **'Balance {balance} is below {threshold}.'**
   String budgetsAlertLowBalanceBody(String balance, String threshold);
 
-  /// No description provided for @budgetsPlanned.
-  ///
-  /// In en, this message translates to:
-  /// **'Planned'**
-  String get budgetsPlanned;
-
   /// No description provided for @budgetsPlannedAmount.
   ///
   /// In en, this message translates to:
@@ -2178,6 +2172,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Within this period'**
   String get budgetsWindowsInPeriod;
+
+  /// No description provided for @budgetsRemovedFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} removed from this period on'**
+  String budgetsRemovedFollowing(String category);
+
+  /// No description provided for @budgetsBudgetedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted for {period}'**
+  String budgetsBudgetedFor(String period);
+
+  /// No description provided for @budgetsTransactionsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions in {period}'**
+  String budgetsTransactionsIn(String period);
+
+  /// No description provided for @budgetsRepeatsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'repeats'**
+  String get budgetsRepeatsShort;
 
   /// No description provided for @categoriesTitle.
   ///

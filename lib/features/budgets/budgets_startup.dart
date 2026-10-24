@@ -5,8 +5,8 @@ import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/budgets/data/budget_period_provider.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 
-/// Generates the rows of repeating budgets for the current and the next
-/// budget period (registered in app/startup_tasks.dart before the budget
+/// Generates the rows of repeating budgets up to the end of the next
+/// budget period (every week of it, for a weekly budget) (registered in app/startup_tasks.dart before the budget
 /// alerts). Idempotent; never throws.
 Future<void> budgetRulesStartupTask(ProviderContainer c) async {
   try {
@@ -19,7 +19,7 @@ Future<void> budgetRulesStartupTask(ProviderContainer c) async {
       final next = periods.next(c.read(currentBudgetPeriodProvider));
       await c
           .read(budgetsRepositoryProvider)
-          .ensureFromRules(periods, next.start);
+          .ensureFromRules(periods, next.last);
     } finally {
       sub.close();
     }

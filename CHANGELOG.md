@@ -15,8 +15,9 @@ a dated release section.
 
 - Budgets show planned entries and recurring items that are not booked
   yet as outstanding: a striped part of the bar, "€80 planned" or
-  "Planned: €30 over" on the row, a "Planned" total and an "Outstanding"
-  list with Confirm and Skip on the budget's detail screen. They never
+  "Planned: €30 over" on the row, the planned total on the summary card
+  and an "Outstanding" list with Confirm and Skip on the budget's detail
+  screen. They never
   count as spent, so alerts, rollover and "left to assign" are unchanged.
   Settings › Budgets › Show planned and upcoming turns this off.
 - Repeating budgets: a budget can repeat every period, every n-th period,

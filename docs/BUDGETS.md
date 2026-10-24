@@ -58,7 +58,8 @@ On screen:
   spent fill.
 - The row says "€80 planned", or "Planned: €30 over" in the warning colour
   when the planned amount would take the line over.
-- The summary card adds "Planned" and "After planned: €X left".
+- The summary card adds a line "€X planned · After planned: €Y left"
+  under its figures.
 - The detail screen lists the items under "Outstanding". Planned entries
   open the transaction. Recurring occurrences open the rule. A rule's
   next remind & confirm occurrence also offers Confirm and Skip; later
@@ -99,13 +100,19 @@ after sync or a category merge, the newest (`updatedAt`) wins.
 
 - `budgets.ruleId` is set on a row the rule generated and nobody has
   edited since. A row with `ruleId = null` was **set by hand**: by
-  editing one period, Copy previous, Average, Template or Edit all. A rule
-  never touches a row set by hand, and the row overrides the rule for
-  that period.
-- Rows are generated for the current and the next period at startup
-  (`budgetRulesStartupTask`, before the budget alerts), and up to any
-  later period when the board shows it (`budgetRulesSyncProvider`).
-  Earlier periods are filled only once, when a rule starts in the past.
+  editing one period, Copy previous, Average, Template or Edit all (an
+  explicit write marks the row as set by hand even when the amount stays
+  the same). A rule never touches a row set by hand, and the row
+  overrides the rule for that period.
+- Rows are generated up to the end of the next period at startup
+  (`budgetRulesStartupTask`, before the budget alerts): for a weekly
+  budget every week starting in it, so the forecast sees a whole month.
+  The board generates up to the end of any later period it shows
+  (`budgetRulesSyncProvider`). Earlier periods are filled only once, when
+  a rule starts in the past.
+- A window is not generated while any window of the category overlaps it
+  (after the first day of week, start day or fiscal year changed), so
+  windows never overlap and nothing is counted twice.
 - **Watermark.** `generatedUntil` is the start of the last period a rule
   has handled. Periods up to it are never generated again, so a budget
   the user removed stays removed. This holds even after the tombstone
@@ -114,8 +121,17 @@ after sync or a category merge, the newest (`updatedAt`) wins.
   earlier is generated again. That happens to a salary-based period when
   the salary lands earlier than expected.
 - **Deterministic ids.** A generated row's id is a UUIDv5 of the rule id
-  and the period start (`generatedBudgetId`). Two devices that generate
-  the same period create the same row, and sync merges them.
+  and the period start (`generatedBudgetId`), and its sync timestamp is
+  fixed at the rule's creation (`SyncWriter.insert(hlc: …)`). Two devices
+  that generate the same period create the same row, and any edit or
+  removal by the user, on any device, wins over a generated row.
+- **Period type changes.** A `period` rule records the period type it was
+  made for (`budget_rules.period_type`). After the type changes it keeps
+  its length: a monthly rule on a weekly board becomes a monthly budget
+  with its own length (`lengthOn`), and the rows it generated turn into
+  windows (and back when the type returns). Budgets of a period set by
+  hand are not converted; they only show where a period of the new type
+  starts on the same day.
 
 ### Editing
 
@@ -127,17 +143,25 @@ date, each with "every … periods". Then:
 |---|---|
 | New budget, repeating | `repeatFrom`: a rule from this period, plus this period's row |
 | Changed amount, same repeat setting | asks **Only this period** (the row becomes a hand-set override) or **This and following periods** (`repeatFrom`) |
-| Changed repeat setting | applies from this period on: `repeatFrom`, or for "this period only" the rule ends with this period (`stopRepeating` from the next one) |
+| Changed repeat setting or length | applies from this period on: `repeatFrom`, or for "this period only" the rule ends with this period (`stopRepeating` from the next one). Only the budget shown is replaced; earlier budgets stay |
 | Remove, only this period | the row is soft-deleted, with Undo. The watermark keeps it removed |
-| Remove, this and following | `stopRepeating` from this period, then this period's row is removed |
+| Remove, this and following | `stopRepeating` from this period, then this period's row is removed (confirmed by a snackbar) |
 | Stop repeating (detail screen) | `stopRepeating` from the next period; this period's budget stays |
-| Fill › Repeat these budgets every period | `repeatPeriod`: every row of the period becomes a rule from that period |
+| Fill › Repeat these budgets every period | `repeatPeriod`: every row of the period that no rule covers yet becomes a rule from that period |
+| New budget for a category whose rule skips this period (every n-th) | the dialog suggests "this period only", so the rule is not replaced by accident |
 
-`repeatFrom` ends the category's existing rules the day before the
-period, and removes rules that start at or after it. Their generated
-rows from the period on move to the new rule with the new amount, or
-are removed where the new rule doesn't cover that period. Rows set by
-hand stay. The new rule takes over the old watermark.
+`repeatFrom(from:, replace:)` starts the new rule at `from` (a period, or
+a window of the new length) and replaces the budget shown (`replace`,
+by default `from`). Budgets starting before `replace` are history and
+stay untouched, whatever their length or origin. The category's
+existing rules end the day before `replace`, and rules that start at or
+after it are removed. Any budget overlapping `replace` is replaced.
+Later rows the old rules generated move to the new rule with the new
+amount, or are removed where the new rule doesn't cover that period.
+Later rows set by hand stay. The new rule takes over the old watermark
+only as far as old rules of the same length had already handled every
+period it covers, so "every 2 months" changed to "every month" fills
+the skipped months.
 
 `stopRepeating` ends the rules the same way and soft-deletes their
 generated rows from the given period on.
@@ -146,8 +170,10 @@ generated rows from the given period on.
 
 - A category with rules counts as in use, so deleting it is refused.
 - Merging moves the source's rules to the target. If the target has
-  rules of its own, the amount of the source's newest rule is added to
-  each of them, the same way merged period amounts are added up. Merged
+  rules of its own of the same length, the amount of the source's newest
+  open-ended rule is added to each of them, the same way merged period
+  amounts are added up; source rules with an end or a count move as they
+  are. Merged
   period rows become hand-set.
 - `budget_rules` is in `syncedTableNames`, so it is backed up, restored
   and synced like every other table. A restore brings back the rules
@@ -183,7 +209,7 @@ with its length and window ("Weekly · Oct 19 – Oct 25, 2026"). The detail
 screen lists every window of the category within the period (each week of
 the month) and its history shows the last windows.
 
-**Totals.** Budgeted, Spent, Planned and Left on the summary card cover
+**Totals.** Budgeted, Spent, Left and the planned line on the summary card cover
 budgets of the period only, with a note when windowed budgets are on the
 board. Spending of a category with a window budget does not count as
 "spent in categories without a budget".
@@ -193,8 +219,12 @@ amount is assigned evenly to the budget periods it covers: a window
 longer than the budget period is spread over the periods starting inside
 it (a yearly budget gives each month 1/12, leftover cents to the first
 months), a shorter one counts fully in the period it starts in (each week
-in its month). The envelope carry along the chain (`syncChain`) adds the
-same shares. The forecast's "variable spending = budget" method gets the
+in its month). `assignedInPeriod` decides what counts, for the board and
+for the envelope carry along the chain (`syncChain`) alike: budgets of
+the period for root categories, window shares for categories without a
+budget of the period, and nothing for a category whose parent has a
+budget of either kind. A period with only window budgets still belongs
+to the chain. The forecast's "variable spending = budget" method gets the
 same per-period shares, unless the category has a budget of that period.
 
 **Rollover** of a window budget runs along the chain of directly

@@ -11509,6 +11509,17 @@ class $BudgetRulesTable extends BudgetRules
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
+  static const VerificationMeta _periodTypeMeta = const VerificationMeta(
+    'periodType',
+  );
+  @override
+  late final GeneratedColumn<String> periodType = GeneratedColumn<String>(
+    'period_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _startDateMeta = const VerificationMeta(
     'startDate',
   );
@@ -11563,6 +11574,7 @@ class $BudgetRulesTable extends BudgetRules
     amountMinor,
     cadence,
     every,
+    periodType,
     startDate,
     endDate,
     count,
@@ -11643,6 +11655,12 @@ class $BudgetRulesTable extends BudgetRules
         every.isAcceptableOrUnknown(data['every']!, _everyMeta),
       );
     }
+    if (data.containsKey('period_type')) {
+      context.handle(
+        _periodTypeMeta,
+        periodType.isAcceptableOrUnknown(data['period_type']!, _periodTypeMeta),
+      );
+    }
     if (data.containsKey('start_date')) {
       context.handle(
         _startDateMeta,
@@ -11719,6 +11737,10 @@ class $BudgetRulesTable extends BudgetRules
         DriftSqlType.int,
         data['${effectivePrefix}every'],
       )!,
+      periodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_type'],
+      ),
       startDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}start_date'],
@@ -11762,6 +11784,11 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
   /// Every n-th window, >= 1.
   final int every;
 
+  /// For a `period` rule: the budget period type it was made for
+  /// (`BudgetPeriodType` name). After the period type changes, the rule
+  /// keeps that length as a budget with its own length.
+  final String? periodType;
+
   /// Start of the first window.
   final DateTime startDate;
 
@@ -11784,6 +11811,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
     required this.amountMinor,
     required this.cadence,
     required this.every,
+    this.periodType,
     required this.startDate,
     this.endDate,
     this.count,
@@ -11807,6 +11835,9 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
       );
     }
     map['every'] = Variable<int>(every);
+    if (!nullToAbsent || periodType != null) {
+      map['period_type'] = Variable<String>(periodType);
+    }
     map['start_date'] = Variable<DateTime>(startDate);
     if (!nullToAbsent || endDate != null) {
       map['end_date'] = Variable<DateTime>(endDate);
@@ -11833,6 +11864,9 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
       amountMinor: Value(amountMinor),
       cadence: Value(cadence),
       every: Value(every),
+      periodType: periodType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(periodType),
       startDate: Value(startDate),
       endDate: endDate == null && nullToAbsent
           ? const Value.absent()
@@ -11863,6 +11897,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
         serializer.fromJson<String>(json['cadence']),
       ),
       every: serializer.fromJson<int>(json['every']),
+      periodType: serializer.fromJson<String?>(json['periodType']),
       startDate: serializer.fromJson<DateTime>(json['startDate']),
       endDate: serializer.fromJson<DateTime?>(json['endDate']),
       count: serializer.fromJson<int?>(json['count']),
@@ -11884,6 +11919,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
         $BudgetRulesTable.$convertercadence.toJson(cadence),
       ),
       'every': serializer.toJson<int>(every),
+      'periodType': serializer.toJson<String?>(periodType),
       'startDate': serializer.toJson<DateTime>(startDate),
       'endDate': serializer.toJson<DateTime?>(endDate),
       'count': serializer.toJson<int?>(count),
@@ -11901,6 +11937,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
     int? amountMinor,
     BudgetCadence? cadence,
     int? every,
+    Value<String?> periodType = const Value.absent(),
     DateTime? startDate,
     Value<DateTime?> endDate = const Value.absent(),
     Value<int?> count = const Value.absent(),
@@ -11915,6 +11952,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
     amountMinor: amountMinor ?? this.amountMinor,
     cadence: cadence ?? this.cadence,
     every: every ?? this.every,
+    periodType: periodType.present ? periodType.value : this.periodType,
     startDate: startDate ?? this.startDate,
     endDate: endDate.present ? endDate.value : this.endDate,
     count: count.present ? count.value : this.count,
@@ -11939,6 +11977,9 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
           : this.amountMinor,
       cadence: data.cadence.present ? data.cadence.value : this.cadence,
       every: data.every.present ? data.every.value : this.every,
+      periodType: data.periodType.present
+          ? data.periodType.value
+          : this.periodType,
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
       count: data.count.present ? data.count.value : this.count,
@@ -11960,6 +12001,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
           ..write('amountMinor: $amountMinor, ')
           ..write('cadence: $cadence, ')
           ..write('every: $every, ')
+          ..write('periodType: $periodType, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('count: $count, ')
@@ -11979,6 +12021,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
     amountMinor,
     cadence,
     every,
+    periodType,
     startDate,
     endDate,
     count,
@@ -11997,6 +12040,7 @@ class BudgetRule extends DataClass implements Insertable<BudgetRule> {
           other.amountMinor == this.amountMinor &&
           other.cadence == this.cadence &&
           other.every == this.every &&
+          other.periodType == this.periodType &&
           other.startDate == this.startDate &&
           other.endDate == this.endDate &&
           other.count == this.count &&
@@ -12013,6 +12057,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
   final Value<int> amountMinor;
   final Value<BudgetCadence> cadence;
   final Value<int> every;
+  final Value<String?> periodType;
   final Value<DateTime> startDate;
   final Value<DateTime?> endDate;
   final Value<int?> count;
@@ -12028,6 +12073,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
     this.amountMinor = const Value.absent(),
     this.cadence = const Value.absent(),
     this.every = const Value.absent(),
+    this.periodType = const Value.absent(),
     this.startDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.count = const Value.absent(),
@@ -12044,6 +12090,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
     required int amountMinor,
     this.cadence = const Value.absent(),
     this.every = const Value.absent(),
+    this.periodType = const Value.absent(),
     required DateTime startDate,
     this.endDate = const Value.absent(),
     this.count = const Value.absent(),
@@ -12066,6 +12113,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
     Expression<int>? amountMinor,
     Expression<String>? cadence,
     Expression<int>? every,
+    Expression<String>? periodType,
     Expression<DateTime>? startDate,
     Expression<DateTime>? endDate,
     Expression<int>? count,
@@ -12082,6 +12130,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (cadence != null) 'cadence': cadence,
       if (every != null) 'every': every,
+      if (periodType != null) 'period_type': periodType,
       if (startDate != null) 'start_date': startDate,
       if (endDate != null) 'end_date': endDate,
       if (count != null) 'count': count,
@@ -12100,6 +12149,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
     Value<int>? amountMinor,
     Value<BudgetCadence>? cadence,
     Value<int>? every,
+    Value<String?>? periodType,
     Value<DateTime>? startDate,
     Value<DateTime?>? endDate,
     Value<int?>? count,
@@ -12116,6 +12166,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
       amountMinor: amountMinor ?? this.amountMinor,
       cadence: cadence ?? this.cadence,
       every: every ?? this.every,
+      periodType: periodType ?? this.periodType,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       count: count ?? this.count,
@@ -12156,6 +12207,9 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
     if (every.present) {
       map['every'] = Variable<int>(every.value);
     }
+    if (periodType.present) {
+      map['period_type'] = Variable<String>(periodType.value);
+    }
     if (startDate.present) {
       map['start_date'] = Variable<DateTime>(startDate.value);
     }
@@ -12186,6 +12240,7 @@ class BudgetRulesCompanion extends UpdateCompanion<BudgetRule> {
           ..write('amountMinor: $amountMinor, ')
           ..write('cadence: $cadence, ')
           ..write('every: $every, ')
+          ..write('periodType: $periodType, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('count: $count, ')
@@ -23235,6 +23290,7 @@ typedef $$BudgetRulesTableCreateCompanionBuilder =
       required int amountMinor,
       Value<BudgetCadence> cadence,
       Value<int> every,
+      Value<String?> periodType,
       required DateTime startDate,
       Value<DateTime?> endDate,
       Value<int?> count,
@@ -23252,6 +23308,7 @@ typedef $$BudgetRulesTableUpdateCompanionBuilder =
       Value<int> amountMinor,
       Value<BudgetCadence> cadence,
       Value<int> every,
+      Value<String?> periodType,
       Value<DateTime> startDate,
       Value<DateTime?> endDate,
       Value<int?> count,
@@ -23311,6 +23368,11 @@ class $$BudgetRulesTableFilterComposer
 
   ColumnFilters<int> get every => $composableBuilder(
     column: $table.every,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get periodType => $composableBuilder(
+    column: $table.periodType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -23389,6 +23451,11 @@ class $$BudgetRulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get startDate => $composableBuilder(
     column: $table.startDate,
     builder: (column) => ColumnOrderings(column),
@@ -23452,6 +23519,11 @@ class $$BudgetRulesTableAnnotationComposer
   GeneratedColumn<int> get every =>
       $composableBuilder(column: $table.every, builder: (column) => column);
 
+  GeneratedColumn<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get startDate =>
       $composableBuilder(column: $table.startDate, builder: (column) => column);
 
@@ -23507,6 +23579,7 @@ class $$BudgetRulesTableTableManager
                 Value<int> amountMinor = const Value.absent(),
                 Value<BudgetCadence> cadence = const Value.absent(),
                 Value<int> every = const Value.absent(),
+                Value<String?> periodType = const Value.absent(),
                 Value<DateTime> startDate = const Value.absent(),
                 Value<DateTime?> endDate = const Value.absent(),
                 Value<int?> count = const Value.absent(),
@@ -23522,6 +23595,7 @@ class $$BudgetRulesTableTableManager
                 amountMinor: amountMinor,
                 cadence: cadence,
                 every: every,
+                periodType: periodType,
                 startDate: startDate,
                 endDate: endDate,
                 count: count,
@@ -23539,6 +23613,7 @@ class $$BudgetRulesTableTableManager
                 required int amountMinor,
                 Value<BudgetCadence> cadence = const Value.absent(),
                 Value<int> every = const Value.absent(),
+                Value<String?> periodType = const Value.absent(),
                 required DateTime startDate,
                 Value<DateTime?> endDate = const Value.absent(),
                 Value<int?> count = const Value.absent(),
@@ -23554,6 +23629,7 @@ class $$BudgetRulesTableTableManager
                 amountMinor: amountMinor,
                 cadence: cadence,
                 every: every,
+                periodType: periodType,
                 startDate: startDate,
                 endDate: endDate,
                 count: count,

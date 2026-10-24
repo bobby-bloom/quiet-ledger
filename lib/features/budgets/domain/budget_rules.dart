@@ -102,6 +102,8 @@ class BudgetRulePlan {
     this.generatedUntil,
     this.updatedAt = '',
     this.cadence = BudgetCadence.period,
+    this.periodType,
+    this.createdAtMillis = 0,
   });
 
   factory BudgetRulePlan.fromRow(BudgetRule r) => BudgetRulePlan(
@@ -115,6 +117,10 @@ class BudgetRulePlan {
     generatedUntil: r.generatedUntil == null ? null : _day(r.generatedUntil!),
     updatedAt: r.updatedAt,
     cadence: r.cadence,
+    periodType: r.periodType == null
+        ? null
+        : BudgetPeriodType.values.asNameMap()[r.periodType],
+    createdAtMillis: r.createdAt,
   );
 
   final String id;
@@ -127,8 +133,37 @@ class BudgetRulePlan {
   final DateTime? generatedUntil;
   final BudgetCadence cadence;
 
-  /// The budget has its own length: its rows carry `periodEnd`.
-  bool get isWindowed => cadence != BudgetCadence.period;
+  /// For a `period` rule, the period type it was made for (null: rules
+  /// from before this was recorded, which follow the current type).
+  final BudgetPeriodType? periodType;
+
+  /// Creation time of the rule; the fixed sync timestamp of the rows it
+  /// generates (see `BudgetsRepository.ensureFromRules`).
+  final int createdAtMillis;
+
+  /// The length of one budget on [board]: [cadence], or for a `period` rule
+  /// made for another period type, the length of that type (so it keeps
+  /// its length after the period type changed).
+  BudgetCadence lengthOn(BudgetPeriods board) {
+    if (cadence != BudgetCadence.period) return cadence;
+    final made = periodType;
+    if (made == null || made == board.config.type) return cadence;
+    return cadenceOfPeriodType(made) ?? BudgetCadence.period;
+  }
+
+  /// The budgets have their own length on [board]: rows carry `periodEnd`.
+  bool windowedOn(BudgetPeriods board) =>
+      lengthOn(board) != BudgetCadence.period;
+
+  /// The repeat setting this rule stands for on [board].
+  BudgetRepeat repeatOn(BudgetPeriods board) {
+    final c = lengthOn(board);
+    return count != null
+        ? BudgetRepeat.forPeriods(count!, every: every, cadence: c)
+        : end != null
+        ? BudgetRepeat.until(end!, every: every, cadence: c)
+        : BudgetRepeat.everyPeriod(every: every, cadence: c);
+  }
 
   /// HLC of the last change; the newest rule wins when two cover the same
   /// category and period.
@@ -139,7 +174,7 @@ class BudgetRulePlan {
 
   /// Covered periods that start on or before [upTo], oldest first.
   List<DateRange> periodsUpTo(BudgetPeriods board, DateTime upTo) {
-    final periods = windowPeriods(board, cadence);
+    final periods = windowPeriods(board, lengthOn(board));
     final out = <DateRange>[];
     final limit = _day(upTo);
     var p = periods.periodOf(start);
@@ -188,13 +223,6 @@ class BudgetRulePlan {
     return left < 1 ? 1 : left;
   }
 
-  /// The repeat setting this rule stands for.
-  BudgetRepeat get repeat => count != null
-      ? BudgetRepeat.forPeriods(count!, every: every, cadence: cadence)
-      : end != null
-      ? BudgetRepeat.until(end!, every: every, cadence: cadence)
-      : BudgetRepeat.everyPeriod(every: every, cadence: cadence);
-
   @override
   bool operator ==(Object other) =>
       other is BudgetRulePlan &&
@@ -207,7 +235,8 @@ class BudgetRulePlan {
       other.count == count &&
       other.generatedUntil == generatedUntil &&
       other.updatedAt == updatedAt &&
-      other.cadence == cadence;
+      other.cadence == cadence &&
+      other.periodType == periodType;
 
   @override
   int get hashCode => Object.hash(
@@ -221,6 +250,7 @@ class BudgetRulePlan {
     generatedUntil,
     updatedAt,
     cadence,
+    periodType,
   );
 }
 
@@ -237,7 +267,9 @@ BudgetRulePlan? ruleFor(
 }) {
   BudgetRulePlan? best;
   for (final r in rules) {
-    if (r.categoryId != categoryId || r.isWindowed != windowed) continue;
+    if (r.categoryId != categoryId || r.windowedOn(periods) != windowed) {
+      continue;
+    }
     if (!r.covers(periods, periodStart)) continue;
     if (best == null || r.updatedAt.compareTo(best.updatedAt) > 0) best = r;
   }
@@ -274,13 +306,16 @@ BudgetPeriods windowPeriods(BudgetPeriods board, BudgetCadence cadence) =>
       BudgetCadence.year => BudgetPeriods(
         board.config.withType(BudgetPeriodType.yearly),
       ),
+      BudgetCadence.biWeek => BudgetPeriods(
+        board.config.withType(BudgetPeriodType.biWeekly),
+      ),
     };
 
 /// The own length that equals the budget period type [type] (choosing it is
-/// the same as the budget period), or null for bi-weekly periods.
+/// the same as the budget period).
 BudgetCadence? cadenceOfPeriodType(BudgetPeriodType type) => switch (type) {
   BudgetPeriodType.weekly => BudgetCadence.week,
-  BudgetPeriodType.biWeekly => null,
+  BudgetPeriodType.biWeekly => BudgetCadence.biWeek,
   BudgetPeriodType.monthly => BudgetCadence.month,
   BudgetPeriodType.quarterly => BudgetCadence.quarter,
   BudgetPeriodType.yearly => BudgetCadence.year,

@@ -7,6 +7,7 @@ import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/platform/notifications.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:personal_finance/features/budgets/presentation/budgets_tab.dart';
 import 'package:personal_finance/features/plan/plan_providers.dart';
@@ -133,9 +134,10 @@ void main() {
     expect(find.text('€50.00 planned'), findsOneWidget);
     expect(find.text('Planned: €8.60 over'), findsOneWidget);
     expect(find.text('€635.90'), findsOneWidget); // spent total unchanged
-    expect(find.text('Planned'), findsOneWidget);
-    expect(find.text('€70.00'), findsOneWidget);
-    expect(find.text('After planned: €4.10 left'), findsOneWidget);
+    expect(
+      find.text('€70.00 planned · After planned: €4.10 left'),
+      findsOneWidget,
+    );
 
     await dispose(tester);
   });
@@ -322,6 +324,96 @@ void main() {
       find.text("Totals don't include budgets with their own length."),
       findsOneWidget,
     );
+
+    await dispose(tester);
+  });
+
+  testWidgets('removing a repeating budget: only this period with undo, '
+      'then this and following', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      await f.account('Checking');
+      final pets = await f.category('Pets');
+      final periods = BudgetPeriods(const BudgetPeriodConfig());
+      await BudgetsRepository(db, f.writer).repeatFrom(
+        periods: periods,
+        categoryId: pets,
+        from: periods.periodOf(DateTime(2026, 10, 23)),
+        amountMinor: 6000,
+        repeat: const BudgetRepeat.everyPeriod(),
+      );
+    });
+    await tester.pumpWidget(app());
+    await settle(tester);
+    expect(find.text('€60.00 left'), findsOneWidget);
+
+    await tester.longPress(find.text('Pets'));
+    await settle(tester);
+    await tester.tap(find.text('Remove budget'));
+    await settle(tester);
+    expect(find.text('Remove a repeating budget'), findsOneWidget);
+    await tester.tap(find.text('Only this period'));
+    await settle(tester);
+    expect(find.text('Pets'), findsNothing);
+    expect(find.text('Budget for Pets removed'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1)); // snackbar slides in
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(find.text('€60.00 left'), findsOneWidget);
+
+    await tester.longPress(find.text('Pets'));
+    await settle(tester);
+    await tester.tap(find.text('Remove budget'));
+    await settle(tester);
+    await tester.tap(find.text('This and following periods'));
+    await settle(tester);
+    expect(find.text('Pets removed from this period on'), findsOneWidget);
+    await tester.tap(find.byTooltip('Next period'));
+    await settle(tester);
+    expect(find.text('Pets'), findsNothing);
+
+    await dispose(tester);
+  });
+
+  testWidgets('switching to a yearly budget keeps earlier months', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await seed(tester);
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      final groceries = (await db.select(db.categories).get())
+          .firstWhere((c) => c.name == 'Groceries')
+          .id;
+      await BudgetsRepository(
+        db,
+        f.writer,
+      ).setAmount(groceries, DateTime(2026, 9), 35000);
+    });
+    await tester.pumpWidget(app());
+    await settle(tester);
+    await tester.longPress(find.text('Groceries'));
+    await settle(tester);
+    await tester.tap(find.byKey(const ValueKey('budget-length')));
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('One year').last);
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.enterText(find.byType(TextField).first, '4800');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.textContaining('Yearly · '), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Previous period'));
+    await settle(tester);
+    expect(find.text('September 2026'), findsOneWidget);
+    expect(find.textContaining('of €350.00'), findsOneWidget);
 
     await dispose(tester);
   });

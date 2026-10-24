@@ -85,8 +85,14 @@ void main() {
     test('remaining count and repeat setting', () {
       expect(rule(count: 6).remainingCountFrom(periods, DateTime(2026, 3)), 4);
       expect(rule().remainingCountFrom(periods, DateTime(2026, 3)), isNull);
-      expect(rule(count: 2).repeat, const BudgetRepeat.forPeriods(2));
-      expect(rule(every: 2).repeat, const BudgetRepeat.everyPeriod(every: 2));
+      expect(
+        rule(count: 2).repeatOn(periods),
+        const BudgetRepeat.forPeriods(2),
+      );
+      expect(
+        rule(every: 2).repeatOn(periods),
+        const BudgetRepeat.everyPeriod(every: 2),
+      );
     });
 
     test('generated ids are deterministic per rule and period', () {

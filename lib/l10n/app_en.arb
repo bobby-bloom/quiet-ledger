@@ -797,7 +797,6 @@
       }
     }
   },
-  "budgetsPlanned": "Planned",
   "budgetsPlannedAmount": "{amount} planned",
   "@budgetsPlannedAmount": {
     "placeholders": {
@@ -1020,6 +1019,31 @@
   },
   "budgetsWindowsNote": "Totals don't include budgets with their own length.",
   "budgetsWindowsInPeriod": "Within this period",
+  "budgetsRemovedFollowing": "{category} removed from this period on",
+  "@budgetsRemovedFollowing": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsBudgetedFor": "Budgeted for {period}",
+  "@budgetsBudgetedFor": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsTransactionsIn": "Transactions in {period}",
+  "@budgetsTransactionsIn": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsRepeatsShort": "repeats",
   "categoriesTitle": "Categories",
   "categoriesAdd": "Add category",
   "categoriesAddSub": "Add subcategory",

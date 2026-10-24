@@ -228,7 +228,10 @@ class BudgetDetailView extends ConsumerWidget {
         windowPlanned?.itemsFor({categoryId, ...children}) ??
         const <OutstandingItem>[];
     final lines = ref.watch(
-      categoryPeriodLinesProvider((categoryId: categoryId, period: period)),
+      categoryPeriodLinesProvider((
+        categoryId: categoryId,
+        period: line.window ?? period,
+      )),
     );
 
     return ListView(
@@ -292,7 +295,13 @@ class BudgetDetailView extends ConsumerWidget {
           ),
           for (final i in outstanding) _OutstandingRow(item: i),
         ],
-        PlanSectionHeader(l.budgetsTransactionsInPeriod),
+        PlanSectionHeader(
+          line.window == null
+              ? l.budgetsTransactionsInPeriod
+              : l.budgetsTransactionsIn(
+                  periodTitle(line.window!, ref.watch(formatLocaleProvider)),
+                ),
+        ),
         AsyncView(
           value: lines,
           data: (list) => list.isEmpty
@@ -330,6 +339,10 @@ class _ProgressCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final money = moneyText(ref);
+    final window = line.window;
+    final windowTitle = window == null
+        ? null
+        : periodTitle(window, ref.watch(formatLocaleProvider));
     final state = line.state;
     final stateLabel = switch (state) {
       BudgetState.over => l.budgetsOverBudget(money(line.overMinor)),
@@ -352,6 +365,34 @@ class _ProgressCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (windowTitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Space.xxs),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.date_range_outlined,
+                        size: 16,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          l.budgetsWindowLabel(
+                            lengthAdjective(
+                              l,
+                              line.cadence ?? BudgetCadence.month,
+                            ),
+                            windowTitle,
+                          ),
+                          style: context.text.labelLarge?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -414,7 +455,9 @@ class _ProgressCard extends ConsumerWidget {
                 const SizedBox(height: Space.sm),
                 _kv(
                   context,
-                  l.budgetsBudgetedThisPeriod,
+                  windowTitle == null
+                      ? l.budgetsBudgetedThisPeriod
+                      : l.budgetsBudgetedFor(windowTitle),
                   money(line.budgetedMinor),
                 ),
                 if (line.rolloverMinor != 0)
@@ -500,20 +543,32 @@ class _OptionsCard extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.repeat),
                 title: Text(l.budgetsRepeatOption),
-                subtitle: Text(
-                  repeatSummary(
-                    l,
-                    rule.repeat,
-                    periodTitle(
-                      windowPeriods(periods, rule.cadence).periodOf(rule.start),
-                      locale,
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      repeatSummary(
+                        l,
+                        rule.repeatOn(periods),
+                        periodTitle(
+                          windowPeriods(
+                            periods,
+                            rule.lengthOn(periods),
+                          ).periodOf(rule.start),
+                          locale,
+                        ),
+                        dates.short,
+                      ),
                     ),
-                    dates.short,
-                  ),
-                ),
-                trailing: TextButton(
-                  onPressed: () => _stopRepeating(context, ref, periods),
-                  child: Text(l.budgetsStopRepeating),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.centerLeft,
+                      ),
+                      onPressed: () => _stopRepeating(context, ref, periods),
+                      child: Text(l.budgetsStopRepeating),
+                    ),
+                  ],
                 ),
               ),
             ListTile(
@@ -691,15 +746,17 @@ class _HistoryCard extends ConsumerWidget {
                   excludeSemantics: true,
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 110,
+                      Expanded(
+                        flex: 3,
                         child: Text(
                           periodTitle(h.period, locale),
                           style: context.text.bodySmall,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       Expanded(
+                        flex: 2,
                         child: ProgressBar(
                           value: h.spentMinor <= 0 ? 0 : h.spentMinor / max,
                           state:
@@ -781,15 +838,17 @@ class _WindowsCard extends ConsumerWidget {
                   excludeSemantics: true,
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 130,
+                      Expanded(
+                        flex: 3,
                         child: Text(
                           periodTitle(w.window, locale),
                           style: context.text.bodySmall,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       Expanded(
+                        flex: 2,
                         child: ProgressBar(
                           value: w.budgetMinor <= 0
                               ? (w.spentMinor > 0 ? 1 : 0)
@@ -980,10 +1039,16 @@ class _OutstandingRow extends ConsumerWidget {
   ) async {
     final l = context.l10n;
     final messenger = ScaffoldMessenger.maybeOf(context);
-    await ref.read(recurringRepositoryProvider).skip(plan, o);
-    await rescheduleRuleReminders(ref.read, plan.id);
-    messenger?.showSnackBar(
-      SnackBar(content: Text(l.recurringSkipped(plan.name))),
-    );
+    try {
+      await ref.read(recurringRepositoryProvider).skip(plan, o);
+      await rescheduleRuleReminders(ref.read, plan.id);
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.recurringSkipped(plan.name))),
+      );
+    } on Object catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.commonError(e.toString()))),
+      );
+    }
   }
 }

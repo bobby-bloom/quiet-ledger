@@ -52,8 +52,9 @@ enum PostingMode { autoPost, remindConfirm }
 
 /// Window length of a [BudgetRules] row. `period` follows the global budget
 /// period (Settings › Budgets); the others give the budget its own length
-/// (rows with `periodEnd`).
-enum BudgetCadence { period, week, month, quarter, year }
+/// (rows with `periodEnd`). `biWeek` is only used for a `period` rule made
+/// while the budget period was bi-weekly, after the period type changed.
+enum BudgetCadence { period, week, month, quarter, year, biWeek }
 
 @DataClassName('AccountGroup')
 class AccountGroups extends Table with SyncColumns {
@@ -291,6 +292,11 @@ class BudgetRules extends Table with SyncColumns {
 
   /// Every n-th window, >= 1.
   IntColumn get every => integer().withDefault(const Constant(1))();
+
+  /// For a `period` rule: the budget period type it was made for
+  /// (`BudgetPeriodType` name). After the period type changes, the rule
+  /// keeps that length as a budget with its own length.
+  TextColumn get periodType => text().nullable()();
 
   /// Start of the first window.
   DateTimeColumn get startDate => dateTime()();

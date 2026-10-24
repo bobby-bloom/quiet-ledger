@@ -66,7 +66,10 @@ void main() {
         cadenceOfPeriodType(BudgetPeriodType.monthly),
         BudgetCadence.month,
       );
-      expect(cadenceOfPeriodType(BudgetPeriodType.biWeekly), isNull);
+      expect(
+        cadenceOfPeriodType(BudgetPeriodType.biWeekly),
+        BudgetCadence.biWeek,
+      );
       expect(
         cadenceOfWindow(board, week(DateTime(2026, 10, 14))),
         BudgetCadence.week,
@@ -128,9 +131,9 @@ void main() {
         [for (final w in r.periodsUpTo(board, DateTime(2026, 11))) w.start.day],
         [5, 19],
       );
-      expect(r.isWindowed, isTrue);
+      expect(r.windowedOn(board), isTrue);
       expect(
-        r.repeat,
+        r.repeatOn(board),
         const BudgetRepeat.everyPeriod(every: 2, cadence: BudgetCadence.week),
       );
     });
