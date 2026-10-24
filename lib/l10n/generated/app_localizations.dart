@@ -3331,12 +3331,6 @@ abstract class AppLocalizations {
   /// **'Search transactions'**
   String get dashSearchHint;
 
-  /// No description provided for @dashNewTransaction.
-  ///
-  /// In en, this message translates to:
-  /// **'New transaction'**
-  String get dashNewTransaction;
-
   /// No description provided for @dashAutoPost.
   ///
   /// In en, this message translates to:
@@ -10697,12 +10691,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select multiple'**
   String get txnSelectMultiple;
-
-  /// No description provided for @txnNew.
-  ///
-  /// In en, this message translates to:
-  /// **'New'**
-  String get txnNew;
 
   /// No description provided for @txnCtrl.
   ///

@@ -70,8 +70,8 @@ a dated release section.
 - Android Auto Backup and device transfer are off, because a restored
   database could not be opened without its key.
 - The web app asks the browser to keep its storage.
-- Dashboard: "Edit dashboard" and "New transaction" are icon buttons on
-  wide screens; phones get an "Edit dashboard" button too.
+- Dashboard: "Edit dashboard" is an icon button on wide screens; phones
+  get an "Edit dashboard" button too.
 - Desktop sidebar shows only the tabs chosen in Navigation & modules plus
   More; Settings and Import are reached through More.
 - Forecast: up to 5 scenarios can be compared at once (was 3).
@@ -83,6 +83,12 @@ a dated release section.
   is remembered on this device.
 - Desktop sidebar can be collapsed to icons with the button at its
   bottom; the choice is remembered on this device.
+
+### Removed
+
+- The "New transaction" buttons in the Home and Transactions headers on
+  wide screens; the sidebar's "Add transaction" button and Ctrl/Cmd+N do
+  the same.
 
 ### Fixed
 

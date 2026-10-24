@@ -19,7 +19,6 @@ import 'package:personal_finance/features/transactions/domain/txn_filter.dart';
 import 'package:personal_finance/features/transactions/domain/txn_grouping.dart';
 import 'package:personal_finance/features/transactions/presentation/filter_bar.dart';
 import 'package:personal_finance/features/transactions/presentation/providers.dart';
-import 'package:personal_finance/features/transactions/presentation/quick_add.dart';
 import 'package:personal_finance/features/transactions/presentation/quick_add_extras.dart';
 import 'package:personal_finance/features/transactions/presentation/transaction_detail.dart';
 import 'package:personal_finance/features/transactions/presentation/transaction_list_view.dart';
@@ -436,7 +435,6 @@ class _Header extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cs = context.colors;
     final actions = [
       IconButton(
         tooltip: l.txnViewOptions,
@@ -473,7 +471,13 @@ class _Header extends ConsumerWidget {
       );
     }
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.xxl, Space.lg, Space.xl, 8),
+      // The last icon's circle ends on the list's 24 px right margin.
+      padding: const EdgeInsets.fromLTRB(
+        Space.xxl,
+        Space.lg,
+        Space.xl - Space.xxs,
+        8,
+      ),
       child: Row(
         children: [
           Semantics(
@@ -490,35 +494,6 @@ class _Header extends ConsumerWidget {
           ),
           const SizedBox(width: Space.sm),
           ...actions,
-          const SizedBox(width: Space.xs),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-            onPressed: () => showQuickAdd(context),
-            icon: const Icon(Icons.add),
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l.txnNew),
-                const SizedBox(width: Space.xs),
-                ExcludeSemantics(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    decoration: BoxDecoration(
-                      color: cs.onPrimary.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      '${TxnLabels.modifier(l)} N',
-                      style: context.mono.copyWith(
-                        fontSize: 11,
-                        color: cs.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

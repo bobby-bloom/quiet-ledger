@@ -2091,9 +2091,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashSearchHint => 'Search transactions';
 
   @override
-  String get dashNewTransaction => 'New transaction';
-
-  @override
   String get dashAutoPost => 'auto-post';
 
   @override
@@ -6534,9 +6531,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txnSelectMultiple => 'Select multiple';
-
-  @override
-  String get txnNew => 'New';
 
   @override
   String get txnCtrl => 'Ctrl';

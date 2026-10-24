@@ -41,7 +41,6 @@
   "dashNextPeriod": "Next period",
   "dashToday": "Back to today",
   "dashSearchHint": "Search transactions",
-  "dashNewTransaction": "New transaction",
   "dashAutoPost": "auto-post",
   "dashConfirm": "confirm",
   "dashConfirmDaysBefore": "confirm {days} days before",

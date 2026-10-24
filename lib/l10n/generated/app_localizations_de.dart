@@ -2111,9 +2111,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashSearchHint => 'Buchungen suchen';
 
   @override
-  String get dashNewTransaction => 'Neue Buchung';
-
-  @override
   String get dashAutoPost => 'automatisch';
 
   @override
@@ -6571,9 +6568,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get txnSelectMultiple => 'Mehrere auswählen';
-
-  @override
-  String get txnNew => 'Neu';
 
   @override
   String get txnCtrl => 'Strg';
