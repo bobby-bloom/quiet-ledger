@@ -163,7 +163,14 @@ class _BudgetRow extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            ProgressBar(value: line.ratio, state: state, tick: tick),
+            ProgressBar(
+              value: line.ratio,
+              state: state,
+              tick: tick,
+              pending: line.plannedMinor > 0 && line.state != BudgetState.over
+                  ? line.projectedRatio - line.ratio
+                  : 0,
+            ),
           ],
         ),
       ),

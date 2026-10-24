@@ -11,6 +11,7 @@ import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 
 final budgetsRepositoryProvider = Provider<BudgetsRepository>(
   (ref) => BudgetsRepository(
@@ -277,6 +278,91 @@ class BudgetsRepository {
           ],
         );
   }
+
+  // ----------------------------------------------------------- planned ---
+
+  /// Planned ledger entries (`status = 'planned'`) of [range] that count
+  /// toward budgets, one item per transaction or split line. Entries dated
+  /// before [today] are overdue.
+  Stream<List<OutstandingItem>> watchPlannedItems(
+    DateRange range,
+    DateTime today,
+  ) => db
+      .customSelect(
+        'SELECT t.id AS id, t.date AS date, t.account_id AS account_id, '
+        't.category_id AS category_id, t.amount_minor AS amount, '
+        't.type AS txn_type, t.payee AS payee, t.note AS note, 0 AS is_split '
+        'FROM transactions t JOIN accounts a ON a.id = t.account_id '
+        'WHERE t.deleted_at IS NULL AND a.deleted_at IS NULL '
+        "AND a.include_in_budgets = 1 AND t.type <> 'transfer' "
+        "AND t.transfer_peer_id IS NULL AND t.status = 'planned' "
+        'AND t.date >= ? AND t.date < ? '
+        'AND NOT EXISTS (SELECT 1 FROM transaction_splits s0 '
+        'WHERE s0.transaction_id = t.id AND s0.deleted_at IS NULL) '
+        'UNION ALL '
+        'SELECT t.id, t.date, t.account_id, s.category_id, s.amount_minor, '
+        't.type, t.payee, COALESCE(s.note, t.note), 1 '
+        'FROM transaction_splits s '
+        'JOIN transactions t ON t.id = s.transaction_id '
+        'JOIN accounts a ON a.id = t.account_id '
+        'WHERE s.deleted_at IS NULL AND t.deleted_at IS NULL '
+        'AND a.deleted_at IS NULL AND a.include_in_budgets = 1 '
+        "AND t.type <> 'transfer' AND t.transfer_peer_id IS NULL "
+        "AND t.status = 'planned' AND t.date >= ? AND t.date < ?",
+        variables: [
+          Variable<DateTime>(range.start),
+          Variable<DateTime>(range.end),
+          Variable<DateTime>(range.start),
+          Variable<DateTime>(range.end),
+        ],
+        readsFrom: {db.transactions, db.transactionSplits, db.accounts},
+      )
+      .watch()
+      .map((rows) {
+        final day = dateOnly(today);
+        return [
+          for (final r in rows)
+            OutstandingItem(
+              source: OutstandingSource.planned,
+              date: r.read<DateTime>('date'),
+              amountMinor: r.read<int>('amount'),
+              type: TxnType.values.byName(r.read<String>('txn_type')),
+              accountId: r.read<String>('account_id'),
+              categoryId: r.readNullable<String>('category_id'),
+              isSplit: r.read<int>('is_split') == 1,
+              overdue: r.read<DateTime>('date').isBefore(day),
+              title: _titleOf(
+                r.readNullable<String>('payee'),
+                r.readNullable<String>('note'),
+              ),
+              transactionId: r.read<String>('id'),
+            ),
+        ];
+      });
+
+  static String? _titleOf(String? payee, String? note) =>
+      (payee?.isNotEmpty ?? false) ? payee : note;
+
+  /// `(recurringRuleId, date)` of live ledger rows created for a recurring
+  /// rule in [range], whatever their status.
+  Stream<Set<(String, DateTime)>> watchRuleBookings(DateRange range) => db
+      .customSelect(
+        'SELECT DISTINCT recurring_rule_id AS rule_id, date FROM transactions '
+        'WHERE deleted_at IS NULL AND recurring_rule_id IS NOT NULL '
+        'AND date >= ? AND date < ?',
+        variables: [
+          Variable<DateTime>(range.start),
+          Variable<DateTime>(range.end),
+        ],
+        readsFrom: {db.transactions},
+      )
+      .watch()
+      .map(
+        (rows) => {
+          for (final r in rows)
+            (r.read<String>('rule_id'), dateOnly(r.read<DateTime>('date'))),
+        },
+      );
 
   // ----------------------------------------------------------- budgets ---
 

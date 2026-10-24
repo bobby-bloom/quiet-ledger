@@ -75,6 +75,7 @@ class BudgetLine {
     this.color,
     this.budgetId,
     this.isRoot = true,
+    this.plannedMinor = 0,
   });
 
   final String categoryId;
@@ -95,6 +96,11 @@ class BudgetLine {
   /// Net spending in the period (parent categories include children;
   /// refunds reduce it).
   final int spentMinor;
+
+  /// Net outstanding spending in the period (planned entries and unposted
+  /// recurring occurrences; positive = still to be spent). Never part of
+  /// [spentMinor], [state] or the rollover.
+  final int plannedMinor;
   final int thresholdPercent;
   final RolloverMode rolloverMode;
 
@@ -123,6 +129,33 @@ class BudgetLine {
     thresholdPercent: thresholdPercent,
   );
 
+  /// Spent plus outstanding.
+  int get projectedSpentMinor => spentMinor + plannedMinor;
+  int get projectedRemainingMinor => availableMinor - projectedSpentMinor;
+  int get projectedOverMinor =>
+      projectedRemainingMinor < 0 ? -projectedRemainingMinor : 0;
+
+  /// Projected spent / available, like [ratio].
+  double get projectedRatio {
+    if (availableMinor <= 0) return projectedSpentMinor > 0 ? 1 : 0;
+    return projectedSpentMinor / availableMinor;
+  }
+
+  /// State once everything outstanding is booked (in-app hint only; alerts
+  /// use [state]).
+  BudgetState get projectedState => budgetState(
+    availableMinor: availableMinor,
+    spentMinor: projectedSpentMinor,
+    thresholdPercent: thresholdPercent,
+  );
+
+  /// Outstanding spending would take this budget over while it is not over
+  /// yet.
+  bool get plannedPushesOver =>
+      plannedMinor > 0 &&
+      state != BudgetState.over &&
+      projectedState == BudgetState.over;
+
   /// Rollover into the next period if the period ended now.
   int get nextRolloverMinor => rolloverFor(rolloverMode, remainingMinor);
 
@@ -134,6 +167,7 @@ class BudgetLine {
       other.budgetedMinor == budgetedMinor &&
       other.rolloverMinor == rolloverMinor &&
       other.spentMinor == spentMinor &&
+      other.plannedMinor == plannedMinor &&
       other.thresholdPercent == thresholdPercent &&
       other.rolloverMode == rolloverMode &&
       other.isRoot == isRoot &&
@@ -146,6 +180,7 @@ class BudgetLine {
     budgetedMinor,
     rolloverMinor,
     spentMinor,
+    plannedMinor,
     thresholdPercent,
     rolloverMode,
     isRoot,
@@ -165,6 +200,7 @@ class BudgetSummary {
     this.incomeMinor = 0,
     this.carryMinor = 0,
     this.unbudgetedSpentMinor = 0,
+    this.plannedIncomeMinor = 0,
   });
 
   final DateRange period;
@@ -183,6 +219,10 @@ class BudgetSummary {
   /// Expense spending in categories without a budget.
   final int unbudgetedSpentMinor;
 
+  /// Expected income still outstanding (shown next to "left to assign",
+  /// never added to it).
+  final int plannedIncomeMinor;
+
   Iterable<BudgetLine> get _roots => lines.where((l) => l.isRoot);
 
   /// Budget + rollover over root lines.
@@ -192,6 +232,12 @@ class BudgetSummary {
   int get assignedMinor => _roots.fold(0, (a, l) => a + l.budgetedMinor);
   int get totalSpentMinor => _roots.fold(0, (a, l) => a + l.spentMinor);
   int get totalRemainingMinor => totalBudgetedMinor - totalSpentMinor;
+
+  /// Outstanding spending over root lines.
+  int get totalPlannedMinor => _roots.fold(0, (a, l) => a + l.plannedMinor);
+
+  /// What is left once everything outstanding is booked.
+  int get projectedRemainingMinor => totalRemainingMinor - totalPlannedMinor;
 
   /// Envelope mode: income + carry − assigned ("€X left to assign").
   int get toBeBudgetedMinor => toBeBudgeted(

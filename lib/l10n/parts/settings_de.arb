@@ -159,6 +159,8 @@
   "setRunningBalanceDesc": "Saldo nach jeder Buchung anzeigen",
   "setSalaryBased": "Mit dem Gehaltseingang beginnen",
   "setSalaryBasedDesc": "Der Zeitraum beginnt mit dem Eingang der gewählten Einnahme",
+  "setShowOutstanding": "Geplantes und Anstehendes zeigen",
+  "setShowOutstandingDesc": "Geplante Buchungen und noch nicht gebuchte wiederkehrende Buchungen erscheinen als offen markiert in den Budgets",
   "setSalaryRule": "Gehaltseingang",
   "setSecAppearance": "Darstellung",
   "setSecBudgets": "Budgets",

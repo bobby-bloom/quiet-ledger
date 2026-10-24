@@ -1159,6 +1159,50 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get budgetsPlanned => 'Planned';
+
+  @override
+  String budgetsPlannedAmount(String amount) {
+    return '$amount planned';
+  }
+
+  @override
+  String budgetsPlannedOver(String amount) {
+    return 'Planned: $amount over';
+  }
+
+  @override
+  String budgetsAfterPlanned(String amount) {
+    return 'After planned: $amount left';
+  }
+
+  @override
+  String budgetsAfterPlannedOver(String amount) {
+    return 'After planned: $amount over';
+  }
+
+  @override
+  String get budgetsOutstanding => 'Outstanding';
+
+  @override
+  String get budgetsOutstandingHint =>
+      'Not spent yet. Counts once it is booked.';
+
+  @override
+  String get budgetsUpcoming => 'Upcoming';
+
+  @override
+  String get budgetsDue => 'Due';
+
+  @override
+  String get budgetsOverdue => 'Overdue';
+
+  @override
+  String budgetsExpectedIncome(String amount) {
+    return '$amount expected income, not included until it arrives';
+  }
+
+  @override
   String get categoriesTitle => 'Categories';
 
   @override
@@ -5769,6 +5813,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get setSalaryBasedDesc =>
       'The period starts when the chosen income arrives';
+
+  @override
+  String get setShowOutstanding => 'Show planned and upcoming';
+
+  @override
+  String get setShowOutstandingDesc =>
+      'Planned entries and recurring items not booked yet appear in budgets, marked as outstanding';
 
   @override
   String get setSalaryRule => 'Salary income';

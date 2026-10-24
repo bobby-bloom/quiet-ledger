@@ -100,6 +100,7 @@ Non-goals for v1: actual sync, bank connections (PSD2/FinTS), multi-currency, mu
     - *envelope / zero-based*: every euro of income gets assigned to a category
   - **warning thresholds**: 80 % by default, configurable globally and per category
   - filling a period by copying the previous one, starting from the N-period average, or using a template
+  - **outstanding** amounts: planned entries and recurring items not posted yet are shown in each budget, marked as not spent (`docs/BUDGETS.md`)
 - **Recurring rules**:
   - Recurrence is stored as an iCal RRULE (any frequency, "last business day", "every 3 months on the 15th").
   - Each rule has start/end dates or a number of occurrences, a template transaction (including splits/tags), and *auto-post* or *remind & confirm*.

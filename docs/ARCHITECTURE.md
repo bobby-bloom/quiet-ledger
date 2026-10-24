@@ -3,7 +3,8 @@
 Read this before changing code. `PLAN.md` is the approved product plan; the
 design draft ("Quiet Ledger") is mirrored in `docs/design/` (one `.dc.html`
 per screen, `Foundations.dc.html` holds the tokens). `docs/BACKUP.md`
-describes backups, restore and the data-safety rules below.
+describes backups, restore and the data-safety rules below;
+`docs/BUDGETS.md` describes how budget lines are calculated.
 
 ## Layout
 

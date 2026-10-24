@@ -8,6 +8,7 @@ import 'package:personal_finance/app/ui/app_icons.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
+import 'package:personal_finance/core/calendar/recurrence.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
@@ -16,9 +17,14 @@ import 'package:personal_finance/features/budgets/data/budget_period_provider.da
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 import 'package:personal_finance/features/budgets/presentation/budget_actions.dart';
+import 'package:personal_finance/features/plan/plan_providers.dart';
 import 'package:personal_finance/features/plan/presentation/money_text.dart';
 import 'package:personal_finance/features/plan/presentation/plan_widgets.dart';
+import 'package:personal_finance/features/recurring/data/recurring_repository.dart';
+import 'package:personal_finance/features/recurring/data/reminders.dart';
+import 'package:personal_finance/features/recurring/domain/recurring_logic.dart';
 
 /// Transactions and split lines of a category (with children) in a period.
 final categoryPeriodLinesProvider = StreamProvider.autoDispose
@@ -149,6 +155,7 @@ class BudgetDetailView extends ConsumerWidget {
     }
     final board = ref.watch(budgetBoardProvider(period)).value;
     final actuals = ref.watch(periodActualsProvider(period)).value;
+    final planned = ref.watch(periodPlannedProvider(period)).value;
     final settings = ref.watch(settingsProvider);
     final children = [
       for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
@@ -165,10 +172,14 @@ class BudgetDetailView extends ConsumerWidget {
           budgetedMinor: 0,
           rolloverMinor: 0,
           spentMinor: actuals?.spentOf(categoryId, children) ?? 0,
+          plannedMinor: planned?.spentOf(categoryId, children) ?? 0,
           thresholdPercent: warnThresholdFor(cat, settings),
           rolloverMode: rolloverModeFor(cat, settings),
         );
     final hasBudget = line.budgetId != null;
+    final outstanding =
+        planned?.itemsFor({categoryId, ...children}) ??
+        const <OutstandingItem>[];
     final lines = ref.watch(
       categoryPeriodLinesProvider((categoryId: categoryId, period: period)),
     );
@@ -212,6 +223,24 @@ class BudgetDetailView extends ConsumerWidget {
         ),
         _OptionsCard(category: cat, line: line),
         _HistoryCard(categoryId: categoryId, period: period),
+        if (outstanding.isNotEmpty) ...[
+          PlanSectionHeader(l.budgetsOutstanding),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Space.listInset,
+              0,
+              Space.listInset,
+              Space.xxs,
+            ),
+            child: Text(
+              l.budgetsOutstandingHint,
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          for (final i in outstanding) _OutstandingRow(item: i),
+        ],
         PlanSectionHeader(l.budgetsTransactionsInPeriod),
         AsyncView(
           value: lines,
@@ -314,6 +343,9 @@ class _ProgressCard extends ConsumerWidget {
                   value: state == BudgetState.over ? 1 : line.ratio,
                   state: progressStateOf(state),
                   tick: tick,
+                  pending: line.plannedMinor > 0 && state != BudgetState.over
+                      ? line.projectedRatio - line.ratio
+                      : 0,
                 ),
                 const SizedBox(height: Space.xs),
                 Text(
@@ -325,6 +357,21 @@ class _ProgressCard extends ConsumerWidget {
                         : FontWeight.w700,
                   ),
                 ),
+                const SizedBox(height: Space.sm),
+                if (line.plannedMinor > 0)
+                  Text(
+                    line.plannedPushesOver
+                        ? l.budgetsPlannedOver(money(line.projectedOverMinor))
+                        : l.budgetsPlannedAmount(money(line.plannedMinor)),
+                    style: context.text.bodyMedium?.copyWith(
+                      color: line.plannedPushesOver
+                          ? context.finance.warning
+                          : context.colors.onSurfaceVariant,
+                      fontWeight: line.plannedPushesOver
+                          ? FontWeight.w700
+                          : null,
+                    ),
+                  ),
                 const SizedBox(height: Space.sm),
                 _kv(
                   context,
@@ -624,6 +671,139 @@ class _TxnRow extends ConsumerWidget {
       subtitle: Text(sub, overflow: TextOverflow.ellipsis),
       trailing: AmountText(line.amountMinor),
       onTap: () => context.push('/transactions/${line.transactionId}'),
+    );
+  }
+}
+
+/// A planned entry or unposted recurring occurrence of the category. Planned
+/// entries open the transaction; recurring ones open the rule and, for the
+/// rule's next remind & confirm occurrence, offer confirm and skip.
+class _OutstandingRow extends ConsumerWidget {
+  const _OutstandingRow({required this.item});
+
+  final OutstandingItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final accounts = ref.watch(accountMapProvider);
+    final cats = ref.watch(categoryMapProvider);
+    final dates = ref.watch(dateFormatsProvider);
+    final today = ref.watch(planTodayProvider);
+    final calendar = ref.watch(holidayCalendarProvider);
+    final plan = item.plan;
+    final occurrence = item.occurrence;
+    final recurring = item.source == OutstandingSource.recurring;
+    final badge = item.overdue
+        ? l.budgetsOverdue
+        : !recurring
+        ? l.statusPlanned
+        : item.date == today
+        ? l.budgetsDue
+        : l.budgetsUpcoming;
+    final title = (item.title?.isNotEmpty ?? false)
+        ? item.title!
+        : (cats[item.categoryId]?.name ?? '');
+    final sub = [
+      dates.short(item.date),
+      accounts[item.accountId]?.name ?? '',
+      if (item.isSplit) l.budgetsSplitLine,
+    ].where((s) => s.isNotEmpty).join(' · ');
+    final canAct =
+        recurring &&
+        plan != null &&
+        occurrence != null &&
+        plan.mode == PostingMode.remindConfirm &&
+        plan.nextPending(calendar) == occurrence;
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: Space.listInset,
+          ),
+          leading: Icon(
+            recurring ? Icons.repeat : Icons.schedule,
+            color: colors.onSurfaceVariant,
+          ),
+          title: Row(
+            children: [
+              Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+              const SizedBox(width: Space.xs),
+              StatusBadge(
+                badge,
+                background: item.overdue
+                    ? context.finance.warningContainer
+                    : null,
+                foreground: item.overdue
+                    ? context.finance.onWarningContainer
+                    : null,
+              ),
+            ],
+          ),
+          subtitle: Text(sub, overflow: TextOverflow.ellipsis),
+          trailing: AmountText(item.amountMinor, type: item.type),
+          onTap: recurring
+              ? (plan == null
+                    ? null
+                    : () => context.push('/plan/recurring/${plan.id}'))
+              : () => context.push('/transactions/${item.transactionId}'),
+        ),
+        if (canAct)
+          Padding(
+            padding: const EdgeInsets.only(right: Space.sm),
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => _skip(context, ref, plan, occurrence),
+                  child: Text(l.recurringSkip),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => _confirm(context, ref, plan, occurrence),
+                  child: Text(l.commonConfirm),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _confirm(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringPlan plan,
+    Occurrence o,
+  ) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    try {
+      await ref.read(recurringRepositoryProvider).confirm(plan, o);
+      await rescheduleRuleReminders(ref.read, plan.id);
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.recurringConfirmed(plan.name))),
+      );
+    } on Object catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l.commonError(e.toString()))),
+      );
+    }
+  }
+
+  Future<void> _skip(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringPlan plan,
+    Occurrence o,
+  ) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    await ref.read(recurringRepositoryProvider).skip(plan, o);
+    await rescheduleRuleReminders(ref.read, plan.id);
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l.recurringSkipped(plan.name))),
     );
   }
 }

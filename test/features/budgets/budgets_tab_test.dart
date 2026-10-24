@@ -1,12 +1,16 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/database.dart';
+import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/platform/notifications.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
+import 'package:personal_finance/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:personal_finance/features/budgets/presentation/budgets_tab.dart';
 import 'package:personal_finance/features/plan/plan_providers.dart';
+import 'package:personal_finance/features/recurring/data/recurring_repository.dart';
 
 import '../../helpers/test_app.dart';
 import '../plan/plan_fixtures.dart';
@@ -93,6 +97,106 @@ void main() {
     await tester.tap(find.text('Today'));
     await settle(tester);
     expect(find.text('October 2026'), findsOneWidget);
+
+    await dispose(tester);
+  });
+
+  testWidgets('planned entries show as outstanding, not as spent', (
+    tester,
+  ) async {
+    await seed(tester);
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      final acc = (await db.select(db.accounts).get()).first.id;
+      final cats = {
+        for (final c in await db.select(db.categories).get()) c.name: c.id,
+      };
+      await f.expense(
+        acc,
+        cats['Groceries'],
+        5000,
+        DateTime(2026, 10, 25),
+        status: TxnStatus.planned,
+      );
+      await f.expense(
+        acc,
+        cats['Eating out'],
+        2000,
+        DateTime(2026, 10, 26),
+        status: TxnStatus.planned,
+      );
+    });
+    await tester.pumpWidget(app());
+    await settle(tester);
+
+    expect(find.text('€87.60 left'), findsOneWidget); // spent unchanged
+    expect(find.text('€50.00 planned'), findsOneWidget);
+    expect(find.text('Planned: €8.60 over'), findsOneWidget);
+    expect(find.text('€635.90'), findsOneWidget); // spent total unchanged
+    expect(find.text('Planned'), findsOneWidget);
+    expect(find.text('€70.00'), findsOneWidget);
+    expect(find.text('After planned: €4.10 left'), findsOneWidget);
+
+    await dispose(tester);
+  });
+
+  testWidgets('detail lists outstanding items and confirms the next one', (
+    tester,
+  ) async {
+    await seed(tester);
+    late String groceries;
+    await tester.runAsync(() async {
+      final acc = (await db.select(db.accounts).get()).first.id;
+      groceries = (await db.select(db.categories).get())
+          .firstWhere((c) => c.name == 'Groceries')
+          .id;
+      await RecurringRepository(
+        db,
+        PlanFixture(db).writer,
+        PlanFixture(db).ledger,
+      ).create(
+        RecurringRuleDraft(
+          name: 'Veg box',
+          rrule: 'FREQ=WEEKLY;BYDAY=TU',
+          startDate: DateTime(2026, 10, 27),
+          template: TxnDraft(
+            accountId: acc,
+            amountMinor: -2500,
+            date: DateTime(2026, 10, 27),
+            categoryId: groceries,
+          ),
+        ),
+      );
+    });
+    final period = DateRange(DateTime(2026, 10), DateTime(2026, 10, 30));
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      testApp(
+        Scaffold(
+          body: BudgetDetailView(categoryId: groceries, period: period),
+        ),
+        db: db,
+        overrides: [
+          planTodayProvider.overrideWithValue(DateTime(2026, 10, 23)),
+          notificationServiceProvider.overrideWithValue(
+            const NoopNotificationService(),
+          ),
+        ],
+      ),
+    );
+    await settle(tester);
+
+    expect(find.text('Outstanding'), findsOneWidget);
+    expect(find.text('Veg box'), findsOneWidget);
+    expect(find.text('Upcoming'), findsOneWidget);
+    expect(find.text('€25.00 planned'), findsOneWidget);
+
+    await tester.tap(find.text('Confirm'));
+    await settle(tester);
+    expect(find.text('Outstanding'), findsNothing);
+    expect(find.text('€337.40'), findsWidgets); // spent + confirmed
 
     await dispose(tester);
   });

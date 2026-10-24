@@ -1177,6 +1177,50 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get budgetsPlanned => 'Geplant';
+
+  @override
+  String budgetsPlannedAmount(String amount) {
+    return '$amount geplant';
+  }
+
+  @override
+  String budgetsPlannedOver(String amount) {
+    return 'Geplant: $amount drüber';
+  }
+
+  @override
+  String budgetsAfterPlanned(String amount) {
+    return 'Nach Geplantem: $amount übrig';
+  }
+
+  @override
+  String budgetsAfterPlannedOver(String amount) {
+    return 'Nach Geplantem: $amount drüber';
+  }
+
+  @override
+  String get budgetsOutstanding => 'Offen';
+
+  @override
+  String get budgetsOutstandingHint =>
+      'Noch nicht ausgegeben. Zählt, sobald es gebucht ist.';
+
+  @override
+  String get budgetsUpcoming => 'Anstehend';
+
+  @override
+  String get budgetsDue => 'Fällig';
+
+  @override
+  String get budgetsOverdue => 'Überfällig';
+
+  @override
+  String budgetsExpectedIncome(String amount) {
+    return '$amount erwartete Einnahmen, erst nach Eingang enthalten';
+  }
+
+  @override
   String get categoriesTitle => 'Kategorien';
 
   @override
@@ -5804,6 +5848,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get setSalaryBasedDesc =>
       'Der Zeitraum beginnt mit dem Eingang der gewählten Einnahme';
+
+  @override
+  String get setShowOutstanding => 'Geplantes und Anstehendes zeigen';
+
+  @override
+  String get setShowOutstandingDesc =>
+      'Geplante Buchungen und noch nicht gebuchte wiederkehrende Buchungen erscheinen als offen markiert in den Budgets';
 
   @override
   String get setSalaryRule => 'Gehaltseingang';

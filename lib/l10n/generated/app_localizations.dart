@@ -1873,6 +1873,72 @@ abstract class AppLocalizations {
   /// **'Balance {balance} is below {threshold}.'**
   String budgetsAlertLowBalanceBody(String balance, String threshold);
 
+  /// No description provided for @budgetsPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get budgetsPlanned;
+
+  /// No description provided for @budgetsPlannedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} planned'**
+  String budgetsPlannedAmount(String amount);
+
+  /// No description provided for @budgetsPlannedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned: {amount} over'**
+  String budgetsPlannedOver(String amount);
+
+  /// No description provided for @budgetsAfterPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'After planned: {amount} left'**
+  String budgetsAfterPlanned(String amount);
+
+  /// No description provided for @budgetsAfterPlannedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'After planned: {amount} over'**
+  String budgetsAfterPlannedOver(String amount);
+
+  /// No description provided for @budgetsOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get budgetsOutstanding;
+
+  /// No description provided for @budgetsOutstandingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not spent yet. Counts once it is booked.'**
+  String get budgetsOutstandingHint;
+
+  /// No description provided for @budgetsUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get budgetsUpcoming;
+
+  /// No description provided for @budgetsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get budgetsDue;
+
+  /// No description provided for @budgetsOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get budgetsOverdue;
+
+  /// No description provided for @budgetsExpectedIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} expected income, not included until it arrives'**
+  String budgetsExpectedIncome(String amount);
+
   /// No description provided for @categoriesTitle.
   ///
   /// In en, this message translates to:
@@ -9545,6 +9611,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The period starts when the chosen income arrives'**
   String get setSalaryBasedDesc;
+
+  /// No description provided for @setShowOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Show planned and upcoming'**
+  String get setShowOutstanding;
+
+  /// No description provided for @setShowOutstandingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned entries and recurring items not booked yet appear in budgets, marked as outstanding'**
+  String get setShowOutstandingDesc;
 
   /// No description provided for @setSalaryRule.
   ///

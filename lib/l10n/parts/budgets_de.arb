@@ -68,5 +68,16 @@
   "budgetsAlertWarningTitle": "{category} ist fast aufgebraucht",
   "budgetsAlertWarningBody": "{percent} % verbraucht, {amount} übrig.",
   "budgetsAlertLowBalanceTitle": "Niedriger Kontostand: {account}",
-  "budgetsAlertLowBalanceBody": "Kontostand {balance} liegt unter {threshold}."
+  "budgetsAlertLowBalanceBody": "Kontostand {balance} liegt unter {threshold}.",
+  "budgetsPlanned": "Geplant",
+  "budgetsPlannedAmount": "{amount} geplant",
+  "budgetsPlannedOver": "Geplant: {amount} drüber",
+  "budgetsAfterPlanned": "Nach Geplantem: {amount} übrig",
+  "budgetsAfterPlannedOver": "Nach Geplantem: {amount} drüber",
+  "budgetsOutstanding": "Offen",
+  "budgetsOutstandingHint": "Noch nicht ausgegeben. Zählt, sobald es gebucht ist.",
+  "budgetsUpcoming": "Anstehend",
+  "budgetsDue": "Fällig",
+  "budgetsOverdue": "Überfällig",
+  "budgetsExpectedIncome": "{amount} erwartete Einnahmen, erst nach Eingang enthalten"
 }

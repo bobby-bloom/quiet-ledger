@@ -13,6 +13,12 @@ a dated release section.
 
 ### Added
 
+- Budgets show planned entries and recurring items that are not booked
+  yet as outstanding: a striped part of the bar, "€80 planned" or
+  "Planned: €30 over" on the row, a "Planned" total and an "Outstanding"
+  list with Confirm and Skip on the budget's detail screen. They never
+  count as spent, so alerts, rollover and "left to assign" are unchanged.
+  Settings › Budgets › Show planned and upcoming turns this off.
 - Backups include receipt files.
 - Encrypted backups (`.pfbackup`) with a backup password and a recovery key
   that must be confirmed. Required while the app lock or the database

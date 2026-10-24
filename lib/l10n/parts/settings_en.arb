@@ -159,6 +159,8 @@
   "setRunningBalanceDesc": "Show the balance after each transaction",
   "setSalaryBased": "Start on payday",
   "setSalaryBasedDesc": "The period starts when the chosen income arrives",
+  "setShowOutstanding": "Show planned and upcoming",
+  "setShowOutstandingDesc": "Planned entries and recurring items not booked yet appear in budgets, marked as outstanding",
   "setSalaryRule": "Salary income",
   "setSecAppearance": "Appearance",
   "setSecBudgets": "Budgets",

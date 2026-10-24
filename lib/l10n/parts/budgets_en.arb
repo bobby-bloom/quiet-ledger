@@ -280,5 +280,51 @@
         "type": "String"
       }
     }
+  },
+  "budgetsPlanned": "Planned",
+  "budgetsPlannedAmount": "{amount} planned",
+  "@budgetsPlannedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsPlannedOver": "Planned: {amount} over",
+  "@budgetsPlannedOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAfterPlanned": "After planned: {amount} left",
+  "@budgetsAfterPlanned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAfterPlannedOver": "After planned: {amount} over",
+  "@budgetsAfterPlannedOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsOutstanding": "Outstanding",
+  "budgetsOutstandingHint": "Not spent yet. Counts once it is booked.",
+  "budgetsUpcoming": "Upcoming",
+  "budgetsDue": "Due",
+  "budgetsOverdue": "Overdue",
+  "budgetsExpectedIncome": "{amount} expected income, not included until it arrives",
+  "@budgetsExpectedIncome": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

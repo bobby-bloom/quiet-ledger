@@ -209,7 +209,10 @@ class _SummaryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    final money = moneyText(ref);
     final remaining = summary.totalRemainingMinor;
+    final planned = summary.totalPlannedMinor;
+    final projected = summary.projectedRemainingMinor;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         Space.md,
@@ -223,39 +226,89 @@ class _SummaryCard extends ConsumerWidget {
             horizontal: Space.md,
             vertical: Space.sm,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Metric(
-                  label: l.budgetsBudgeted,
-                  value: AmountText(summary.totalBudgetedMinor, colored: false),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Metric(
+                      label: l.budgetsBudgeted,
+                      value: AmountText(
+                        summary.totalBudgetedMinor,
+                        colored: false,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Metric(
+                      label: l.budgetsSpent,
+                      value: AmountText(
+                        summary.totalSpentMinor,
+                        colored: false,
+                        style: TextStyle(color: context.finance.expense),
+                      ),
+                    ),
+                  ),
+                  if (planned != 0)
+                    Expanded(
+                      child: Metric(
+                        label: l.budgetsPlanned,
+                        value: AmountText(
+                          planned,
+                          colored: false,
+                          style: TextStyle(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: Metric(
+                      alignEnd: true,
+                      label: summary.isCurrent
+                          ? l.budgetsLeftDays(summary.daysLeft)
+                          : l.budgetsLeftLabel,
+                      value: AmountText(
+                        remaining,
+                        colored: false,
+                        style: remaining < 0
+                            ? TextStyle(color: context.colors.error)
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Metric(
-                  label: l.budgetsSpent,
-                  value: AmountText(
-                    summary.totalSpentMinor,
-                    colored: false,
-                    style: TextStyle(color: context.finance.expense),
+              if (planned != 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.xxs),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.schedule,
+                        size: 13,
+                        color: projected < 0
+                            ? context.finance.warning
+                            : context.colors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          projected < 0
+                              ? l.budgetsAfterPlannedOver(money(-projected))
+                              : l.budgetsAfterPlanned(money(projected)),
+                          style: context.text.bodySmall?.copyWith(
+                            color: projected < 0
+                                ? context.finance.warning
+                                : context.colors.onSurfaceVariant,
+                            fontWeight: projected < 0 ? FontWeight.w700 : null,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Expanded(
-                child: Metric(
-                  alignEnd: true,
-                  label: summary.isCurrent
-                      ? l.budgetsLeftDays(summary.daysLeft)
-                      : l.budgetsLeftLabel,
-                  value: AmountText(
-                    remaining,
-                    colored: false,
-                    style: remaining < 0
-                        ? TextStyle(color: context.colors.error)
-                        : null,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -328,6 +381,11 @@ class _EnvelopeBanner extends ConsumerWidget {
                 ),
                 style: context.text.bodySmall?.copyWith(color: fg),
               ),
+              if (summary.plannedIncomeMinor > 0)
+                Text(
+                  l.budgetsExpectedIncome(money(summary.plannedIncomeMinor)),
+                  style: context.text.bodySmall?.copyWith(color: fg),
+                ),
             ],
           ),
         ),
@@ -426,10 +484,20 @@ class BudgetLineTile extends ConsumerWidget {
         : rollover > 0
         ? l.budgetsInclRolledOver(money(rollover))
         : l.budgetsInclOverspentCarried(money(-rollover));
+    final planned = line.plannedMinor;
+    final plannedLabel = line.plannedPushesOver
+        ? l.budgetsPlannedOver(money(line.projectedOverMinor))
+        : planned > 0
+        ? l.budgetsPlannedAmount(money(planned))
+        : null;
+    final plannedColor = line.plannedPushesOver
+        ? context.finance.warning
+        : context.colors.onSurfaceVariant;
     final semantics = [
       line.name,
       l.budgetsSpentOf(money(line.spentMinor), money(line.availableMinor)),
       label,
+      ?plannedLabel,
       ?rolloverLabel,
     ].join(', ');
 
@@ -502,6 +570,9 @@ class BudgetLineTile extends ConsumerWidget {
                         value: state == BudgetState.over ? 1 : line.ratio,
                         state: progressStateOf(state),
                         tick: tick,
+                        pending: planned > 0 && state != BudgetState.over
+                            ? line.projectedRatio - line.ratio
+                            : 0,
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -526,6 +597,27 @@ class BudgetLineTile extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          if (plannedLabel != null)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.schedule,
+                                  size: 13,
+                                  color: plannedColor,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  plannedLabel,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: plannedColor,
+                                    fontWeight: line.plannedPushesOver
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           if (rolloverLabel != null)
                             Row(
                               mainAxisSize: MainAxisSize.min,
