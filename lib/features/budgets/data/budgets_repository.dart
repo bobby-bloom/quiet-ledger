@@ -481,65 +481,101 @@ class BudgetsRepository {
   /// generated before the budget period type changed are turned into (or
   /// back from) budgets with their own length. Idempotent; returns the
   /// number of rows created.
-  Future<int> ensureFromRules(BudgetPeriods periods, DateTime upTo) =>
-      writer.transaction(() async {
-        final all = await rules();
-        var created = 0;
-        for (final r in all) {
-          final windowed = r.windowedOn(periods);
-          await _normaliseRows(r, periods, windowed: windowed);
-          final due = r.due(periods, upTo);
-          if (due.isEmpty) continue;
-          for (final p in due) {
-            final winner = ruleFor(
-              all,
-              periods,
-              r.categoryId,
-              p.start,
-              windowed: windowed,
-            );
-            if (winner?.id != r.id) continue;
-            final live =
-                await (db.select(db.budgets)..where(
-                      (b) =>
-                          b.categoryId.equals(r.categoryId) &
-                          (windowed
-                              ? b.periodEnd.isNotNull() &
-                                    b.periodStart.isSmallerThanValue(p.end) &
-                                    b.periodEnd.isBiggerThanValue(p.start)
-                              : b.periodStart.equals(p.start) &
-                                    b.periodEnd.isNull()) &
-                          b.deletedAt.isNull(),
-                    ))
-                    .get();
-            if (live.isNotEmpty) continue;
-            final id = generatedBudgetId(r.id, p.start);
-            final existing = await (db.select(
-              db.budgets,
-            )..where((b) => b.id.equals(id))).getSingleOrNull();
-            if (existing != null) continue; // removed by the user
-            await writer.insert(
-              db.budgets,
-              BudgetsCompanion(
-                categoryId: Value(r.categoryId),
-                periodStart: Value(p.start),
-                amountMinor: Value(r.amountMinor),
-                ruleId: Value(r.id),
-                periodEnd: Value(windowed ? p.end : null),
-              ),
-              id: id,
-              hlc: Hlc(r.createdAtMillis, 0, ''),
-            );
-            created++;
-          }
-          await writer.update(
-            db.budgetRules,
-            r.id,
-            BudgetRulesCompanion(generatedUntil: Value(due.last.start)),
-          );
-        }
-        return created;
-      });
+  Future<int> ensureFromRules(
+    BudgetPeriods periods,
+    DateTime upTo, {
+    Set<String>? onlyRules,
+  }) => writer.transaction(() async {
+    final all = await rules();
+    var created = 0;
+    for (final r in all) {
+      if (onlyRules != null && !onlyRules.contains(r.id)) continue;
+      final windowed = r.windowedOn(periods);
+      await _normaliseRows(r, periods, windowed: windowed);
+      await _dropBeyondEnd(r);
+      final due = r.due(periods, upTo);
+      if (due.isEmpty) continue;
+      for (final p in due) {
+        final winner = ruleFor(
+          all,
+          periods,
+          r.categoryId,
+          p.start,
+          windowed: windowed,
+        );
+        if (winner?.id != r.id) continue;
+        if (await _generateRow(r, p, windowed: windowed)) created++;
+      }
+      await writer.update(
+        db.budgetRules,
+        r.id,
+        BudgetRulesCompanion(generatedUntil: Value(due.last.start)),
+      );
+    }
+    return created;
+  });
+
+  /// Inserts the row [r] generates for [p] unless the category already has a
+  /// live budget there (for a window: any overlapping window) or the row was
+  /// generated before and removed since. Returns whether it was created.
+  Future<bool> _generateRow(
+    BudgetRulePlan r,
+    DateRange p, {
+    required bool windowed,
+  }) async {
+    final live =
+        await (db.select(db.budgets)..where(
+              (b) =>
+                  b.categoryId.equals(r.categoryId) &
+                  (windowed
+                      ? b.periodEnd.isNotNull() &
+                            b.periodStart.isSmallerThanValue(p.end) &
+                            b.periodEnd.isBiggerThanValue(p.start)
+                      : b.periodStart.equals(p.start) & b.periodEnd.isNull()) &
+                  b.deletedAt.isNull(),
+            ))
+            .get();
+    if (live.isNotEmpty) return false;
+    final id = generatedBudgetId(r.id, p.start);
+    final existing = await (db.select(
+      db.budgets,
+    )..where((b) => b.id.equals(id))).getSingleOrNull();
+    if (existing != null) return false; // removed by the user
+    await writer.insert(
+      db.budgets,
+      BudgetsCompanion(
+        categoryId: Value(r.categoryId),
+        periodStart: Value(p.start),
+        amountMinor: Value(r.amountMinor),
+        ruleId: Value(r.id),
+        periodEnd: Value(windowed ? p.end : null),
+      ),
+      id: id,
+      // A second before the rule was created: older than any edit made
+      // after the rule existed, on any device (clock margin).
+      hlc: Hlc(r.createdAtMillis > 1000 ? r.createdAtMillis - 1000 : 0, 0, ''),
+    );
+    return true;
+  }
+
+  /// Removes unedited rows of [r] after its end: rows another device
+  /// generated before it learnt that the rule had ended (a newer rule took
+  /// over; it generated its own rows).
+  Future<void> _dropBeyondEnd(BudgetRulePlan r) async {
+    final end = r.end;
+    if (end == null) return;
+    final rows =
+        await (db.select(db.budgets)..where(
+              (b) =>
+                  b.ruleId.equals(r.id) &
+                  b.periodStart.isBiggerThanValue(end) &
+                  b.deletedAt.isNull(),
+            ))
+            .get();
+    for (final b in rows) {
+      await writer.delete(db.budgets, b.id);
+    }
+  }
 
   /// Gives the unedited rows [r] generated the kind it has on [periods]
   /// now: a window (`periodEnd`) after the period type changed away from
@@ -618,29 +654,29 @@ class BudgetsRepository {
         cadence: repeat.cadence,
         periodType: repeat.windowed ? null : periods.config.type,
       );
-      // Watermark: as far as old rules of the same length had handled every
-      // period the new rule covers.
-      var watermark = start;
+      // Watermark: the new rule takes over how far old rules of the same
+      // length got, so periods they handled (and the user may have removed)
+      // are not generated again. Periods the new rule covers that they did
+      // not (every 2 months → every month) are generated below.
       final sameLength = [
         for (final r in old)
           if (r.lengthOn(periods) == repeat.cadence && r.generatedUntil != null)
             r,
       ];
-      if (sameLength.isNotEmpty) {
-        final g = sameLength
-            .map((r) => r.generatedUntil!)
-            .reduce((a, b) => a.isAfter(b) ? a : b);
-        for (final p in rule.periodsUpTo(periods, g)) {
-          if (!p.start.isAfter(start)) continue;
-          final handled = sameLength.any(
-            (r) =>
-                r.covers(periods, p.start) &&
-                !p.start.isAfter(r.generatedUntil!),
-          );
-          if (!handled) break;
-          watermark = p.start;
-        }
+      var watermark = start;
+      for (final r in sameLength) {
+        if (r.generatedUntil!.isAfter(watermark)) watermark = r.generatedUntil!;
       }
+      final gaps = [
+        for (final p in rule.periodsUpTo(periods, watermark))
+          if (p.start.isAfter(start) &&
+              !sameLength.any(
+                (r) =>
+                    r.covers(periods, p.start) &&
+                    !p.start.isAfter(r.generatedUntil!),
+              ))
+            p,
+      ];
       final ruleId = await writer.insert(
         db.budgetRules,
         BudgetRulesCompanion(
@@ -695,6 +731,15 @@ class BudgetsRepository {
           );
         } else {
           await writer.delete(db.budgets, b.id);
+        }
+      }
+      if (gaps.isNotEmpty) {
+        final row = await (db.select(
+          db.budgetRules,
+        )..where((r) => r.id.equals(ruleId))).getSingle();
+        final saved = BudgetRulePlan.fromRow(row);
+        for (final p in gaps) {
+          await _generateRow(saved, p, windowed: repeat.windowed);
         }
       }
       if (here == null) {
@@ -880,7 +925,7 @@ class BudgetsRepository {
     Set<String> skip = const {},
   }) async {
     var sum = 0;
-    for (final b in await windows(period)) {
+    for (final b in dropNestedWindows(await windows(period))) {
       if (skip.contains(b.categoryId)) continue;
       sum += windowShare(
         periods,
@@ -963,6 +1008,132 @@ class BudgetsRepository {
         );
       }
     }
+  }
+
+  // ------------------------------------------------------------- merge ---
+
+  /// Category merge, before the budget rows are merged: brings the rules of
+  /// [sourceId] and [targetId] to the target without changing any rule in
+  /// place (a rule changed in place would let devices that generated its
+  /// rows disagree). Both categories' rows are generated through a common
+  /// horizon (a limited source rule through its end), so merging the rows
+  /// adds them up. After the horizon:
+  /// - a target rule continues as a new rule with the newest open-ended
+  ///   source amount of its length added;
+  /// - an open-ended source rule of a length the target has no rule of
+  ///   continues as a new rule of the target;
+  /// - the source rules end.
+  Future<void> mergeRules(
+    BudgetPeriods periods, {
+    required String sourceId,
+    required String targetId,
+    DateTime? today,
+  }) => writer.transaction(() async {
+    final all = await rules();
+    final source = [
+      for (final r in all)
+        if (r.categoryId == sourceId) r,
+    ];
+    if (source.isEmpty) return;
+    final target = [
+      for (final r in all)
+        if (r.categoryId == targetId) r,
+    ];
+    final now = dateOnly(today ?? DateTime.now());
+    var horizon = periods.next(periods.periodOf(now)).last;
+    final far = DateTime(now.year + 10, now.month, now.day);
+    for (final r in [...source, ...target]) {
+      final g = r.generatedUntil;
+      if (g != null && g.isAfter(horizon)) horizon = g;
+      if (r.categoryId == sourceId && (r.end != null || r.count != null)) {
+        final covered = r.periodsUpTo(periods, far);
+        if (covered.isNotEmpty && covered.last.start.isAfter(horizon)) {
+          horizon = covered.last.start;
+        }
+      }
+    }
+    await ensureFromRules(
+      periods,
+      horizon,
+      onlyRules: {
+        for (final r in [...source, ...target]) r.id,
+      },
+    );
+    final next = horizon.add(const Duration(days: 1));
+    for (final cadence in BudgetCadence.values) {
+      final src = [
+        for (final r in source)
+          if (r.lengthOn(periods) == cadence) r,
+      ];
+      if (src.isEmpty) continue;
+      final open = [
+        for (final r in src)
+          if (r.end == null && r.count == null) r,
+      ];
+      final newest = open.isEmpty
+          ? null
+          : open.reduce(
+              (a, b) => b.updatedAt.compareTo(a.updatedAt) > 0 ? b : a,
+            );
+      final tgt = [
+        for (final r in target)
+          if (r.lengthOn(periods) == cadence) r,
+      ];
+      if (tgt.isNotEmpty) {
+        if (newest != null) {
+          for (final t in tgt) {
+            await _continueRule(
+              t,
+              periods,
+              after: next,
+              amountMinor: t.amountMinor + newest.amountMinor,
+            );
+          }
+        }
+      } else {
+        for (final r in open) {
+          await _continueRule(r, periods, after: next, categoryId: targetId);
+        }
+      }
+      for (final r in src) {
+        await _endRules([r], next);
+      }
+    }
+  });
+
+  /// Ends [r] before its first covered period starting on or after [after]
+  /// and continues it from there as a new rule, with [categoryId] and
+  /// [amountMinor] when given. Nothing continues when [r] has no such
+  /// period.
+  Future<void> _continueRule(
+    BudgetRulePlan r,
+    BudgetPeriods periods, {
+    required DateTime after,
+    String? categoryId,
+    int? amountMinor,
+  }) async {
+    // The next covered period lies within `every` windows (at most a year
+    // each).
+    final limit = after.add(Duration(days: 370 * (r.every + 1)));
+    final first = r
+        .periodsUpTo(periods, limit)
+        .where((p) => !p.start.isBefore(after))
+        .firstOrNull;
+    await _endRules([r], first?.start ?? after);
+    if (first == null) return;
+    await writer.insert(
+      db.budgetRules,
+      BudgetRulesCompanion(
+        categoryId: Value(categoryId ?? r.categoryId),
+        amountMinor: Value(amountMinor ?? r.amountMinor),
+        cadence: Value(r.cadence),
+        every: Value(r.every),
+        startDate: Value(first.start),
+        endDate: Value(r.end),
+        count: Value(r.remainingCountFrom(periods, first.start)),
+        periodType: Value(r.periodType?.name),
+      ),
+    );
   }
 
   /// Removes all budgets of a period.

@@ -116,7 +116,7 @@ typedef BoardWindow = ({
 /// The window of each category with a budget of its own length shown on
 /// the board of the period: the one containing the period's reference day
 /// (today in the current period), else the last one starting before it,
-/// else the first.
+/// else the first. Windows inside a longer window are left out.
 Map<String, Budget> pickBoardWindows(
   List<Budget> rows,
   DateRange period,
@@ -130,7 +130,8 @@ Map<String, Budget> pickBoardWindows(
     return b.periodStart.isAfter(day) ? 0 : 1;
   }
 
-  for (final b in rows) {
+  // A window inside a longer one of the category is covered by it.
+  for (final b in dropNestedWindows(rows)) {
     final cur = pick[b.categoryId];
     if (cur == null) {
       pick[b.categoryId] = b;

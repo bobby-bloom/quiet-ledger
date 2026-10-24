@@ -348,8 +348,9 @@ class BudgetSummary {
     for (final r in periodRows)
       if (categories.containsKey(r.categoryId)) r.categoryId,
   };
+  final windows = dropNestedWindows(windowRows.toList());
   final windowed = {
-    for (final r in windowRows)
+    for (final r in windows)
       if (categories.containsKey(r.categoryId) &&
           !budgeted.contains(r.categoryId))
         r.categoryId,
@@ -367,7 +368,7 @@ class BudgetSummary {
     }
   }
   var windowMinor = 0;
-  for (final r in windowRows) {
+  for (final r in windows) {
     if (!windowed.contains(r.categoryId) || !root(r.categoryId)) continue;
     windowMinor += windowShare(
       periods,

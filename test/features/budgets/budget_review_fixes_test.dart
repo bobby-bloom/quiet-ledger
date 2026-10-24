@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
+import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/sync/hlc.dart';
 import 'package:personal_finance/core/sync/sync_backend.dart';
@@ -11,6 +12,7 @@ import 'package:personal_finance/core/sync/sync_engine.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
 import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
+import 'package:personal_finance/features/categories/data/categories_repository.dart';
 
 import '../../helpers/test_app.dart';
 import '../plan/plan_fixtures.dart';
@@ -294,5 +296,184 @@ void main() {
     for (final d in [a, b]) {
       expect(await d.repo.period(dec.start), isEmpty);
     }
+  });
+
+  group('verification round', () {
+    test('a longer window does not count the weeks inside it twice', () async {
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: week(board, DateTime(2026, 10, 5)),
+        amountMinor: 10000,
+        repeat: const BudgetRepeat.everyPeriod(cadence: BudgetCadence.week),
+      );
+      await repo.ensureFromRules(board, DateTime(2026, 10, 19));
+      final quarter = windowPeriods(
+        board,
+        BudgetCadence.quarter,
+      ).periodOf(DateTime(2026, 10, 24));
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: quarter,
+        amountMinor: 300000,
+        repeat: const BudgetRepeat.everyPeriod(cadence: BudgetCadence.quarter),
+        replace: week(board, DateTime(2026, 10, 24)),
+      );
+      final categories = {
+        for (final c in await db.select(db.categories).get()) c.id: c,
+      };
+      final a = assignedInPeriod(
+        periods: board,
+        period: oct,
+        periodRows: const [],
+        windowRows: await repo.windows(oct),
+        categories: categories,
+      );
+      expect(a.windowMinor, 100000); // a third of the quarter only
+      expect(await repo.windowAssigned(board, oct), 100000);
+    });
+
+    test('every 2 → every month keeps a removed month removed', () async {
+      await repeatMonthly(oct, 20000, every: 2);
+      await repo.ensureFromRules(board, DateTime(2027, 2, 28));
+      await repo.removeFromPeriod(board, food, month(2026, 12));
+      await repeatMonthly(oct, 20000);
+      await repo.ensureFromRules(board, DateTime(2027, 3, 31));
+      expect(
+        [for (final b in await live()) b.periodStart.month],
+        [
+          10, 11, 1, 2, 3, //
+        ],
+      );
+    });
+
+    test('merging a limited rule adds it for its periods only', () async {
+      final writer = SyncWriter(db, testClock(node: 'm'), 'm');
+      final cats = CategoriesRepository(
+        db,
+        writer,
+        LedgerRepository(db, writer),
+      );
+      final now = board.periodOf(DateTime.now());
+      final snacks = await f.category('Snacks');
+      await repeatMonthly(now, 30000);
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: snacks,
+        from: now,
+        amountMinor: 10000,
+        repeat: const BudgetRepeat.forPeriods(3),
+      );
+      await cats.merge(snacks, food, periods: board);
+      var p = now;
+      final amounts = <int>[];
+      for (var i = 0; i < 5; i++) {
+        await repo.ensureFromRules(board, p.start);
+        amounts.add((await repo.period(p.start)).single.amountMinor);
+        p = board.next(p);
+      }
+      expect(amounts, [40000, 40000, 40000, 30000, 30000]);
+    });
+
+    test('generated rows are older than the rule and any later edit', () async {
+      // One wall clock for the HLC and created_at, as in the app.
+      var ms = 1790000000000;
+      final clock = HlcClock('x', now: () => ms++);
+      final w = SyncWriter(
+        db,
+        clock,
+        'x',
+        now: () => DateTime.fromMillisecondsSinceEpoch(ms),
+      );
+      final r = BudgetsRepository(db, w);
+      final ruleId = await r.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: oct,
+        amountMinor: 40000,
+        repeat: const BudgetRepeat.everyPeriod(),
+      );
+      final rule = await (db.select(
+        db.budgetRules,
+      )..where((x) => x.id.equals(ruleId))).getSingle();
+      await r.ensureFromRules(board, DateTime(2026, 11, 30));
+      final nov = (await r.period(DateTime(2026, 11))).single;
+      final generated = Hlc.parse(nov.updatedAt);
+      expect(generated.millis, rule.createdAt - 1000);
+      await r.setAmount(food, DateTime(2026, 11), 1000);
+      final edited = (await r.period(DateTime(2026, 11))).single;
+      expect(Hlc.parse(edited.updatedAt) > generated, isTrue);
+    });
+
+    test('sync: devices agree after a merge raced with generation', () async {
+      final backend = InMemorySyncBackend();
+      var now = DateTime.now().millisecondsSinceEpoch;
+      final cur = board.periodOf(DateTime.now());
+      ({
+        AppDatabase db,
+        BudgetsRepository repo,
+        CategoriesRepository cats,
+        SyncEngine engine,
+      })
+      device(String name) {
+        final d = newTestDb();
+        final clock = HlcClock(name, now: () => now++);
+        final writer = SyncWriter(
+          d,
+          clock,
+          name,
+          now: () => DateTime.fromMillisecondsSinceEpoch(now),
+        );
+        return (
+          db: d,
+          repo: BudgetsRepository(d, writer),
+          cats: CategoriesRepository(d, writer, LedgerRepository(d, writer)),
+          engine: SyncEngine(
+            db: d,
+            clock: clock,
+            deviceId: name,
+            backend: backend,
+          ),
+        );
+      }
+
+      final a = device('a');
+      final b = device('b');
+      addTearDown(a.db.close);
+      addTearDown(b.db.close);
+      final fa = PlanFixture(a.db);
+      final groceries = await fa.category('Groceries');
+      final snacks = await fa.category('Snacks');
+      for (final (cat, amount) in [(groceries, 30000), (snacks, 10000)]) {
+        await a.repo.repeatFrom(
+          periods: board,
+          categoryId: cat,
+          from: cur,
+          amountMinor: amount,
+          repeat: const BudgetRepeat.everyPeriod(),
+        );
+      }
+      await a.engine.sync();
+      await b.engine.sync();
+      final next = board.next(cur);
+      await a.repo.ensureFromRules(board, next.start);
+      await b.cats.merge(snacks, groceries, periods: board);
+      await b.repo.ensureFromRules(board, next.start);
+      for (var i = 0; i < 2; i++) {
+        await a.engine.sync();
+        await b.engine.sync();
+      }
+      for (final d in [a, b]) {
+        expect(
+          [
+            for (final r in await d.repo.period(next.start))
+              (r.categoryId, r.amountMinor),
+          ],
+          [(groceries, 40000)],
+          reason: '$d',
+        );
+      }
+    });
   });
 }

@@ -298,7 +298,7 @@ void main() {
       expect(await ids(db), hasLength(2));
     });
 
-    test('category merge moves rules or adds to the target', () async {
+    test('category merge continues rules on the target', () async {
       final writer = SyncWriter(db, testClock(node: 'm'), 'm');
       final cats = CategoriesRepository(
         db,
@@ -314,9 +314,14 @@ void main() {
         amountMinor: 3000,
         repeat: const BudgetRepeat.everyPeriod(),
       );
-      await cats.merge(snacks, food);
-      expect((await repo.rules()).single.categoryId, food);
-      expect((await cats.usage(food)).budgets, 2); // row + rule
+      await cats.merge(snacks, food, periods: periods);
+      Future<List<BudgetRulePlan>> open() async => [
+        for (final r in await repo.rules())
+          if (r.end == null) r,
+      ];
+      expect((await open()).single.categoryId, food);
+      expect((await open()).single.amountMinor, 3000);
+      expect((await repo.period(jan.start)).single.categoryId, food);
 
       await repo.repeatFrom(
         periods: periods,
@@ -325,11 +330,15 @@ void main() {
         amountMinor: 2000,
         repeat: const BudgetRepeat.everyPeriod(),
       );
-      await cats.merge(drinks, food);
-      final rules = await repo.rules();
-      expect(rules.single.amountMinor, 5000);
+      await cats.merge(drinks, food, periods: periods);
+      expect((await open()).single.amountMinor, 5000);
       expect((await repo.period(jan.start)).single.amountMinor, 5000);
       expect((await repo.period(jan.start)).single.ruleId, isNull);
+      // No rule was changed in place: every rule's amount is as created.
+      expect(
+        {for (final r in await repo.rules()) r.amountMinor},
+        {3000, 2000, 5000},
+      );
     });
   });
 }

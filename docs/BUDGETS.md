@@ -96,6 +96,11 @@ below). For those, "period" in this section means one window.
 When two live rules cover the same category and period, which can happen
 after sync or a category merge, the newest (`updatedAt`) wins.
 
+A rule is **never changed in place** once it may have generated rows
+(only its end and its watermark move). A change ends it and continues
+with a new rule (`repeatFrom`, `mergeRules`), so devices that generated
+rows from the old rule never disagree about what the rule says.
+
 ### Rows
 
 - `budgets.ruleId` is set on a row the rule generated and nobody has
@@ -112,7 +117,10 @@ after sync or a category merge, the newest (`updatedAt`) wins.
   a rule starts in the past.
 - A window is not generated while any window of the category overlaps it
   (after the first day of week, start day or fiscal year changed), so
-  windows never overlap and nothing is counted twice.
+  generated windows never overlap. The window straddling such a change is
+  skipped, so a few days can be without a budget.
+- Rows a rule generated after its end (by a device that did not know yet
+  that a newer rule took over) are removed when rules generate.
 - **Watermark.** `generatedUntil` is the start of the last period a rule
   has handled. Periods up to it are never generated again, so a budget
   the user removed stays removed. This holds even after the tombstone
@@ -122,7 +130,8 @@ after sync or a category merge, the newest (`updatedAt`) wins.
   the salary lands earlier than expected.
 - **Deterministic ids.** A generated row's id is a UUIDv5 of the rule id
   and the period start (`generatedBudgetId`), and its sync timestamp is
-  fixed at the rule's creation (`SyncWriter.insert(hlc: …)`). Two devices
+  fixed one second before the rule's creation (`SyncWriter.insert(hlc:
+  …)`), older than any edit made after the rule existed. Two devices
   that generate the same period create the same row, and any edit or
   removal by the user, on any device, wins over a generated row.
 - **Period type changes.** A `period` rule records the period type it was
@@ -158,10 +167,10 @@ existing rules end the day before `replace`, and rules that start at or
 after it are removed. Any budget overlapping `replace` is replaced.
 Later rows the old rules generated move to the new rule with the new
 amount, or are removed where the new rule doesn't cover that period.
-Later rows set by hand stay. The new rule takes over the old watermark
-only as far as old rules of the same length had already handled every
-period it covers, so "every 2 months" changed to "every month" fills
-the skipped months.
+Later rows set by hand stay. The new rule takes over the watermark of the
+old rules of the same length, so periods they handled (and the user may
+have removed) are not generated again; periods it covers that they did
+not ("every 2 months" changed to "every month") are generated right away.
 
 `stopRepeating` ends the rules the same way and soft-deletes their
 generated rows from the given period on.
@@ -169,11 +178,14 @@ generated rows from the given period on.
 ### Categories, backup, sync
 
 - A category with rules counts as in use, so deleting it is refused.
-- Merging moves the source's rules to the target. If the target has
-  rules of its own of the same length, the amount of the source's newest
-  open-ended rule is added to each of them, the same way merged period
-  amounts are added up; source rules with an end or a count move as they
-  are. Merged
+- Merging (`mergeRules`, before the rows are merged) first generates the
+  rows of both categories' rules through a common horizon (the end of the
+  next period or the furthest watermark; a source rule with an end or a
+  count through its last period), so the merged rows add up. After the
+  horizon a target rule continues as a new rule with the newest
+  open-ended source amount of its length added; an open-ended source rule
+  of a length the target has no rule of continues as a new rule of the
+  target. The source rules end. Merged
   period rows become hand-set.
 - `budget_rules` is in `syncedTableNames`, so it is backed up, restored
   and synced like every other table. A restore brings back the rules
@@ -213,6 +225,12 @@ the month) and its history shows the last windows.
 budgets of the period only, with a note when windowed budgets are on the
 board. Spending of a category with a window budget does not count as
 "spent in categories without a budget".
+
+**Nested windows.** A window inside a longer window of the same category
+(weeks left from before the category switched to a quarterly budget) is
+covered by the longer one: it is not shown on the board and not counted
+in shares or the forecast (`dropNestedWindows`). The rows stay as
+history.
 
 **Shares** (`windowShare`, `windowTargets`). In envelope mode a window's
 amount is assigned evenly to the budget periods it covers: a window

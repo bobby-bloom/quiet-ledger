@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/categories/data/references.dart';
 import 'package:personal_finance/features/categories/domain/default_categories.dart';
 import 'package:personal_finance/features/categories/domain/drafts.dart';
@@ -231,171 +233,118 @@ class CategoriesRepository {
   /// budgets (amounts of the same period are added up) and subcategories to
   /// the target, re-points JSON references (templates, rules, filters) and
   /// soft-deletes the source.
-  Future<void> merge(String sourceId, String targetId) =>
-      writer.transaction(() async {
-        final source = await byId(sourceId);
-        final target = await byId(targetId);
-        if (source == null || target == null) {
-          throw const CategoryException(CategoryError.notFound);
-        }
-        if (sourceId == targetId ||
-            source.kind != target.kind ||
-            target.parentId == sourceId) {
-          throw const CategoryException(CategoryError.invalidMergeTarget);
-        }
-        final children = await _children(sourceId);
-        if (children.isNotEmpty && target.parentId != null) {
-          throw const CategoryException(CategoryError.mergeWouldNest);
-        }
+  ///
+  /// Repeating budgets go first ([BudgetsRepository.mergeRules] with
+  /// [periods], the budget periods from the settings): their rows are
+  /// generated through a common horizon, so the budgets below add up, and
+  /// the rules continue on the target after it.
+  Future<void> merge(
+    String sourceId,
+    String targetId, {
+    BudgetPeriods? periods,
+  }) => writer.transaction(() async {
+    final source = await byId(sourceId);
+    final target = await byId(targetId);
+    if (source == null || target == null) {
+      throw const CategoryException(CategoryError.notFound);
+    }
+    if (sourceId == targetId ||
+        source.kind != target.kind ||
+        target.parentId == sourceId) {
+      throw const CategoryException(CategoryError.invalidMergeTarget);
+    }
+    final children = await _children(sourceId);
+    if (children.isNotEmpty && target.parentId != null) {
+      throw const CategoryException(CategoryError.mergeWouldNest);
+    }
 
-        // Transactions (through the ledger so search & peers stay right).
-        final txnIds =
-            await (db.selectOnly(db.transactions)
-                  ..addColumns([db.transactions.id])
-                  ..where(
-                    db.transactions.categoryId.equals(sourceId) &
-                        db.transactions.deletedAt.isNull(),
-                  ))
-                .map((r) => r.read(db.transactions.id)!)
-                .get();
-        if (txnIds.isNotEmpty) {
-          await ledger.bulkUpdate(txnIds, categoryId: targetId);
-        }
+    // Transactions (through the ledger so search & peers stay right).
+    final txnIds =
+        await (db.selectOnly(db.transactions)
+              ..addColumns([db.transactions.id])
+              ..where(
+                db.transactions.categoryId.equals(sourceId) &
+                    db.transactions.deletedAt.isNull(),
+              ))
+            .map((r) => r.read(db.transactions.id)!)
+            .get();
+    if (txnIds.isNotEmpty) {
+      await ledger.bulkUpdate(txnIds, categoryId: targetId);
+    }
 
-        // Splits.
-        final splits =
-            await (db.select(db.transactionSplits)..where(
-                  (s) => s.categoryId.equals(sourceId) & s.deletedAt.isNull(),
-                ))
-                .get();
-        for (final s in splits) {
-          await writer.update(
-            db.transactionSplits,
-            s.id,
-            TransactionSplitsCompanion(categoryId: Value(targetId)),
-          );
-        }
+    // Splits.
+    final splits =
+        await (db.select(db.transactionSplits)..where(
+              (s) => s.categoryId.equals(sourceId) & s.deletedAt.isNull(),
+            ))
+            .get();
+    for (final s in splits) {
+      await writer.update(
+        db.transactionSplits,
+        s.id,
+        TransactionSplitsCompanion(categoryId: Value(targetId)),
+      );
+    }
 
-        // Budgets: combine with an existing target budget of the period.
-        final targetBudgets = {
-          for (final b
-              in await (db.select(db.budgets)..where(
-                    (b) => b.categoryId.equals(targetId) & b.deletedAt.isNull(),
-                  ))
-                  .get())
-            (b.periodStart, b.periodEnd): b,
-        };
-        final sourceBudgets =
-            await (db.select(db.budgets)..where(
-                  (b) => b.categoryId.equals(sourceId) & b.deletedAt.isNull(),
-                ))
-                .get();
-        for (final b in sourceBudgets) {
-          final existing = targetBudgets[(b.periodStart, b.periodEnd)];
-          if (existing != null) {
-            await writer.update(
-              db.budgets,
-              existing.id,
-              BudgetsCompanion(
-                amountMinor: Value(existing.amountMinor + b.amountMinor),
-                rolloverMinor: Value(existing.rolloverMinor + b.rolloverMinor),
-                // The sum is no rule's amount: keep it as set by hand.
-                ruleId: const Value(null),
-              ),
-            );
-            await writer.delete(db.budgets, b.id);
-          } else {
-            await writer.update(
-              db.budgets,
-              b.id,
-              BudgetsCompanion(categoryId: Value(targetId)),
-            );
-          }
-        }
+    await BudgetsRepository(db, writer).mergeRules(
+      periods ?? BudgetPeriods(const BudgetPeriodConfig()),
+      sourceId: sourceId,
+      targetId: targetId,
+    );
 
-        // Repeating budgets, per length: moved to the target, or, where the
-        // target has its own of that length, the newest open-ended source
-        // amount is added to them (like the amounts of a period above).
-        final targetRules =
-            await (db.select(db.budgetRules)..where(
-                  (r) => r.categoryId.equals(targetId) & r.deletedAt.isNull(),
-                ))
-                .get();
-        final sourceRules =
-            await (db.select(db.budgetRules)..where(
-                  (r) => r.categoryId.equals(sourceId) & r.deletedAt.isNull(),
-                ))
-                .get();
-        for (final cadence in BudgetCadence.values) {
-          final targets = [
-            for (final r in targetRules)
-              if (r.cadence == cadence) r,
-          ];
-          final sources = [
-            for (final r in sourceRules)
-              if (r.cadence == cadence) r,
-          ];
-          if (sources.isEmpty) continue;
-          // A source rule with an end or a count moves as it is; adding its
-          // amount to the target would last forever.
-          if (targets.isNotEmpty) {
-            final limited = [
-              for (final r in sources)
-                if (r.endDate != null || r.count != null) r,
-            ];
-            for (final r in limited) {
-              await writer.update(
-                db.budgetRules,
-                r.id,
-                BudgetRulesCompanion(categoryId: Value(targetId)),
-              );
-            }
-            sources.removeWhere(limited.contains);
-            if (sources.isEmpty) continue;
-          }
-          if (targets.isEmpty) {
-            for (final r in sources) {
-              await writer.update(
-                db.budgetRules,
-                r.id,
-                BudgetRulesCompanion(categoryId: Value(targetId)),
-              );
-            }
-            continue;
-          }
-          final newest = sources.reduce(
-            (a, b) => b.updatedAt.compareTo(a.updatedAt) > 0 ? b : a,
-          );
-          for (final t in targets) {
-            await writer.update(
-              db.budgetRules,
-              t.id,
-              BudgetRulesCompanion(
-                amountMinor: Value(t.amountMinor + newest.amountMinor),
-              ),
-            );
-          }
-          for (final r in sources) {
-            await writer.delete(db.budgetRules, r.id);
-          }
-        }
+    // Budgets: combine with an existing target budget of the period.
+    final targetBudgets = {
+      for (final b
+          in await (db.select(db.budgets)..where(
+                (b) => b.categoryId.equals(targetId) & b.deletedAt.isNull(),
+              ))
+              .get())
+        (b.periodStart, b.periodEnd): b,
+    };
+    final sourceBudgets =
+        await (db.select(db.budgets)..where(
+              (b) => b.categoryId.equals(sourceId) & b.deletedAt.isNull(),
+            ))
+            .get();
+    for (final b in sourceBudgets) {
+      final existing = targetBudgets[(b.periodStart, b.periodEnd)];
+      if (existing != null) {
+        await writer.update(
+          db.budgets,
+          existing.id,
+          BudgetsCompanion(
+            amountMinor: Value(existing.amountMinor + b.amountMinor),
+            rolloverMinor: Value(existing.rolloverMinor + b.rolloverMinor),
+            // The sum is no rule's amount: keep it as set by hand.
+            ruleId: const Value(null),
+          ),
+        );
+        await writer.delete(db.budgets, b.id);
+      } else {
+        await writer.update(
+          db.budgets,
+          b.id,
+          BudgetsCompanion(categoryId: Value(targetId)),
+        );
+      }
+    }
 
-        // Subcategories move under the target, after its own children.
-        var order = await _nextOrder(targetId, target.kind);
-        for (final ch in children) {
-          await writer.update(
-            db.categories,
-            ch.id,
-            CategoriesCompanion(
-              parentId: Value(targetId),
-              sortOrder: Value(order++),
-            ),
-          );
-        }
+    // Subcategories move under the target, after its own children.
+    var order = await _nextOrder(targetId, target.kind);
+    for (final ch in children) {
+      await writer.update(
+        db.categories,
+        ch.id,
+        CategoriesCompanion(
+          parentId: Value(targetId),
+          sortOrder: Value(order++),
+        ),
+      );
+    }
 
-        await repointJsonReferences(db, writer, sourceId, targetId);
-        await writer.delete(db.categories, sourceId);
-      });
+    await repointJsonReferences(db, writer, sourceId, targetId);
+    await writer.delete(db.categories, sourceId);
+  });
 
   /// Sets the order of siblings to their position in [orderedIds].
   Future<void> reorder(List<String> orderedIds) => writer.transaction(() async {

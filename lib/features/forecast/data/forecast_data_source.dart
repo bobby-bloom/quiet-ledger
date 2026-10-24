@@ -550,7 +550,15 @@ class ForecastDataSource {
             .get();
     final byPeriod = <(String, DateTime), int>{};
     final shares = <(String, DateTime), int>{};
-    for (final b in rows) {
+    final windows = dropNestedWindows([
+      for (final b in rows)
+        if (b.periodEnd != null) b,
+    ]);
+    for (final b in [
+      for (final b in rows)
+        if (b.periodEnd == null) b,
+      ...windows,
+    ]) {
       final end = b.periodEnd;
       if (end == null) {
         byPeriod[(b.categoryId, dayOf(b.periodStart))] = b.amountMinor;

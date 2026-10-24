@@ -372,4 +372,20 @@ List<DateRange> windowTargets(BudgetPeriods board, DateRange window) {
   return starts.isEmpty ? [home] : starts;
 }
 
+/// Drops window budgets that lie inside a longer window budget of the same
+/// category (left from before the category switched to the longer
+/// length): the longer budget covers them, so they would count twice.
+List<Budget> dropNestedWindows(List<Budget> rows) => [
+  for (final r in rows)
+    if (!rows.any(
+      (o) =>
+          !identical(o, r) &&
+          o.categoryId == r.categoryId &&
+          !o.periodStart.isAfter(r.periodStart) &&
+          !r.periodEnd!.isAfter(o.periodEnd!) &&
+          (o.periodStart != r.periodStart || o.periodEnd != r.periodEnd),
+    ))
+      r,
+];
+
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
