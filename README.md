@@ -52,8 +52,9 @@ no telemetry, no cloud dependency.
 ### Plan
 - **Budgets** per category with rollover, tracking or envelope (zero-based)
   mode and warning thresholds. Budgets repeat (every period, every n-th,
-  a number of periods or until a date) and show planned and upcoming
-  items as outstanding.
+  a number of periods or until a date), can have their own length (a
+  week, month, quarter or year) and show planned and upcoming items as
+  outstanding.
 - **Flexible budget periods**: monthly, weekly, bi-weekly, quarterly or
   yearly; any start day; a salary-based start; weekend and public-holiday
   shifting.

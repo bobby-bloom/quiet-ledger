@@ -17,6 +17,7 @@ import 'package:personal_finance/features/budgets/data/budget_period_provider.da
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 import 'package:personal_finance/features/budgets/domain/outstanding.dart';
 import 'package:personal_finance/features/budgets/presentation/budget_actions.dart';
 import 'package:personal_finance/features/plan/plan_providers.dart';
@@ -43,23 +44,33 @@ final categoryPeriodLinesProvider = StreamProvider.autoDispose
           .watchCategoryLines(ids, key.period);
     });
 
-/// Budget vs. spent of a category over the last periods (oldest first).
+/// Budget vs. spent of a category over the last periods (oldest first), or
+/// over the last windows of its budget with its own length when `window`
+/// is set.
 final categoryBudgetHistoryProvider = FutureProvider.autoDispose
     .family<
       List<({DateRange period, int? budgetMinor, int spentMinor})>,
-      ({String categoryId, DateRange period})
+      ({String categoryId, DateRange period, DateRange? window})
     >((ref, key) async {
-      final periods = ref.watch(budgetPeriodsProvider);
+      final board = ref.watch(budgetPeriodsProvider);
       final repo = ref.watch(budgetsRepositoryProvider);
       // Refresh with the shown period's data.
       ref.watch(periodActualsProvider(key.period));
       ref.watch(periodBudgetsProvider(key.period.start));
+      ref.watch(periodWindowRowsProvider(key.period));
       final cats = await ref.watch(categoriesProvider.future);
       final children = [
         for (final c in cats)
           if (c.parentId == key.categoryId) c.id,
       ];
-      final list = <DateRange>[key.period];
+      final window = key.window;
+      final periods = window == null
+          ? board
+          : windowPeriods(
+              board,
+              cadenceOfWindow(board, window) ?? BudgetCadence.month,
+            );
+      final list = <DateRange>[window ?? key.period];
       for (var i = 0; i < 5; i++) {
         list.insert(0, periods.previous(list.first));
       }
@@ -67,13 +78,45 @@ final categoryBudgetHistoryProvider = FutureProvider.autoDispose
         for (final p in list)
           (
             period: p,
-            budgetMinor: (await repo.period(p.start))
-                .where((b) => b.categoryId == key.categoryId)
-                .firstOrNull
-                ?.amountMinor,
+            budgetMinor: window == null
+                ? (await repo.period(p.start))
+                      .where((b) => b.categoryId == key.categoryId)
+                      .firstOrNull
+                      ?.amountMinor
+                : (await repo.windowBudget(key.categoryId, p))?.amountMinor,
             spentMinor: (await repo.actuals(p))
                 .spentOf(key.categoryId, children),
           ),
+      ];
+    });
+
+/// The windows of a category's budget with its own length that overlap a
+/// period (all weeks of a month, say), with budget and spending each.
+final categoryWindowsProvider = FutureProvider.autoDispose
+    .family<
+      List<({DateRange window, int budgetMinor, int spentMinor})>,
+      ({String categoryId, DateRange period})
+    >((ref, key) async {
+      final repo = ref.watch(budgetsRepositoryProvider);
+      ref.watch(periodActualsProvider(key.period));
+      final rowsF = ref.watch(periodWindowRowsProvider(key.period).future);
+      final catsF = ref.watch(categoriesProvider.future);
+      final rows = await rowsF;
+      final cats = await catsF;
+      final children = [
+        for (final c in cats)
+          if (c.parentId == key.categoryId) c.id,
+      ];
+      return [
+        for (final b in rows)
+          if (b.categoryId == key.categoryId)
+            (
+              window: DateRange(b.periodStart, b.periodEnd!),
+              budgetMinor: b.amountMinor,
+              spentMinor: (await repo.actuals(
+                DateRange(b.periodStart, b.periodEnd!),
+              )).spentOf(key.categoryId, children),
+            ),
       ];
     });
 
@@ -177,8 +220,12 @@ class BudgetDetailView extends ConsumerWidget {
           rolloverMode: rolloverModeFor(cat, settings),
         );
     final hasBudget = line.budgetId != null;
+    // A budget with its own length lists what is outstanding in its window.
+    final windowPlanned = line.window == null
+        ? planned
+        : ref.watch(periodPlannedProvider(line.window!)).value;
     final outstanding =
-        planned?.itemsFor({categoryId, ...children}) ??
+        windowPlanned?.itemsFor({categoryId, ...children}) ??
         const <OutstandingItem>[];
     final lines = ref.watch(
       categoryPeriodLinesProvider((categoryId: categoryId, period: period)),
@@ -216,12 +263,17 @@ class BudgetDetailView extends ConsumerWidget {
         _ProgressCard(
           line: line,
           hasBudget: hasBudget,
-          tick: board?.todayTick,
+          tick: board?.tickFor(line),
           onEdit: () =>
               editCategoryBudget(context, ref, period, cat.id, name: cat.name),
         ),
         _OptionsCard(category: cat, line: line, period: period),
-        _HistoryCard(categoryId: categoryId, period: period),
+        if (line.windowed) _WindowsCard(categoryId: categoryId, period: period),
+        _HistoryCard(
+          categoryId: categoryId,
+          period: period,
+          window: line.window,
+        ),
         if (outstanding.isNotEmpty) ...[
           PlanSectionHeader(l.budgetsOutstanding),
           Padding(
@@ -452,7 +504,10 @@ class _OptionsCard extends ConsumerWidget {
                   repeatSummary(
                     l,
                     rule.repeat,
-                    periodTitle(periods.periodOf(rule.start), locale),
+                    periodTitle(
+                      windowPeriods(periods, rule.cadence).periodOf(rule.start),
+                      locale,
+                    ),
                     dates.short,
                   ),
                 ),
@@ -529,7 +584,10 @@ class _OptionsCard extends ConsumerWidget {
     if (!ok) return;
     await ref
         .read(budgetsRepositoryProvider)
-        .stopRepeating(category.id, periods.next(period).start);
+        .stopRepeating(
+          category.id,
+          line.window?.end ?? periods.next(period).start,
+        );
     if (!context.mounted) return;
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(content: Text(l.budgetsStoppedRepeating(category.name))),
@@ -585,10 +643,15 @@ class _OptionsCard extends ConsumerWidget {
 }
 
 class _HistoryCard extends ConsumerWidget {
-  const _HistoryCard({required this.categoryId, required this.period});
+  const _HistoryCard({
+    required this.categoryId,
+    required this.period,
+    this.window,
+  });
 
   final String categoryId;
   final DateRange period;
+  final DateRange? window;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -600,6 +663,7 @@ class _HistoryCard extends ConsumerWidget {
           categoryBudgetHistoryProvider((
             categoryId: categoryId,
             period: period,
+            window: window,
           )),
         )
         .value;
@@ -672,6 +736,87 @@ class _HistoryCard extends ConsumerWidget {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The windows of a budget with its own length within the shown period
+/// (for a weekly budget: every week of the month).
+class _WindowsCard extends ConsumerWidget {
+  const _WindowsCard({required this.categoryId, required this.period});
+
+  final String categoryId;
+  final DateRange period;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final money = moneyText(ref);
+    final locale = ref.watch(formatLocaleProvider);
+    final today = ref.watch(planTodayProvider);
+    final list = ref
+        .watch(
+          categoryWindowsProvider((categoryId: categoryId, period: period)),
+        )
+        .value;
+    if (list == null || list.length < 2) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      child: SectionCard(
+        title: l.budgetsWindowsInPeriod,
+        child: Column(
+          children: [
+            for (final w in list)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Semantics(
+                  label: l.budgetsHistoryRow(
+                    periodTitle(w.window, locale),
+                    money(w.spentMinor),
+                    money(w.budgetMinor),
+                  ),
+                  excludeSemantics: true,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 130,
+                        child: Text(
+                          periodTitle(w.window, locale),
+                          style: context.text.bodySmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        child: ProgressBar(
+                          value: w.budgetMinor <= 0
+                              ? (w.spentMinor > 0 ? 1 : 0)
+                              : w.spentMinor / w.budgetMinor,
+                          state: w.spentMinor > w.budgetMinor
+                              ? ProgressState.over
+                              : ProgressState.onTrack,
+                          tick: w.window.contains(today)
+                              ? w.window.progressAt(today)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: Space.xs),
+                      SizedBox(
+                        width: 120,
+                        child: Text(
+                          '${money(w.spentMinor)} / ${money(w.budgetMinor)}',
+                          textAlign: TextAlign.end,
+                          style: context.text.bodySmall?.copyWith(
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

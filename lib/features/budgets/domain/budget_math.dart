@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
+import 'package:personal_finance/core/db/tables.dart' show BudgetCadence;
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
 
@@ -79,6 +80,8 @@ class BudgetLine {
     this.plannedMinor = 0,
     this.rule,
     this.generated = false,
+    this.window,
+    this.cadence,
   });
 
   final String categoryId;
@@ -119,6 +122,16 @@ class BudgetLine {
   final bool generated;
 
   bool get repeats => rule != null;
+
+  /// Set for a budget with its own length: the window shown (the one
+  /// containing the board period's reference day). Spent, planned and the
+  /// state are measured over it; it is not part of the board's totals.
+  final DateRange? window;
+
+  /// Length of [window] (week, month, quarter or year).
+  final BudgetCadence? cadence;
+
+  bool get windowed => window != null;
 
   int get availableMinor => budgetedMinor + rolloverMinor;
   int get remainingMinor => availableMinor - spentMinor;
@@ -185,6 +198,8 @@ class BudgetLine {
       other.isRoot == isRoot &&
       other.rule == rule &&
       other.generated == generated &&
+      other.window == window &&
+      other.cadence == cadence &&
       other.name == name;
 
   @override
@@ -200,6 +215,8 @@ class BudgetLine {
     isRoot,
     rule,
     generated,
+    window,
+    cadence,
     name,
   );
 }
@@ -217,6 +234,7 @@ class BudgetSummary {
     this.carryMinor = 0,
     this.unbudgetedSpentMinor = 0,
     this.plannedIncomeMinor = 0,
+    this.windowAssignedMinor = 0,
   });
 
   final DateRange period;
@@ -239,13 +257,24 @@ class BudgetSummary {
   /// never added to it).
   final int plannedIncomeMinor;
 
-  Iterable<BudgetLine> get _roots => lines.where((l) => l.isRoot);
+  /// Envelope mode: the shares of budgets with their own length assigned
+  /// to this period (spread evenly over the periods a window covers).
+  final int windowAssignedMinor;
+
+  /// Root lines of the budget period; lines with their own length have
+  /// their own window and stay out of the totals.
+  Iterable<BudgetLine> get _roots =>
+      lines.where((l) => l.isRoot && !l.windowed);
+
+  bool get hasWindowed => lines.any((l) => l.windowed);
 
   /// Budget + rollover over root lines.
   int get totalBudgetedMinor => _roots.fold(0, (a, l) => a + l.availableMinor);
 
-  /// Amounts assigned this period (without rollovers) over root lines.
-  int get assignedMinor => _roots.fold(0, (a, l) => a + l.budgetedMinor);
+  /// Amounts assigned this period (without rollovers) over root lines, plus
+  /// the shares of budgets with their own length.
+  int get assignedMinor =>
+      _roots.fold(0, (a, l) => a + l.budgetedMinor) + windowAssignedMinor;
   int get totalSpentMinor => _roots.fold(0, (a, l) => a + l.spentMinor);
   int get totalRemainingMinor => totalBudgetedMinor - totalSpentMinor;
 
@@ -267,6 +296,14 @@ class BudgetSummary {
 
   /// Today's position in the period (0..1) for the bar tick; null outside.
   double? get todayTick => isCurrent ? period.progressAt(today) : null;
+
+  /// The bar tick of [line]: today's position in its window, or in the
+  /// period.
+  double? tickFor(BudgetLine line) {
+    final w = line.window;
+    if (w == null) return todayTick;
+    return w.contains(today) ? w.progressAt(today) : null;
+  }
 
   /// 1-based day of the period for "Today, day 23 of 31".
   int get dayOfPeriod =>

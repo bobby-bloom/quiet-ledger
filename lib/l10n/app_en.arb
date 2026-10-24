@@ -848,8 +848,8 @@
   "budgetsRepeatEvery": "Every period",
   "budgetsRepeatCount": "For a number of periods",
   "budgetsRepeatUntil": "Until a date",
-  "budgetsRepeatPeriods": "Number of periods",
-  "budgetsRepeatInterval": "Every … periods",
+  "budgetsRepeatPeriods": "How many times",
+  "budgetsRepeatInterval": "Interval",
   "budgetsRepeatNumberInvalid": "Enter 1 or more",
   "budgetsRepeatUntilDate": "Until {date}",
   "@budgetsRepeatUntilDate": {
@@ -954,6 +954,72 @@
       }
     }
   },
+  "budgetsLength": "Length",
+  "budgetsLengthPeriod": "Budget period ({type})",
+  "@budgetsLengthPeriod": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsLengthWeek": "One week",
+  "budgetsLengthMonth": "One month",
+  "budgetsLengthQuarter": "One quarter",
+  "budgetsLengthYear": "One year",
+  "budgetsEveryWeek": "{every, plural, =1{every week} other{every {every} weeks}}",
+  "@budgetsEveryWeek": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryMonth": "{every, plural, =1{every month} other{every {every} months}}",
+  "@budgetsEveryMonth": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryQuarter": "{every, plural, =1{every quarter} other{every {every} quarters}}",
+  "@budgetsEveryQuarter": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsEveryYear": "{every, plural, =1{every year} other{every {every} years}}",
+  "@budgetsEveryYear": {
+    "placeholders": {
+      "every": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOnlyIn": "Only {period}",
+  "@budgetsOnlyIn": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsWindowLabel": "{length} · {period}",
+  "@budgetsWindowLabel": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsWindowsNote": "Totals don't include budgets with their own length.",
+  "budgetsWindowsInPeriod": "Within this period",
   "categoriesTitle": "Categories",
   "categoriesAdd": "Add category",
   "categoriesAddSub": "Add subcategory",

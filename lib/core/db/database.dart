@@ -122,9 +122,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(safetyCopies);
       }
       if (from < 4) {
-        // v4: repeating budgets.
+        // v4: repeating budgets and budgets with their own length.
         await m.createTable(budgetRules);
         await m.addColumn(budgets, budgets.ruleId);
+        await m.addColumn(budgets, budgets.periodEnd);
       }
     },
     beforeOpen: (details) async {

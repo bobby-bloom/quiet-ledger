@@ -283,7 +283,7 @@ class CategoriesRepository {
                     (b) => b.categoryId.equals(targetId) & b.deletedAt.isNull(),
                   ))
                   .get())
-            b.periodStart: b,
+            (b.periodStart, b.periodEnd): b,
         };
         final sourceBudgets =
             await (db.select(db.budgets)..where(
@@ -291,7 +291,7 @@ class CategoriesRepository {
                 ))
                 .get();
         for (final b in sourceBudgets) {
-          final existing = targetBudgets[b.periodStart];
+          final existing = targetBudgets[(b.periodStart, b.periodEnd)];
           if (existing != null) {
             await writer.update(
               db.budgets,
@@ -313,9 +313,9 @@ class CategoriesRepository {
           }
         }
 
-        // Repeating budgets: moved to the target, or, where the target has
-        // its own, the source's newest amount is added to them (like the
-        // amounts of a period above).
+        // Repeating budgets, per length: moved to the target, or, where the
+        // target has its own of that length, the source's newest amount is
+        // added to them (like the amounts of a period above).
         final targetRules =
             await (db.select(db.budgetRules)..where(
                   (r) => r.categoryId.equals(targetId) & r.deletedAt.isNull(),
@@ -326,19 +326,30 @@ class CategoriesRepository {
                   (r) => r.categoryId.equals(sourceId) & r.deletedAt.isNull(),
                 ))
                 .get();
-        if (targetRules.isEmpty) {
-          for (final r in sourceRules) {
-            await writer.update(
-              db.budgetRules,
-              r.id,
-              BudgetRulesCompanion(categoryId: Value(targetId)),
-            );
+        for (final cadence in BudgetCadence.values) {
+          final targets = [
+            for (final r in targetRules)
+              if (r.cadence == cadence) r,
+          ];
+          final sources = [
+            for (final r in sourceRules)
+              if (r.cadence == cadence) r,
+          ];
+          if (sources.isEmpty) continue;
+          if (targets.isEmpty) {
+            for (final r in sources) {
+              await writer.update(
+                db.budgetRules,
+                r.id,
+                BudgetRulesCompanion(categoryId: Value(targetId)),
+              );
+            }
+            continue;
           }
-        } else if (sourceRules.isNotEmpty) {
-          final newest = sourceRules.reduce(
+          final newest = sources.reduce(
             (a, b) => b.updatedAt.compareTo(a.updatedAt) > 0 ? b : a,
           );
-          for (final t in targetRules) {
+          for (final t in targets) {
             await writer.update(
               db.budgetRules,
               t.id,
@@ -347,7 +358,7 @@ class CategoriesRepository {
               ),
             );
           }
-          for (final r in sourceRules) {
+          for (final r in sources) {
             await writer.delete(db.budgetRules, r.id);
           }
         }

@@ -10366,6 +10366,17 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10378,6 +10389,7 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     amountMinor,
     rolloverMinor,
     ruleId,
+    periodEnd,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10474,6 +10486,12 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         ruleId.isAcceptableOrUnknown(data['rule_id']!, _ruleIdMeta),
       );
     }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    }
     return context;
   }
 
@@ -10523,6 +10541,10 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         DriftSqlType.string,
         data['${effectivePrefix}rule_id'],
       ),
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      ),
     );
   }
 
@@ -10549,6 +10571,11 @@ class Budget extends DataClass implements Insertable<Budget> {
   /// [BudgetRules] row that generated this budget; null for a budget set by
   /// hand (which the rule never touches).
   final String? ruleId;
+
+  /// Exclusive end of a budget with its own length (a week, month, quarter
+  /// or year window starting at [periodStart]); null for a budget of the
+  /// budget period starting at [periodStart].
+  final DateTime? periodEnd;
   const Budget({
     required this.id,
     required this.createdAt,
@@ -10560,6 +10587,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     required this.amountMinor,
     required this.rolloverMinor,
     this.ruleId,
+    this.periodEnd,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10577,6 +10605,9 @@ class Budget extends DataClass implements Insertable<Budget> {
     map['rollover_minor'] = Variable<int>(rolloverMinor);
     if (!nullToAbsent || ruleId != null) {
       map['rule_id'] = Variable<String>(ruleId);
+    }
+    if (!nullToAbsent || periodEnd != null) {
+      map['period_end'] = Variable<DateTime>(periodEnd);
     }
     return map;
   }
@@ -10597,6 +10628,9 @@ class Budget extends DataClass implements Insertable<Budget> {
       ruleId: ruleId == null && nullToAbsent
           ? const Value.absent()
           : Value(ruleId),
+      periodEnd: periodEnd == null && nullToAbsent
+          ? const Value.absent()
+          : Value(periodEnd),
     );
   }
 
@@ -10616,6 +10650,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       rolloverMinor: serializer.fromJson<int>(json['rolloverMinor']),
       ruleId: serializer.fromJson<String?>(json['ruleId']),
+      periodEnd: serializer.fromJson<DateTime?>(json['periodEnd']),
     );
   }
   @override
@@ -10632,6 +10667,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       'amountMinor': serializer.toJson<int>(amountMinor),
       'rolloverMinor': serializer.toJson<int>(rolloverMinor),
       'ruleId': serializer.toJson<String?>(ruleId),
+      'periodEnd': serializer.toJson<DateTime?>(periodEnd),
     };
   }
 
@@ -10646,6 +10682,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     int? amountMinor,
     int? rolloverMinor,
     Value<String?> ruleId = const Value.absent(),
+    Value<DateTime?> periodEnd = const Value.absent(),
   }) => Budget(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -10657,6 +10694,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     amountMinor: amountMinor ?? this.amountMinor,
     rolloverMinor: rolloverMinor ?? this.rolloverMinor,
     ruleId: ruleId.present ? ruleId.value : this.ruleId,
+    periodEnd: periodEnd.present ? periodEnd.value : this.periodEnd,
   );
   Budget copyWithCompanion(BudgetsCompanion data) {
     return Budget(
@@ -10680,6 +10718,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           ? data.rolloverMinor.value
           : this.rolloverMinor,
       ruleId: data.ruleId.present ? data.ruleId.value : this.ruleId,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
     );
   }
 
@@ -10695,7 +10734,8 @@ class Budget extends DataClass implements Insertable<Budget> {
           ..write('periodStart: $periodStart, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('rolloverMinor: $rolloverMinor, ')
-          ..write('ruleId: $ruleId')
+          ..write('ruleId: $ruleId, ')
+          ..write('periodEnd: $periodEnd')
           ..write(')'))
         .toString();
   }
@@ -10712,6 +10752,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     amountMinor,
     rolloverMinor,
     ruleId,
+    periodEnd,
   );
   @override
   bool operator ==(Object other) =>
@@ -10726,7 +10767,8 @@ class Budget extends DataClass implements Insertable<Budget> {
           other.periodStart == this.periodStart &&
           other.amountMinor == this.amountMinor &&
           other.rolloverMinor == this.rolloverMinor &&
-          other.ruleId == this.ruleId);
+          other.ruleId == this.ruleId &&
+          other.periodEnd == this.periodEnd);
 }
 
 class BudgetsCompanion extends UpdateCompanion<Budget> {
@@ -10740,6 +10782,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   final Value<int> amountMinor;
   final Value<int> rolloverMinor;
   final Value<String?> ruleId;
+  final Value<DateTime?> periodEnd;
   final Value<int> rowid;
   const BudgetsCompanion({
     this.id = const Value.absent(),
@@ -10752,6 +10795,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     this.amountMinor = const Value.absent(),
     this.rolloverMinor = const Value.absent(),
     this.ruleId = const Value.absent(),
+    this.periodEnd = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BudgetsCompanion.insert({
@@ -10765,6 +10809,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     required int amountMinor,
     this.rolloverMinor = const Value.absent(),
     this.ruleId = const Value.absent(),
+    this.periodEnd = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -10784,6 +10829,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Expression<int>? amountMinor,
     Expression<int>? rolloverMinor,
     Expression<String>? ruleId,
+    Expression<DateTime>? periodEnd,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10797,6 +10843,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (rolloverMinor != null) 'rollover_minor': rolloverMinor,
       if (ruleId != null) 'rule_id': ruleId,
+      if (periodEnd != null) 'period_end': periodEnd,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10812,6 +10859,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Value<int>? amountMinor,
     Value<int>? rolloverMinor,
     Value<String?>? ruleId,
+    Value<DateTime?>? periodEnd,
     Value<int>? rowid,
   }) {
     return BudgetsCompanion(
@@ -10825,6 +10873,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       amountMinor: amountMinor ?? this.amountMinor,
       rolloverMinor: rolloverMinor ?? this.rolloverMinor,
       ruleId: ruleId ?? this.ruleId,
+      periodEnd: periodEnd ?? this.periodEnd,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10862,6 +10911,9 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     if (ruleId.present) {
       map['rule_id'] = Variable<String>(ruleId.value);
     }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -10881,6 +10933,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
           ..write('amountMinor: $amountMinor, ')
           ..write('rolloverMinor: $rolloverMinor, ')
           ..write('ruleId: $ruleId, ')
+          ..write('periodEnd: $periodEnd, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -22602,6 +22655,7 @@ typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   required int amountMinor,
   Value<int> rolloverMinor,
   Value<String?> ruleId,
+  Value<DateTime?> periodEnd,
   Value<int> rowid,
 });
 typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
@@ -22615,6 +22669,7 @@ typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
   Value<int> amountMinor,
   Value<int> rolloverMinor,
   Value<String?> ruleId,
+  Value<DateTime?> periodEnd,
   Value<int> rowid,
 });
 
@@ -22674,6 +22729,11 @@ class $$BudgetsTableFilterComposer
 
   ColumnFilters<String> get ruleId => $composableBuilder(
     column: $table.ruleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -22736,6 +22796,11 @@ class $$BudgetsTableOrderingComposer
     column: $table.ruleId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$BudgetsTableAnnotationComposer
@@ -22786,6 +22851,9 @@ class $$BudgetsTableAnnotationComposer
 
   GeneratedColumn<String> get ruleId =>
       $composableBuilder(column: $table.ruleId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
 }
 
 class $$BudgetsTableTableManager
@@ -22826,6 +22894,7 @@ class $$BudgetsTableTableManager
                 Value<int> amountMinor = const Value.absent(),
                 Value<int> rolloverMinor = const Value.absent(),
                 Value<String?> ruleId = const Value.absent(),
+                Value<DateTime?> periodEnd = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetsCompanion(
                 id: id,
@@ -22838,6 +22907,7 @@ class $$BudgetsTableTableManager
                 amountMinor: amountMinor,
                 rolloverMinor: rolloverMinor,
                 ruleId: ruleId,
+                periodEnd: periodEnd,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -22852,6 +22922,7 @@ class $$BudgetsTableTableManager
                 required int amountMinor,
                 Value<int> rolloverMinor = const Value.absent(),
                 Value<String?> ruleId = const Value.absent(),
+                Value<DateTime?> periodEnd = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetsCompanion.insert(
                 id: id,
@@ -22864,6 +22935,7 @@ class $$BudgetsTableTableManager
                 amountMinor: amountMinor,
                 rolloverMinor: rolloverMinor,
                 ruleId: ruleId,
+                periodEnd: periodEnd,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

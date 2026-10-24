@@ -97,6 +97,91 @@ final budgetRulesSyncProvider = FutureProvider.autoDispose
       return rules;
     });
 
+/// Budgets with their own length overlapping a range.
+final periodWindowRowsProvider = StreamProvider.autoDispose
+    .family<List<Budget>, DateRange>(
+      (ref, range) => ref.watch(budgetsRepositoryProvider).watchWindows(range),
+    );
+
+/// A budget with its own length as shown on a board, with its figures.
+typedef BoardWindow = ({
+  Budget row,
+  DateRange range,
+  PeriodActuals actuals,
+  PeriodPlanned planned,
+  int rolloverMinor,
+});
+
+/// The window of each category with a budget of its own length shown on
+/// the board of the period: the one containing the period's reference day
+/// (today in the current period), else the last one starting before it,
+/// else the first.
+Map<String, Budget> pickBoardWindows(
+  List<Budget> rows,
+  DateRange period,
+  DateTime today,
+) {
+  final day = referenceDay(period, today);
+  final pick = <String, Budget>{};
+  int rank(Budget b) {
+    final r = DateRange(b.periodStart, b.periodEnd!);
+    if (r.contains(day)) return 2;
+    return b.periodStart.isAfter(day) ? 0 : 1;
+  }
+
+  for (final b in rows) {
+    final cur = pick[b.categoryId];
+    if (cur == null) {
+      pick[b.categoryId] = b;
+      continue;
+    }
+    final rb = rank(b);
+    final rc = rank(cur);
+    if (rb > rc ||
+        (rb == rc && rb == 1 && b.periodStart.isAfter(cur.periodStart))) {
+      pick[b.categoryId] = b;
+    }
+  }
+  return pick;
+}
+
+/// The windows of budgets with their own length shown on the board of the
+/// period, with spending, outstanding amounts and rollover over each
+/// window.
+final boardWindowsProvider = FutureProvider.autoDispose
+    .family<List<BoardWindow>, DateRange>((ref, period) async {
+      final today = ref.watch(planTodayProvider);
+      final settings = ref.watch(settingsProvider);
+      final repo = ref.watch(budgetsRepositoryProvider);
+      final rowsF = ref.watch(periodWindowRowsProvider(period).future);
+      final categoriesF = ref.watch(categoriesProvider.future);
+      final rows = await rowsF;
+      final categories = await categoriesF;
+      final out = <BoardWindow>[];
+      for (final b in pickBoardWindows(rows, period, today).values) {
+        final range = DateRange(b.periodStart, b.periodEnd!);
+        final actualsF = ref.watch(periodActualsProvider(range).future);
+        final plannedF = ref.watch(periodPlannedProvider(range).future);
+        final cat = categories.where((c) => c.id == b.categoryId).firstOrNull;
+        final children = [
+          for (final c in categories)
+            if (c.parentId == b.categoryId) c.id,
+        ];
+        out.add((
+          row: b,
+          range: range,
+          actuals: await actualsF,
+          planned: await plannedF,
+          rolloverMinor: await repo.windowRollover(
+            b,
+            rolloverModeFor(cat, settings),
+            children: children,
+          ),
+        ));
+      }
+      return out;
+    });
+
 /// Budget templates, sorted by name.
 final budgetTemplatesProvider = StreamProvider<List<BudgetTemplate>>(
   (ref) => ref.watch(budgetsRepositoryProvider).watchTemplates(),
@@ -127,10 +212,13 @@ final budgetChainProvider = FutureProvider.autoDispose
       final categoriesF = ref.watch(categoriesProvider.future);
       final prevActualsF = ref.watch(periodActualsProvider(prev).future);
       final prevBudgetsF = ref.watch(periodBudgetsProvider(prev.start).future);
+      // Window budgets add to what each period assigned (envelope carry).
+      final prevWindowsF = ref.watch(periodWindowRowsProvider(prev).future);
       final budgetsF = ref.watch(periodBudgetsProvider(period.start).future);
       final categories = await categoriesF;
       await prevActualsF;
       await prevBudgetsF;
+      await prevWindowsF;
       await budgetsF;
       return await ref
           .read(budgetsRepositoryProvider)
@@ -155,6 +243,8 @@ BudgetSummary buildBudgetSummary({
   PeriodPlanned planned = PeriodPlanned.empty,
   List<BudgetRulePlan> rules = const [],
   BudgetPeriods? periods,
+  List<BoardWindow> windows = const [],
+  List<Budget> windowRows = const [],
 }) {
   final children = <String, List<String>>{};
   for (final c in categories.values) {
@@ -165,6 +255,17 @@ BudgetSummary buildBudgetSummary({
   final budgeted = {
     for (final b in budgets)
       if (categories.containsKey(b.categoryId)) b.categoryId,
+  };
+  // A budget of the period wins over one with its own length.
+  final shownWindows = [
+    for (final w in windows)
+      if (categories.containsKey(w.row.categoryId) &&
+          !budgeted.contains(w.row.categoryId))
+        w,
+  ];
+  final withBudget = {
+    ...budgeted,
+    for (final w in shownWindows) w.row.categoryId,
   };
   final lines = <BudgetLine>[];
   for (final b in budgets) {
@@ -184,7 +285,7 @@ BudgetSummary buildBudgetSummary({
         plannedMinor: planned.spentOf(c.id, children[c.id] ?? const []),
         thresholdPercent: warnThresholdFor(c, settings),
         rolloverMode: rolloverModeFor(c, settings),
-        isRoot: c.parentId == null || !budgeted.contains(c.parentId),
+        isRoot: c.parentId == null || !withBudget.contains(c.parentId),
         rule: periods == null || rules.isEmpty
             ? null
             : ruleFor(rules, periods, c.id, period.start),
@@ -192,12 +293,53 @@ BudgetSummary buildBudgetSummary({
       ),
     );
   }
+  for (final w in shownWindows) {
+    final c = categories[w.row.categoryId]!;
+    final kids = children[c.id] ?? const <String>[];
+    lines.add(
+      BudgetLine(
+        categoryId: c.id,
+        parentId: c.parentId,
+        name: c.name,
+        icon: c.icon,
+        color: c.color,
+        budgetId: w.row.id,
+        budgetedMinor: w.row.amountMinor,
+        rolloverMinor: w.rolloverMinor,
+        spentMinor: w.actuals.spentOf(c.id, kids),
+        plannedMinor: w.planned.spentOf(c.id, kids),
+        thresholdPercent: warnThresholdFor(c, settings),
+        rolloverMode: rolloverModeFor(c, settings),
+        isRoot: c.parentId == null || !withBudget.contains(c.parentId),
+        rule: periods == null || rules.isEmpty
+            ? null
+            : ruleFor(rules, periods, c.id, w.row.periodStart, windowed: true),
+        generated: w.row.ruleId != null,
+        window: w.range,
+        cadence: periods == null ? null : cadenceOfWindow(periods, w.range),
+      ),
+    );
+  }
+  var windowAssigned = 0;
+  if (periods != null) {
+    for (final b in windowRows) {
+      final c = categories[b.categoryId];
+      if (c == null || budgeted.contains(c.id)) continue;
+      if (c.parentId != null && withBudget.contains(c.parentId)) continue;
+      windowAssigned += windowShare(
+        periods,
+        DateRange(b.periodStart, b.periodEnd!),
+        b.amountMinor,
+        period,
+      );
+    }
+  }
   var unbudgeted = actuals.uncategorizedSpentMinor;
   for (final e in actuals.netByCategory.entries) {
     final c = categories[e.key];
     if (c == null || c.kind != CategoryKind.expense) continue;
-    if (budgeted.contains(c.id)) continue;
-    if (c.parentId != null && budgeted.contains(c.parentId)) continue;
+    if (withBudget.contains(c.id)) continue;
+    if (c.parentId != null && withBudget.contains(c.parentId)) continue;
     unbudgeted -= e.value;
   }
   return BudgetSummary(
@@ -209,6 +351,7 @@ BudgetSummary buildBudgetSummary({
     carryMinor: chain.carryMinor,
     unbudgetedSpentMinor: unbudgeted,
     plannedIncomeMinor: planned.incomeMinor,
+    windowAssignedMinor: windowAssigned,
   );
 }
 
@@ -223,6 +366,8 @@ final budgetBoardProvider = FutureProvider.autoDispose
       final chainF = ref.watch(budgetChainProvider(period).future);
       final plannedF = ref.watch(periodPlannedProvider(period).future);
       final rulesF = ref.watch(budgetRulesSyncProvider(period).future);
+      final windowsF = ref.watch(boardWindowsProvider(period).future);
+      final windowRowsF = ref.watch(periodWindowRowsProvider(period).future);
       final periods = ref.watch(budgetPeriodsProvider);
       final categories = await categoriesF;
       return buildBudgetSummary(
@@ -237,6 +382,8 @@ final budgetBoardProvider = FutureProvider.autoDispose
         planned: await plannedF,
         rules: await rulesF,
         periods: periods,
+        windows: await windowsF,
+        windowRows: await windowRowsF,
       );
     });
 

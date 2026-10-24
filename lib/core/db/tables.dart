@@ -51,8 +51,8 @@ enum CustomFieldType { text, number, date, select, multiselect, boolean }
 enum PostingMode { autoPost, remindConfirm }
 
 /// Window length of a [BudgetRules] row. `period` follows the global budget
-/// period (Settings › Budgets); the others are reserved for budgets with
-/// their own length.
+/// period (Settings › Budgets); the others give the budget its own length
+/// (rows with `periodEnd`).
 enum BudgetCadence { period, week, month, quarter, year }
 
 @DataClassName('AccountGroup')
@@ -270,6 +270,11 @@ class Budgets extends Table with SyncColumns {
   /// [BudgetRules] row that generated this budget; null for a budget set by
   /// hand (which the rule never touches).
   TextColumn get ruleId => text().nullable()();
+
+  /// Exclusive end of a budget with its own length (a week, month, quarter
+  /// or year window starting at [periodStart]); null for a budget of the
+  /// budget period starting at [periodStart].
+  DateTimeColumn get periodEnd => dateTime().nullable()();
 }
 
 /// A repeating budget: generates one [Budgets] row per covered period (see

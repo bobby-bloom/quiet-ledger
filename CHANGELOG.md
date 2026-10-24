@@ -26,6 +26,13 @@ a dated release section.
   or to this and the following periods; budgets set by hand in a period
   always win. "Repeat these budgets every period" in the Fill menu turns
   a period's budgets into repeating ones. Database schema 4.
+- Budgets with their own length: a budget can last a week, month, quarter
+  or year instead of the budget period, e.g. a yearly holiday budget or a
+  weekly groceries budget on a monthly board. The board shows the window
+  containing today with its own bar; the detail screen lists every window
+  of the period and the last windows' history. Totals stay for budgets of
+  the period; in envelope mode and the forecast a long window's amount is
+  spread evenly over the budget periods it covers.
 - Backups include receipt files.
 - Encrypted backups (`.pfbackup`) with a backup password and a recovery key
   that must be confirmed. Required while the app lock or the database

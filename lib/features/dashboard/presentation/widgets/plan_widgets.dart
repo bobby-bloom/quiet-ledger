@@ -65,7 +65,9 @@ class BudgetsWidget extends ConsumerWidget {
               for (final line in lines.take(limit))
                 _BudgetRow(
                   line: line,
-                  tick: summary.period.progressAt(DateTime.now()),
+                  tick:
+                      line.window?.progressAt(DateTime.now()) ??
+                      summary.period.progressAt(DateTime.now()),
                   fmtAvailable: fmt.format(
                     Money(line.availableMinor),
                     cents: false,

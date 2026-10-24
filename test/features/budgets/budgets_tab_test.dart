@@ -291,6 +291,41 @@ void main() {
     await dispose(tester);
   });
 
+  testWidgets('a budget with its own length shows its window', (tester) async {
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      final acc = await f.account('Checking');
+      final pets = await f.category('Pets');
+      await f.expense(acc, pets, 1500, DateTime(2026, 10, 22));
+      await f.expense(acc, pets, 9900, DateTime(2026, 10, 2)); // other week
+    });
+    await tester.pumpWidget(app());
+    await settle(tester);
+    await tester.tap(find.text('Add budget').first);
+    await settle(tester);
+    await tester.tap(find.text('Pets'));
+    await settle(tester);
+    await tester.tap(find.byKey(const ValueKey('budget-length')));
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('One week').last);
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.textContaining('Repeats every week from'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, '40');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+
+    expect(find.textContaining('Weekly · '), findsOneWidget);
+    expect(find.text('€25.00 left'), findsOneWidget); // only this week
+    expect(
+      find.text("Totals don't include budgets with their own length."),
+      findsOneWidget,
+    );
+
+    await dispose(tester);
+  });
+
   testWidgets('envelope mode shows money left to assign', (tester) async {
     await seed(tester);
     await tester.runAsync(() async {

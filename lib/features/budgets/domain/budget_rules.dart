@@ -1,34 +1,70 @@
 import 'package:meta/meta.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/database.dart';
+import 'package:personal_finance/core/settings/setting_enums.dart';
 import 'package:uuid/uuid.dart';
 
-/// How a budget repeats, as chosen in the amount dialog.
+/// How a budget repeats and how long one budget lasts, as chosen in the
+/// amount dialog. "Period" below means one window of [cadence]: the budget
+/// period, or a week, month, quarter or year for a budget with its own
+/// length.
 @immutable
 class BudgetRepeat {
-  const BudgetRepeat._(this.kind, {this.every = 1, this.count, this.until});
-
-  /// Every [every]-th period until changed.
-  const BudgetRepeat.everyPeriod({int every = 1})
-    : this._(BudgetRepeatKind.every, every: every);
-
-  /// [count] periods, this one included.
-  const BudgetRepeat.forPeriods(int count, {int every = 1})
-    : this._(BudgetRepeatKind.count, every: every, count: count);
-
-  /// Every period starting on or before [until].
-  const BudgetRepeat.until(DateTime until, {int every = 1})
-    : this._(BudgetRepeatKind.until, every: every, until: until);
+  const BudgetRepeat._(
+    this.kind, {
+    this.every = 1,
+    this.count,
+    this.until,
+    this.cadence = BudgetCadence.period,
+  });
 
   /// This period only (no rule).
-  static const once = BudgetRepeat._(BudgetRepeatKind.once);
+  const BudgetRepeat.single({BudgetCadence cadence = BudgetCadence.period})
+    : this._(BudgetRepeatKind.once, cadence: cadence);
+
+  /// Every [every]-th period until changed.
+  const BudgetRepeat.everyPeriod({
+    int every = 1,
+    BudgetCadence cadence = BudgetCadence.period,
+  }) : this._(BudgetRepeatKind.every, every: every, cadence: cadence);
+
+  /// [count] periods, this one included.
+  const BudgetRepeat.forPeriods(
+    int count, {
+    int every = 1,
+    BudgetCadence cadence = BudgetCadence.period,
+  }) : this._(
+         BudgetRepeatKind.count,
+         every: every,
+         count: count,
+         cadence: cadence,
+       );
+
+  /// Every period starting on or before [until].
+  const BudgetRepeat.until(
+    DateTime until, {
+    int every = 1,
+    BudgetCadence cadence = BudgetCadence.period,
+  }) : this._(
+         BudgetRepeatKind.until,
+         every: every,
+         until: until,
+         cadence: cadence,
+       );
+
+  /// This budget period only (no rule).
+  static const once = BudgetRepeat.single();
 
   final BudgetRepeatKind kind;
   final int every;
   final int? count;
   final DateTime? until;
+  final BudgetCadence cadence;
 
   bool get repeats => kind != BudgetRepeatKind.once;
+
+  /// The budget has its own length instead of the budget period.
+  bool get windowed => cadence != BudgetCadence.period;
 
   @override
   bool operator ==(Object other) =>
@@ -36,20 +72,23 @@ class BudgetRepeat {
       other.kind == kind &&
       other.every == every &&
       other.count == count &&
-      other.until == until;
+      other.until == until &&
+      other.cadence == cadence;
 
   @override
-  int get hashCode => Object.hash(kind, every, count, until);
+  int get hashCode => Object.hash(kind, every, count, until, cadence);
 }
 
 enum BudgetRepeatKind { once, every, count, until }
 
-/// A live `budget_rules` row: a budget that repeats over budget periods.
+/// A live `budget_rules` row: a budget that repeats over budget periods, or
+/// over windows of its own length ([cadence]).
 ///
-/// A rule covers every [every]-th period starting with the one that starts
-/// on [start], at most [count] of them and none starting after [end].
-/// Periods up to [generatedUntil] already had their row generated (and may
-/// have been edited or removed since).
+/// A rule covers every [every]-th period (window) starting with the one
+/// that starts on [start], at most [count] of them and none starting after
+/// [end]. Periods up to [generatedUntil] already had their row generated
+/// (and may have been edited or removed since). Methods take the budget
+/// periods and switch to the rule's windows themselves.
 @immutable
 class BudgetRulePlan {
   const BudgetRulePlan({
@@ -62,6 +101,7 @@ class BudgetRulePlan {
     this.count,
     this.generatedUntil,
     this.updatedAt = '',
+    this.cadence = BudgetCadence.period,
   });
 
   factory BudgetRulePlan.fromRow(BudgetRule r) => BudgetRulePlan(
@@ -74,6 +114,7 @@ class BudgetRulePlan {
     count: r.count,
     generatedUntil: r.generatedUntil == null ? null : _day(r.generatedUntil!),
     updatedAt: r.updatedAt,
+    cadence: r.cadence,
   );
 
   final String id;
@@ -84,6 +125,10 @@ class BudgetRulePlan {
   final DateTime? end;
   final int? count;
   final DateTime? generatedUntil;
+  final BudgetCadence cadence;
+
+  /// The budget has its own length: its rows carry `periodEnd`.
+  bool get isWindowed => cadence != BudgetCadence.period;
 
   /// HLC of the last change; the newest rule wins when two cover the same
   /// category and period.
@@ -93,7 +138,8 @@ class BudgetRulePlan {
   static const _maxSteps = 5300;
 
   /// Covered periods that start on or before [upTo], oldest first.
-  List<DateRange> periodsUpTo(BudgetPeriods periods, DateTime upTo) {
+  List<DateRange> periodsUpTo(BudgetPeriods board, DateTime upTo) {
+    final periods = windowPeriods(board, cadence);
     final out = <DateRange>[];
     final limit = _day(upTo);
     var p = periods.periodOf(start);
@@ -144,10 +190,10 @@ class BudgetRulePlan {
 
   /// The repeat setting this rule stands for.
   BudgetRepeat get repeat => count != null
-      ? BudgetRepeat.forPeriods(count!, every: every)
+      ? BudgetRepeat.forPeriods(count!, every: every, cadence: cadence)
       : end != null
-      ? BudgetRepeat.until(end!, every: every)
-      : BudgetRepeat.everyPeriod(every: every);
+      ? BudgetRepeat.until(end!, every: every, cadence: cadence)
+      : BudgetRepeat.everyPeriod(every: every, cadence: cadence);
 
   @override
   bool operator ==(Object other) =>
@@ -160,7 +206,8 @@ class BudgetRulePlan {
       other.end == end &&
       other.count == count &&
       other.generatedUntil == generatedUntil &&
-      other.updatedAt == updatedAt;
+      other.updatedAt == updatedAt &&
+      other.cadence == cadence;
 
   @override
   int get hashCode => Object.hash(
@@ -173,21 +220,24 @@ class BudgetRulePlan {
     count,
     generatedUntil,
     updatedAt,
+    cadence,
   );
 }
 
-/// The rule covering [categoryId] in the period starting [periodStart]: the
-/// newest by [BudgetRulePlan.updatedAt] when several do (after sync or a
-/// category merge).
+/// The rule covering [categoryId] in the period starting [periodStart] (the
+/// window starting there when [windowed]): the newest by
+/// [BudgetRulePlan.updatedAt] when several do (after sync or a category
+/// merge).
 BudgetRulePlan? ruleFor(
   Iterable<BudgetRulePlan> rules,
   BudgetPeriods periods,
   String categoryId,
-  DateTime periodStart,
-) {
+  DateTime periodStart, {
+  bool windowed = false,
+}) {
   BudgetRulePlan? best;
   for (final r in rules) {
-    if (r.categoryId != categoryId) continue;
+    if (r.categoryId != categoryId || r.isWindowed != windowed) continue;
     if (!r.covers(periods, periodStart)) continue;
     if (best == null || r.updatedAt.compareTo(best.updatedAt) > 0) best = r;
   }
@@ -204,6 +254,87 @@ String generatedBudgetId(String ruleId, DateTime periodStart) {
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
   return const Uuid().v5(Namespace.url.value, 'budget-rule:$ruleId:$day');
+}
+
+/// Windows of [cadence], built from the budget periods' calendar settings
+/// (start day, weekend shift, first day of week, fiscal year; no salary-based
+/// start). `period` gives [board] itself.
+BudgetPeriods windowPeriods(BudgetPeriods board, BudgetCadence cadence) =>
+    switch (cadence) {
+      BudgetCadence.period => board,
+      BudgetCadence.week => BudgetPeriods(
+        board.config.withType(BudgetPeriodType.weekly),
+      ),
+      BudgetCadence.month => BudgetPeriods(
+        board.config.withType(BudgetPeriodType.monthly),
+      ),
+      BudgetCadence.quarter => BudgetPeriods(
+        board.config.withType(BudgetPeriodType.quarterly),
+      ),
+      BudgetCadence.year => BudgetPeriods(
+        board.config.withType(BudgetPeriodType.yearly),
+      ),
+    };
+
+/// The own length that equals the budget period type [type] (choosing it is
+/// the same as the budget period), or null for bi-weekly periods.
+BudgetCadence? cadenceOfPeriodType(BudgetPeriodType type) => switch (type) {
+  BudgetPeriodType.weekly => BudgetCadence.week,
+  BudgetPeriodType.biWeekly => null,
+  BudgetPeriodType.monthly => BudgetCadence.month,
+  BudgetPeriodType.quarterly => BudgetCadence.quarter,
+  BudgetPeriodType.yearly => BudgetCadence.year,
+};
+
+/// The length whose window [window] is (for a budget row with `periodEnd`
+/// that no rule generated), or null when none matches.
+BudgetCadence? cadenceOfWindow(BudgetPeriods board, DateRange window) {
+  for (final c in BudgetCadence.values) {
+    if (c == BudgetCadence.period) continue;
+    if (windowPeriods(board, c).periodOf(window.start) == window) return c;
+  }
+  return null;
+}
+
+/// The day a board period is looked at: today inside it, its last day when
+/// it is over, its first day when it lies ahead. A budget with its own
+/// length shows the window containing this day.
+DateTime referenceDay(DateRange period, DateTime today) {
+  final d = _day(today);
+  if (period.contains(d)) return d;
+  return d.isBefore(period.start) ? period.start : period.last;
+}
+
+/// The part of a window budget's [amountMinor] assigned to the budget
+/// period [period] (envelope "left to assign" and the forecast): spread
+/// evenly over the budget periods starting inside the window, or all of it
+/// in the budget period a shorter window starts in.
+/// Cents left over go to the first periods.
+int windowShare(
+  BudgetPeriods board,
+  DateRange window,
+  int amountMinor,
+  DateRange period,
+) {
+  final targets = windowTargets(board, window);
+  final i = targets.indexOf(period);
+  if (i < 0) return 0;
+  final n = targets.length;
+  final base = amountMinor ~/ n;
+  return base + (i < amountMinor - base * n ? 1 : 0);
+}
+
+/// Budget periods a window's amount is spread over (see [windowShare]): the
+/// period a window no longer than it starts in, or the periods starting
+/// inside a longer window.
+List<DateRange> windowTargets(BudgetPeriods board, DateRange window) {
+  final home = board.periodOf(window.start);
+  if (window.days <= home.days) return [home];
+  final starts = [
+    for (final p in board.periodsBetween(window.start, window.last))
+      if (window.contains(p.start)) p,
+  ];
+  return starts.isEmpty ? [home] : starts;
 }
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);

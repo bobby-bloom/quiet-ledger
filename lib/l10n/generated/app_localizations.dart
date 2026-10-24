@@ -1972,13 +1972,13 @@ abstract class AppLocalizations {
   /// No description provided for @budgetsRepeatPeriods.
   ///
   /// In en, this message translates to:
-  /// **'Number of periods'**
+  /// **'How many times'**
   String get budgetsRepeatPeriods;
 
   /// No description provided for @budgetsRepeatInterval.
   ///
   /// In en, this message translates to:
-  /// **'Every … periods'**
+  /// **'Interval'**
   String get budgetsRepeatInterval;
 
   /// No description provided for @budgetsRepeatNumberInvalid.
@@ -2094,6 +2094,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 budget now repeats every period} other{{count} budgets now repeat every period}}'**
   String budgetsRepeatAllDone(int count);
+
+  /// No description provided for @budgetsLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get budgetsLength;
+
+  /// No description provided for @budgetsLengthPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget period ({type})'**
+  String budgetsLengthPeriod(String type);
+
+  /// No description provided for @budgetsLengthWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'One week'**
+  String get budgetsLengthWeek;
+
+  /// No description provided for @budgetsLengthMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'One month'**
+  String get budgetsLengthMonth;
+
+  /// No description provided for @budgetsLengthQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'One quarter'**
+  String get budgetsLengthQuarter;
+
+  /// No description provided for @budgetsLengthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'One year'**
+  String get budgetsLengthYear;
+
+  /// No description provided for @budgetsEveryWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every week} other{every {every} weeks}}'**
+  String budgetsEveryWeek(int every);
+
+  /// No description provided for @budgetsEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every month} other{every {every} months}}'**
+  String budgetsEveryMonth(int every);
+
+  /// No description provided for @budgetsEveryQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every quarter} other{every {every} quarters}}'**
+  String budgetsEveryQuarter(int every);
+
+  /// No description provided for @budgetsEveryYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{every, plural, =1{every year} other{every {every} years}}'**
+  String budgetsEveryYear(int every);
+
+  /// No description provided for @budgetsOnlyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {period}'**
+  String budgetsOnlyIn(String period);
+
+  /// No description provided for @budgetsWindowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{length} · {period}'**
+  String budgetsWindowLabel(String length, String period);
+
+  /// No description provided for @budgetsWindowsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals don\'t include budgets with their own length.'**
+  String get budgetsWindowsNote;
+
+  /// No description provided for @budgetsWindowsInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Within this period'**
+  String get budgetsWindowsInPeriod;
 
   /// No description provided for @categoriesTitle.
   ///

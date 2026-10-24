@@ -87,10 +87,10 @@ set once.
 A rule has an amount, a start (the first period it covers), an interval
 (`every`: every n-th period) and an optional limit: a number of periods
 (`count`) or an end date (`endDate`: periods starting after it are not
-covered). Without a limit it repeats until changed. `cadence` is always
-`period` for now, meaning the rule follows the global budget period
-setting. Other values are reserved for budgets with their own length
-(week, month, quarter, year).
+covered). Without a limit it repeats until changed. `cadence` is the
+length of one budget: `period` follows the global budget period setting;
+`week`, `month`, `quarter` and `year` give the budget its own length (see
+below). For those, "period" in this section means one window.
 
 When two live rules cover the same category and period, which can happen
 after sync or a category merge, the newest (`updatedAt`) wins.
@@ -154,3 +154,62 @@ generated rows from the given period on.
   together with their watermarks, so nothing the user removed comes back.
   Backups from before schema 4 restore with `ruleId = null` on every
   budget.
+
+## Budgets with their own length
+
+A budget can last a week, month, quarter or year instead of the budget
+period: a yearly holiday budget or a weekly groceries budget on a monthly
+board. Its rows carry `periodEnd` (exclusive); `periodEnd = null` is a
+budget of the budget period starting at `periodStart`. Every query for a
+period's budgets filters `periodEnd IS NULL`, so a yearly window starting
+on 1 January is not mistaken for January's budget.
+
+**Windows** come from `windowPeriods`: the budget period settings with the
+period type of the length (first day of week, start day and weekend shift
+for months, fiscal year start for quarters and years) and no salary-based
+start.
+
+**On the board** of a budget period a category shows:
+
+1. its budget of the period, if it has one (this always wins);
+2. otherwise the window containing the period's reference day
+   (`referenceDay`: today in the current period, the last day of a past
+   period, the first day of a future one); failing that the last window
+   starting before that day, else the first one overlapping the period.
+
+Spent, outstanding amounts, rollover and the state are measured over the
+window, and the today tick marks today's place in it. The row is labelled
+with its length and window ("Weekly · Oct 19 – Oct 25, 2026"). The detail
+screen lists every window of the category within the period (each week of
+the month) and its history shows the last windows.
+
+**Totals.** Budgeted, Spent, Planned and Left on the summary card cover
+budgets of the period only, with a note when windowed budgets are on the
+board. Spending of a category with a window budget does not count as
+"spent in categories without a budget".
+
+**Shares** (`windowShare`, `windowTargets`). In envelope mode a window's
+amount is assigned evenly to the budget periods it covers: a window
+longer than the budget period is spread over the periods starting inside
+it (a yearly budget gives each month 1/12, leftover cents to the first
+months), a shorter one counts fully in the period it starts in (each week
+in its month). The envelope carry along the chain (`syncChain`) adds the
+same shares. The forecast's "variable spending = budget" method gets the
+same per-period shares, unless the category has a budget of that period.
+
+**Rollover** of a window budget runs along the chain of directly
+preceding windows of the category (`windowRollover`, at most 12) with the
+category's rollover mode; it is computed when shown, not stored.
+
+**Editing.** The amount dialog has a **Length** field (Budget period, One
+week, month, quarter or year; the length equal to the budget period type
+is not offered separately). Keeping the length, edits work as described
+above for the window shown (this window only, or this and the following
+windows). A new length applies from the window containing the shown
+period's first day: `repeatFrom` replaces the budget overlapping that
+window (of any length), and later budgets of the old rules are moved or
+removed as usual; budgets set by hand later on stay. A one-off window is a
+row with `periodEnd` and no rule (`setWindowAmount`).
+
+**Alerts** for a window budget are keyed by the window, so each week can
+warn once.

@@ -11,11 +11,13 @@ import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/data/budget_period_provider.dart';
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/data/budgets_repository.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
 import 'package:personal_finance/features/budgets/domain/budget_rules.dart';
+import 'package:personal_finance/features/plan/plan_providers.dart';
 import 'package:personal_finance/features/plan/presentation/money_text.dart';
 import 'package:personal_finance/features/plan/presentation/plan_widgets.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
@@ -104,10 +106,58 @@ Future<void> editBudgetAmount(
   BudgetLine line,
 ) => editCategoryBudget(context, ref, period, line.categoryId, name: line.name);
 
-/// Sets, changes or removes the budget of [categoryId] in [period] through
-/// the amount dialog, including how it repeats. Changing or removing a
-/// repeating budget asks whether it applies to this period only or to
-/// this and the following periods.
+/// What a budget edit applies to: a budget period, or one window of a
+/// budget with its own length.
+typedef BudgetSlot = ({DateRange range, BudgetCadence cadence});
+
+/// The budget of [categoryId] the board of [period] shows: its budget of
+/// the period, else its window budget for the period, else a new budget of
+/// the period. Returns the slot and the row (null for a new budget).
+Future<(BudgetSlot, Budget?)> budgetSlotFor(
+  BudgetsRepository repo,
+  BudgetPeriods periods,
+  DateRange period,
+  String categoryId,
+  DateTime today,
+) async {
+  final row = (await repo.period(period.start))
+      .where((b) => b.categoryId == categoryId)
+      .firstOrNull;
+  if (row != null) return ((range: period, cadence: BudgetCadence.period), row);
+  final windows = [
+    for (final b in await repo.windows(period))
+      if (b.categoryId == categoryId) b,
+  ];
+  final w = pickBoardWindows(windows, period, today)[categoryId];
+  if (w == null) {
+    return ((range: period, cadence: BudgetCadence.period), null);
+  }
+  final range = DateRange(w.periodStart, w.periodEnd!);
+  return (
+    (
+      range: range,
+      cadence: cadenceOfWindow(periods, range) ?? BudgetCadence.month,
+    ),
+    w,
+  );
+}
+
+/// The first window of a budget with length [cadence] when it starts in
+/// the board period [period] (the one containing the period's first day),
+/// or [period] itself.
+DateRange slotRangeFor(
+  BudgetPeriods periods,
+  DateRange period,
+  BudgetCadence cadence,
+) => cadence == BudgetCadence.period
+    ? period
+    : windowPeriods(periods, cadence).periodOf(period.start);
+
+/// Sets, changes or removes the budget of [categoryId] shown in [period]
+/// through the amount dialog, including its length and how it repeats.
+/// Changing or removing a repeating budget asks whether it applies to this
+/// period (window) only or to this and the following ones. A new length
+/// starts with the window containing the period's first day.
 Future<void> editCategoryBudget(
   BuildContext context,
   WidgetRef ref,
@@ -118,32 +168,51 @@ Future<void> editCategoryBudget(
   final l = context.l10n;
   final repo = ref.read(budgetsRepositoryProvider);
   final periods = ref.read(budgetPeriodsProvider);
-  final existing = (await repo.period(period.start))
-      .where((b) => b.categoryId == categoryId)
-      .firstOrNull;
-  final rule = ruleFor(await repo.rules(), periods, categoryId, period.start);
+  final today = ref.read(planTodayProvider);
+  final (slot, row) = await budgetSlotFor(
+    repo,
+    periods,
+    period,
+    categoryId,
+    today,
+  );
+  final windowed = slot.cadence != BudgetCadence.period;
+  final rule = ruleFor(
+    await repo.rules(),
+    periods,
+    categoryId,
+    slot.range.start,
+    windowed: windowed,
+  );
   if (!context.mounted) return;
   // A count is shown as what is left from this period on.
   final current = rule == null
-      ? (existing == null
+      ? (row == null
             ? const BudgetRepeat.everyPeriod()
-            : BudgetRepeat.once)
+            : BudgetRepeat.single(cadence: slot.cadence))
       : rule.count == null
       ? rule.repeat
       : BudgetRepeat.forPeriods(
-          rule.remainingCountFrom(periods, period.start)!,
+          rule.remainingCountFrom(periods, slot.range.start)!,
           every: rule.every,
+          cadence: rule.cadence,
         );
   final r = await showBudgetAmountDialog(
     context,
     title: name,
-    period: period,
-    initialMinor: existing?.amountMinor ?? rule?.amountMinor,
+    periodType: periods.config.type,
+    rangeFor: (c) =>
+        c == slot.cadence ? slot.range : slotRangeFor(periods, period, c),
+    initialMinor: row?.amountMinor ?? rule?.amountMinor,
     initialRepeat: current,
-    allowRemove: existing != null,
+    allowRemove: row != null,
   );
   if (r == null || !context.mounted) return;
   final amount = r.amount;
+
+  Future<List<String>> removeSlot() => windowed
+      ? repo.removeWindow(periods, categoryId, slot.range)
+      : repo.removeFromPeriod(periods, categoryId, slot.range);
 
   if (amount == null) {
     var following = false;
@@ -153,8 +222,8 @@ Future<void> editCategoryBudget(
       following = scope;
     }
     final removed = <String>[
-      if (following) ...await repo.stopRepeating(categoryId, period.start),
-      ...await repo.removeFromPeriod(periods, categoryId, period),
+      if (following) ...await repo.stopRepeating(categoryId, slot.range.start),
+      ...await removeSlot(),
     ];
     if (!context.mounted || following || removed.isEmpty) return;
     ScaffoldMessenger.maybeOf(context)
@@ -172,38 +241,46 @@ Future<void> editCategoryBudget(
   }
 
   final repeat = r.repeat;
-  Future<void> repeatFromHere() => repo.repeatFrom(
+  final sameLength = repeat.cadence == slot.cadence;
+  final target = sameLength
+      ? slot.range
+      : slotRangeFor(periods, period, repeat.cadence);
+  Future<void> repeatFromTarget() => repo.repeatFrom(
     periods: periods,
     categoryId: categoryId,
-    period: period,
+    from: target,
     amountMinor: amount,
     repeat: repeat,
   );
-  if (rule == null) {
-    if (repeat.repeats) {
-      await repeatFromHere();
-    } else {
-      await repo.setAmount(categoryId, period.start, amount);
-    }
+  Future<void> setOnce(DateRange range, BudgetCadence cadence) =>
+      cadence == BudgetCadence.period
+      ? repo.setAmount(categoryId, range.start, amount)
+      : repo.setWindowAmount(categoryId, range, amount);
+
+  if (repeat.repeats && (rule == null || repeat != current)) {
+    // New repeat setting or length: applies from here on.
+    await repeatFromTarget();
     return;
   }
-  if (repeat != current) {
-    // A new repeat setting applies from this period on.
-    if (repeat.repeats) {
-      await repeatFromHere();
-    } else {
-      await repo.stopRepeating(categoryId, periods.next(period).start);
-      await repo.setAmount(categoryId, period.start, amount);
+  if (!repeat.repeats && (rule == null || repeat != current)) {
+    // Just this one: the old budget ends with it or is replaced.
+    if (rule != null) {
+      await repo.stopRepeating(
+        categoryId,
+        sameLength ? slot.range.end : slot.range.start,
+      );
     }
+    if (!sameLength && row != null) await removeSlot();
+    await setOnce(target, repeat.cadence);
     return;
   }
-  if (amount == existing?.amountMinor) return;
+  if (amount == row?.amountMinor) return;
   final following = await _askScope(context, remove: false);
   if (following == null) return;
   if (following) {
-    await repeatFromHere();
+    await repeatFromTarget();
   } else {
-    await repo.setAmount(categoryId, period.start, amount);
+    await setOnce(slot.range, slot.cadence);
   }
 }
 
@@ -240,16 +317,37 @@ Future<bool?> _askScope(BuildContext context, {required bool remove}) {
   );
 }
 
-/// "Repeats every period from November 2026" and friends.
+/// "every month", "every 2 weeks", "every period", ...
+String everyText(AppLocalizations l, BudgetCadence cadence, int every) =>
+    switch (cadence) {
+      BudgetCadence.period => l.budgetsEveryN(every),
+      BudgetCadence.week => l.budgetsEveryWeek(every),
+      BudgetCadence.month => l.budgetsEveryMonth(every),
+      BudgetCadence.quarter => l.budgetsEveryQuarter(every),
+      BudgetCadence.year => l.budgetsEveryYear(every),
+    };
+
+/// "Weekly", "Monthly", ... (the adjective of a budget's own length).
+String lengthAdjective(AppLocalizations l, BudgetCadence cadence) =>
+    switch (cadence) {
+      BudgetCadence.period || BudgetCadence.month => l.setOptMonthly,
+      BudgetCadence.week => l.setOptWeekly,
+      BudgetCadence.quarter => l.setOptQuarterly,
+      BudgetCadence.year => l.setOptYearly,
+    };
+
+/// "Repeats every period from November 2026" and friends; [periodLabel]
+/// names the first period (window).
 String repeatSummary(
   AppLocalizations l,
   BudgetRepeat repeat,
   String periodLabel,
   String Function(DateTime) date,
 ) {
-  final every = l.budgetsEveryN(repeat.every);
+  final every = everyText(l, repeat.cadence, repeat.every);
   return switch (repeat.kind) {
-    BudgetRepeatKind.once => l.budgetsRepeatOnce,
+    BudgetRepeatKind.once =>
+      repeat.windowed ? l.budgetsOnlyIn(periodLabel) : l.budgetsRepeatOnce,
     BudgetRepeatKind.every => l.budgetsRepeatsEvery(every, periodLabel),
     BudgetRepeatKind.count => l.budgetsRepeatsCount(
       repeat.count ?? 1,
@@ -264,12 +362,15 @@ String repeatSummary(
   };
 }
 
-/// Asks for a budget amount and how it repeats from [period] on. Returns
-/// null when cancelled; `amount: null` means "remove the budget".
+/// Asks for a budget amount, its length and how it repeats. [rangeFor]
+/// gives the first period (window) for a length, [periodType] the budget
+/// period type (its own length is offered as "Budget period"). Returns null
+/// when cancelled; `amount: null` means "remove the budget".
 Future<({int? amount, BudgetRepeat repeat})?> showBudgetAmountDialog(
   BuildContext context, {
   required String title,
-  required DateRange period,
+  required BudgetPeriodType periodType,
+  required DateRange Function(BudgetCadence) rangeFor,
   int? initialMinor,
   BudgetRepeat initialRepeat = const BudgetRepeat.everyPeriod(),
   bool allowRemove = false,
@@ -278,7 +379,8 @@ Future<({int? amount, BudgetRepeat repeat})?> showBudgetAmountDialog(
     context: context,
     builder: (ctx) => _AmountDialog(
       title: title,
-      period: period,
+      periodType: periodType,
+      rangeFor: rangeFor,
       initialMinor: initialMinor,
       initialRepeat: initialRepeat,
       allowRemove: allowRemove,
@@ -289,14 +391,16 @@ Future<({int? amount, BudgetRepeat repeat})?> showBudgetAmountDialog(
 class _AmountDialog extends ConsumerStatefulWidget {
   const _AmountDialog({
     required this.title,
-    required this.period,
+    required this.periodType,
+    required this.rangeFor,
     required this.allowRemove,
     required this.initialRepeat,
     this.initialMinor,
   });
 
   final String title;
-  final DateRange period;
+  final BudgetPeriodType periodType;
+  final DateRange Function(BudgetCadence) rangeFor;
   final int? initialMinor;
   final BudgetRepeat initialRepeat;
   final bool allowRemove;
@@ -309,21 +413,34 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
   final _form = GlobalKey<FormState>();
   late int? _amount = widget.initialMinor;
   late BudgetRepeatKind _kind = widget.initialRepeat.kind;
+  late BudgetCadence _cadence = widget.initialRepeat.cadence;
   late int _every = widget.initialRepeat.every;
   late int _count = widget.initialRepeat.count ?? 3;
-  late DateTime _until =
-      widget.initialRepeat.until ??
-      DateTime(
-        widget.period.start.year + 1,
-        widget.period.start.month,
-        widget.period.start.day - 1,
-      );
+  late DateTime _until = widget.initialRepeat.until ?? _defaultUntil();
+
+  DateRange get _range => widget.rangeFor(_cadence);
+
+  DateTime _defaultUntil() {
+    final start = widget.rangeFor(widget.initialRepeat.cadence).start;
+    return DateTime(start.year + 1, start.month, start.day - 1);
+  }
 
   BudgetRepeat get _repeat => switch (_kind) {
-    BudgetRepeatKind.once => BudgetRepeat.once,
-    BudgetRepeatKind.every => BudgetRepeat.everyPeriod(every: _every),
-    BudgetRepeatKind.count => BudgetRepeat.forPeriods(_count, every: _every),
-    BudgetRepeatKind.until => BudgetRepeat.until(_until, every: _every),
+    BudgetRepeatKind.once => BudgetRepeat.single(cadence: _cadence),
+    BudgetRepeatKind.every => BudgetRepeat.everyPeriod(
+      every: _every,
+      cadence: _cadence,
+    ),
+    BudgetRepeatKind.count => BudgetRepeat.forPeriods(
+      _count,
+      every: _every,
+      cadence: _cadence,
+    ),
+    BudgetRepeatKind.until => BudgetRepeat.until(
+      _until,
+      every: _every,
+      cadence: _cadence,
+    ),
   };
 
   void _save() {
@@ -337,13 +454,12 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
   }
 
   Future<void> _pickUntil() async {
+    final first = _range.start;
     final d = await showDatePicker(
       context: context,
-      initialDate: _until.isBefore(widget.period.start)
-          ? widget.period.start
-          : _until,
-      firstDate: widget.period.start,
-      lastDate: DateTime(widget.period.start.year + 50),
+      initialDate: _until.isBefore(first) ? first : _until,
+      firstDate: first,
+      lastDate: DateTime(first.year + 50),
     );
     if (d != null) setState(() => _until = d);
   }
@@ -354,6 +470,21 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
     final dates = ref.watch(dateFormatsProvider);
     final locale = ref.watch(formatLocaleProvider);
     final repeats = _kind != BudgetRepeatKind.once;
+    final sameAsPeriod = cadenceOfPeriodType(widget.periodType);
+    final typeLabel = switch (widget.periodType) {
+      BudgetPeriodType.weekly => l.setOptWeekly,
+      BudgetPeriodType.biWeekly => l.setOptBiWeekly,
+      BudgetPeriodType.monthly => l.setOptMonthly,
+      BudgetPeriodType.quarterly => l.setOptQuarterly,
+      BudgetPeriodType.yearly => l.setOptYearly,
+    };
+    final lengths = [
+      (BudgetCadence.period, l.budgetsLengthPeriod(typeLabel)),
+      (BudgetCadence.week, l.budgetsLengthWeek),
+      (BudgetCadence.month, l.budgetsLengthMonth),
+      (BudgetCadence.quarter, l.budgetsLengthQuarter),
+      (BudgetCadence.year, l.budgetsLengthYear),
+    ].where((e) => e.$1 != sameAsPeriod || e.$1 == _cadence);
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
@@ -372,7 +503,19 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
                     v == null || v < 0 ? l.budgetsAmountInvalid : null,
               ),
               const SizedBox(height: Space.md),
+              DropdownButtonFormField<BudgetCadence>(
+                key: const ValueKey('budget-length'),
+                initialValue: _cadence,
+                decoration: InputDecoration(labelText: l.budgetsLength),
+                items: [
+                  for (final (c, label) in lengths)
+                    DropdownMenuItem(value: c, child: Text(label)),
+                ],
+                onChanged: (c) => setState(() => _cadence = c ?? _cadence),
+              ),
+              const SizedBox(height: Space.sm),
               DropdownButtonFormField<BudgetRepeatKind>(
+                key: const ValueKey('budget-repeat'),
                 initialValue: _kind,
                 decoration: InputDecoration(labelText: l.budgetsRepeat),
                 items: [
@@ -440,7 +583,7 @@ class _AmountDialogState extends ConsumerState<_AmountDialog> {
                 repeatSummary(
                   l,
                   _repeat,
-                  periodTitle(widget.period, locale),
+                  periodTitle(_range, locale),
                   dates.short,
                 ),
                 style: context.text.bodySmall?.copyWith(

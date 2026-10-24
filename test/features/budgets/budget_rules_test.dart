@@ -151,7 +151,7 @@ void main() {
     ]) => repo.repeatFrom(
       periods: periods,
       categoryId: food,
-      period: from,
+      from: from,
       amountMinor: amount,
       repeat: r,
     );
@@ -304,7 +304,7 @@ void main() {
       await repo.repeatFrom(
         periods: periods,
         categoryId: snacks,
-        period: jan,
+        from: jan,
         amountMinor: 3000,
         repeat: const BudgetRepeat.everyPeriod(),
       );
@@ -315,7 +315,7 @@ void main() {
       await repo.repeatFrom(
         periods: periods,
         categoryId: drinks,
-        period: jan,
+        from: jan,
         amountMinor: 2000,
         repeat: const BudgetRepeat.everyPeriod(),
       );

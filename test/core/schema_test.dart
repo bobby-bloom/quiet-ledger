@@ -82,6 +82,7 @@ void main() {
       'DROP TABLE safety_copies',
       'DROP TABLE budget_rules',
       'ALTER TABLE budgets DROP COLUMN rule_id',
+      'ALTER TABLE budgets DROP COLUMN period_end',
       'PRAGMA user_version = 1',
     ]) {
       await v1.customStatement(s);
@@ -110,7 +111,7 @@ void main() {
     expect(version.data.values.first, AppDatabase.currentSchemaVersion);
     await v2.customSelect('SELECT count(*) FROM safety_copies').get();
     await v2.customSelect('SELECT count(*) FROM budget_rules').get();
-    await v2.customSelect('SELECT rule_id FROM budgets').get();
+    await v2.customSelect('SELECT rule_id, period_end FROM budgets').get();
   });
 
   test(
@@ -125,6 +126,7 @@ void main() {
       await v2.customStatement('DROP TABLE safety_copies');
       await v2.customStatement('DROP TABLE budget_rules');
       await v2.customStatement('ALTER TABLE budgets DROP COLUMN rule_id');
+      await v2.customStatement('ALTER TABLE budgets DROP COLUMN period_end');
       await v2.customStatement('PRAGMA user_version = 2');
       await v2.close();
 
@@ -143,6 +145,7 @@ void main() {
     final w = SyncWriter(v3, testClock(), 'd');
     await v3.customStatement('DROP TABLE budget_rules');
     await v3.customStatement('ALTER TABLE budgets DROP COLUMN rule_id');
+    await v3.customStatement('ALTER TABLE budgets DROP COLUMN period_end');
     await v3.customStatement('PRAGMA user_version = 3');
     await v3.customStatement(
       'INSERT INTO budgets (id, created_at, updated_at, origin_device_id, '

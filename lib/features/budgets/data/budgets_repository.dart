@@ -367,9 +367,14 @@ class BudgetsRepository {
 
   // ----------------------------------------------------------- budgets ---
 
+  /// Budgets of the budget period starting [start] (not budgets with their
+  /// own length that happen to start that day).
   SimpleSelectStatement<$BudgetsTable, Budget> _periodQuery(DateTime start) =>
       db.select(db.budgets)..where(
-        (b) => b.periodStart.equals(dateOnly(start)) & b.deletedAt.isNull(),
+        (b) =>
+            b.periodStart.equals(dateOnly(start)) &
+            b.periodEnd.isNull() &
+            b.deletedAt.isNull(),
       );
 
   Stream<List<Budget>> watchPeriod(DateTime periodStart) =>
@@ -476,14 +481,22 @@ class BudgetsRepository {
           final due = r.due(periods, upTo);
           if (due.isEmpty) continue;
           for (final p in due) {
-            if (ruleFor(all, periods, r.categoryId, p.start)?.id != r.id) {
-              continue;
-            }
+            final winner = ruleFor(
+              all,
+              periods,
+              r.categoryId,
+              p.start,
+              windowed: r.isWindowed,
+            );
+            if (winner?.id != r.id) continue;
             final live =
                 await (db.select(db.budgets)..where(
                       (b) =>
                           b.categoryId.equals(r.categoryId) &
                           b.periodStart.equals(p.start) &
+                          (r.isWindowed
+                              ? b.periodEnd.equals(p.end)
+                              : b.periodEnd.isNull()) &
                           b.deletedAt.isNull(),
                     ))
                     .get();
@@ -500,6 +513,7 @@ class BudgetsRepository {
                 periodStart: Value(p.start),
                 amountMinor: Value(r.amountMinor),
                 ruleId: Value(r.id),
+                periodEnd: Value(r.isWindowed ? p.end : null),
               ),
               id: id,
             );
@@ -514,32 +528,36 @@ class BudgetsRepository {
         return created;
       });
 
-  /// Makes [categoryId] repeat from [period] on with [amountMinor] as set in
-  /// [repeat] (which must repeat).
+  /// Makes [categoryId] repeat from [from] on with [amountMinor] as set in
+  /// [repeat] (which must repeat). [from] is a budget period, or for a
+  /// budget with its own length ([BudgetRepeat.cadence]) one of its windows.
   ///
-  /// The category's existing rules end before [period] (rules starting at
-  /// or after it are removed). Their generated, unedited rows from [period]
-  /// on move to the new rule with the new amount, or are removed where the
-  /// new rule does not cover the period; budgets set by hand stay. The row
-  /// of [period] itself gets the new amount. The new rule inherits the old
-  /// watermark, so periods the user removed stay removed. Returns the new
-  /// rule's id.
+  /// The category's existing rules end before [from] (rules starting at or
+  /// after it are removed). The budget being replaced (any row overlapping
+  /// [from]) goes; later rows the old rules generated move to the new rule
+  /// with the new amount where it covers them and are removed otherwise.
+  /// Later budgets set by hand stay. The new rule takes over the watermark
+  /// of old rules of the same length, so periods the user removed stay
+  /// removed. Returns the new rule's id.
   Future<String> repeatFrom({
     required BudgetPeriods periods,
     required String categoryId,
-    required DateRange period,
+    required DateRange from,
     required int amountMinor,
     required BudgetRepeat repeat,
   }) {
     if (!repeat.repeats) throw ArgumentError.value(repeat, 'repeat');
     if (amountMinor < 0) throw ArgumentError.value(amountMinor, 'amountMinor');
     return writer.transaction(() async {
-      final start = dateOnly(period.start);
+      final start = dateOnly(from.start);
+      final every = repeat.every < 1 ? 1 : repeat.every;
       final old = (await rules()).where((r) => r.categoryId == categoryId);
       var watermark = start;
       for (final r in old) {
         final g = r.generatedUntil;
-        if (g != null && g.isAfter(watermark)) watermark = g;
+        if (r.cadence == repeat.cadence && g != null && g.isAfter(watermark)) {
+          watermark = g;
+        }
       }
       await _endRules(old, start);
       final ruleId = await writer.insert(
@@ -547,7 +565,8 @@ class BudgetsRepository {
         BudgetRulesCompanion(
           categoryId: Value(categoryId),
           amountMinor: Value(amountMinor),
-          every: Value(repeat.every < 1 ? 1 : repeat.every),
+          cadence: Value(repeat.cadence),
+          every: Value(every),
           startDate: Value(start),
           endDate: Value(repeat.until == null ? null : dateOnly(repeat.until!)),
           count: Value(repeat.count),
@@ -559,39 +578,58 @@ class BudgetsRepository {
         categoryId: categoryId,
         amountMinor: amountMinor,
         start: start,
-        every: repeat.every < 1 ? 1 : repeat.every,
+        every: every,
         end: repeat.until,
         count: repeat.count,
+        cadence: repeat.cadence,
       );
       final oldIds = {for (final r in old) r.id};
-      if (oldIds.isNotEmpty) {
-        final rows =
-            await (db.select(db.budgets)..where(
-                  (b) =>
-                      b.categoryId.equals(categoryId) &
-                      b.periodStart.isBiggerThanValue(start) &
-                      b.ruleId.isIn(oldIds) &
-                      b.deletedAt.isNull(),
-                ))
-                .get();
-        for (final b in rows) {
-          if (rule.covers(periods, b.periodStart)) {
-            await writer.update(
-              db.budgets,
-              b.id,
-              BudgetsCompanion(
-                amountMinor: Value(amountMinor),
-                ruleId: Value(ruleId),
-              ),
-            );
-          } else {
-            await writer.delete(db.budgets, b.id);
-          }
+      final windowEnd = repeat.windowed ? from.end : null;
+      Budget? here;
+      final rows =
+          await (db.select(db.budgets)..where(
+                (b) =>
+                    b.categoryId.equals(categoryId) &
+                    b.periodStart.isBiggerOrEqualValue(
+                      DateTime(start.year - 2, start.month, start.day),
+                    ) &
+                    b.deletedAt.isNull(),
+              ))
+              .get();
+      for (final b in rows) {
+        final range = DateRange(
+          b.periodStart,
+          b.periodEnd ?? periods.periodOf(b.periodStart).end,
+        );
+        if (!range.end.isAfter(start)) continue;
+        final sameKind =
+            (b.periodEnd == null) == !repeat.windowed &&
+            (!repeat.windowed ||
+                windowPeriods(
+                      periods,
+                      repeat.cadence,
+                    ).periodOf(b.periodStart) ==
+                    range);
+        if (sameKind && b.periodStart == start && here == null) {
+          here = b;
+          continue;
+        }
+        final replaced = range.start.isBefore(from.end);
+        if (!replaced && !oldIds.contains(b.ruleId)) continue; // set by hand
+        if (!replaced && sameKind && rule.covers(periods, b.periodStart)) {
+          await writer.update(
+            db.budgets,
+            b.id,
+            BudgetsCompanion(
+              amountMinor: Value(amountMinor),
+              ruleId: Value(ruleId),
+            ),
+          );
+        } else {
+          await writer.delete(db.budgets, b.id);
         }
       }
-      final current = await _periodQuery(start).get();
-      final here = current.where((b) => b.categoryId == categoryId).toList();
-      if (here.isEmpty) {
+      if (here == null) {
         await writer.insert(
           db.budgets,
           BudgetsCompanion(
@@ -599,21 +637,19 @@ class BudgetsRepository {
             periodStart: Value(start),
             amountMinor: Value(amountMinor),
             ruleId: Value(ruleId),
+            periodEnd: Value(windowEnd),
           ),
           id: generatedBudgetId(ruleId, start),
         );
       } else {
         await writer.update(
           db.budgets,
-          here.first.id,
+          here.id,
           BudgetsCompanion(
             amountMinor: Value(amountMinor),
             ruleId: Value(ruleId),
           ),
         );
-        for (final dup in here.skip(1)) {
-          await writer.delete(db.budgets, dup.id);
-        }
       }
       return ruleId;
     });
@@ -669,6 +705,160 @@ class BudgetsRepository {
     }
   });
 
+  /// Removes the budget of [categoryId] with its own length in [window]
+  /// only (see [removeFromPeriod]). Returns the removed row ids.
+  Future<List<String>> removeWindow(
+    BudgetPeriods periods,
+    String categoryId,
+    DateRange window,
+  ) => writer.transaction(() async {
+    await ensureFromRules(periods, window.start);
+    final rows = await _windowQuery(categoryId, window).get();
+    for (final b in rows) {
+      await writer.delete(db.budgets, b.id);
+    }
+    return [for (final b in rows) b.id];
+  });
+
+  /// Sets the budget of [categoryId] with its own length for [window] by
+  /// hand (a one-off window, or an override of a repeating one).
+  Future<void> setWindowAmount(
+    String categoryId,
+    DateRange window,
+    int amountMinor,
+  ) {
+    if (amountMinor < 0) throw ArgumentError.value(amountMinor, 'amountMinor');
+    return writer.transaction(() async {
+      final rows = await _windowQuery(categoryId, window).get();
+      if (rows.isEmpty) {
+        await writer.insert(
+          db.budgets,
+          BudgetsCompanion(
+            categoryId: Value(categoryId),
+            periodStart: Value(dateOnly(window.start)),
+            periodEnd: Value(dateOnly(window.end)),
+            amountMinor: Value(amountMinor),
+          ),
+        );
+        return;
+      }
+      if (rows.first.amountMinor != amountMinor) {
+        await writer.update(
+          db.budgets,
+          rows.first.id,
+          BudgetsCompanion(
+            amountMinor: Value(amountMinor),
+            ruleId: const Value(null),
+          ),
+        );
+      }
+      for (final dup in rows.skip(1)) {
+        await writer.delete(db.budgets, dup.id);
+      }
+    });
+  }
+
+  /// The budget of [categoryId] for exactly [window], if any.
+  Future<Budget?> windowBudget(String categoryId, DateRange window) async =>
+      (await _windowQuery(categoryId, window).get()).firstOrNull;
+
+  SimpleSelectStatement<$BudgetsTable, Budget> _windowQuery(
+    String categoryId,
+    DateRange window,
+  ) => db.select(db.budgets)
+    ..where(
+      (b) =>
+          b.categoryId.equals(categoryId) &
+          b.periodStart.equals(dateOnly(window.start)) &
+          b.periodEnd.equals(dateOnly(window.end)) &
+          b.deletedAt.isNull(),
+    );
+
+  /// Budgets with their own length overlapping [range] (one per category
+  /// and window; the newest wins after sync).
+  Selectable<Budget> _windowsQuery(DateRange range) =>
+      (db.select(db.budgets)..where(
+            (b) =>
+                b.periodEnd.isNotNull() &
+                b.periodStart.isSmallerThanValue(range.end) &
+                b.periodEnd.isBiggerThanValue(range.start) &
+                b.deletedAt.isNull(),
+          ))
+          .map((b) => b);
+
+  static List<Budget> _dedupeWindows(List<Budget> rows) {
+    final byKey = <(String, DateTime), Budget>{};
+    for (final r in rows) {
+      final k = (r.categoryId, r.periodStart);
+      final e = byKey[k];
+      if (e == null || r.updatedAt.compareTo(e.updatedAt) > 0) byKey[k] = r;
+    }
+    return byKey.values.toList()
+      ..sort((a, b) => a.periodStart.compareTo(b.periodStart));
+  }
+
+  Stream<List<Budget>> watchWindows(DateRange range) =>
+      _windowsQuery(range).watch().map(_dedupeWindows);
+
+  Future<List<Budget>> windows(DateRange range) async =>
+      _dedupeWindows(await _windowsQuery(range).get());
+
+  /// Envelope mode: the shares of budgets with their own length assigned to
+  /// [period] (see [windowShare]), without [skip] categories (those with a
+  /// budget of the period itself).
+  Future<int> windowAssigned(
+    BudgetPeriods periods,
+    DateRange period, {
+    Set<String> skip = const {},
+  }) async {
+    var sum = 0;
+    for (final b in await windows(period)) {
+      if (skip.contains(b.categoryId)) continue;
+      sum += windowShare(
+        periods,
+        DateRange(b.periodStart, b.periodEnd!),
+        b.amountMinor,
+        period,
+      );
+    }
+    return sum;
+  }
+
+  /// Rollover carried into the window budget [row] (its category with
+  /// [children]): along the chain of directly preceding windows of the
+  /// category (at most [maxBack]), like [syncChain] does for periods. Not
+  /// stored.
+  Future<int> windowRollover(
+    Budget row,
+    RolloverMode mode, {
+    Iterable<String> children = const [],
+    int maxBack = 12,
+  }) async {
+    if (mode == RolloverMode.none) return 0;
+    final chain = <Budget>[];
+    var start = row.periodStart;
+    for (var i = 0; i < maxBack; i++) {
+      final prev =
+          await (db.select(db.budgets)..where(
+                (b) =>
+                    b.categoryId.equals(row.categoryId) &
+                    b.periodEnd.equals(start) &
+                    b.deletedAt.isNull(),
+              ))
+              .get();
+      if (prev.isEmpty) break;
+      chain.insert(0, prev.first);
+      start = prev.first.periodStart;
+    }
+    var rollover = 0;
+    for (final b in chain) {
+      final spent = (await actuals(DateRange(b.periodStart, b.periodEnd!)))
+          .spentOf(b.categoryId, children);
+      rollover = rolloverFor(mode, b.amountMinor + rollover - spent);
+    }
+    return rollover;
+  }
+
   /// Turns the budgets of [period] into rules repeating every period from
   /// it on (Fill menu). Returns the number of budgets converted.
   Future<int> repeatPeriod(BudgetPeriods periods, DateRange period) =>
@@ -678,7 +868,7 @@ class BudgetsRepository {
           await repeatFrom(
             periods: periods,
             categoryId: b.categoryId,
-            period: period,
+            from: period,
             amountMinor: b.amountMinor,
             repeat: const BudgetRepeat.everyPeriod(),
           );
@@ -921,6 +1111,7 @@ class BudgetsRepository {
           assigned += r.amountMinor;
         }
       }
+      assigned += await windowAssigned(periods, chain[i], skip: budgeted);
       carry = toBeBudgeted(
         incomeMinor: actual.incomeMinor,
         carryMinor: carry,

@@ -1236,10 +1236,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get budgetsRepeatUntil => 'Bis zu einem Datum';
 
   @override
-  String get budgetsRepeatPeriods => 'Anzahl Zeiträume';
+  String get budgetsRepeatPeriods => 'Wie oft';
 
   @override
-  String get budgetsRepeatInterval => 'Alle … Zeiträume';
+  String get budgetsRepeatInterval => 'Intervall';
 
   @override
   String get budgetsRepeatNumberInvalid => 'Mindestens 1';
@@ -1336,6 +1336,87 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get budgetsLength => 'Dauer';
+
+  @override
+  String budgetsLengthPeriod(String type) {
+    return 'Budgetzeitraum ($type)';
+  }
+
+  @override
+  String get budgetsLengthWeek => 'Eine Woche';
+
+  @override
+  String get budgetsLengthMonth => 'Ein Monat';
+
+  @override
+  String get budgetsLengthQuarter => 'Ein Quartal';
+
+  @override
+  String get budgetsLengthYear => 'Ein Jahr';
+
+  @override
+  String budgetsEveryWeek(int every) {
+    String _temp0 = intl.Intl.pluralLogic(
+      every,
+      locale: localeName,
+      other: 'alle $every Wochen',
+      one: 'jede Woche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsEveryMonth(int every) {
+    String _temp0 = intl.Intl.pluralLogic(
+      every,
+      locale: localeName,
+      other: 'alle $every Monate',
+      one: 'jeden Monat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsEveryQuarter(int every) {
+    String _temp0 = intl.Intl.pluralLogic(
+      every,
+      locale: localeName,
+      other: 'alle $every Quartale',
+      one: 'jedes Quartal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsEveryYear(int every) {
+    String _temp0 = intl.Intl.pluralLogic(
+      every,
+      locale: localeName,
+      other: 'alle $every Jahre',
+      one: 'jedes Jahr',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsOnlyIn(String period) {
+    return 'Nur $period';
+  }
+
+  @override
+  String budgetsWindowLabel(String length, String period) {
+    return '$length · $period';
+  }
+
+  @override
+  String get budgetsWindowsNote =>
+      'Die Summen enthalten keine Budgets mit eigener Dauer.';
+
+  @override
+  String get budgetsWindowsInPeriod => 'In diesem Zeitraum';
 
   @override
   String get categoriesTitle => 'Kategorien';

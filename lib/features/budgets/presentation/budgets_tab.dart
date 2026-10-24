@@ -8,8 +8,10 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/app_icons.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
+import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
+import 'package:personal_finance/core/db/tables.dart' show BudgetCadence;
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/budgets/data/budget_period_provider.dart';
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
@@ -156,7 +158,7 @@ class BudgetBoard extends ConsumerWidget {
         children.add(
           BudgetLineTile(
             line: line,
-            tick: summary.todayTick,
+            tick: summary.tickFor(line),
             divider: i > 0,
             selected: line.categoryId == selectedCategoryId,
             onTap: () => onOpen(line.categoryId),
@@ -307,6 +309,16 @@ class _SummaryCard extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              if (summary.hasWindowed)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.xxs),
+                  child: Text(
+                    l.budgetsWindowsNote,
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                    ),
                   ),
                 ),
             ],
@@ -493,8 +505,16 @@ class BudgetLineTile extends ConsumerWidget {
     final plannedColor = line.plannedPushesOver
         ? context.finance.warning
         : context.colors.onSurfaceVariant;
+    final window = line.window;
+    final windowLabel = window == null
+        ? null
+        : l.budgetsWindowLabel(
+            lengthAdjective(l, line.cadence ?? BudgetCadence.month),
+            periodTitle(window, ref.watch(formatLocaleProvider)),
+          );
     final semantics = [
       line.name,
+      ?windowLabel,
       l.budgetsSpentOf(money(line.spentMinor), money(line.availableMinor)),
       label,
       ?plannedLabel,
@@ -631,6 +651,24 @@ class BudgetLineTile extends ConsumerWidget {
                                     fontWeight: line.plannedPushesOver
                                         ? FontWeight.w700
                                         : FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (windowLabel != null)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.date_range_outlined,
+                                  size: 13,
+                                  color: context.colors.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  windowLabel,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: context.colors.onSurfaceVariant,
                                   ),
                                 ),
                               ],
