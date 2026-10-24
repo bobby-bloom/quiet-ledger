@@ -5,9 +5,10 @@ import 'package:flutter/widgets.dart';
 /// drawn at reduced opacity.
 ///
 /// Geometry is defined on a 1024 canvas and matches the icon source
-/// (`mark.svg`) exactly; it stays inside a centred circle of diameter 600 so
-/// it survives every platform's icon mask. It is scaled to the shortest side
-/// of the painted area and centred.
+/// (`mark.svg`) exactly; it stays inside a centred circle of diameter 617
+/// (inside Android's 66/108 adaptive safe circle) so it survives every
+/// platform's icon mask. The rule edges sit on whole pixels at 16 and 32 px.
+/// It is scaled to the shortest side of the painted area and centred.
 class AppMarkPainter extends CustomPainter {
   const AppMarkPainter({
     required this.color,
@@ -49,27 +50,27 @@ class AppMarkPainter extends CustomPainter {
     canvas.scale(side / 1024);
     final paint = Paint()..color = color;
 
-    // Tick: polyline (398,368) (478,448) (626,300), width 92, round caps and
-    // join, as one filled outline.
-    const r = Radius.circular(46);
+    // Tick: polyline (383.75,366.25) (473.75,456.25) (640.25,289.75), width
+    // 103.5, round caps and join, as one filled outline.
+    const r = Radius.circular(51.75);
     final tick = Path()
-      ..moveTo(430.527, 335.473)
-      ..lineTo(478, 382.946)
-      ..lineTo(593.473, 267.473)
-      ..arcToPoint(const Offset(658.527, 332.527), radius: r)
-      ..lineTo(510.527, 480.527)
-      ..arcToPoint(const Offset(445.473, 480.527), radius: r)
-      ..lineTo(365.473, 400.527)
-      ..arcToPoint(const Offset(430.527, 335.473), radius: r)
+      ..moveTo(420.343, 329.657)
+      ..lineTo(473.75, 383.064)
+      ..lineTo(603.657, 253.157)
+      ..arcToPoint(const Offset(676.843, 326.343), radius: r)
+      ..lineTo(510.343, 492.843)
+      ..arcToPoint(const Offset(437.157, 492.843), radius: r)
+      ..lineTo(347.157, 402.843)
+      ..arcToPoint(const Offset(420.343, 329.657), radius: r)
       ..close();
     canvas.drawPath(tick, paint);
 
     // Double rule: the total line, then the faded second line.
     const ends = Radius.circular(32);
     canvas
-      ..drawRRect(RRect.fromLTRBR(352, 576, 672, 640, ends), paint)
+      ..drawRRect(RRect.fromLTRBR(320, 576, 704, 640, ends), paint)
       ..drawRRect(
-        RRect.fromLTRBR(352, 704, 672, 768, ends),
+        RRect.fromLTRBR(320, 704, 704, 768, ends),
         Paint()..color = color.withValues(alpha: color.a * secondaryOpacity),
       )
       ..restore();

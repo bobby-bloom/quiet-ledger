@@ -117,7 +117,7 @@ Future<void> _android(Map<AccentScheme, ColorScheme> colours) async {
         background: Colors.transparent,
         foreground: Colors.white,
         shape: AppIconShape.markOnly,
-        markScale: 1.75,
+        markScale: 1.6,
       ),
     );
   }
