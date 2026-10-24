@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
+import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
 import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
@@ -23,7 +25,6 @@ class DashboardLayoutButton extends ConsumerWidget {
     required this.layout,
     super.key,
     this.focusNode,
-    this.menuExtras = const [],
   });
 
   /// The button's focus: it gets it back when arrange mode ends.
@@ -34,9 +35,6 @@ class DashboardLayoutButton extends ConsumerWidget {
 
   /// What the wide board shows now; null on phones.
   final BoardLayout? layout;
-
-  /// More board-menu items after Add widget (Expand all / Collapse all).
-  final List<Widget> menuExtras;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -85,7 +83,8 @@ class DashboardLayoutButton extends ConsumerWidget {
           ),
           child: Text(l.dashLayoutAddMenu),
         ),
-        if (menuExtras.isNotEmpty) ...[const Divider(), ...menuExtras],
+        const Divider(),
+        ...expandCollapseItems(context, ref, saved.shown(view)),
       ],
       builder: (context, controller, _) => IconButton(
         focusNode: focusNode,
@@ -97,6 +96,42 @@ class DashboardLayoutButton extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Expand all and Collapse all for the widgets [types] that show: they
+/// change only the cards that fold (not Net worth on phones) and are
+/// disabled when they would change nothing.
+List<Widget> expandCollapseItems(
+  BuildContext context,
+  WidgetRef ref,
+  List<DashboardWidgetType> types,
+) {
+  final l = context.l10n;
+  final expansion = ref.watch(cardExpansionProvider);
+  final foldable = [
+    for (final t in types)
+      if (!WindowSize.of(context).isCompact ||
+          t != DashboardWidgetType.netWorth)
+        t,
+  ];
+  void setAll(bool open) =>
+      ref.read(cardExpansionProvider.notifier).setAll(foldable, open);
+  return [
+    MenuItemButton(
+      leadingIcon: const Icon(Icons.unfold_more),
+      onPressed: expansion.wouldChange(foldable, true)
+          ? () => setAll(true)
+          : null,
+      child: Text(l.dashLayoutExpandAll),
+    ),
+    MenuItemButton(
+      leadingIcon: const Icon(Icons.unfold_less),
+      onPressed: expansion.wouldChange(foldable, false)
+          ? () => setAll(false)
+          : null,
+      child: Text(l.dashLayoutCollapseAll),
+    ),
+  ];
 }
 
 /// The menu's Layout control: Auto · 1 · 2 · 3 (· Custom while a layout is

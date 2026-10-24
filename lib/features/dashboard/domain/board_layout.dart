@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 // The pure half of the dashboard board (docs/DASHBOARD.md): rows with a
 // split, fitting them to the window and reconciling them with the widgets
@@ -43,7 +44,8 @@ class RowSplit {
 
   @override
   bool operator ==(Object other) =>
-      other is RowSplit && listEquals(other.weights, weights);
+      other is RowSplit &&
+      const ListEquality<Object?>().equals(other.weights, weights);
 
   @override
   int get hashCode => Object.hashAll(weights);
@@ -69,7 +71,9 @@ class BoardRow {
       other is BoardRow &&
       other.split == split &&
       other.columns.length == columns.length &&
-      columns.indexed.every((e) => listEquals(other.columns[e.$1], e.$2));
+      columns.indexed.every(
+        (e) => const ListEquality<Object?>().equals(other.columns[e.$1], e.$2),
+      );
 
   @override
   int get hashCode =>

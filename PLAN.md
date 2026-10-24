@@ -67,7 +67,7 @@ Non-goals for v1: actual sync, bank connections (PSD2/FinTS), multi-currency, mu
   - checking, savings, cash, credit card, investment, loan/debt, other asset/liability
   - Each account has an opening balance, colour, icon, group, an "include in net worth/budgets/forecast" flag and a low-balance threshold, and can be archived.
 - **Balance reconciliation**: the user enters the real bank balance and the app creates a correction entry, or flags transactions that are not yet cleared.
-- **Dashboard made of configurable widgets**: users add, remove, reorder and resize them, and on desktop they lay out in a grid. Available widgets:
+- **Dashboard made of configurable widgets**: users add, remove, fold and arrange them; on wide screens they sit in rows of columns (Auto, 1–3 columns or the person's own rows, arranged in place), on phones in one list (docs/DASHBOARD.md). Available widgets:
   - net worth
   - month summary / savings rate
   - budget progress
@@ -193,7 +193,7 @@ Settings live in a **typed schema**, so each setting has a key, type, default, s
 | **Appearance** | Theme light/dark/system, accent colour/scheme (presets + custom), Material You dynamic colour (Android/desktop), high-contrast mode, text scale, density (compact/comfortable), income/expense colour style (colour-coded / neutral / +/− only), show cents, sign style (`-12,50` / `(12,50)` / `12,50 −`) |
 | **Privacy** | Hide amounts (blur until tapped), privacy mode on start, hide content in app switcher, block screenshots (Android) |
 | **Navigation & modules** | Choose and order the bottom-nav/rail tabs; **switch off whole modules** (Goals, Forecast, Scenarios, Budgets, Tags, Custom fields, Attachments) |
-| **Dashboard** | Widget selection, order and size; per-widget options (period, accounts) |
+| **Dashboard** | Widget selection and arrangement (the dashboard's layout menu, not Settings); per-widget options (forecast account, rows) |
 | **Entry** | Quick-add field order and required fields, default account/type/date, calculator keypad, number of recent categories, payee suggestions on/off, confirm before delete |
 | **Transactions** | Grouping, sorting, running balance, visible columns, default filter |
 | **Categories & tags** | Hierarchy (2 levels), icons, colours, archive, merge, reorder, default category set (EN/DE) |
@@ -320,7 +320,7 @@ BudgetTemplate   name, items(JSON)
 Goal             name, targetMinor, targetDate?, accountId?, contributionMinor?, priority
 Scenario         name, color, adjustments(JSON → freezed union)
 SavedFilter      name, filter(JSON)
-DashboardLayout  breakpoint, widgets(JSON)
+DashboardLayout  breakpoint (`compact.v2` / `expanded.v2`), widgets(JSON: mode, items, rows | order)
 ImportProfile    name, config(JSON: sheets, header, mapping, formats, filters, transfer matching…)
 ImportBatch      fileName, fileHash, profileId?, importedAt, rowCount, undoneAt?
 Setting          key, value(JSON), scope(global|account:<id>|category:<id>)

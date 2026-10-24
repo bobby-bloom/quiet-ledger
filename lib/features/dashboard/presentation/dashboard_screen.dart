@@ -38,6 +38,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   /// The layout button: focus comes back to it when arrange mode ends.
   final _layoutButton = FocusNode(debugLabel: 'dashboard layout');
 
+  /// Whether an arrange session waits for a window wide enough (paused).
+  var _isPaused = false;
+
   @override
   void dispose() {
     _layoutButton.dispose();
@@ -61,6 +64,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         });
       }
     });
+    // A paused session whose saved layout changed meanwhile (a Layout pick,
+    // an undo, another device) would resume on a stale base: it goes.
+    ref.listen(dashboardViewProvider(DashboardView.expanded), (_, next) {
+      final s = ref.read(arrangeSessionProvider);
+      final value = next.value;
+      if (s != null && _isPaused && value != null && value != s.before) {
+        ref.read(arrangeSessionProvider.notifier).end();
+      }
+    });
     final gutter = size.isCompact ? Space.phoneGutter : Space.xxl;
 
     return Scaffold(
@@ -72,6 +84,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             final Widget header;
             final Widget board;
             if (view == DashboardView.compact) {
+              _isPaused = session != null;
               header = _PhoneHeader(
                 saved: saved,
                 layoutButtonFocus: _layoutButton,
@@ -93,6 +106,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             } else {
               final layout = wideLayout(saved, fittingColumns(width));
               final arranging = session != null && layout.canArrange;
+              _isPaused = session != null && !layout.canArrange;
               final l = context.l10n;
               String title(String id) =>
                   widgetTypeLabel(l, DashboardWidgetType.values.byName(id));

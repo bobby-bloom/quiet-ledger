@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 
 // The pure half of arrange mode (docs/DASHBOARD.md): where a widget is as
@@ -286,7 +287,9 @@ bool _isInPlace(
           p.index == index;
 
     case NewRowTarget(:final at):
-      final own = rows.indexWhere((r) => listEquals(r.cardIds.toList(), [id]));
+      final own = rows.indexWhere(
+        (r) => const ListEquality<Object?>().equals(r.cardIds.toList(), [id]),
+      );
       return own >= 0 && (at == own || at == own + 1);
   }
 }

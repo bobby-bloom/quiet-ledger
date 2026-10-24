@@ -114,7 +114,9 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   String? _settling;
   Offset? _settleFrom;
 
-  AppLocalizations get _l => AppLocalizations.of(context);
+  /// The words, read with the dependencies: a board that goes mid-drag
+  /// still announces the drop from dispose.
+  late AppLocalizations _l;
 
   @override
   void initState() {
@@ -130,6 +132,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _scrollable = Scrollable.maybeOf(context, axis: Axis.vertical);
+    _l = AppLocalizations.of(context);
     _view = View.maybeOf(context);
     _textDirection = Directionality.of(context);
     _isMotionReduced = Motion.isReduced(context);

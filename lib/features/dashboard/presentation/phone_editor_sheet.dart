@@ -8,6 +8,7 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
+import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 
@@ -111,6 +112,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                   ),
                   const SizedBox(height: Space.sm),
                   _PhoneLayoutChoice(state: state, onSave: _save),
+                  _FoldAll(types: shown),
                 ],
               ),
             ),
@@ -293,6 +295,45 @@ class _PhoneLayoutChoice extends StatelessWidget {
           style: context.text.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Expand all and Collapse all for the phone's cards that fold (all but
+/// Net worth, the hero); each disabled when it would change nothing.
+class _FoldAll extends ConsumerWidget {
+  const _FoldAll({required this.types});
+
+  final List<DashboardWidgetType> types;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final expansion = ref.watch(cardExpansionProvider);
+    final foldable = [
+      for (final t in types)
+        if (t != DashboardWidgetType.netWorth) t,
+    ];
+    void setAll(bool open) =>
+        ref.read(cardExpansionProvider.notifier).setAll(foldable, open);
+    return Wrap(
+      spacing: Space.xs,
+      children: [
+        TextButton.icon(
+          onPressed: expansion.wouldChange(foldable, true)
+              ? () => setAll(true)
+              : null,
+          icon: const Icon(Icons.unfold_more),
+          label: Text(l.dashLayoutExpandAll),
+        ),
+        TextButton.icon(
+          onPressed: expansion.wouldChange(foldable, false)
+              ? () => setAll(false)
+              : null,
+          icon: const Icon(Icons.unfold_less),
+          label: Text(l.dashLayoutCollapseAll),
         ),
       ],
     );

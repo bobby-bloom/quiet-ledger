@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 
 /// Widgets available on the dashboard (PLAN.md §2.2). Their `name` is
@@ -39,7 +40,7 @@ class WidgetEntry {
   bool operator ==(Object other) =>
       other is WidgetEntry &&
       other.visible == visible &&
-      mapEquals(other.options, options);
+      const MapEquality<Object?, Object?>().equals(other.options, options);
 
   @override
   int get hashCode => Object.hash(
@@ -156,9 +157,9 @@ class DashboardViewState {
   bool operator ==(Object other) =>
       other is DashboardViewState &&
       other.mode == mode &&
-      mapEquals(other.items, items) &&
-      listEquals(other.rows, rows) &&
-      listEquals(other.order, order);
+      const MapEquality<Object?, Object?>().equals(other.items, items) &&
+      const ListEquality<Object?>().equals(other.rows, rows) &&
+      const ListEquality<Object?>().equals(other.order, order);
 
   @override
   int get hashCode => Object.hash(

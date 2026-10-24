@@ -4,7 +4,9 @@ Read this before changing code. `PLAN.md` is the approved product plan; the
 design draft ("Quiet Ledger") is mirrored in `docs/design/` (one `.dc.html`
 per screen, `Foundations.dc.html` holds the tokens). `docs/BACKUP.md`
 describes backups, restore and the data-safety rules below;
-`docs/BUDGETS.md` describes how budget lines are calculated.
+`docs/BUDGETS.md` describes how budget lines are calculated;
+`docs/DASHBOARD.md` describes the dashboard's views, rows, arrange mode
+and layout storage.
 
 ## Layout
 
@@ -97,7 +99,8 @@ phone UI.
 
 **Design.** Use theme roles (`context.colors`, `context.text`) and
 `context.finance` (income/expense/transfer/warning colours) — never hex
-literals in feature code. Spacing from `Space`, radii from `Radii`. Cards:
+literals in feature code. Spacing from `Space`, radii from `Radii`,
+durations and curves from `Motion` (`Motion.isReduced` for reduced motion). Cards:
 `SectionCard` / `Card` (level 0, hairline border). Expense amounts stay
 onSurface with "−"; income uses `finance.income` with "+"; transfers use
 `finance.transfer` and no sign (AmountText does this). Budget bars: on

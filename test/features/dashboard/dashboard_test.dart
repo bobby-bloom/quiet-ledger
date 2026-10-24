@@ -7,8 +7,6 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
-import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_grid.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 
@@ -110,54 +108,32 @@ void main() {
       // 1,000.00 opening + 3,420.00 income − 24.80 expense.
       expect(find.textContaining('4,395'), findsWidgets);
       expect(find.text('Income'), findsOneWidget);
-      expect(find.byType(DashboardGrid), findsOneWidget);
-      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
+      expect(find.byTooltip('Dashboard layout'), findsOneWidget);
       expect(tester.takeException(), isNull);
     } finally {
       await teardown(tester);
     }
   });
 
-  testWidgets('desktop dashboard lays widgets out in columns', (tester) async {
+  testWidgets('desktop dashboard shows the default rows in three columns', (
+    tester,
+  ) async {
     await tester.runAsync(seed);
     try {
       await pumpAt(tester, const Size(1440, 1000));
-      final grid = tester.widget<DashboardGrid>(find.byType(DashboardGrid));
-      expect(grid.columns, 3);
-      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
+      // Row 1, 2:1 — net worth wide, the month and the forecast stacked.
+      final netWorth = tester.getRect(find.textContaining('Net worth').first);
+      final month = tester.getRect(find.textContaining('so far').first);
+      final forecast = tester.getRect(find.textContaining('Forecast').first);
+      expect(month.left, greaterThan(netWorth.right));
+      expect(forecast.left, moreOrLessEquals(month.left, epsilon: 1));
+      expect(forecast.top, greaterThan(month.bottom));
+      expect(find.byTooltip('Dashboard layout'), findsOneWidget);
       expect(find.text('Recent transactions'), findsOneWidget);
       expect(find.text('Corner Grocer'), findsWidgets);
       expect(tester.takeException(), isNull);
     } finally {
       await teardown(tester);
     }
-  });
-
-  test('layout JSON round-trip skips unknown widget types', () async {
-    final db = newTestDb();
-    addTearDown(db.close);
-    final c = testContainer(db);
-    addTearDown(c.dispose);
-    final repo = c.read(dashboardLayoutRepositoryProvider);
-    expect(
-      await repo.watch(DashboardBreakpoint.compact).first,
-      defaultLayouts[DashboardBreakpoint.compact],
-    );
-    await repo.save(DashboardBreakpoint.compact, const [
-      DashboardItem(
-        DashboardWidgetType.goals,
-        size: WidgetSize.wide,
-        options: {'limit': 2},
-      ),
-    ]);
-    final items = await repo.watch(DashboardBreakpoint.compact).first;
-    expect(items.single.type, DashboardWidgetType.goals);
-    expect(items.single.size, WidgetSize.wide);
-    expect(items.single.options['limit'], 2);
-    await repo.reset(DashboardBreakpoint.compact);
-    expect(
-      await repo.watch(DashboardBreakpoint.compact).first,
-      defaultLayouts[DashboardBreakpoint.compact],
-    );
   });
 }

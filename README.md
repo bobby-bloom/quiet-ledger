@@ -44,7 +44,9 @@ no telemetry, no cloud dependency.
 - Checking, savings, cash, credit card, investment, loan and other
   asset/liability accounts, with balance reconciliation.
 - A **configurable dashboard**: net worth, month summary and savings rate,
-  budget progress, upcoming bills, mini forecast, goals and more.
+  budget progress, upcoming bills, mini forecast, goals and more, arranged
+  in rows of columns you can drag around in place, or left on Auto;
+  widgets fold to a one-line summary.
 - **Reports**: spending by category with drill-down, income vs expense, net
   worth over time, category trends, top payees, period comparison. Each one
   exports to CSV.
