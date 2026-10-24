@@ -88,8 +88,8 @@ no telemetry, no cloud dependency.
 - **CSV export** of transactions and reports.
 - **Backups that do not lose data** ([`docs/BACKUP.md`](docs/BACKUP.md)):
   - everything, receipt files included, in one verified file;
-  - encrypted with a backup password plus a recovery key, required while
-    the app lock or database encryption is on;
+  - optionally encrypted with a backup password plus a recovery key (the
+    app warns while backups are not encrypted);
   - scheduled to a folder (on Android, iOS and macOS also a cloud
     provider's folder) and read back after writing;
   - warnings when a backup fails or gets old;

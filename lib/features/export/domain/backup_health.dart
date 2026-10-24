@@ -7,10 +7,6 @@ enum BackupStatus {
   /// A verified backup newer than the threshold exists.
   ok,
 
-  /// Backups must be encrypted but no backup password is set; they are
-  /// paused until one is.
-  needsPassword,
-
   /// Everything is fine, but the backup password has not been typed for a
   /// while: ask for it so a forgotten password shows up early.
   checkPassword,
@@ -54,12 +50,8 @@ BackupHealth backupHealth({
   DateTime? lastScheduled,
   DateTime? lastAttempt,
   String? lastError,
-  bool needsPassword = false,
   DateTime? passwordCheckedAt,
 }) {
-  if (needsPassword && hasData) {
-    return BackupHealth(BackupStatus.needsPassword, lastVerified: lastVerified);
-  }
   if (lastError != null && lastError.isNotEmpty) {
     return BackupHealth(
       BackupStatus.failing,

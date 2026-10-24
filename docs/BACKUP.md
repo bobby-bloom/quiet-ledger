@@ -24,7 +24,7 @@ Each one has a test; a failing test there means data could be lost.
 | 6 | **No silent failure.** A failed, interrupted or paused scheduled backup, a lost folder permission and a stale last backup are shown on the dashboard and the export screen. Failures also raise a notification once. | `backup_reliability_test.dart`, `backup_ui_test.dart` |
 | 7 | **Atomic restore.** A failed restore leaves the database and the receipt files exactly as they were. | `receipts_backup_test.dart` |
 | 8 | **Never delete what cannot be read.** A database the app cannot open (missing key, newer schema, damage) is moved aside, never overwritten, deleted or downgraded. | `test/core/db/db_safety_test.dart`, `test/app/boot_error_test.dart` |
-| 9 | **Never weaker than the device.** While the app lock or the database encryption is on, no backup leaves the device unencrypted. | `backup_encryption_test.dart` |
+| 9 | **No unnoticed plain backup.** With a backup password, no backup leaves the device unencrypted. Without one, backups still run (a missing password never stops them), and the export screen, the automatic-backup screen and the message after saving a backup say it is not encrypted. | `backup_encryption_test.dart` |
 
 ## What a backup contains
 
@@ -92,15 +92,14 @@ AES-256-GCM(data key, nonce, bundle zip, aad = everything before) | tag
   scheduled backups run unattended.
 - KDF and AES run in a background isolate (`compute`; inline on the web).
 
-**When encryption is used.** If a backup password is set, every backup
-that leaves the device is encrypted: manual, scheduled and saved safety
-copies. While the app lock or the database encryption is on
-(`backupEncryptionRequiredProvider`), a password is **required**. Without
-one, backups are refused rather than written plain: scheduled backups
-pause, and the banner says "Backups are paused until you set a backup
-password." Existing plain backups are not pruned meanwhile, because no new
-backup is written. Since the database is encrypted by default wherever
-secure storage exists, native users need a backup password for any backup.
+**When encryption is used.** The backup password is optional. If one is
+set, every backup that leaves the device is encrypted: manual, scheduled
+and saved safety copies. Without one, backups are plain `.zip` files, also
+while the app lock or the database encryption is on: a backup anyone can
+read beats no backup. The app says so instead (`UnencryptedBackupNotice`
+on the export, automatic-backup and password screens; the message after
+saving a backup, with a "Set backup password" action). The dashboard
+banner is only for data that may be lost, so it does not show this.
 
 **Not losing the key.** The recovery key must be confirmed at setup. Every
 30 days the app asks for the backup password once
@@ -117,7 +116,7 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
   failure it does not wait for the next day but retries with growing gaps
   (`backupRetryDelay`: 1 h, 4 h, 12 h, then daily, counted in
   `BackupSettings.failureCount`). The banner shows the failure throughout.
-  "Back up now", a new folder or a new backup password retry at once.
+  "Back up now" or a new folder retry at once.
   Concurrent runs share one backup.
 - **Run** (`runAutoExportNow`): record the attempt → list the folder (an
   unreachable folder fails here, before any export) → create the backup,
@@ -154,8 +153,8 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
     date, so `content://` folders are never asked. Not yet tested on a
     device.
 - **Health** (`backupHealth`, shown by `BackupHealthBanner` on the
-  dashboard and the export screen). The states, in order: password needed,
-  failing (with the error), interrupted (started more than 10 minutes ago,
+  dashboard and the export screen). The states, in order: failing (with
+  the error), interrupted (started more than 10 minutes ago,
   never finished), never backed up, stale (last verified backup older than
   `export.backupStaleDays`, default 7), check password, ok. The "last
   verified backup" counts scheduled backups and manual ones that were
@@ -276,7 +275,8 @@ startup task (`migrateAttachmentPaths`) rewrites them.
   The pre-migration copy and the downgrade guard are automatic.
 - A new destructive operation: wrap it in `withSafetyCopy`.
 - A new way to create a backup: go through `createVerifiedBackup`, which
-  applies encryption and the policy. Never write `exportBundle` output to
+  encrypts when a password is set; show `backupSavedSnackBar` (or
+  `UnencryptedBackupNotice`) so a plain backup is never unnoticed. Never write `exportBundle` output to
   a user-visible place directly.
 - A new device-specific setting: mark it `deviceLocal: true` and make sure
   it is in `allSettings` (core code only sees settings listed there).

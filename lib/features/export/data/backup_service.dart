@@ -30,18 +30,13 @@ class VerifiedBackup {
 /// The single way the app creates a backup that leaves the device (manual,
 /// scheduled, saved safety copy): exports all data and receipts (or wraps
 /// [zip] when given), validates the bundle and, when a backup password is
-/// set, encrypts it and checks that it decrypts to the same bytes. Throws
-/// [BackupPasswordMissingException] when encryption is required but no
-/// password is set; throws on any other failure.
+/// set, encrypts it and checks that it decrypts to the same bytes. Without
+/// a password the result is the plain zip. Throws on any failure.
 Future<VerifiedBackup> createVerifiedBackup(
   ProviderReader read, {
   Uint8List? zip,
 }) async {
-  // Policy first: a paused backup must not cost a full export each retry.
   final ring = await read(backupKeyRepositoryProvider).load();
-  if (ring == null && read(backupEncryptionRequiredProvider)) {
-    throw const BackupPasswordMissingException();
-  }
   final db = read(databaseProvider);
   final bundle =
       zip ??

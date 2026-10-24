@@ -26,17 +26,13 @@ final hasLedgerDataProvider = StreamProvider<bool>((ref) {
 });
 
 /// Current [BackupHealth] from the backup settings and the backup
-/// password state.
+/// password check.
 final backupHealthProvider = Provider<BackupHealth>((ref) {
   final s = ref.watch(settingsProvider);
   DateTime? at(String? v) => v == null ? null : DateTime.tryParse(v);
   final ring = ref.watch(backupKeyringProvider);
   final hasKeys = ring.value != null;
   return backupHealth(
-    needsPassword:
-        ring.hasValue &&
-        !hasKeys &&
-        ref.watch(backupEncryptionRequiredProvider),
     passwordCheckedAt: hasKeys
         ? at(s.get(BackupSettings.passwordCheckedAt)) ??
               ring.value!.current.createdAt
@@ -69,10 +65,8 @@ class BackupHealthBanner extends ConsumerWidget {
     final last = health.lastVerified?.toLocal();
     final failing =
         health.status == BackupStatus.failing ||
-        health.status == BackupStatus.interrupted ||
-        health.status == BackupStatus.needsPassword;
+        health.status == BackupStatus.interrupted;
     final text = switch (health.status) {
-      BackupStatus.needsPassword => l.backupPasswordMissing,
       BackupStatus.checkPassword => l.backupHealthCheckPassword,
       BackupStatus.never => l.backupHealthNever,
       BackupStatus.stale => l.backupHealthStale(
@@ -120,13 +114,13 @@ class BackupHealthBanner extends ConsumerWidget {
               TextButton(
                 style: TextButton.styleFrom(foregroundColor: fg),
                 onPressed: switch (health.status) {
-                  BackupStatus.needsPassword || BackupStatus.checkPassword =>
-                    () => context.push('/more/export/encryption'),
+                  BackupStatus.checkPassword => () => context.push(
+                    '/more/export/encryption',
+                  ),
                   _ when failing => () => context.push('/more/export/folder'),
                   _ => onBackUp ?? () => context.push('/more/export'),
                 },
                 child: Text(switch (health.status) {
-                  BackupStatus.needsPassword => l.backupPasswordSet,
                   BackupStatus.checkPassword => l.backupPasswordCheck,
                   _ when failing => l.backupHealthDetails,
                   _ => l.backupHealthBackUp,

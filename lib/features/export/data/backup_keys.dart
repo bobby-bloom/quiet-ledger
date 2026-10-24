@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/core/app_version.dart' as app;
-import 'package:personal_finance/core/settings/app_settings.dart';
-import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/domain/backup_crypto.dart';
 import 'package:personal_finance/features/security/data/secret_store.dart';
 
 // Backup password state of this device (docs/BACKUP.md): the derived keys
-// live in secure storage (never in the database or a backup), and the
-// policy says when backups must be encrypted.
+// live in secure storage (never in the database or a backup). The password
+// is optional: without one, backups are plain zips and the app says so.
 
 /// Stored keys: the current password and the earlier ones, so backups
 /// made before a password change still open on this device.
@@ -73,26 +71,6 @@ final backupKeyRepositoryProvider = Provider<BackupKeyRepository>(
 final backupKeyringProvider = FutureProvider<BackupKeyring?>(
   (ref) => ref.watch(backupKeyRepositoryProvider).load(),
 );
-
-/// Backups must be encrypted while the app lock or the database
-/// encryption is on (a plain backup would undo either).
-final backupEncryptionRequiredProvider = Provider<bool>((ref) {
-  final appLock = ref.watch(
-    settingsProvider.select((s) => s.get(SecuritySettings.appLock)),
-  );
-  final dbEncrypted =
-      ref.watch(sharedPreferencesProvider)?.getBool('db.encrypted') ?? false;
-  return appLock || dbEncrypted;
-});
-
-/// Encryption is required but no backup password is set: backups are
-/// paused until one is.
-class BackupPasswordMissingException implements Exception {
-  const BackupPasswordMissingException();
-
-  @override
-  String toString() => 'A backup password is required';
-}
 
 // The KDF and AES work runs in a background isolate (`compute`; inline on
 // the web) so the UI keeps running during large backups.

@@ -13,9 +13,9 @@ import 'package:personal_finance/core/csv/file_output.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/backup_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
-import 'package:personal_finance/features/export/data/auto_export.dart';
 import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/domain/backup_crypto.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// `/more/export/encryption`: set, check and change the backup password and
@@ -27,7 +27,6 @@ class BackupPasswordScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final ring = ref.watch(backupKeyringProvider);
-    final required = ref.watch(backupEncryptionRequiredProvider);
     final dates = ref.watch(dateFormatsProvider);
     final checked = DateTime.tryParse(
       ref.watch(settingsProvider).get(BackupSettings.passwordCheckedAt) ?? '',
@@ -52,16 +51,8 @@ class BackupPasswordScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(l.backupPasswordDesc),
-                        if (required) ...[
-                          const SizedBox(height: Space.sm),
-                          Text(
-                            l.backupPasswordRequired,
-                            style: context.text.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: Space.md),
+                        const UnencryptedBackupNotice(showAction: false),
                         if (keys == null)
                           Align(
                             alignment: AlignmentDirectional.centerEnd,
@@ -189,17 +180,8 @@ Future<void> _showSetup(
       builder: (_) => _SetupFlow(mode: mode),
     ),
   );
-  if (saved ?? false) {
-    ref.invalidate(backupKeyringProvider);
-    // A paused backup can run again.
-    await clearBackupFailure(ref.read);
-  }
+  if (saved ?? false) ref.invalidate(backupKeyringProvider);
 }
-
-/// Starts the password setup from anywhere (e.g. the backup button when a
-/// password is required).
-Future<void> startBackupPasswordSetup(BuildContext context, WidgetRef ref) =>
-    _showSetup(context, ref, _SetupMode.create);
 
 class _SetupFlow extends ConsumerStatefulWidget {
   const _SetupFlow({required this.mode});

@@ -15,7 +15,6 @@ import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/export/data/auto_export.dart';
-import 'package:personal_finance/features/export/data/backup_keys.dart';
 import 'package:personal_finance/features/export/data/backup_service.dart';
 import 'package:personal_finance/features/export/data/bundle_service.dart';
 import 'package:personal_finance/features/export/data/safety_copies.dart';
@@ -23,6 +22,7 @@ import 'package:personal_finance/features/export/domain/backup_crypto.dart';
 import 'package:personal_finance/features/export/domain/bundle_manifest.dart';
 import 'package:personal_finance/features/export/presentation/backup_password_screen.dart';
 import 'package:personal_finance/features/export/presentation/export_labels.dart';
+import 'package:personal_finance/features/export/presentation/unencrypted_backup_notice.dart';
 
 /// File name for a manual backup (`.zip`, or `.pfbackup` when encrypted).
 /// Differs from the scheduled backups' names, so retention never deletes a
@@ -32,8 +32,8 @@ String backupFileName(DateTime now, [String extension = '.zip']) =>
     '$extension';
 
 /// Creates a verified backup and hands it to save/share/download. Returns
-/// the save outcome, or null on error (a snackbar is shown). When a backup
-/// password is required but missing, the password setup opens instead.
+/// the save outcome, or null on error (a snackbar is shown). Without a
+/// backup password the snackbar says the file is not encrypted.
 Future<SaveResult?> createBackup(
   BuildContext context,
   WidgetRef ref, {
@@ -52,21 +52,19 @@ Future<SaveResult?> createBackup(
     );
     if (r.ok) {
       await recordVerifiedBackup(ref.read);
-      messenger?.showSnackBar(
-        SnackBar(
-          content: Text(
+      if (context.mounted) {
+        messenger?.showSnackBar(
+          backupSavedSnackBar(
+            context,
             backup.manifest.missingFiles.isEmpty
                 ? l.exportBackupDone(backup.manifest.totalRows)
                 : l.backupMissingReceipts(backup.manifest.missingFiles.length),
+            encrypted: backup.encrypted,
           ),
-        ),
-      );
+        );
+      }
     }
     return r;
-  } on BackupPasswordMissingException {
-    messenger?.showSnackBar(SnackBar(content: Text(l.backupPasswordMissing)));
-    if (context.mounted) await startBackupPasswordSetup(context, ref);
-    return null;
   } on Object catch (e) {
     messenger?.showSnackBar(SnackBar(content: Text(l.exportFailed('$e'))));
     return null;

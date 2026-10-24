@@ -38,9 +38,10 @@ a dated release section.
   are added up; the target's repeating budgets stay, and the source's
   take over when they end.
 - Backups include receipt files.
-- Encrypted backups (`.pfbackup`) with a backup password and a recovery key
-  that must be confirmed. Required while the app lock or the database
-  encryption is on; the app asks for the password once a month.
+- Encrypted backups (`.pfbackup`) with an optional backup password and a
+  recovery key that must be confirmed; the app asks for the password once
+  a month. Without a password, backups are not encrypted and the app says
+  so.
 - Safety copies, taken automatically before restoring, resetting, undoing
   an import, merging categories or tags and purging old deleted entries.
   They can be restored from Export & backup › Safety copies. The copy from
