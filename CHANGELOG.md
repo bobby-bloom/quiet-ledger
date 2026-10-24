@@ -104,6 +104,10 @@ a dated release section.
   named `quiet-ledger-backup-…` (manual: `quiet-ledger-manual-…`); older
   `personal-finance-backup-…` files are still listed for restore and
   cleaned up as before.
+- The program in the Linux and Windows downloads is called `quiet-ledger`
+  (`quiet-ledger.exe`) instead of `personal_finance`. Shortcuts or pinned
+  taskbar entries to the old file need to be made again; data, settings
+  and the database key are found as before.
 - The app bar's last button lines up with the page margin on every
   screen instead of sitting at the window edge (or wherever each screen
   put its own spacer); the phone headers of Home and Transactions match.
