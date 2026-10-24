@@ -487,6 +487,7 @@ class BudgetsRepository {
     Set<String>? onlyRules,
   }) => writer.transaction(() async {
     final all = await rules();
+    await _dropOfRemovedRules();
     var created = 0;
     for (final r in all) {
       if (onlyRules != null && !onlyRules.contains(r.id)) continue;
@@ -556,6 +557,24 @@ class BudgetsRepository {
       hlc: Hlc(r.createdAtMillis > 1000 ? r.createdAtMillis - 1000 : 0, 0, ''),
     );
     return true;
+  }
+
+  /// Removes unedited rows of removed rules. A rule is removed only when a
+  /// change starts at or before its first period, and that change moves or
+  /// removes the rule's rows; rows left are ones another device generated
+  /// before it learnt of the change.
+  Future<void> _dropOfRemovedRules() async {
+    final rows = await db
+        .customSelect(
+          'SELECT b.id AS id FROM budgets b JOIN budget_rules r '
+          'ON r.id = b.rule_id WHERE b.deleted_at IS NULL '
+          'AND r.deleted_at IS NOT NULL',
+          readsFrom: {db.budgets, db.budgetRules},
+        )
+        .get();
+    for (final r in rows) {
+      await writer.delete(db.budgets, r.read<String>('id'));
+    }
   }
 
   /// Removes unedited rows of [r] after its end: rows another device
@@ -1012,17 +1031,15 @@ class BudgetsRepository {
 
   // ------------------------------------------------------------- merge ---
 
-  /// Category merge, before the budget rows are merged: brings the rules of
-  /// [sourceId] and [targetId] to the target without changing any rule in
-  /// place (a rule changed in place would let devices that generated its
-  /// rows disagree). Both categories' rows are generated through a common
-  /// horizon (a limited source rule through its end), so merging the rows
-  /// adds them up. After the horizon:
-  /// - a target rule continues as a new rule with the newest open-ended
-  ///   source amount of its length added;
-  /// - an open-ended source rule of a length the target has no rule of
-  ///   continues as a new rule of the target;
-  /// - the source rules end.
+  /// Category merge, before the budget rows are merged. No rule is changed
+  /// in place (devices that generated its rows would disagree):
+  /// - both categories' rules generate their rows through a horizon (the
+  ///   end of the next period, or the furthest watermark), so the merged
+  ///   rows of those periods add up;
+  /// - if the target has a repeating budget that goes on after the
+  ///   horizon, it stays as it is and the source's rules end;
+  /// - otherwise every source rule with periods after the horizon
+  ///   continues as a new rule of the target, unchanged.
   Future<void> mergeRules(
     BudgetPeriods periods, {
     required String sourceId,
@@ -1041,16 +1058,9 @@ class BudgetsRepository {
     ];
     final now = dateOnly(today ?? DateTime.now());
     var horizon = periods.next(periods.periodOf(now)).last;
-    final far = DateTime(now.year + 10, now.month, now.day);
     for (final r in [...source, ...target]) {
       final g = r.generatedUntil;
       if (g != null && g.isAfter(horizon)) horizon = g;
-      if (r.categoryId == sourceId && (r.end != null || r.count != null)) {
-        final covered = r.periodsUpTo(periods, far);
-        if (covered.isNotEmpty && covered.last.start.isAfter(horizon)) {
-          horizon = covered.last.start;
-        }
-      }
     }
     await ensureFromRules(
       periods,
@@ -1060,46 +1070,31 @@ class BudgetsRepository {
       },
     );
     final next = horizon.add(const Duration(days: 1));
-    for (final cadence in BudgetCadence.values) {
-      final src = [
-        for (final r in source)
-          if (r.lengthOn(periods) == cadence) r,
-      ];
-      if (src.isEmpty) continue;
-      final open = [
-        for (final r in src)
-          if (r.end == null && r.count == null) r,
-      ];
-      final newest = open.isEmpty
-          ? null
-          : open.reduce(
-              (a, b) => b.updatedAt.compareTo(a.updatedAt) > 0 ? b : a,
-            );
-      final tgt = [
-        for (final r in target)
-          if (r.lengthOn(periods) == cadence) r,
-      ];
-      if (tgt.isNotEmpty) {
-        if (newest != null) {
-          for (final t in tgt) {
-            await _continueRule(
-              t,
-              periods,
-              after: next,
-              amountMinor: t.amountMinor + newest.amountMinor,
-            );
-          }
-        }
-      } else {
-        for (final r in open) {
-          await _continueRule(r, periods, after: next, categoryId: targetId);
-        }
-      }
-      for (final r in src) {
+    final targetGoesOn = target.any(
+      (r) => _nextPeriod(r, periods, next) != null,
+    );
+    for (final r in source) {
+      if (targetGoesOn) {
         await _endRules([r], next);
+      } else {
+        await _continueRule(r, periods, after: next, categoryId: targetId);
       }
     }
   });
+
+  /// The first period [r] covers that starts on or after [after], if any.
+  DateRange? _nextPeriod(
+    BudgetRulePlan r,
+    BudgetPeriods periods,
+    DateTime after,
+  ) {
+    // It lies within `every` windows (at most a year each).
+    final limit = after.add(Duration(days: 370 * (r.every + 1)));
+    return r
+        .periodsUpTo(periods, limit)
+        .where((p) => !p.start.isBefore(after))
+        .firstOrNull;
+  }
 
   /// Ends [r] before its first covered period starting on or after [after]
   /// and continues it from there as a new rule, with [categoryId] and
@@ -1112,13 +1107,7 @@ class BudgetsRepository {
     String? categoryId,
     int? amountMinor,
   }) async {
-    // The next covered period lies within `every` windows (at most a year
-    // each).
-    final limit = after.add(Duration(days: 370 * (r.every + 1)));
-    final first = r
-        .periodsUpTo(periods, limit)
-        .where((p) => !p.start.isBefore(after))
-        .firstOrNull;
+    final first = _nextPeriod(r, periods, after);
     await _endRules([r], first?.start ?? after);
     if (first == null) return;
     await writer.insert(

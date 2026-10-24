@@ -298,7 +298,8 @@ void main() {
       expect(await ids(db), hasLength(2));
     });
 
-    test('category merge continues rules on the target', () async {
+    test('category merge: rules move to a target without one, end when the '
+        'target has its own', () async {
       final writer = SyncWriter(db, testClock(node: 'm'), 'm');
       final cats = CategoriesRepository(
         db,
@@ -331,14 +332,12 @@ void main() {
         repeat: const BudgetRepeat.everyPeriod(),
       );
       await cats.merge(drinks, food, periods: periods);
-      expect((await open()).single.amountMinor, 5000);
+      // Food's own repeating budget stays; Drinks' ends after the horizon.
+      expect((await open()).single.amountMinor, 3000);
       expect((await repo.period(jan.start)).single.amountMinor, 5000);
       expect((await repo.period(jan.start)).single.ruleId, isNull);
       // No rule was changed in place: every rule's amount is as created.
-      expect(
-        {for (final r in await repo.rules()) r.amountMinor},
-        {3000, 2000, 5000},
-      );
+      expect({for (final r in await repo.rules()) r.amountMinor}, {3000, 2000});
     });
   });
 }

@@ -44,6 +44,18 @@ void main() {
             ..orderBy([(b) => OrderingTerm(expression: b.periodStart)]))
           .get();
 
+  Future<String> repeatMonthlyFor(
+    String categoryId,
+    DateRange from,
+    int amount,
+  ) => repo.repeatFrom(
+    periods: board,
+    categoryId: categoryId,
+    from: from,
+    amountMinor: amount,
+    repeat: const BudgetRepeat.everyPeriod(),
+  );
+
   Future<String> repeatMonthly(DateRange from, int amount, {int every = 1}) =>
       repo.repeatFrom(
         periods: board,
@@ -348,13 +360,24 @@ void main() {
       );
     });
 
-    test('merging a limited rule adds it for its periods only', () async {
+    Future<List<int?>> monthsFrom(DateRange start, int n) async {
+      final out = <int?>[];
+      var p = start;
+      for (var i = 0; i < n; i++) {
+        await repo.ensureFromRules(board, p.start);
+        out.add((await repo.period(p.start)).singleOrNull?.amountMinor);
+        p = board.next(p);
+      }
+      return out;
+    }
+
+    CategoriesRepository categories() {
       final writer = SyncWriter(db, testClock(node: 'm'), 'm');
-      final cats = CategoriesRepository(
-        db,
-        writer,
-        LedgerRepository(db, writer),
-      );
+      return CategoriesRepository(db, writer, LedgerRepository(db, writer));
+    }
+
+    test('merge into a target with a running rule: it stays, the source '
+        'adds up through the next period', () async {
       final now = board.periodOf(DateTime.now());
       final snacks = await f.category('Snacks');
       await repeatMonthly(now, 30000);
@@ -363,17 +386,69 @@ void main() {
         categoryId: snacks,
         from: now,
         amountMinor: 10000,
-        repeat: const BudgetRepeat.forPeriods(3),
+        repeat: const BudgetRepeat.forPeriods(12),
       );
-      await cats.merge(snacks, food, periods: board);
-      var p = now;
-      final amounts = <int>[];
-      for (var i = 0; i < 5; i++) {
-        await repo.ensureFromRules(board, p.start);
-        amounts.add((await repo.period(p.start)).single.amountMinor);
-        p = board.next(p);
-      }
-      expect(amounts, [40000, 40000, 40000, 30000, 30000]);
+      await categories().merge(snacks, food, periods: board);
+      expect(await monthsFrom(now, 5), [40000, 40000, 30000, 30000, 30000]);
+      // Later changes to the target apply from where the user makes them.
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: board.next(board.next(now)),
+        amountMinor: 50000,
+        repeat: const BudgetRepeat.everyPeriod(),
+      );
+      expect(await monthsFrom(now, 4), [40000, 40000, 50000, 50000]);
+    });
+
+    test('merge into a target whose rule has stopped: the source rule '
+        'moves over', () async {
+      final now = board.periodOf(DateTime.now());
+      final snacks = await f.category('Snacks');
+      final lastYear = board.periodOf(
+        DateTime(now.start.year - 1, now.start.month, 15),
+      );
+      await repo.repeatFrom(
+        periods: board,
+        categoryId: food,
+        from: lastYear,
+        amountMinor: 30000,
+        repeat: const BudgetRepeat.forPeriods(2),
+      );
+      await repeatMonthlyFor(snacks, now, 10000);
+      await categories().merge(snacks, food, periods: board);
+      expect(await monthsFrom(now, 6), List.filled(6, 10000));
+    });
+
+    test('rows a removed rule left on another device are removed', () async {
+      final ruleId = await repeatMonthly(oct, 40000);
+      // Another device generated November, then the rule was replaced from
+      // October (removing it, since it started there).
+      await repo.ensureFromRules(board, DateTime(2026, 11, 30));
+      await repeatMonthly(oct, 45000);
+      // The stray row the other device synced in.
+      await f.writer.insert(
+        db.budgets,
+        BudgetsCompanion(
+          categoryId: Value(food),
+          periodStart: Value(DateTime(2026, 11)),
+          amountMinor: const Value(40000),
+          ruleId: Value(ruleId),
+        ),
+      );
+      expect(
+        (await live()).where((b) => b.periodStart == DateTime(2026, 11)),
+        hasLength(2),
+      );
+      await repo.ensureFromRules(board, DateTime(2026, 11, 30));
+      expect(
+        [for (final b in await repo.period(DateTime(2026, 11))) b.amountMinor],
+        [45000],
+      );
+      expect(
+        (await live()).where((b) => b.periodStart == DateTime(2026, 11)),
+        hasLength(1),
+      );
     });
 
     test('generated rows are older than the rule and any later edit', () async {

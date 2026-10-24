@@ -2464,7 +2464,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoriesMergeConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted.'**
+  /// **'Move everything from \"{source}\" into \"{target}\"? Transactions, splits, budgets and subcategories move over and \"{source}\" is deleted. Budgets of the same period are added up. If \"{target}\" has a repeating budget, it stays, and the repeating budgets of \"{source}\" end after the next period.'**
   String categoriesMergeConfirm(String source, String target);
 
   /// No description provided for @categoriesMerged.

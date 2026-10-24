@@ -119,8 +119,10 @@ rows from the old rule never disagree about what the rule says.
   (after the first day of week, start day or fiscal year changed), so
   generated windows never overlap. The window straddling such a change is
   skipped, so a few days can be without a budget.
-- Rows a rule generated after its end (by a device that did not know yet
-  that a newer rule took over) are removed when rules generate.
+- Rows a rule generated after its end, or after it was removed (by a
+  device that did not know yet that a newer rule took over), are removed
+  when rules generate. A hand edit clears `ruleId`, so edited rows are
+  never touched.
 - **Watermark.** `generatedUntil` is the start of the last period a rule
   has handled. Periods up to it are never generated again, so a budget
   the user removed stays removed. This holds even after the tombstone
@@ -179,13 +181,12 @@ generated rows from the given period on.
 
 - A category with rules counts as in use, so deleting it is refused.
 - Merging (`mergeRules`, before the rows are merged) first generates the
-  rows of both categories' rules through a common horizon (the end of the
-  next period or the furthest watermark; a source rule with an end or a
-  count through its last period), so the merged rows add up. After the
-  horizon a target rule continues as a new rule with the newest
-  open-ended source amount of its length added; an open-ended source rule
-  of a length the target has no rule of continues as a new rule of the
-  target. The source rules end. Merged
+  rows of both categories' rules through a horizon (the end of the next
+  period, or the furthest watermark), so the merged rows of those periods
+  add up. After the horizon: if the target has a repeating budget that
+  goes on, it stays as it is and the source's rules end; otherwise every
+  source rule with periods left continues, unchanged, as a new rule of
+  the target. The merge dialog says so. Merged
   period rows become hand-set.
 - `budget_rules` is in `syncedTableNames`, so it is backed up, restored
   and synced like every other table. A restore brings back the rules

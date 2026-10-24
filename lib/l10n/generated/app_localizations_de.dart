@@ -1596,7 +1596,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String categoriesMergeConfirm(String source, String target) {
-    return 'Alles aus „$source“ nach „$target“ verschieben? Buchungen, Aufteilungen, Budgets und Unterkategorien werden übernommen und „$source“ wird gelöscht.';
+    return 'Alles aus „$source“ nach „$target“ verschieben? Buchungen, Aufteilungen, Budgets und Unterkategorien werden übernommen und „$source“ wird gelöscht. Budgets desselben Zeitraums werden addiert. Hat „$target“ ein wiederkehrendes Budget, bleibt es, und die wiederkehrenden Budgets von „$source“ enden nach dem nächsten Zeitraum.';
   }
 
   @override
