@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/app_logo.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
@@ -374,19 +375,7 @@ class _Sidebar extends ConsumerWidget {
       (d) => d.tab != NavTab.more && active(_branchRoot(d.branch)),
     );
 
-    final logo = Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Icon(
-        Icons.account_balance_wallet_outlined,
-        size: 18,
-        color: cs.onPrimary,
-      ),
-    );
+    const logo = AppLogo();
 
     return Container(
       width: collapsed ? 72 : 232,
@@ -402,7 +391,7 @@ class _Sidebar extends ConsumerWidget {
             child: collapsed
                 ? Tooltip(
                     message: l.appTitle,
-                    child: Center(child: logo),
+                    child: const Center(child: logo),
                   )
                 : Row(
                     children: [

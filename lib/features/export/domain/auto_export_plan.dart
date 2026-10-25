@@ -3,10 +3,14 @@ import 'package:personal_finance/core/settings/app_settings.dart';
 
 // Pure scheduling/retention rules of the automatic backup.
 
-const autoExportPrefix = 'personal-finance-backup-';
+const autoExportPrefix = 'quiet-ledger-backup-';
 
+/// Scheduled backups written before the app was named Quiet Ledger
+/// (`personal-finance-backup-…`) still count: they are listed for restore
+/// and pruned like new ones.
 final _fileName = RegExp(
-  r'^personal-finance-backup-(\d{8}-\d{6})(?:-\d+)?\.(?:zip|pfbackup)$',
+  r'^(?:quiet-ledger|personal-finance)-backup-(\d{8}-\d{6})(?:-(\d+))?'
+  r'\.(?:zip|pfbackup)$',
 );
 
 /// How long to wait after [failures] scheduled backups failed in a row
@@ -46,13 +50,31 @@ bool isAutoExportDue(
   };
 }
 
-/// `personal-finance-backup-20261023-081500.zip` (local time; sorts
-/// chronologically), `.pfbackup` when [extension] says so.
+/// `quiet-ledger-backup-20261023-081500.zip` (local time),
+/// `.pfbackup` when [extension] says so.
 String autoExportFileName(DateTime now, [String extension = '.zip']) =>
     '$autoExportPrefix${DateFormat('yyyyMMdd-HHmmss').format(now)}$extension';
 
 /// Whether [name] was written by the automatic backup.
 bool isAutoExportFile(String name) => _fileName.hasMatch(name);
+
+/// The automatic backups among [names], newest first: by the time in the
+/// name, so old and new prefixes interleave correctly.
+List<String> sortedAutoExportFiles(Iterable<String> names) {
+  (String, int) key(String name) {
+    final m = _fileName.firstMatch(name)!;
+    return (m[1]!, int.tryParse(m[2] ?? '') ?? 0);
+  }
+
+  return names.where(isAutoExportFile).toList()..sort((a, b) {
+    final (ta, na) = key(a);
+    final (tb, nb) = key(b);
+    final byTime = tb.compareTo(ta);
+    if (byTime != 0) return byTime;
+    final bySuffix = nb.compareTo(na);
+    return bySuffix != 0 ? bySuffix : b.compareTo(a);
+  });
+}
 
 /// Automatic backup files to delete so that only the newest [keep] remain.
 /// Other files in the folder are never touched, and neither is [protect]
@@ -62,8 +84,7 @@ List<String> autoExportFilesToPrune(
   int keep, {
   String? protect,
 }) {
-  final ours = names.where((n) => isAutoExportFile(n) && n != protect).toList()
-    ..sort((a, b) => b.compareTo(a));
+  final ours = sortedAutoExportFiles(names.where((n) => n != protect));
   final rest = protect == null ? keep : keep - 1;
   return ours.length <= rest ? const [] : ours.sublist(rest.clamp(0, keep));
 }

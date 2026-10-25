@@ -6,6 +6,7 @@ import UserNotifications
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var backupFolder: BackupFolderChannel?
+  private var appIcon: AppIconChannel?
 
   override func application(
     _ application: UIApplication,
@@ -20,6 +21,42 @@ import UserNotifications
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "BackupFolderChannel") {
       backupFolder = BackupFolderChannel(messenger: registrar.messenger())
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "AppIconChannel") {
+      appIcon = AppIconChannel(messenger: registrar.messenger())
+    }
+  }
+}
+
+/// Home-screen icon in the accent colour (`personal_finance/app_icon`).
+/// `setLauncherIcon` switches to the alternate icon `AppIcon-<preset>`
+/// (spruce is the primary `AppIcon`). The icon sets come from
+/// tool/app_icons; ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS ships
+/// them all. iOS shows its own alert after each change.
+final class AppIconChannel {
+  private let channel: FlutterMethodChannel
+
+  init(messenger: FlutterBinaryMessenger) {
+    channel = FlutterMethodChannel(name: "personal_finance/app_icon", binaryMessenger: messenger)
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "setLauncherIcon",
+        let args = call.arguments as? [String: Any],
+        let name = args["name"] as? String
+      else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let icon: String? = name == "spruce" ? nil : "AppIcon-\(name)"
+      let app = UIApplication.shared
+      guard app.supportsAlternateIcons, app.alternateIconName != icon else {
+        result(nil)
+        return
+      }
+      app.setAlternateIconName(icon) { error in
+        DispatchQueue.main.async {
+          result(error.map { FlutterError(code: "io", message: $0.localizedDescription, details: nil) })
+        }
+      }
     }
   }
 }

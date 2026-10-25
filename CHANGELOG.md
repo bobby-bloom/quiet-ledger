@@ -27,6 +27,13 @@ a dated release section.
   transactions, accounts) offer Rows 3 · 5 · 10 in their menu.
 - Removing a dashboard widget can be undone, and it keeps its settings and
   its place for when it is added back.
+- An app icon of its own, a tick over a double rule, in your accent
+  colour: in the app, on the window, taskbar and Dock while the app runs
+  (Linux, Windows, macOS), as the web app's tab icon, and as the tint of
+  Android notifications. On Android and iOS the home-screen icon switches
+  to the preset closest to the accent (Settings › Appearance › App icon in
+  accent colour; iOS confirms each change). Installer and file icons stay
+  in the default spruce.
 - Budgets show planned entries and recurring items that are not booked
   yet as outstanding: a striped part of the bar, "€80 planned" or
   "Planned: €30 over" on the row, the planned total on the summary card
@@ -99,6 +106,10 @@ a dated release section.
   is remembered on this device.
 - Desktop sidebar can be collapsed to icons with the button at its
   bottom; the choice is remembered on this device.
+- Plan › Budgets adds a budget with the + in the header, like Recurring
+  and Goals, instead of a button below the list.
+- Accounts on wide screens offer Reconcile once, as the button in the
+  account's pane, instead of also in the app bar and the pane's header.
 
 ### Removed
 
@@ -114,6 +125,18 @@ a dated release section.
   ("of €…", "€… over") and goals ("saved / target"), the running balance
   under a transaction, and the amounts screen readers read out for
   transactions.
+- The app is called Quiet Ledger everywhere: on the Android and iOS home
+  screen, in the macOS menu bar and the released `Quiet Ledger.app`, in
+  the Linux and Windows window titles, the Windows task manager and the
+  web app's title and install name (some still said `personal_finance`
+  or "Personal Finance"). Data stays where it is. New backup files are
+  named `quiet-ledger-backup-…` (manual: `quiet-ledger-manual-…`); older
+  `personal-finance-backup-…` files are still listed for restore and
+  cleaned up as before.
+- The program in the Linux and Windows downloads is called `quiet-ledger`
+  (`quiet-ledger.exe`) instead of `personal_finance`. Shortcuts or pinned
+  taskbar entries to the old file need to be made again; data, settings
+  and the database key are found as before.
 - The app bar's last button lines up with the page margin on every
   screen instead of sitting at the window edge (or wherever each screen
   put its own spacer); the phone headers of Home and Transactions match.

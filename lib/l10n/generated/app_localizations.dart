@@ -9552,6 +9552,18 @@ abstract class AppLocalizations {
   /// **'Confirm before deleting'**
   String get setConfirmDelete;
 
+  /// No description provided for @setAccentAppIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon in accent colour'**
+  String get setAccentAppIcon;
+
+  /// No description provided for @setAccentAppIconDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The home-screen icon uses the preset closest to your accent. iOS asks to confirm each change.'**
+  String get setAccentAppIconDesc;
+
   /// No description provided for @setSidebarCollapsed.
   ///
   /// In en, this message translates to:

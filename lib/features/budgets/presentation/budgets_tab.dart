@@ -91,11 +91,14 @@ class BudgetBoard extends ConsumerWidget {
     final board = ref.watch(budgetBoardProvider(period));
     final selector = ref.read(selectedBudgetPeriodProvider.notifier);
 
-    final header = PeriodSwitcher(
-      period: period,
-      onPrevious: () => selector.select(periods.previous(period)),
-      onNext: () => selector.select(periods.next(period)),
-      onToday: period == current ? null : selector.reset,
+    final header = Padding(
+      padding: const EdgeInsets.all(Space.xs),
+      child: PeriodSwitcher(
+        period: period,
+        onPrevious: () => selector.select(periods.previous(period)),
+        onNext: () => selector.select(periods.next(period)),
+        onToday: period == current ? null : selector.reset,
+      ),
     );
 
     final summary = board.value;
@@ -184,19 +187,6 @@ class BudgetBoard extends ConsumerWidget {
           ),
         );
       }
-      children.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(Space.sm, Space.xs, Space.sm, 0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              icon: const Icon(Icons.add),
-              label: Text(l.budgetsAdd),
-              onPressed: () => addBudget(context, ref, period),
-            ),
-          ),
-        ),
-      );
     }
     children.add(const SizedBox(height: 96));
     return ListView(children: children);

@@ -122,12 +122,16 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
 - **Run** (`runAutoExportNow`): record the attempt → list the folder (an
   unreachable folder fails here, before any export) → create the backup,
   encrypt it and decrypt it again to check it (`createVerifiedBackup`) →
-  write `personal-finance-backup-<yyyyMMdd-HHmmss>.zip|.pfbackup` → read
+  write `quiet-ledger-backup-<yyyyMMdd-HHmmss>.zip|.pfbackup` → read
   it back and compare it byte for byte, deleting it again if that fails →
   prune to the newest N, never the new file and never other files →
   record success. Manual backups are named
-  `personal-finance-manual-…`, so a manual backup saved into the backup
-  folder is never pruned.
+  `quiet-ledger-manual-…`, so a manual backup saved into the backup
+  folder is never pruned. Scheduled backups from before the rename
+  (`personal-finance-backup-…`) still count: they are listed for restore
+  and pruned with the new ones, newest first by the time in the name.
+  The format ids inside a backup (`personal-finance-bundle`, the recovery
+  key's derivation context) keep the old name for good.
 - **Folder access.**
   - Linux and Windows: a plain path. A missing folder is an error
     (`BackupFolderMissingException`, "Connect the drive it is on"), never

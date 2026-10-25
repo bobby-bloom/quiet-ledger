@@ -5951,6 +5951,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setConfirmDelete => 'Confirm before deleting';
 
   @override
+  String get setAccentAppIcon => 'App icon in accent colour';
+
+  @override
+  String get setAccentAppIconDesc =>
+      'The home-screen icon uses the preset closest to your accent. iOS asks to confirm each change.';
+
+  @override
   String get setSidebarCollapsed => 'Collapse the sidebar';
 
   @override

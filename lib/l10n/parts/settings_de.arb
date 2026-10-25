@@ -20,6 +20,8 @@
   "setCombineScenarios": "Alle Szenarien kombiniert zeigen",
   "setCombineScenariosDesc": "Zusätzliche Linie mit allen verglichenen Szenarien zusammen. Setzen mehrere eine Rendite oder Inflation, gilt das letzte.",
   "setConfirmDelete": "Vor dem Löschen bestätigen",
+  "setAccentAppIcon": "App-Symbol in Akzentfarbe",
+  "setAccentAppIconDesc": "Das Symbol auf dem Startbildschirm nimmt die Vorgabe, die deiner Akzentfarbe am nächsten kommt. iOS fragt bei jeder Änderung nach.",
   "setSidebarCollapsed": "Seitenleiste einklappen",
   "setForecastSidePanelHidden": "Prognose-Seitenleiste ausblenden",
   "setCsvDateFormat": "CSV-Datumsformat",

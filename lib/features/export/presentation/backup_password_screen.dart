@@ -265,7 +265,7 @@ class _SetupFlowState extends ConsumerState<_SetupFlow> {
     final text = '${l.backupRecoveryFileIntro}\n\n${_groups.join('-')}\n';
     await saveOrShareBytes(
       bytes: Uint8List.fromList(utf8.encode(text)),
-      fileName: 'personal-finance-recovery-key.txt',
+      fileName: 'quiet-ledger-recovery-key.txt',
       mimeType: 'text/plain',
       capabilities: ref.read(platformCapabilitiesProvider),
     );

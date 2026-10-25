@@ -90,11 +90,16 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.personalfinance" "\0"
-            VALUE "FileDescription", "personal_finance" "\0"
+            VALUE "FileDescription", "Quiet Ledger" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "personal_finance" "\0"
+            VALUE "InternalName", "quiet-ledger" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 dev.personalfinance. All rights reserved." "\0"
-            VALUE "OriginalFilename", "personal_finance.exe" "\0"
+            VALUE "OriginalFilename", "quiet-ledger.exe" "\0"
+            // CompanyName and ProductName name the data folder
+            // (%APPDATA%\dev.personalfinance\personal_finance, see
+            // path_provider_windows) and the stored database key
+            // (flutter_secure_storage_windows); changing them would lose
+            // the database. The exe's file name is free to change.
             VALUE "ProductName", "personal_finance" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

@@ -3,6 +3,7 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   private var backupFolder: BackupFolderChannel?
+  private var appIcon: AppIconChannel?
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -12,8 +13,32 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     backupFolder = BackupFolderChannel(messenger: flutterViewController.engine.binaryMessenger)
+    appIcon = AppIconChannel(messenger: flutterViewController.engine.binaryMessenger)
 
     super.awakeFromNib()
+  }
+}
+
+/// Dock icon in the accent colour while the app runs
+/// (`personal_finance/app_icon`, lib/app/app_icon/app_icon_host_io.dart);
+/// Finder and a quit app show the bundle's icon.
+final class AppIconChannel {
+  private let channel: FlutterMethodChannel
+
+  init(messenger: FlutterBinaryMessenger) {
+    channel = FlutterMethodChannel(name: "personal_finance/app_icon", binaryMessenger: messenger)
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "setDockIcon",
+        let args = call.arguments as? [String: Any],
+        let png = args["png"] as? FlutterStandardTypedData,
+        let image = NSImage(data: png.data)
+      else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      NSApp.applicationIconImage = image
+      result(nil)
+    }
   }
 }
 

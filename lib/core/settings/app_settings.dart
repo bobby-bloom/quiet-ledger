@@ -185,6 +185,18 @@ abstract final class AppearanceSettings {
     bootstrap: true,
   );
 
+  /// Android/iOS: the home-screen icon switches to the preset closest to
+  /// the accent (iOS confirms each change with a system alert).
+  static final accentAppIcon = SettingDef.boolean(
+    key: 'appearance.accentAppIcon',
+    section: SettingSection.appearance,
+    defaultValue: true,
+    label: (l) => l.setAccentAppIcon,
+    description: (l) => l.setAccentAppIconDesc,
+    keywords: const ['icon', 'launcher', 'symbol'],
+    deviceLocal: true,
+  );
+
   static final highContrast = SettingDef.boolean(
     key: 'appearance.highContrast',
     section: SettingSection.appearance,
@@ -261,6 +273,7 @@ abstract final class AppearanceSettings {
     accentScheme,
     customAccent,
     dynamicColor,
+    accentAppIcon,
     highContrast,
     textScale,
     density,

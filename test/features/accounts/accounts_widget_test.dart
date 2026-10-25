@@ -113,6 +113,16 @@ void main() {
     expect(find.text('Balance over time'), findsOneWidget);
     expect(find.text('Corner Grocer'), findsOneWidget);
     expect(find.text('Main account'), findsWidgets);
+    // Reconcile only once, as the button in the detail pane.
+    expect(find.byIcon(Icons.balance_outlined), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Reconcile'), findsOneWidget);
+    await unmount(tester);
+
+    // Phones have no pane: the list's app bar reconciles.
+    tester.view.physicalSize = const Size(400, 900);
+    await tester.pumpWidget(testApp(const AccountsScreen(), db: db));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Reconcile balances'), findsOneWidget);
     await unmount(tester);
   });
 

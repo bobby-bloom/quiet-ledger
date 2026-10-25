@@ -195,7 +195,10 @@ jobs:
       - if: matrix.target == 'macos'
         run: |
           flutter build macos --release
-          ditto -c -k --keepParent build/macos/Build/Products/Release/personal_finance.app "dist/$NAME-macos.zip"
+          # The bundle is built as personal_finance.app; users get it as
+          # "Quiet Ledger.app" (data is keyed to the bundle id, not the name).
+          mv build/macos/Build/Products/Release/personal_finance.app "build/macos/Build/Products/Release/Quiet Ledger.app"
+          ditto -c -k --keepParent "build/macos/Build/Products/Release/Quiet Ledger.app" "dist/$NAME-macos.zip"
 
       - uses: actions/upload-artifact@v7
         with:

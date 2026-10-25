@@ -1,11 +1,11 @@
 {
-    "name": "personal_finance",
-    "short_name": "personal_finance",
+    "name": "Quiet Ledger",
+    "short_name": "Quiet Ledger",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Local-first personal finance: record, track, plan and project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

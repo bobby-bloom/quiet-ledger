@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/app_logo.dart';
 import 'package:personal_finance/core/app_version.dart';
 import 'package:personal_finance/core/platform/capabilities.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
@@ -92,18 +93,7 @@ class AboutSection extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: context.colors.primaryContainer,
-                  borderRadius: BorderRadius.circular(Radii.lg),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: context.colors.onPrimaryContainer,
-                ),
-              ),
+              const AppLogo(size: 56),
               const SizedBox(width: Space.md),
               Expanded(
                 child: Column(

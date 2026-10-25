@@ -14,10 +14,12 @@ and layout storage.
 lib/
   app/            app widget, bootstrap, router, AdaptiveShell, theme, shared UI
     theme/        tokens.dart (design tokens), app_theme.dart, finance_colors.dart, theme_ext.dart
+    app_icon/     app icon in the accent colour: rendering/ICO, AppIconSync (window, Dock,
+                  favicon, launcher preset, notification tint)
     ui/           AmountText, SectionCard, ProgressBar, StatusBadge, EmptyState, AsyncView,
                   IconTile, confirmDialog, formatters (money/date providers), breakpoints, AppIcons,
                   pickers.dart (showCategoryPicker/MultiPicker, showAccountPicker/MultiPicker,
-                  showAdaptiveSheet, MoneyField)
+                  showAdaptiveSheet, MoneyField), app_mark.dart (the icon's mark), AppLogo
   core/
     money/        Money (int minor units), MoneyFormatter, money_input.dart (parseAmountInput)
     db/           tables.dart (schema), database.dart (+ .g.dart; syncedTableNames,
@@ -107,6 +109,17 @@ onSurface with "−"; income uses `finance.income` with "+"; transfers use
 track → primary, ≥ threshold → warningFill, over → error, always with a
 text label. Touch targets ≥ 44 px. Icons: Material outlined; stored icon keys
 map through `AppIcons`.
+
+**App icon.** One drawing, `AppMarkPainter` (`app/ui/app_mark.dart`): a
+tick over a double rule, white on the accent. In the app it is `AppLogo`;
+`AppIconSync` recolours the running app's window (Linux, Windows), Dock
+(macOS) and favicon (web) in any accent, and on Android/iOS switches the
+home-screen icon to the closest preset (`launcherIconPresets`; Android
+activity-aliases switch when the app goes to the background, iOS
+alternate icons confirm with a system alert). Every static icon file
+(launcher presets, notification icon, iOS/macOS asset sets, Windows ICO,
+web icons) is generated: rerun `flutter test tool/app_icons/app_icons_test.dart`
+after changing the mark or a preset colour, never edit the files by hand.
 
 **Strings.** No hard-coded user-visible strings. Put them in
 `lib/l10n/parts/<feature>_en.arb` and `_de.arb` (both!), keys prefixed with

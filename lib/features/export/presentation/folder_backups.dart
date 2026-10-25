@@ -20,8 +20,7 @@ final folderBackupsProvider = FutureProvider.autoDispose
       final files = await ref
           .watch(exportFolderFactoryProvider)(folder)
           .listFiles();
-      return files.where(isAutoExportFile).toList()
-        ..sort((a, b) => b.compareTo(a));
+      return sortedAutoExportFiles(files);
     });
 
 /// How the backup folder is shown: the app Documents folder by its place
