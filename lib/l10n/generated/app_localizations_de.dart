@@ -2493,6 +2493,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'Deine frühere Reihenfolge wurde ersetzt';
 
   @override
+  String get dashLayoutDragRow => 'Ziehen, um die Zeile zu verschieben';
+
+  @override
+  String dashLayoutRowPickedUp(int row) {
+    return 'Zeile $row aufgenommen';
+  }
+
+  @override
+  String dashLayoutRowDropped(int row) {
+    return 'Zeile $row abgelegt';
+  }
+
+  @override
+  String dashLayoutRowMovedTo(int position, int count) {
+    return 'Zeile auf Position $position von $count verschoben';
+  }
+
+  @override
   String get exportTitle => 'Export & Sicherung';
 
   @override

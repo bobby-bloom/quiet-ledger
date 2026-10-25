@@ -2468,6 +2468,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashLayoutOrderReplaced => 'Your earlier order was replaced';
 
   @override
+  String get dashLayoutDragRow => 'Drag to move the row';
+
+  @override
+  String dashLayoutRowPickedUp(int row) {
+    return 'Row $row picked up';
+  }
+
+  @override
+  String dashLayoutRowDropped(int row) {
+    return 'Row $row dropped';
+  }
+
+  @override
+  String dashLayoutRowMovedTo(int position, int count) {
+    return 'Row moved to position $position of $count';
+  }
+
+  @override
   String get exportTitle => 'Export & backup';
 
   @override

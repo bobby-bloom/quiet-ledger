@@ -405,3 +405,16 @@ List<BoardRow> addRow(List<BoardRow> rows, int fits) {
     ),
   ];
 }
+
+/// [rows] with the row at [from] moved to the gap at [to] (0 = above the
+/// first row, `rows.length` = below the last), counted before it is taken
+/// out. A gap next to the row itself returns [rows] as they are.
+List<BoardRow> moveRowTo(List<BoardRow> rows, int from, int to) {
+  if (from < 0 || from >= rows.length || to < 0 || to > rows.length) {
+    return rows;
+  }
+  if (to == from || to == from + 1) return rows;
+  final row = rows[from];
+  final without = [...rows]..removeAt(from);
+  return without..insert(to > from ? to - 1 : to, row);
+}

@@ -1737,6 +1737,34 @@
     }
   },
   "dashLayoutOrderReplaced": "Your earlier order was replaced",
+  "dashLayoutDragRow": "Drag to move the row",
+  "dashLayoutRowPickedUp": "Row {row} picked up",
+  "@dashLayoutRowPickedUp": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "dashLayoutRowDropped": "Row {row} dropped",
+  "@dashLayoutRowDropped": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "dashLayoutRowMovedTo": "Row moved to position {position} of {count}",
+  "@dashLayoutRowMovedTo": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exportTitle": "Export & backup",
   "exportTxnTitle": "Transactions as CSV",
   "exportTxnDesc": "Export transactions of a period and selected accounts, e.g. for Excel.",
