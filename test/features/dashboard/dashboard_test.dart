@@ -43,6 +43,23 @@ void main() {
       ),
     );
     final today = dateOnly(DateTime.now());
+    // A budget already over (24.80 of 10.00) and a goal, for privacy mode.
+    await w.insert(
+      db.budgets,
+      BudgetsCompanion(
+        categoryId: Value(food),
+        periodStart: Value(DateTime(today.year, today.month)),
+        amountMinor: const Value(1000),
+      ),
+    );
+    await w.insert(
+      db.goals,
+      const GoalsCompanion(
+        name: Value('Emergency fund'),
+        targetMinor: Value(1000000),
+        savedMinor: Value(420000),
+      ),
+    );
     await ledger.create(
       TxnDraft(
         accountId: checking,
@@ -149,6 +166,38 @@ void main() {
       await tester.tap(find.byTooltip('Hide amounts'));
       await settle(tester);
       expect(find.bySemanticsLabel(RegExp('Lowest .*€')), findsNothing);
+    } finally {
+      handle.dispose();
+      await teardown(tester);
+    }
+  });
+
+  testWidgets('privacy mode masks budget, goal and transaction amounts in '
+      'text and for screen readers', (tester) async {
+    await tester.runAsync(seed);
+    final handle = tester.ensureSemantics();
+    try {
+      await pumpAt(tester, const Size(1440, 1000));
+      // Shown in plain text while amounts are visible.
+      expect(find.textContaining('of €10'), findsOneWidget);
+      expect(find.textContaining('€14.80 over'), findsOneWidget);
+      expect(find.textContaining('€4,200 / €10,000'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Corner Grocer.*24[.,]80')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byTooltip('Hide amounts'));
+      await settle(tester);
+      expect(find.textContaining('of €10'), findsNothing);
+      expect(find.textContaining('over'), findsWidgets);
+      expect(find.textContaining('€14.80 over'), findsNothing);
+      expect(find.textContaining('••• / •••'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('24[.,]80')), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp('Corner Grocer.*Hidden amount')),
+        findsOneWidget,
+      );
     } finally {
       handle.dispose();
       await teardown(tester);

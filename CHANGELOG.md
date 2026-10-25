@@ -110,6 +110,10 @@ a dated release section.
 
 ### Fixed
 
+- Privacy mode now also hides the amounts in the dashboard's budget rows
+  ("of €…", "€… over") and goals ("saved / target"), the running balance
+  under a transaction, and the amounts screen readers read out for
+  transactions.
 - The app bar's last button lines up with the page margin on every
   screen instead of sitting at the window edge (or wherever each screen
   put its own spacer); the phone headers of Home and Transactions match.

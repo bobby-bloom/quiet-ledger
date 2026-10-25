@@ -33,6 +33,10 @@ class BudgetsWidget extends ConsumerWidget {
     final range = ref.watch(dashboardPeriodProvider);
     final board = ref.watch(budgetBoardProvider(range));
     final fmt = ref.watch(moneyFormatterProvider);
+    // Privacy mode: amounts inside composed labels show as a mask.
+    final hidden = ref.watch(privacyModeProvider);
+    String money(int minor, {bool cents = true}) =>
+        hidden ? '•••' : fmt.format(Money(minor), cents: cents);
     final lines =
         (board.value?.lines ?? const <BudgetLine>[])
             .where((x) => x.isRoot && x.budgetId != null)
@@ -58,12 +62,9 @@ class BudgetsWidget extends ConsumerWidget {
                   tick:
                       line.window?.progressAt(DateTime.now()) ??
                       summary.period.progressAt(DateTime.now()),
-                  fmtAvailable: fmt.format(
-                    Money(line.availableMinor),
-                    cents: false,
-                  ),
-                  fmtOver: fmt.format(Money(line.overMinor)),
-                  fmtPlanned: fmt.format(Money(line.plannedMinor)),
+                  fmtAvailable: money(line.availableMinor, cents: false),
+                  fmtOver: money(line.overMinor),
+                  fmtPlanned: money(line.plannedMinor),
                   onTap: () => context.push(
                     '/plan/budgets/${line.categoryId}?period=${_iso(summary.period.start)}',
                   ),
@@ -388,6 +389,10 @@ class GoalsWidget extends ConsumerWidget {
     final l = context.l10n;
     final goals = ref.watch(goalsProgressProvider);
     final fmt = ref.watch(moneyFormatterProvider);
+    // Privacy mode: amounts inside composed labels show as a mask.
+    final hidden = ref.watch(privacyModeProvider);
+    String money(int minor, {bool cents = true}) =>
+        hidden ? '•••' : fmt.format(Money(minor), cents: cents);
     final dates = ref.watch(dateFormatsProvider);
     final all = goals.value ?? const [];
     // The goal closest to its target (not yet reached), else the first.
@@ -450,7 +455,7 @@ class GoalsWidget extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           [
-                            '${fmt.format(Money(g.savedMinor), cents: false)} / ${fmt.format(Money(g.targetMinor), cents: false)}',
+                            '${money(g.savedMinor, cents: false)} / ${money(g.targetMinor, cents: false)}',
                             if (g.projection.projectedDate != null)
                               dates.monthYear(g.projection.projectedDate!),
                           ].join(' · '),
