@@ -298,7 +298,12 @@ class BoardArrangeBar extends ConsumerWidget {
     final onReset = isDefault ? null : () => notifier.reset(fits);
     return Container(
       color: context.colors.surfaceContainerHigh,
-      padding: const EdgeInsets.fromLTRB(32, 14, 28, 14),
+      padding: const EdgeInsets.fromLTRB(
+        Space.desktopGutter,
+        14,
+        Space.desktopGutter - Space.xxs,
+        14,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           // Below this width at the text scale the hint goes and Add

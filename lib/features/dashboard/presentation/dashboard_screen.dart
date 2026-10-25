@@ -38,7 +38,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final size = WindowSize.of(context);
-    final gutter = size.isCompact ? Space.phoneGutter : Space.xxl;
+    final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
     final view = size.isCompact ? BoardView.compact : BoardView.expanded;
     final labels = dashboardLabels(
       context,
@@ -79,7 +79,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             )),
                 ),
                 SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: gutter),
+                  padding: EdgeInsets.fromLTRB(
+                    gutter,
+                    size.isCompact ? 0 : Space.md,
+                    gutter,
+                    0,
+                  ),
                   sliver: const SliverToBoxAdapter(
                     child: BackupHealthBanner(dismissible: true),
                   ),
@@ -352,8 +357,14 @@ class _WideHeader extends ConsumerWidget {
     final l = context.l10n;
     final privacy = ref.watch(privacyModeProvider);
     return Padding(
-      // The last icon's circle ends on the 32 px content margin.
-      padding: const EdgeInsets.fromLTRB(32, 20, 28, 20),
+      // Same height and margins as the other screens' PageAppBar: the
+      // title and the last icon's circle on the content's 24 px margins.
+      padding: const EdgeInsets.fromLTRB(
+        Space.desktopGutter,
+        Space.xxs,
+        Space.desktopGutter - Space.xxs,
+        Space.xxs,
+      ),
       child: Wrap(
         spacing: 12,
         runSpacing: 12,

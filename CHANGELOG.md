@@ -131,6 +131,10 @@ a dated release section.
 
 ### Fixed
 
+- Home on wider windows sits on the same 24 px margins as the other
+  screens (it kept 32 px), and its header has their height, so the title
+  no longer jumps when switching screens. The same goes for the bar shown
+  while arranging the widgets.
 - Plan › Recurring: the amounts in the list of rules are as large as in
   the due items and transaction rows instead of tiny.
 - Arranging the dashboard: dragging a widget into an empty column no
