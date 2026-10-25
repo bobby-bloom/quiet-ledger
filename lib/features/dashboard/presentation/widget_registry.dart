@@ -68,7 +68,7 @@ int? rowLimit(DashboardItem item) {
 
 /// Widget-specific entries for the options menu: the forecast's account and,
 /// for lists, the Rows group.
-List<DashOption> widgetOptions(
+List<CardOption> widgetOptions(
   BuildContext context,
   WidgetRef ref,
   DashboardItem item,
@@ -79,7 +79,7 @@ List<DashOption> widgetOptions(
   final limit = rowLimit(item);
   return [
     if (item.type == DashboardWidgetType.forecast)
-      DashOption(l.dashChooseAccount, Icons.account_balance_outlined, () async {
+      CardOption(l.dashChooseAccount, Icons.account_balance_outlined, () async {
         final id = await showAccountPicker(
           context,
           selectedId: item.options['accountId'] as String?,
@@ -90,7 +90,7 @@ List<DashOption> widgetOptions(
       }),
     if (choices != null)
       for (final n in choices.values)
-        DashOption(
+        CardOption(
           '$n',
           Icons.format_list_numbered,
           () => update(item.copyWith(options: {...item.options, 'limit': n})),
@@ -104,7 +104,7 @@ Widget buildDashboardWidget(
   BuildContext context,
   DashboardItem item, {
   required bool compact,
-  required List<DashOption> options,
+  required List<CardOption> options,
 }) {
   // Non-null for every list widget below.
   final limit = rowLimit(item) ?? 0;

@@ -122,7 +122,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           setCardOptions(ref, dashboardBoard, view, type.name, updated.options),
         );
       }),
-      DashOption(
+      CardOption(
         l.dashRemove,
         Icons.remove_circle_outline,
         () => unawaited(
@@ -130,7 +130,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
       ),
       if (layout != null && layout.canArrange)
-        DashOption(
+        CardOption(
           l.dashLayoutArrange,
           Icons.drag_indicator,
           () => ref
@@ -138,7 +138,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               .enter(saved, layout.placed),
         )
       else if (view == BoardView.compact)
-        DashOption(
+        CardOption(
           l.dashLayoutEditMenu,
           Icons.dashboard_customize_outlined,
           () => unawaited(

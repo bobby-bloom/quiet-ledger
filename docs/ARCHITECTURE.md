@@ -20,7 +20,8 @@ lib/
     ui/board/     boards of cards (docs/BOARD.md): CardBoard, arrange mode, layout menu,
                   order sheet, actions
     ui/           AmountText, SectionCard, ProgressBar, StatusBadge, EmptyState, AsyncView,
-                  BusyBody, IconTile, confirmDialog, formatters (money/date providers), breakpoints, AppIcons,
+                  BusyBody, FoldCard, IconTile, confirmDialog, formatters (money/date providers),
+                  breakpoints, AppIcons,
                   pickers.dart (showCategoryPicker/MultiPicker, showAccountPicker/MultiPicker,
                   showAdaptiveSheet, MoneyField), app_mark.dart (the icon's mark), AppLogo
   core/
@@ -116,7 +117,11 @@ phone UI.
 literals in feature code. Spacing from `Space`, radii from `Radii`,
 durations and curves from `Motion` (`Motion.isReduced` for reduced motion). Cards:
 `SectionCard` / `Card` (level 0, hairline border), `Space.cardGap`
-(10 px) apart, stacked or side by side, on every screen. Expense amounts stay
+(10 px) apart, stacked or side by side, on every screen. Cards of a board
+(the dashboard, the forecast) are `FoldCard`s: a fold chevron whose state
+is kept per card in a device-local string setting (`cardFoldsProvider`),
+and their action as a footer link ("All budgets ›") that moves into ⋮
+while folded. Expense amounts stay
 onSurface with "−"; income uses `finance.income` with "+"; transfers use
 `finance.transfer` and no sign (AmountText does this). Budget bars: on
 track → primary, ≥ threshold → warningFill, over → error, always with a

@@ -9588,6 +9588,12 @@ abstract class AppLocalizations {
   /// **'Hide the forecast side panel'**
   String get setForecastSidePanelHidden;
 
+  /// No description provided for @setForecastCardExpansion.
+  ///
+  /// In en, this message translates to:
+  /// **'Folded forecast cards'**
+  String get setForecastCardExpansion;
+
   /// No description provided for @setProjectionSidePanelHidden.
   ///
   /// In en, this message translates to:

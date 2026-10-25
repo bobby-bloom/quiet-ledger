@@ -87,6 +87,11 @@ a dated release section.
 
 ### Changed
 
+- The forecast's cards (balances, scenarios, "Can I afford it?",
+  warnings, upcoming big events) fold with a chevron like the dashboard's,
+  remembered on this device, and their links ("Edit scenarios ›", "Show
+  all") sit at the bottom of the card; a folded card offers "Edit
+  scenarios" in ⋮, and Warnings shows its count in the header.
 - The long-term projection says "Calculating projection…" while it first
   loads, and while a changed assumption recomputes it dims the old result,
   shows "Recalculating…" over the chart and a progress bar under the app

@@ -72,7 +72,7 @@ class NetWorthWidget extends ConsumerWidget {
   });
 
   final bool card;
-  final List<DashOption> options;
+  final List<CardOption> options;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -230,7 +230,7 @@ class _MonthAxis extends ConsumerWidget {
 class MonthSummaryWidget extends ConsumerWidget {
   const MonthSummaryWidget({super.key, this.options = const []});
 
-  final List<DashOption> options;
+  final List<CardOption> options;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -345,7 +345,7 @@ class TopCategoriesWidget extends ConsumerWidget {
     this.limit = 5,
   });
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override
@@ -443,7 +443,7 @@ class MiniForecastWidget extends ConsumerWidget {
   });
 
   final String? accountId;
-  final List<DashOption> options;
+  final List<CardOption> options;
   final bool compact;
 
   @override
@@ -530,7 +530,7 @@ class MiniForecastWidget extends ConsumerWidget {
 class AccountsWidget extends ConsumerWidget {
   const AccountsWidget({super.key, this.options = const [], this.limit = 8});
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override

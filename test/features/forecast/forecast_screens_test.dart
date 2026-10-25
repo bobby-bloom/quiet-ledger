@@ -3,12 +3,15 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart' hide Table, isNotNull, isNull;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
+import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_pipeline.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_screen.dart';
@@ -173,6 +176,64 @@ void main() {
     expect(find.text('Scenarios'), findsWidgets);
     expect(find.text('Upcoming big events'), findsOneWidget);
     expect(find.text('New laptop'), findsWidgets);
+    await unmount(tester);
+  });
+
+  testWidgets('board cards fold like the dashboard', (tester) async {
+    await pumpScreen(
+      tester,
+      const ForecastScreen(),
+      size: const Size(1280, 1400),
+    );
+    for (final title in [
+      'Balances',
+      'Scenarios',
+      'Can I afford it?',
+      'Warnings',
+      'Upcoming big events',
+    ]) {
+      expect(find.byTooltip('Collapse $title'), findsOneWidget, reason: title);
+    }
+    // The warning count sits in the header, so it stays when folded.
+    expect(
+      find.textContaining('Warnings · ', findRichText: true),
+      findsOneWidget,
+    );
+
+    // Open: the link is the card's footer, below the scenarios.
+    final edit = find.text('Edit scenarios');
+    expect(edit, findsOneWidget);
+    final row = find.descendant(
+      of: find.ancestor(of: edit, matching: find.byType(Card)),
+      matching: find.text('Pay rent less'),
+    );
+    expect(tester.getTopLeft(edit).dy, greaterThan(tester.getTopLeft(row).dy));
+
+    await tester.tap(find.byTooltip('Collapse Scenarios'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Expand Scenarios'), findsOneWidget);
+    expect(find.text('Edit scenarios'), findsNothing);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ForecastScreen)),
+    );
+    expect(
+      container.read(settingsProvider).get(ForecastSettings.cardExpansion),
+      '{"scenarios":false}',
+    );
+    // Folded, the link moves into ⋮.
+    await tester.tap(find.byTooltip('Widget options'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit scenarios'), findsOneWidget);
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Expand Scenarios'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit scenarios'), findsOneWidget);
+    expect(
+      container.read(settingsProvider).get(ForecastSettings.cardExpansion),
+      '',
+    );
     await unmount(tester);
   });
 

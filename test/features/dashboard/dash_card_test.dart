@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/fold_card.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
@@ -12,9 +13,9 @@ import 'package:personal_finance/core/ledger/txn_draft.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/core_widgets.dart';
+import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/plan_widgets.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/transactions/transactions.dart';
@@ -171,8 +172,8 @@ void main() {
       expect(find.text('Everyday checking'), findsOneWidget);
       expect(
         containerOf(tester)
-            .read(cardExpansionProvider)
-            .isOpen(DashboardWidgetType.accounts),
+            .read(dashboardFoldsProvider)
+            .isOpen(DashboardWidgetType.accounts.name),
         isTrue,
       );
       expect(tester.takeException(), isNull);
@@ -260,26 +261,26 @@ void main() {
     addTearDown(db.close);
     final c = testContainer(db);
     addTearDown(c.dispose);
-    const all = DashboardWidgetType.values;
-    final n = c.read(cardExpansionProvider.notifier);
-    expect(n.isOpen(DashboardWidgetType.goals), isTrue);
+    final all = [for (final t in DashboardWidgetType.values) t.name];
+    final n = c.read(dashboardFoldsProvider.notifier);
+    expect(n.isOpen('goals'), isTrue);
     expect(n.wouldChange(all, true), isFalse);
     expect(n.wouldChange(all, false), isTrue);
 
-    n.setOpen(DashboardWidgetType.goals, false);
-    expect(n.isOpen(DashboardWidgetType.goals), isFalse);
+    n.setOpen('goals', false);
+    expect(n.isOpen('goals'), isFalse);
     expect(n.wouldChange(all, true), isTrue);
-    expect(n.wouldChange([DashboardWidgetType.goals], false), isFalse);
+    expect(n.wouldChange(['goals'], false), isFalse);
 
     n.setAll(all, false);
     expect(all.every((t) => !n.isOpen(t)), isTrue);
     expect(n.wouldChange(all, false), isFalse);
     await Future<void>.delayed(const Duration(milliseconds: 50));
     expect(
-      CardExpansion.decode(
+      CardFolds.decode(
         c.read(settingsProvider).get(DashboardSettings.cardExpansion),
       ),
-      c.read(cardExpansionProvider),
+      c.read(dashboardFoldsProvider),
     );
 
     n.setAll(all, true);
@@ -288,8 +289,8 @@ void main() {
     await c
         .read(settingsProvider.notifier)
         .set(DashboardSettings.cardExpansion, '{not json');
-    expect(c.read(cardExpansionProvider).folded, isEmpty);
-    expect(CardExpansion.decode('[1, 2]').folded, isEmpty);
+    expect(c.read(dashboardFoldsProvider).folded, isEmpty);
+    expect(CardFolds.decode('[1, 2]').folded, isEmpty);
     expect(DashboardSettings.cardExpansion.deviceLocal, isTrue);
     expect(DashboardSettings.cardExpansion.hidden, isTrue);
     expect(DashboardSettings.all, contains(DashboardSettings.cardExpansion));

@@ -3,15 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/fold_card.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
-import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/forecast/domain/cashflow_engine.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_dates.dart';
 import 'package:personal_finance/features/forecast/domain/forecast_pipeline.dart';
+import 'package:personal_finance/features/forecast/presentation/forecast_common.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 
 /// "Can I afford €X on `date` from `account`?" — runs the forecast with a
@@ -93,9 +94,9 @@ class _WhatIfCardState extends ConsumerState<WhatIfCard> {
     final l = context.l10n;
     final dates = ref.watch(dateFormatsProvider);
     final account = _account;
-    return SectionCard(
+    return FoldCard(
       title: l.forecastWhatIf,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      fold: forecastFold('whatIf'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

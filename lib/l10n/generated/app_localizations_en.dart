@@ -5975,6 +5975,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setForecastSidePanelHidden => 'Hide the forecast side panel';
 
   @override
+  String get setForecastCardExpansion => 'Folded forecast cards';
+
+  @override
   String get setProjectionSidePanelHidden => 'Hide the projection side panel';
 
   @override

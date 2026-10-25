@@ -1061,6 +1061,18 @@ abstract final class ForecastSettings {
     module: AppModule.forecast.name,
   );
 
+  /// `{cardId: open}` for the board's cards (`forecastFold`); '' or
+  /// malformed means all open. Toggled from each card's chevron.
+  static final cardExpansion = SettingDef.string(
+    key: 'forecast.cardExpansion',
+    section: SettingSection.forecast,
+    defaultValue: '',
+    label: (l) => l.setForecastCardExpansion,
+    hidden: true,
+    deviceLocal: true,
+    module: AppModule.forecast.name,
+  );
+
   static final all = <SettingDef<Object?>>[
     horizonMonths,
     variableMethod,
@@ -1074,6 +1086,7 @@ abstract final class ForecastSettings {
     combineScenarios,
     sidePanelHidden,
     projectionSidePanelHidden,
+    cardExpansion,
   ];
 }
 

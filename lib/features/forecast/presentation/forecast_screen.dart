@@ -10,6 +10,7 @@ import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
+import 'package:personal_finance/app/ui/fold_card.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
@@ -701,8 +702,9 @@ class _ScenarioToggles extends ConsumerWidget {
     final describer = adjustmentDescriber(context, ref);
     final money = sentenceMoney(ref);
     final combined = combinedResult(ref, batch.scenarios);
-    return SectionCard(
+    return FoldCard(
       title: l.forecastScenarios,
+      fold: forecastFold('scenarios'),
       actionLabel: l.forecastEditScenarios,
       onAction: () => context.push('/forecast/scenarios'),
       child: scenarios.isEmpty
@@ -972,9 +974,9 @@ class _BalancesTable extends ConsumerWidget {
     );
 
     final threshold = r.threshold(accountId);
-    return SectionCard(
+    return FoldCard(
       title: l.forecastBalances,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      fold: forecastFold('balances'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1169,8 +1171,11 @@ class _Warnings extends ConsumerWidget {
       for (final w in result.warnings)
         if (w.accountId != null && byId.containsKey(w.accountId)) w,
     ];
-    return SectionCard(
+    return FoldCard(
       title: l.forecastWarnings,
+      // Folded, the count still tells that something needs a look.
+      subtitle: warnings.isEmpty ? null : '${warnings.length}',
+      fold: forecastFold('warnings'),
       child: warnings.isEmpty
           ? Padding(
               padding: const EdgeInsets.only(bottom: Space.xs),
@@ -1263,12 +1268,14 @@ class _BigEventsState extends ConsumerState<_BigEvents> {
       }
     }
     final shown = _all ? events : events.take(6).toList();
-    return SectionCard(
+    return FoldCard(
       title: l.forecastUpcoming,
+      fold: forecastFold('upcoming'),
       actionLabel: events.length > 6
           ? (_all ? l.forecastShowLess : l.forecastShowAll)
           : null,
       onAction: () => setState(() => _all = !_all),
+      actionWhenFolded: false,
       child: events.isEmpty
           ? Padding(
               padding: const EdgeInsets.only(bottom: Space.xs),

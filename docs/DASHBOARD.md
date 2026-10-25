@@ -10,8 +10,8 @@ default rows), `domain/dashboard_legacy.dart` (the 0.1 layouts),
 `data/dashboard_layout.dart` (`DashboardItem`, the repository for this
 board), `presentation/dashboard_menu.dart` (`dashboardLabels`, the layout
 button with folding), `presentation/dashboard_screen.dart`,
-`presentation/widget_registry.dart` and `widgets/` (the cards),
-`presentation/card_expansion.dart` (folding).
+`presentation/widget_registry.dart` and `widgets/` (the cards;
+`dash_card.dart` wraps the shared `FoldCard` of `lib/app/ui/fold_card.dart`).
 
 ## Widgets
 
@@ -38,7 +38,8 @@ Every widget folds with its chevron except Net worth on phones (the hero).
 Folded, a card shows its header and its peek line; its footer link moves into
 ⋮. The open state is per widget type, shared by both views, and
 **device-local** (`dashboard.cardExpansion`, `deviceLocal: true`): it is
-situational, never synced, and a restore keeps the device's own.
+situational, never synced, and a restore keeps the device's own. The
+forecast board's cards fold the same way (`forecast.cardExpansion`).
 
 
 ## Storage

@@ -24,7 +24,7 @@ import 'package:personal_finance/features/transactions/transactions.dart';
 class BudgetsWidget extends ConsumerWidget {
   const BudgetsWidget({super.key, this.options = const [], this.limit = 4});
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override
@@ -244,7 +244,7 @@ class UpcomingBillsWidget extends ConsumerWidget {
     this.limit = 4,
   });
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override
@@ -381,7 +381,7 @@ class UpcomingBillsWidget extends ConsumerWidget {
 class GoalsWidget extends ConsumerWidget {
   const GoalsWidget({super.key, this.options = const [], this.limit = 3});
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override
@@ -484,7 +484,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
     this.limit = 5,
   });
 
-  final List<DashOption> options;
+  final List<CardOption> options;
   final int limit;
 
   @override

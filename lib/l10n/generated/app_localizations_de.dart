@@ -6013,6 +6013,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setForecastSidePanelHidden => 'Prognose-Seitenleiste ausblenden';
 
   @override
+  String get setForecastCardExpansion => 'Zugeklappte Prognose-Karten';
+
+  @override
   String get setProjectionSidePanelHidden =>
       'Projektions-Seitenleiste ausblenden';
 

@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/fold_card.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
+import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/scenarios/data/scenario_repository.dart';
 import 'package:personal_finance/features/scenarios/domain/scenario.dart';
@@ -45,6 +47,10 @@ class ModuleOffView extends StatelessWidget {
     );
   }
 }
+
+/// Where the forecast board's card [id] keeps its open state.
+CardFold forecastFold(String id) =>
+    (setting: ForecastSettings.cardExpansion, id: id);
 
 /// Centred spinner with a message while a forecast is first computed.
 class ForecastLoading extends StatelessWidget {

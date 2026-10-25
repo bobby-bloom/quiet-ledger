@@ -10,8 +10,8 @@ import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
-import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
+import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// The dashboard's words for its board (docs/DASHBOARD.md), its widgets
@@ -88,15 +88,15 @@ List<Widget> expandCollapseItems(
   List<DashboardWidgetType> types,
 ) {
   final l = context.l10n;
-  final expansion = ref.watch(cardExpansionProvider);
+  final expansion = ref.watch(dashboardFoldsProvider);
   final foldable = [
     for (final t in types)
       if (!WindowSize.of(context).isCompact ||
           t != DashboardWidgetType.netWorth)
-        t,
+        t.name,
   ];
   void setAll(bool open) =>
-      ref.read(cardExpansionProvider.notifier).setAll(foldable, open);
+      ref.read(dashboardFoldsProvider.notifier).setAll(foldable, open);
   return [
     MenuItemButton(
       leadingIcon: const Icon(Icons.unfold_more),
@@ -125,13 +125,13 @@ class _FoldAll extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final expansion = ref.watch(cardExpansionProvider);
+    final expansion = ref.watch(dashboardFoldsProvider);
     final foldable = [
       for (final t in types)
-        if (t != DashboardWidgetType.netWorth) t,
+        if (t != DashboardWidgetType.netWorth) t.name,
     ];
     void setAll(bool open) =>
-        ref.read(cardExpansionProvider.notifier).setAll(foldable, open);
+        ref.read(dashboardFoldsProvider.notifier).setAll(foldable, open);
     return Wrap(
       spacing: Space.xs,
       children: [

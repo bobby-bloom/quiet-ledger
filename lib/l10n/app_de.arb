@@ -1575,6 +1575,7 @@
   "setAccentAppIconDesc": "Das Symbol auf dem Startbildschirm nimmt die Vorgabe, die deiner Akzentfarbe am nächsten kommt. iOS fragt bei jeder Änderung nach.",
   "setSidebarCollapsed": "Seitenleiste einklappen",
   "setForecastSidePanelHidden": "Prognose-Seitenleiste ausblenden",
+  "setForecastCardExpansion": "Zugeklappte Prognose-Karten",
   "setProjectionSidePanelHidden": "Projektions-Seitenleiste ausblenden",
   "setCsvDateFormat": "CSV-Datumsformat",
   "setCsvDecimalSeparator": "CSV-Dezimaltrennzeichen",
