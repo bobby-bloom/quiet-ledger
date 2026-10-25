@@ -80,6 +80,16 @@ abstract final class BackupSettings {
     deviceLocal: true,
   );
 
+  /// ISO timestamp of the last time the dashboard's backup reminder was
+  /// dismissed (`reminderSnoozed`).
+  static final reminderDismissedAt = SettingDef.optionalString(
+    key: 'export.backupReminderDismissedAt',
+    section: SettingSection.importExport,
+    label: (l) => l.exportAutoTitle,
+    hidden: true,
+    deviceLocal: true,
+  );
+
   static final all = <SettingDef<Object?>>[
     lastAttempt,
     lastError,
@@ -88,5 +98,6 @@ abstract final class BackupSettings {
     staleDays,
     folderName,
     passwordCheckedAt,
+    reminderDismissedAt,
   ];
 }

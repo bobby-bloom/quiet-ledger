@@ -80,7 +80,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: gutter),
-                  sliver: const SliverToBoxAdapter(child: BackupHealthBanner()),
+                  sliver: const SliverToBoxAdapter(
+                    child: BackupHealthBanner(dismissible: true),
+                  ),
                 ),
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 32),

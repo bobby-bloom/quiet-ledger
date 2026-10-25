@@ -13,6 +13,9 @@ a dated release section.
 
 ### Added
 
+- The dashboard's backup reminder (never backed up, last backup too old,
+  check the password) has an × that hides it for a week or until the next
+  backup. A failed backup still shows until it is fixed.
 - Arranging the dashboard: whole rows can be dragged by their toolbar,
   with their widgets; a line shows where the row will land.
 - Dashboard layout: wide windows show the widgets in rows of columns

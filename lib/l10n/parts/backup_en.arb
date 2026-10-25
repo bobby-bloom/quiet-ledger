@@ -46,6 +46,7 @@
   "backupChannel": "Backups",
   "backupHealthBackUp": "Back up now",
   "backupHealthDetails": "Details",
+  "backupHealthDismiss": "Hide for a week",
   "backupHealthFailing": "The automatic backup failed: {message}",
   "@backupHealthFailing": {
     "placeholders": {

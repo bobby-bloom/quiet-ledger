@@ -563,6 +563,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupHealthDetails => 'Details';
 
   @override
+  String get backupHealthDismiss => 'Hide for a week';
+
+  @override
   String backupHealthFailing(String message) {
     return 'The automatic backup failed: $message';
   }

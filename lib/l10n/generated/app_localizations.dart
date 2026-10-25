@@ -973,6 +973,12 @@ abstract class AppLocalizations {
   /// **'Details'**
   String get backupHealthDetails;
 
+  /// No description provided for @backupHealthDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide for a week'**
+  String get backupHealthDismiss;
+
   /// No description provided for @backupHealthFailing.
   ///
   /// In en, this message translates to:

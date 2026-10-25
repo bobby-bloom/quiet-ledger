@@ -33,6 +33,30 @@ class BackupHealth {
   final String? error;
 
   bool get ok => status == BackupStatus.ok;
+
+  /// A reminder (never backed up, stale, check password) rather than a
+  /// failure: the dashboard lets the user hide it for a while.
+  bool get isReminder =>
+      status == BackupStatus.never ||
+      status == BackupStatus.stale ||
+      status == BackupStatus.checkPassword;
+}
+
+/// How long a dismissed reminder stays hidden.
+const reminderSnooze = Duration(days: 7);
+
+/// Whether a reminder dismissed at [dismissedAt] is still hidden: for
+/// [reminderSnooze], and only until the next verified backup (a later
+/// reminder is a new one). Failures are never hidden.
+bool reminderSnoozed(
+  BackupHealth health, {
+  required DateTime now,
+  DateTime? dismissedAt,
+}) {
+  if (!health.isReminder || dismissedAt == null) return false;
+  if (now.difference(dismissedAt) >= reminderSnooze) return false;
+  final last = health.lastVerified;
+  return last == null || last.isBefore(dismissedAt);
 }
 
 /// A run that started longer ago than this without finishing counts as

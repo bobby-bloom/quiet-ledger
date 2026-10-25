@@ -61,6 +61,33 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('banner: the dashboard can hide a reminder, not a failure', (
+    tester,
+  ) async {
+    await tester.runAsync(() => seed(db));
+    await pump(tester, const BackupHealthBanner(dismissible: true));
+    expect(find.text('Your data has not been backed up yet.'), findsOneWidget);
+    await tester.tap(find.byTooltip('Hide for a week'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Your data has not been backed up yet.'), findsNothing);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(BackupHealthBanner)),
+    );
+    await tester.runAsync(
+      () => container
+          .read(settingsProvider.notifier)
+          .set(BackupSettings.lastError, 'Folder not writable'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Folder not writable'), findsOneWidget);
+    expect(find.byTooltip('Hide for a week'), findsNothing);
+    await unmount(tester);
+  });
+
   testWidgets('banner: nothing to nag about in an empty app', (tester) async {
     await pump(tester, const BackupHealthBanner());
     expect(find.text('Back up now'), findsNothing);

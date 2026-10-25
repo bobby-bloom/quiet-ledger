@@ -50,16 +50,40 @@ final backupHealthProvider = Provider<BackupHealth>((ref) {
 /// Warning shown on the dashboard and the export screen while the data is
 /// not safely backed up. Renders nothing when everything is fine.
 /// [onBackUp] replaces the default action (open the export screen).
+/// [dismissible] adds an × that hides a reminder (not a failure) for a
+/// while (`reminderSnoozed`).
 class BackupHealthBanner extends ConsumerWidget {
-  const BackupHealthBanner({this.onBackUp, this.margin, super.key});
+  const BackupHealthBanner({
+    this.onBackUp,
+    this.margin,
+    this.dismissible = false,
+    super.key,
+  });
 
   final VoidCallback? onBackUp;
   final EdgeInsetsGeometry? margin;
+  final bool dismissible;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final health = ref.watch(backupHealthProvider);
     if (health.ok) return const SizedBox.shrink();
+    final canDismiss = dismissible && health.isReminder;
+    if (canDismiss) {
+      final dismissedAt = ref.watch(
+        settingsProvider.select(
+          (s) => s.get(BackupSettings.reminderDismissedAt),
+        ),
+      );
+      final snoozed = reminderSnoozed(
+        health,
+        now: DateTime.now(),
+        dismissedAt: dismissedAt == null
+            ? null
+            : DateTime.tryParse(dismissedAt),
+      );
+      if (snoozed) return const SizedBox.shrink();
+    }
     final l = context.l10n;
     final dates = ref.watch(dateFormatsProvider);
     final last = health.lastVerified?.toLocal();
@@ -126,6 +150,18 @@ class BackupHealthBanner extends ConsumerWidget {
                   _ => l.backupHealthBackUp,
                 }),
               ),
+              if (canDismiss)
+                IconButton(
+                  tooltip: l.backupHealthDismiss,
+                  color: fg,
+                  icon: const Icon(Icons.close),
+                  onPressed: () => ref
+                      .read(settingsProvider.notifier)
+                      .set(
+                        BackupSettings.reminderDismissedAt,
+                        DateTime.now().toIso8601String(),
+                      ),
+                ),
             ],
           ),
         ),

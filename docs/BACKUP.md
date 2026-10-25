@@ -163,7 +163,12 @@ Settings: Export & backup › Automatic backup (`/more/export/folder`).
   never finished), never backed up, stale (last verified backup older than
   `export.backupStaleDays`, default 7), check password, ok. The "last
   verified backup" counts scheduled backups and manual ones that were
-  saved, shared or downloaded.
+  saved, shared or downloaded. On the dashboard the reminders (never,
+  stale, check password) have an × that hides them for 7 days or until the
+  next verified backup (`reminderSnoozed`,
+  `BackupSettings.reminderDismissedAt`, device-local). Failing and
+  interrupted cannot be hidden, and the export screen always shows the
+  banner.
 - **Web:** no folder. Manual downloads count as backups for the stale
   warning, and the app asks the browser for persistent storage
   (`navigator.storage.persist()`); the export screen shows whether the

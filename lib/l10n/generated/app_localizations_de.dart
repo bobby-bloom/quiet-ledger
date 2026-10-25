@@ -568,6 +568,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get backupHealthDetails => 'Details';
 
   @override
+  String get backupHealthDismiss => 'Eine Woche ausblenden';
+
+  @override
   String backupHealthFailing(String message) {
     return 'Die automatische Sicherung ist fehlgeschlagen: $message';
   }

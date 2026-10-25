@@ -485,6 +485,25 @@ void main() {
         BackupStatus.ok,
       );
     });
+
+    test('a dismissed reminder stays hidden for a week, until a backup', () {
+      bool snoozed(BackupHealth h, DateTime? dismissed) =>
+          reminderSnoozed(h, now: now, dismissedAt: dismissed);
+      const never = BackupHealth(BackupStatus.never);
+      expect(snoozed(never, null), isFalse);
+      expect(snoozed(never, DateTime(2026, 10, 20)), isTrue);
+      expect(snoozed(never, DateTime(2026, 10, 17, 12)), isFalse);
+      // Dismissed before the last backup: this reminder is a new one.
+      final stale = BackupHealth(
+        BackupStatus.stale,
+        lastVerified: DateTime(2026, 10, 22),
+      );
+      expect(snoozed(stale, DateTime(2026, 10, 21)), isFalse);
+      expect(snoozed(stale, DateTime(2026, 10, 23)), isTrue);
+      // Failures always show.
+      const failing = BackupHealth(BackupStatus.failing, error: 'x');
+      expect(snoozed(failing, DateTime(2026, 10, 24)), isFalse);
+    });
   });
 }
 

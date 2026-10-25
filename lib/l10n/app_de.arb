@@ -144,6 +144,7 @@
   "backupChannel": "Sicherungen",
   "backupHealthBackUp": "Jetzt sichern",
   "backupHealthDetails": "Details",
+  "backupHealthDismiss": "Eine Woche ausblenden",
   "backupHealthFailing": "Die automatische Sicherung ist fehlgeschlagen: {message}",
   "backupHealthInterrupted": "Die letzte automatische Sicherung wurde nicht abgeschlossen.",
   "backupHealthNever": "Deine Daten wurden noch nicht gesichert.",
