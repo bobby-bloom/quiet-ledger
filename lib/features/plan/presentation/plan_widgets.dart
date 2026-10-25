@@ -189,7 +189,8 @@ class PlanSectionHeader extends StatelessWidget {
   }
 }
 
-/// List and detail side by side on expanded screens.
+/// List and detail side by side on expanded screens. Without [detail]
+/// (nothing opened) the list takes the whole width.
 class ListDetail extends StatelessWidget {
   const ListDetail({
     required this.list,
@@ -199,11 +200,13 @@ class ListDetail extends StatelessWidget {
   });
 
   final Widget list;
-  final Widget detail;
+  final Widget? detail;
   final double listWidth;
 
   @override
   Widget build(BuildContext context) {
+    final detail = this.detail;
+    if (detail == null) return list;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -211,6 +214,22 @@ class ListDetail extends StatelessWidget {
         VerticalDivider(width: 1, color: context.colors.outlineVariant),
         Expanded(child: detail),
       ],
+    );
+  }
+}
+
+/// The × that ends the header of a [ListDetail] detail pane and closes it.
+class ClosePanelButton extends StatelessWidget {
+  const ClosePanelButton({required this.onPressed, super.key});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: context.l10n.commonClose,
+      icon: const Icon(Icons.close),
+      onPressed: onPressed,
     );
   }
 }

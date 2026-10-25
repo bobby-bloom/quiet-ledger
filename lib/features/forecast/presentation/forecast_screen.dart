@@ -55,9 +55,6 @@ class ForecastScreen extends ConsumerWidget {
         : null;
     final accounts = [for (final id in accountIds) ?accountMap[id]];
     final size = WindowSize.of(context);
-    final sideHidden = ref.watch(
-      settingsProvider.select((s) => s.get(ForecastSettings.sidePanelHidden)),
-    );
 
     return Scaffold(
       appBar: PageAppBar(
@@ -71,17 +68,7 @@ class ForecastScreen extends ConsumerWidget {
             onPressed: () => context.push('/forecast/projection'),
           ),
           if (size.isExpanded && accountIds.isNotEmpty)
-            IconButton(
-              tooltip: sideHidden
-                  ? l.forecastShowSidePanel
-                  : l.forecastHideSidePanel,
-              isSelected: !sideHidden,
-              icon: const Icon(Icons.view_sidebar_outlined),
-              selectedIcon: const Icon(Icons.view_sidebar),
-              onPressed: () => ref
-                  .read(settingsProvider.notifier)
-                  .set(ForecastSettings.sidePanelHidden, !sideHidden),
-            ),
+            SidePanelButton(setting: ForecastSettings.sidePanelHidden),
         ],
       ),
       // Keep showing the previous result while a new one is computed.

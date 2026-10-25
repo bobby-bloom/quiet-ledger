@@ -1729,12 +1729,6 @@ abstract class AppLocalizations {
   /// **'Income {income} + carried over {carry} − assigned {assigned}'**
   String budgetsEnvelopeFormula(String income, String carry, String assigned);
 
-  /// No description provided for @budgetsSelectHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a budget to see its details.'**
-  String get budgetsSelectHint;
-
   /// No description provided for @budgetsCategoryMissing.
   ///
   /// In en, this message translates to:
@@ -3000,6 +2994,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing here yet'**
   String get commonEmpty;
+
+  /// No description provided for @commonHideSidePanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide side panel'**
+  String get commonHideSidePanel;
+
+  /// No description provided for @commonShowSidePanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show side panel'**
+  String get commonShowSidePanel;
 
   /// No description provided for @commonError.
   ///
@@ -4703,18 +4709,6 @@ abstract class AppLocalizations {
   /// **'Edit scenarios'**
   String get forecastEditScenarios;
 
-  /// No description provided for @forecastHideSidePanel.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide side panel'**
-  String get forecastHideSidePanel;
-
-  /// No description provided for @forecastShowSidePanel.
-  ///
-  /// In en, this message translates to:
-  /// **'Show side panel'**
-  String get forecastShowSidePanel;
-
   /// No description provided for @forecastNoScenarios.
   ///
   /// In en, this message translates to:
@@ -5191,12 +5185,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide'**
   String get goalsHide;
-
-  /// No description provided for @goalsSelectHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a goal to see its details.'**
-  String get goalsSelectHint;
 
   /// No description provided for @goalsReached.
   ///
@@ -7177,12 +7165,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No recurring items yet. Add rent, salary or subscriptions to see them coming.'**
   String get recurringEmpty;
-
-  /// No description provided for @recurringSelectHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a recurring item to edit it.'**
-  String get recurringSelectHint;
 
   /// No description provided for @recurringNext30Days.
   ///
@@ -9599,6 +9581,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide the forecast side panel'**
   String get setForecastSidePanelHidden;
+
+  /// No description provided for @setProjectionSidePanelHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the projection side panel'**
+  String get setProjectionSidePanelHidden;
 
   /// No description provided for @setCsvDateFormat.
   ///

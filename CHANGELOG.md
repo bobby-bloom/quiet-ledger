@@ -84,6 +84,11 @@ a dated release section.
 
 ### Changed
 
+- Wide windows: the long-term projection's assumptions panel can be hidden
+  from the app bar, like the forecast's side panel. Plan's budgets,
+  recurring items and goals and the bills calendar's day list open in a
+  side panel only once you pick an entry (or a day), and its × closes it;
+  until then the list or calendar takes the whole width.
 - Dashboard widget links ("All budgets", "Calendar", "View all") moved
   from the card header to the bottom of the card.
 - Scheduled backups are read back and verified before old ones are

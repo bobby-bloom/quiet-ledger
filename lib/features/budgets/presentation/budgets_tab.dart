@@ -56,15 +56,13 @@ class _BudgetsTabState extends ConsumerState<BudgetsTab> {
       listWidth: 440,
       list: list,
       detail: _selected == null
-          ? EmptyState(
-              icon: Icons.donut_large_outlined,
-              message: context.l10n.budgetsSelectHint,
-            )
+          ? null
           : BudgetDetailView(
               key: ValueKey(_selected),
               categoryId: _selected!,
               period: period,
               embedded: true,
+              onClose: () => setState(() => _selected = null),
             ),
     );
   }

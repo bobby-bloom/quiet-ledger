@@ -45,7 +45,6 @@
   "budgetsAllAssigned": "Jeder Euro ist zugewiesen",
   "budgetsOverAssigned": "{amount} mehr zugewiesen als verfügbar",
   "budgetsEnvelopeFormula": "Einnahmen {income} + Übertrag {carry} − zugewiesen {assigned}",
-  "budgetsSelectHint": "Wähle ein Budget, um Details zu sehen.",
   "budgetsCategoryMissing": "Diese Kategorie existiert nicht mehr.",
   "budgetsTransactionsInPeriod": "Buchungen in diesem Zeitraum",
   "budgetsNoTransactions": "Keine Buchungen in diesem Zeitraum.",

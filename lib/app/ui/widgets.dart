@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
+import 'package:personal_finance/core/settings/setting_def.dart';
+import 'package:personal_finance/core/settings/settings_controller.dart';
 
 /// App bar of a top-level screen (Plan, Forecast, Accounts, ...): the title
 /// in titleLarge, starting on the page margin. On wider windows that is the
@@ -31,6 +33,28 @@ class PageAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title, style: context.text.titleLarge),
       actions: actions,
       bottom: bottom,
+    );
+  }
+}
+
+/// App bar button of a wide layout that hides or shows the screen's side
+/// panel; [setting] holds whether it is hidden.
+class SidePanelButton extends ConsumerWidget {
+  const SidePanelButton({required this.setting, super.key});
+
+  final SettingDef<bool> setting;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final hidden = ref.watch(settingsProvider.select((s) => s.get(setting)));
+    return IconButton(
+      tooltip: hidden ? l.commonShowSidePanel : l.commonHideSidePanel,
+      isSelected: !hidden,
+      icon: const Icon(Icons.view_sidebar_outlined),
+      selectedIcon: const Icon(Icons.view_sidebar),
+      onPressed: () =>
+          ref.read(settingsProvider.notifier).set(setting, !hidden),
     );
   }
 }

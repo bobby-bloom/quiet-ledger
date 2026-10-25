@@ -3,7 +3,6 @@
   "recurringNew": "Neuer Dauerauftrag",
   "recurringEdit": "Dauerauftrag bearbeiten",
   "recurringEmpty": "Noch keine wiederkehrenden Buchungen. Füge Miete, Gehalt oder Abos hinzu, um sie kommen zu sehen.",
-  "recurringSelectHint": "Wähle eine wiederkehrende Buchung zum Bearbeiten.",
   "recurringNext30Days": "Nächste 30 Tage",
   "recurringBills": "{count, plural, =0{Keine Zahlungen} =1{1 Zahlung} other{{count} Zahlungen}}",
   "recurringIncomeCount": "{count, plural, =0{Keine Einnahmen} =1{1 Einnahme} other{{count} Einnahmen}}",

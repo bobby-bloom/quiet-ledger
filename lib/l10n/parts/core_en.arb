@@ -37,6 +37,8 @@
   "commonNo": "No",
   "commonRetry": "Retry",
   "commonEmpty": "Nothing here yet",
+  "commonHideSidePanel": "Hide side panel",
+  "commonShowSidePanel": "Show side panel",
   "commonError": "Something went wrong: {message}",
   "@commonError": {
     "placeholders": {

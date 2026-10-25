@@ -53,10 +53,7 @@ class _RecurringTabState extends ConsumerState<RecurringTab> {
       listWidth: 440,
       list: list,
       detail: _selected == null
-          ? EmptyState(
-              icon: Icons.event_repeat_outlined,
-              message: context.l10n.recurringSelectHint,
-            )
+          ? null
           : RuleEditor(
               key: ValueKey(_selected),
               ruleId: _selected,

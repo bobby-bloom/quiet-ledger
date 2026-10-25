@@ -705,7 +705,6 @@
       }
     }
   },
-  "budgetsSelectHint": "Select a budget to see its details.",
   "budgetsCategoryMissing": "This category no longer exists.",
   "budgetsTransactionsInPeriod": "Transactions in this period",
   "budgetsNoTransactions": "No transactions in this period.",
@@ -1305,6 +1304,8 @@
   "commonNo": "No",
   "commonRetry": "Retry",
   "commonEmpty": "Nothing here yet",
+  "commonHideSidePanel": "Hide side panel",
+  "commonShowSidePanel": "Show side panel",
   "commonError": "Something went wrong: {message}",
   "@commonError": {
     "placeholders": {
@@ -2137,8 +2138,6 @@
   },
   "forecastScenarios": "Scenarios",
   "forecastEditScenarios": "Edit scenarios",
-  "forecastHideSidePanel": "Hide side panel",
-  "forecastShowSidePanel": "Show side panel",
   "forecastNoScenarios": "No scenarios yet. Try a raise, a big purchase or paying off a loan early.",
   "forecastAddScenario": "Add scenario",
   "forecastBalances": "Balances",
@@ -2323,7 +2322,6 @@
   },
   "goalsShow": "Show",
   "goalsHide": "Hide",
-  "goalsSelectHint": "Select a goal to see its details.",
   "goalsReached": "Goal reached",
   "goalsRequiredPerPeriod": "Needs {amount} per period until {date}",
   "@goalsRequiredPerPeriod": {
@@ -3130,7 +3128,6 @@
   "recurringNew": "New recurring item",
   "recurringEdit": "Edit recurring item",
   "recurringEmpty": "No recurring items yet. Add rent, salary or subscriptions to see them coming.",
-  "recurringSelectHint": "Select a recurring item to edit it.",
   "recurringNext30Days": "Next 30 days",
   "recurringBills": "{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}",
   "@recurringBills": {
@@ -3958,6 +3955,7 @@
   "setAccentAppIconDesc": "The home-screen icon uses the preset closest to your accent. iOS asks to confirm each change.",
   "setSidebarCollapsed": "Collapse the sidebar",
   "setForecastSidePanelHidden": "Hide the forecast side panel",
+  "setProjectionSidePanelHidden": "Hide the projection side panel",
   "setCsvDateFormat": "CSV date format",
   "setCsvDecimalSeparator": "CSV decimal separator",
   "setCsvDelimiter": "CSV delimiter",

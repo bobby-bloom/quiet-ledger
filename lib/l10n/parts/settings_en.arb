@@ -24,6 +24,7 @@
   "setAccentAppIconDesc": "The home-screen icon uses the preset closest to your accent. iOS asks to confirm each change.",
   "setSidebarCollapsed": "Collapse the sidebar",
   "setForecastSidePanelHidden": "Hide the forecast side panel",
+  "setProjectionSidePanelHidden": "Hide the projection side panel",
   "setCsvDateFormat": "CSV date format",
   "setCsvDecimalSeparator": "CSV decimal separator",
   "setCsvDelimiter": "CSV delimiter",
