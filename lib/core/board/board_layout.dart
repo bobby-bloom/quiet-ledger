@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-// The pure half of the dashboard board (docs/DASHBOARD.md): rows with a
-// split, fitting them to the window and reconciling them with the widgets
-// that show. Ported from keeper's card board; widgets only render the
+// The pure half of a card board (docs/BOARD.md): rows with a
+// split, fitting them to the window and reconciling them with the cards
+// that show. Ported from keeper's card board; cards only render the
 // result, so arrange mode builds on the same functions.
 
 /// The narrowest a board column may be: a budget row with its amount, an
@@ -54,7 +54,7 @@ class RowSplit {
   String toString() => 'RowSplit(${weights.join(':')})';
 }
 
-/// One row: its [split] and, per column of the split, the widget ids
+/// One row: its [split] and, per column of the split, the card ids
 /// stacked in it top to bottom. A column may be empty.
 @immutable
 class BoardRow {
@@ -89,7 +89,7 @@ class BoardRow {
 enum LayoutMode { auto, custom }
 
 /// What the wide board renders at one width: whose arrangement ([mode]),
-/// the [rows] to draw (only widgets that show, squeezed to the window,
+/// the [rows] to draw (only cards that show, squeezed to the window,
 /// empty rows left out) and how many equal columns [fits].
 ///
 /// [placed] is the arrangement behind [rows] before anything is hidden or
@@ -115,13 +115,13 @@ class BoardLayout {
   /// Arranging needs two columns: one column is the reading order.
   bool get canArrange => fits >= 2;
 
-  /// The widgets shown, in reading order.
+  /// The cards shown, in reading order.
   List<String> get order => [for (final row in rows) ...row.cardIds];
 }
 
-/// The wide layout for [present] widgets (in their own order): the saved
+/// The wide layout for [present] cards (in their own order): the saved
 /// [saved] rows on [LayoutMode.custom], squeezed to the [fits] columns,
-/// else [defaultRows]. New widgets that show but have no slot go after
+/// else [defaultRows]. New cards that show but have no slot go after
 /// their nearest default predecessor.
 BoardLayout resolveBoardLayout({
   required LayoutMode mode,
@@ -223,7 +223,7 @@ List<String> defaultOrder(List<BoardRow> defaultRows, List<String> present) {
 /// [rows] with the ids that are [present] but nowhere in them placed right
 /// after their nearest predecessor in [defaultOrder] that is present and
 /// placed; with none, at the top of the first column of the first row. Ids
-/// that are not present keep their slots, so a widget that comes back
+/// that are not present keep their slots, so a card that comes back
 /// finds its place.
 List<BoardRow> placeNewCards(
   List<BoardRow> rows,
@@ -324,7 +324,7 @@ List<BoardRow> visibleRows(List<BoardRow> rows, List<String> present) {
   ];
 }
 
-/// [rows] without the ids outside [known] (widget types the app no longer
+/// [rows] without the ids outside [known] (card types the app no longer
 /// has). Hidden ids are known and keep their slots; a column left empty
 /// stays.
 List<BoardRow> dropUnknownCards(List<BoardRow> rows, Set<String> known) => [

@@ -2,11 +2,11 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 
-// The pure half of arrange mode (docs/DASHBOARD.md): where a widget is as
+// The pure half of arrange mode (docs/BOARD.md): where a card is as
 // the person sees it, and what a drop, a Move or a row edit does to the
-// working rows. The rows are the placed arrangement — hidden widgets keep
+// working rows. The rows are the placed arrangement — hidden cards keep
 // their slots, saved splits stay even where the window squeezes a row — so
 // Done writes what the person built, not what the window allowed. Ported
 // from keeper's card board.
@@ -16,9 +16,9 @@ import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 /// direction.
 enum CardMove { up, down, start, end }
 
-/// Where a widget shows in arrange mode: the [row] of the working rows, the
+/// Where a card shows in arrange mode: the [row] of the working rows, the
 /// [column] on screen (a squeezed row shows fewer than it has), and its
-/// [index] among the [count] widgets present in that column.
+/// [index] among the [count] cards present in that column.
 @immutable
 class ArrangePosition {
   const ArrangePosition({
@@ -48,13 +48,13 @@ class ArrangePosition {
   String toString() => 'ArrangePosition($row, $column, $index of $count)';
 }
 
-/// Where a dragged or moved widget can land.
+/// Where a dragged or moved card can land.
 @immutable
 sealed class ArrangeTarget {
   const ArrangeTarget();
 }
 
-/// Before the [index]th widget present in [column] (as shown) of [row] —
+/// Before the [index]th card present in [column] (as shown) of [row] —
 /// counted without the one that moves; at or past the end, after the last.
 final class ColumnTarget extends ArrangeTarget {
   const ColumnTarget({
@@ -148,7 +148,7 @@ ArrangePosition? positionOf(
   return null;
 }
 
-/// The moves that apply to [id]: Up and Down while a widget or a row is
+/// The moves that apply to [id]: Up and Down while a card or a row is
 /// above or below it, Start and End while its row shows a column there.
 Set<CardMove> possibleMoves(
   List<BoardRow> rows,
@@ -295,7 +295,7 @@ bool _isInPlace(
 }
 
 /// [rows] with every id in its first slot only: a malformed saved layout
-/// that lists a widget twice shows and moves it once.
+/// that lists a card twice shows and moves it once.
 List<BoardRow> withoutDuplicates(List<BoardRow> rows) {
   final seen = <String>{};
   return [
@@ -361,7 +361,7 @@ List<BoardRow> moveRow(List<BoardRow> rows, int index, {bool down = false}) {
 }
 
 /// [rows] without the row at [index], its ids — hidden ones too, so a row
-/// that looks empty keeps its hidden widgets' slots — moved to the row
+/// that looks empty keeps its hidden cards' slots — moved to the row
 /// above, at the bottom of the same column index (clamped); for the first
 /// row to the top of the row below. The only row stays.
 List<BoardRow> removeRow(List<BoardRow> rows, int index) {

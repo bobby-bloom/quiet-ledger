@@ -6,60 +6,61 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
-import 'package:personal_finance/features/dashboard/domain/arrange.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/arrange_card.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/drop_slot.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/row_band.dart';
+import 'package:personal_finance/app/ui/board/arrange_card.dart';
+import 'package:personal_finance/app/ui/board/board_labels.dart';
+import 'package:personal_finance/app/ui/board/drop_slot.dart';
+import 'package:personal_finance/app/ui/board/row_band.dart';
+import 'package:personal_finance/core/board/arrange.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
-/// The least height a "New row" target takes while a widget is dragged, a
+/// The least height a "New row" target takes while a card is dragged, a
 /// fingertip and some: what a gap lacks of it comes from the top edge of
 /// the band below it.
 const double _newRowReach = 32;
 
-/// The dashboard in arrange mode (docs/DASHBOARD.md, Arrange mode): the
-/// working [rows] as [RowBand]s with their toolbars, every widget present as
+/// A board in arrange mode (docs/BOARD.md, Arrange mode): the
+/// working [rows] as [RowBand]s with their toolbars, every card present as
 /// an [ArrangeCard], a [DropSlot] where a dragged one would land, "Drag a
-/// widget here" in empty columns, a "New row" slot in the gaps above,
+/// card here" in empty columns, a "New row" slot in the gaps above,
 /// between and below the rows, and "Add row" under the last.
 ///
-/// Where a dragged widget would land follows the pointer, also while the
+/// Where a dragged card would land follows the pointer, also while the
 /// board scrolls (a wheel) under it, and only where the board shows. There
 /// is no auto-scroll: the arranged board is short, and the Move menu is the
 /// way when it is not.
 ///
 /// Every change — a drop, a Move, a row edit — goes to [onChanged] as new
 /// rows; the session keeps them until Done or Cancel. Focus starts on the
-/// first widget and follows a moved widget or row; each move is announced.
+/// first card and follows a moved card or row; each move is announced.
 class ArrangeBoard extends StatefulWidget {
   const ArrangeBoard({
     required this.rows,
     required this.present,
     required this.fits,
-    required this.title,
-    required this.icon,
+    required this.labels,
     required this.onChanged,
     required this.onRemove,
     super.key,
     this.gap = boardGap,
   });
 
-  /// The working arrangement: placed rows, hidden widgets in their slots.
+  /// The working arrangement: placed rows, hidden cards in their slots.
   final List<BoardRow> rows;
 
-  /// The widgets that show.
+  /// The cards that show.
   final Set<String> present;
 
   /// How many columns fit; wider rows show squeezed.
   final int fits;
 
   final double gap;
-  final String Function(String id) title;
-  final IconData Function(String id) icon;
+
+  /// The board's words and its cards' names and icons.
+  final BoardLabels labels;
   final ValueChanged<List<BoardRow>> onChanged;
 
-  /// Takes a widget off the dashboard, inside the session.
+  /// Takes a card off the board, inside the session.
   final ValueChanged<String> onRemove;
 
   @override
@@ -69,11 +70,11 @@ class ArrangeBoard extends StatefulWidget {
 class _ArrangeBoardState extends State<ArrangeBoard> {
   static const double _bandPadding = RowBand.padding;
 
-  /// One key per widget: it keeps its menu and focus wherever it moves, and
-  /// a drag measures the widgets it passes.
+  /// One key per card: it keeps its menu and focus wherever it moves, and
+  /// a drag measures the cards it passes.
   final _keys = <String, GlobalKey>{};
 
-  /// The ⋮ button of each widget, and of each row by its place.
+  /// The ⋮ button of each card, and of each row by its place.
   final _focusNodes = <String, FocusNode>{};
   final _rowFocusNodes = <FocusNode>[];
 
@@ -81,7 +82,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   /// only its columns glide to their new widths.
   int? _resplit;
 
-  /// The widget being dragged and the pointer's last global position.
+  /// The card being dragged and the pointer's last global position.
   String? _dragging;
   Offset? _pointer;
 
@@ -99,18 +100,18 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   var _isLayoutChanged = false;
   var _isWatching = false;
 
-  /// Where the dragged widget would land now.
+  /// Where the dragged card would land now.
   ArrangeTarget? _target;
 
-  /// Whether the slot is still the lifted widget's own place, open from the
+  /// Whether the slot is still the lifted card's own place, open from the
   /// start at full height, so nothing moves as it lifts.
   var _isLiftedInPlace = false;
 
-  /// The slots the dragged widget left, closing as the new one opens, so
+  /// The slots the dragged card left, closing as the new one opens, so
   /// what lies under the pointer stays put. Only while a drag runs.
   final _closing = <ArrangeTarget>{};
 
-  /// The widget settling into its place after a drop, and where its lifted
+  /// The card settling into its place after a drop, and where its lifted
   /// copy was let go — until its glide starts.
   String? _settling;
   Offset? _settleFrom;
@@ -155,7 +156,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     super.didUpdateWidget(oldWidget);
     _isLayoutChanged = true;
 
-    // The held widget left the board: its drag will never end on its own,
+    // The held card left the board: its drag will never end on its own,
     // so it ends here, dropped.
     final dragging = _dragging;
     if (dragging != null && !_isShown(dragging)) {
@@ -163,7 +164,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _target = null;
       _closing.clear();
       _pointer = null;
-      _announce(_l.dashLayoutDropped(widget.title(dragging)));
+      _announce(_l.boardDropped(widget.labels.cardName(dragging)));
     }
     // The rows changed under a lifted row (an undo, a paused session
     // coming back): the drag ends where it is, nothing moved.
@@ -173,19 +174,19 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _draggingRow = null;
       _rowTarget = null;
       _pointer = null;
-      _announce(_l.dashLayoutRowDropped(row + 1));
+      _announce(_l.boardRowDropped(row + 1));
     }
   }
 
   @override
   void dispose() {
-    // The board went mid-drag (arrange mode paused or ended): the widget
+    // The board went mid-drag (arrange mode paused or ended): the card
     // stays where it was.
     if (_dragging case final dragging?) {
-      _announce(_l.dashLayoutDropped(widget.title(dragging)));
+      _announce(_l.boardDropped(widget.labels.cardName(dragging)));
     }
     if (_draggingRow case final row?) {
-      _announce(_l.dashLayoutRowDropped(row + 1));
+      _announce(_l.boardRowDropped(row + 1));
     }
     for (final node in [..._focusNodes.values, ..._rowFocusNodes]) {
       node.dispose();
@@ -215,7 +216,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
           _band(index, row),
         ],
         _gap(NewRowTarget(rows.length)),
-        // Dropped here, a widget goes below the last row.
+        // Dropped here, a card goes below the last row.
         _DropArea(
           targetAt: (_) => NewRowTarget(rows.length),
           child: Align(
@@ -223,7 +224,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
             child: FilledButton.tonalIcon(
               onPressed: () => widget.onChanged(addRow(rows, widget.fits)),
               icon: const Icon(Icons.add),
-              label: Text(_l.dashLayoutAddRow),
+              label: Text(_l.boardAddRow),
             ),
           ),
         ),
@@ -239,7 +240,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       onClosed: () => _closed(target),
       isDragging: _dragging != null,
       height: widget.gap,
-      label: _l.dashLayoutNewRow,
+      label: _l.boardNewRow,
     );
     if (_draggingRow == null || _rowTarget != target.at || !_rowMoves) {
       return gap;
@@ -272,7 +273,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   }
 
   /// [row] as a dashed band of its shown columns and one drop area: the
-  /// pointer picks the column under it and the place between its widgets —
+  /// pointer picks the column under it and the place between its cards —
   /// but for the band's top edge, which counts towards the "New row" gap.
   Widget _band(int index, BoardRow row) {
     final columns = shownColumns(row, widget.present, widget.fits);
@@ -369,7 +370,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     });
   }
 
-  /// Where a widget held at [pointer] lands in the band [band] of [row].
+  /// Where a card held at [pointer] lands in the band [band] of [row].
   ColumnTarget _targetIn(BuildContext band, int row, Offset pointer) {
     final box = band.findRenderObject()! as RenderBox;
     final widths = columnWidths(
@@ -402,9 +403,9 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     );
   }
 
-  /// The widgets [ids] of one shown column: the slot opens where the dragged
+  /// The cards [ids] of one shown column: the slot opens where the dragged
   /// one would land, slots it left close, and the dragged one leaves its
-  /// place. A slot carries its gap to the next widget.
+  /// place. A slot carries its gap to the next card.
   Widget _column(int row, int column, List<String> ids) {
     final others = [
       for (final id in ids)
@@ -456,7 +457,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       );
     }
     if (others.isEmpty) {
-      // An empty column shows the slot in place of "Drag a widget here", at
+      // An empty column shows the slot in place of "Drag a card here", at
       // its full height at once: growing from nothing would shrink the row
       // under the pointer, which then leaves it, and the row flickers.
       final open = indexOf(_target);
@@ -465,7 +466,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
             ? slot(_target!, EdgeInsets.zero, inPlaceOfLabel: true)
             : DropSlot(
                 kind: DropSlotKind.emptyColumn,
-                label: _l.dashLayoutEmptyColumn,
+                label: widget.labels.emptyColumn,
               ),
       );
     } else {
@@ -502,8 +503,8 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     final card = ArrangeCard(
       key: _keys.putIfAbsent(id, () => GlobalKey(debugLabel: 'arrange $id')),
       id: id,
-      icon: widget.icon(id),
-      title: widget.title(id),
+      icon: widget.labels.cardIcon(id),
+      title: widget.labels.cardName(id),
       positionLabel: _positionLabel(id, position),
       moves: possibleMoves(
         rows,
@@ -513,6 +514,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       ),
       onMove: (move) => _move(id, move),
       onRemove: () => _remove(id),
+      removeLabel: widget.labels.removeFromBoard,
       focusNode: _focusNodes.putIfAbsent(
         id,
         () => FocusNode(debugLabel: 'move $id'),
@@ -547,18 +549,18 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     return index;
   }
 
-  /// One drag at a time — a widget or a row —, asked also the moment a
+  /// One drag at a time — a card or a row —, asked also the moment a
   /// drag would start.
   bool _canLift() => mounted && _dragging == null && _draggingRow == null;
 
   /// [handle] (the toolbar's grip and label) as what drags the row at
   /// [index]: lifted, the row follows the pointer as its toolbar with the
-  /// names of its widgets.
+  /// names of its cards.
   Widget _rowHandle(int index, BoardRow row, Widget handle) {
     final theme = Theme.of(context);
     final titles = [
       for (final ids in shownColumns(row, widget.present, widget.fits))
-        for (final id in ids) widget.title(id),
+        for (final id in ids) widget.labels.cardName(id),
     ];
     return Draggable<int>(
       data: index,
@@ -583,7 +585,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
         data: theme,
         child: _LiftedRow(
           width: _width,
-          label: _l.dashLayoutRow(index + 1),
+          label: _l.boardRow(index + 1),
           split: row.split,
           titles: titles,
           isMotionReduced: _isMotionReduced,
@@ -604,7 +606,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _rowTarget = null;
       _settling = null;
     });
-    _announce(_l.dashLayoutRowPickedUp(index + 1));
+    _announce(_l.boardRowPickedUp(index + 1));
     _watchLayout();
   }
 
@@ -646,7 +648,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _pointer = null;
     });
     if (!moves || to == null) {
-      _announce(_l.dashLayoutRowDropped(from + 1));
+      _announce(_l.boardRowDropped(from + 1));
       return;
     }
     final rows = moveRowTo(widget.rows, from, to);
@@ -655,7 +657,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (at < _rowFocusNodes.length) _rowFocusNodes[at].requestFocus();
-      _announce(_l.dashLayoutRowMovedTo(at + 1, rows.length));
+      _announce(_l.boardRowMovedTo(at + 1, rows.length));
     });
   }
 
@@ -664,7 +666,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       widget.rows.any((row) => row.cardIds.contains(id));
 
   /// [id] is lifted at [pointer]. The slot opens in its own place at full
-  /// height, so nothing moves and a widget let go without moving stays.
+  /// height, so nothing moves and a card let go without moving stays.
   void _startDrag(String id, Offset pointer) {
     assert(_dragging == null, 'one drag at a time');
     final board = context.findRenderObject();
@@ -692,7 +694,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _closing.clear();
       _settling = null;
     });
-    _announce(_l.dashLayoutPickedUp(widget.title(id)));
+    _announce(_l.boardPickedUp(widget.labels.cardName(id)));
     _watchLayout();
   }
 
@@ -770,7 +772,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   }
 
   /// Whether a slot at [target] is built to close: a gap always, a place in
-  /// a column only among other widgets.
+  /// a column only among other cards.
   bool _isSlotBuilt(ArrangeTarget target) => switch (target) {
     NewRowTarget() => true,
     ColumnTarget(:final row, :final column) =>
@@ -828,7 +830,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _target = null;
       _closing.clear();
     });
-    _announce(_l.dashLayoutDropped(widget.title(id)));
+    _announce(_l.boardDropped(widget.labels.cardName(id)));
   }
 
   void _drop(String id, ArrangeTarget target, Offset from) {
@@ -847,7 +849,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _settleFrom = from;
     });
     if (identical(rows, widget.rows)) {
-      _announce(_l.dashLayoutDropped(widget.title(id)));
+      _announce(_l.boardDropped(widget.labels.cardName(id)));
     } else {
       _commit(id, rows);
     }
@@ -875,7 +877,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     );
   }
 
-  /// Takes [id] off the board, says so, and puts focus on the widget that
+  /// Takes [id] off the board, says so, and puts focus on the card that
   /// followed it (or the one before, at the end).
   void _remove(String id) {
     final order = [
@@ -890,7 +892,7 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
         ? order[at - 1]
         : null;
     widget.onRemove(id);
-    _announce(_l.dashLayoutRemoved(widget.title(id)));
+    _announce(_l.boardRemoved(widget.labels.cardName(id)));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && next != null) _focusNodes[next]?.requestFocus();
     });
@@ -912,8 +914,8 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     });
   }
 
-  String _positionLabel(String id, ArrangePosition p) => _l.dashLayoutMoved(
-    widget.title(id),
+  String _positionLabel(String id, ArrangePosition p) => _l.boardMoved(
+    widget.labels.cardName(id),
     p.row + 1,
     p.column + 1,
     p.index + 1,
@@ -1035,7 +1037,7 @@ class _BandColumnsState extends State<_BandColumns>
 
 /// The gap before the row at [target]: plain space while nothing is
 /// dragged, a dotted line while something is, and the "New row" slot while
-/// the dragged widget hovers it, closing again once it moves on.
+/// the dragged card hovers it, closing again once it moves on.
 class _NewRowGap extends StatelessWidget {
   const _NewRowGap({
     required this.target,
@@ -1091,8 +1093,8 @@ class _NewRowGap extends StatelessWidget {
   }
 }
 
-/// A part of the board a dragged widget can be let go over: all of
-/// [child]'s box, by a hit test, and where in it the widget would land for
+/// A part of the board a dragged card can be let go over: all of
+/// [child]'s box, by a hit test, and where in it the card would land for
 /// a global pointer position ([targetAt]).
 class _DropArea extends StatelessWidget {
   const _DropArea({required this.targetAt, required this.child});
@@ -1253,7 +1255,7 @@ class _DottedLinePainter extends CustomPainter {
 }
 
 /// A row being dragged: its toolbar — grip, "Row n", its split — and the
-/// names of its widgets, as wide as the board, lifted with a shadow.
+/// names of its cards, as wide as the board, lifted with a shadow.
 class _LiftedRow extends StatelessWidget {
   const _LiftedRow({
     required this.width,
@@ -1273,7 +1275,7 @@ class _LiftedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    // The same lift as a dragged widget's.
+    // The same lift as a dragged card's.
     final lifted = Material(
       color: colors.surfaceContainerHigh,
       borderRadius: BorderRadius.circular(Radii.md),

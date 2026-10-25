@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
+import 'package:personal_finance/core/board/board_storage.dart';
 import 'package:personal_finance/core/db/db_providers.dart';
 import 'package:personal_finance/core/sync/sync_backend.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
 
 import 'sync_engine_test.dart' show Device;
 
@@ -34,7 +34,7 @@ void main() {
     final ra = repoOf(a);
     final rb = repoOf(b);
     DashboardViewState hide(DashboardViewState s, DashboardWidgetType t) =>
-        s.withVisible(_view, t, visible: false);
+        s.withVisible(_view, t.name, visible: false);
 
     // B starts a layout and syncs; A starts its own and syncs.
     await rb.update(_view, (s) => hide(s, DashboardWidgetType.goals));
@@ -59,8 +59,8 @@ void main() {
     expect(sa, sb);
     // Both devices wrote to the row every device picks; as with any synced
     // data edited on two devices before a sync, the later write wins.
-    expect(sa.shows(_view, DashboardWidgetType.forecast), isFalse);
-    expect(sa.shows(_view, DashboardWidgetType.goals), isFalse);
+    expect(sa.shows(_view, DashboardWidgetType.forecast.name), isFalse);
+    expect(sa.shows(_view, DashboardWidgetType.goals.name), isFalse);
     expect(sa.mode, LayoutMode.custom);
     // No row was moved or deleted: A's first layout is still there.
     final rows = await a.db.select(a.db.dashboardLayouts).get();
@@ -69,8 +69,8 @@ void main() {
     expect(live, hasLength(2));
     expect(
       live
-          .map((r) => decodeViewState(_view, r.widgets))
-          .any((s) => !s.shows(_view, DashboardWidgetType.accounts)),
+          .map((r) => decodeViewState(dashboardBoard, _view, r.widgets))
+          .any((s) => !s.shows(_view, DashboardWidgetType.accounts.name)),
       isTrue,
     );
   });

@@ -886,6 +886,194 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nicht verschlüsselt: Wer die Datei hat, kann sie lesen.';
 
   @override
+  String get boardLabel => 'Anordnung';
+
+  @override
+  String get boardAuto => 'Auto';
+
+  @override
+  String get boardCustom => 'Eigene';
+
+  @override
+  String boardFitsUpTo(int count) {
+    return 'In dieses Fenster passen bis zu $count Spalten. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
+  }
+
+  @override
+  String get boardFitsOne =>
+      'In dieses Fenster passt eine Spalte. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
+
+  @override
+  String boardSplitFits(int count) {
+    return 'In dieses Fenster passen bis zu $count Spalten';
+  }
+
+  @override
+  String get boardArrangeNeeds =>
+      'Zum Anordnen das Fenster auf zwei Spalten verbreitern';
+
+  @override
+  String get boardArrangeHint => 'Zum Verschieben ziehen';
+
+  @override
+  String get boardReset => 'Zurücksetzen';
+
+  @override
+  String boardRow(int row) {
+    return 'Zeile $row';
+  }
+
+  @override
+  String boardRowOf(int row, int count) {
+    return 'Zeile $row von $count';
+  }
+
+  @override
+  String boardRowMenu(int row) {
+    return 'Optionen für Zeile $row';
+  }
+
+  @override
+  String get boardNewRow => 'Neue Zeile';
+
+  @override
+  String get boardRowTooWide => 'Braucht ein breiteres Fenster';
+
+  @override
+  String get boardRowSplit => 'Zeilenaufteilung';
+
+  @override
+  String get boardAddRow => 'Zeile hinzufügen';
+
+  @override
+  String get boardSplitOne => 'Eine Spalte';
+
+  @override
+  String get boardSplitHalves => 'Zwei gleiche Spalten';
+
+  @override
+  String get boardSplitWideNarrow => 'Breit und schmal';
+
+  @override
+  String get boardSplitNarrowWide => 'Schmal und breit';
+
+  @override
+  String get boardSplitThirds => 'Drei Spalten';
+
+  @override
+  String get boardMoveRowUp => 'Zeile nach oben';
+
+  @override
+  String get boardMoveRowDown => 'Zeile nach unten';
+
+  @override
+  String get boardRemoveRow => 'Zeile entfernen';
+
+  @override
+  String boardMove(String widget) {
+    return '„$widget“ verschieben';
+  }
+
+  @override
+  String get boardMoveUp => 'Nach oben';
+
+  @override
+  String get boardMoveDown => 'Nach unten';
+
+  @override
+  String get boardMoveLeft => 'Eine Spalte nach links';
+
+  @override
+  String get boardMoveRight => 'Eine Spalte nach rechts';
+
+  @override
+  String boardRemoved(String widget) {
+    return '$widget entfernt';
+  }
+
+  @override
+  String boardFlattened(int count) {
+    return 'Anordnung auf $count Spalten gesetzt';
+  }
+
+  @override
+  String get boardReplaced => 'Anordnung ersetzt';
+
+  @override
+  String get boardDiscarded => 'Änderungen verworfen';
+
+  @override
+  String boardMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  ) {
+    return '$widget: Zeile $row, Spalte $column, Position $position von $count';
+  }
+
+  @override
+  String boardMovedTo(String widget, int position, int count) {
+    return '$widget auf Position $position von $count verschoben';
+  }
+
+  @override
+  String boardPickedUp(String widget) {
+    return '$widget aufgenommen';
+  }
+
+  @override
+  String boardDropped(String widget) {
+    return '$widget abgelegt';
+  }
+
+  @override
+  String get boardSheetSubtitle => 'Änderungen gelten sofort.';
+
+  @override
+  String get boardNew => 'Neu';
+
+  @override
+  String get boardRemovedHint => 'Entfernt · Einstellungen bleiben erhalten';
+
+  @override
+  String boardMoveUpCard(String widget) {
+    return '„$widget“ nach oben';
+  }
+
+  @override
+  String boardMoveDownCard(String widget) {
+    return '„$widget“ nach unten';
+  }
+
+  @override
+  String boardRemoveCard(String widget) {
+    return '„$widget“ entfernen';
+  }
+
+  @override
+  String get boardOrderReplaced => 'Deine frühere Reihenfolge wurde ersetzt';
+
+  @override
+  String get boardDragRow => 'Ziehen, um die Zeile zu verschieben';
+
+  @override
+  String boardRowPickedUp(int row) {
+    return 'Zeile $row aufgenommen';
+  }
+
+  @override
+  String boardRowDropped(int row) {
+    return 'Zeile $row abgelegt';
+  }
+
+  @override
+  String boardRowMovedTo(int position, int count) {
+    return 'Zeile auf Position $position von $count verschoben';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -2235,35 +2423,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashLayoutMenuCustom => 'Dashboard-Anordnung · Eigene';
 
   @override
-  String get dashLayoutLabel => 'Anordnung';
-
-  @override
-  String get dashLayoutAuto => 'Auto';
-
-  @override
-  String get dashLayoutCustom => 'Eigene';
-
-  @override
   String get dashLayoutAutoHint =>
       'Anordnung von Quiet Ledger, passt sich dem Fenster an';
 
   @override
   String get dashLayoutCustomHint =>
       'Deine Anordnung, gilt für alle größeren Bildschirme';
-
-  @override
-  String dashLayoutFitsUpTo(int count) {
-    return 'In dieses Fenster passen bis zu $count Spalten. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
-  }
-
-  @override
-  String get dashLayoutFitsOne =>
-      'In dieses Fenster passt eine Spalte. Auf breiteren Bildschirmen erscheint deine Anordnung vollständig.';
-
-  @override
-  String dashLayoutSplitFits(int count) {
-    return 'In dieses Fenster passen bis zu $count Spalten';
-  }
 
   @override
   String get dashLayoutPhoneAutoHint => 'Reihenfolge von Quiet Ledger';
@@ -2274,10 +2439,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dashLayoutArrange => 'Widgets anordnen…';
-
-  @override
-  String get dashLayoutArrangeNeeds =>
-      'Zum Anordnen das Fenster auf zwei Spalten verbreitern';
 
   @override
   String get dashLayoutEditMenu => 'Dashboard bearbeiten…';
@@ -2295,142 +2456,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashLayoutArrangeTitle => 'Widgets anordnen';
 
   @override
-  String get dashLayoutArrangeHint => 'Zum Verschieben ziehen';
-
-  @override
-  String get dashLayoutReset => 'Zurücksetzen';
-
-  @override
-  String dashLayoutRow(int row) {
-    return 'Zeile $row';
-  }
-
-  @override
-  String dashLayoutRowOf(int row, int count) {
-    return 'Zeile $row von $count';
-  }
-
-  @override
-  String dashLayoutRowMenu(int row) {
-    return 'Optionen für Zeile $row';
-  }
-
-  @override
-  String get dashLayoutNewRow => 'Neue Zeile';
-
-  @override
-  String get dashLayoutRowTooWide => 'Braucht ein breiteres Fenster';
-
-  @override
-  String get dashLayoutRowSplit => 'Zeilenaufteilung';
-
-  @override
-  String get dashLayoutAddRow => 'Zeile hinzufügen';
-
-  @override
-  String get dashLayoutSplitOne => 'Eine Spalte';
-
-  @override
-  String get dashLayoutSplitHalves => 'Zwei gleiche Spalten';
-
-  @override
-  String get dashLayoutSplitWideNarrow => 'Breit und schmal';
-
-  @override
-  String get dashLayoutSplitNarrowWide => 'Schmal und breit';
-
-  @override
-  String get dashLayoutSplitThirds => 'Drei Spalten';
-
-  @override
-  String get dashLayoutMoveRowUp => 'Zeile nach oben';
-
-  @override
-  String get dashLayoutMoveRowDown => 'Zeile nach unten';
-
-  @override
-  String get dashLayoutRemoveRow => 'Zeile entfernen';
-
-  @override
-  String dashLayoutMove(String widget) {
-    return '„$widget“ verschieben';
-  }
-
-  @override
-  String get dashLayoutMoveUp => 'Nach oben';
-
-  @override
-  String get dashLayoutMoveDown => 'Nach unten';
-
-  @override
-  String get dashLayoutMoveLeft => 'Eine Spalte nach links';
-
-  @override
-  String get dashLayoutMoveRight => 'Eine Spalte nach rechts';
-
-  @override
   String get dashLayoutRemoveFromDashboard => 'Vom Dashboard entfernen';
 
   @override
   String get dashLayoutEmptyColumn => 'Widget hierher ziehen';
 
   @override
-  String dashLayoutRemoved(String widget) {
-    return '$widget entfernt';
-  }
-
-  @override
-  String dashLayoutFlattened(int count) {
-    return 'Anordnung auf $count Spalten gesetzt';
-  }
-
-  @override
-  String get dashLayoutReplaced => 'Anordnung ersetzt';
-
-  @override
-  String get dashLayoutDiscarded => 'Änderungen verworfen';
-
-  @override
   String get dashLayoutResetDone => 'Dashboard auf Standard zurückgesetzt';
 
   @override
-  String dashLayoutMoved(
-    String widget,
-    int row,
-    int column,
-    int position,
-    int count,
-  ) {
-    return '$widget: Zeile $row, Spalte $column, Position $position von $count';
-  }
-
-  @override
-  String dashLayoutMovedTo(String widget, int position, int count) {
-    return '$widget auf Position $position von $count verschoben';
-  }
-
-  @override
-  String dashLayoutPickedUp(String widget) {
-    return '$widget aufgenommen';
-  }
-
-  @override
-  String dashLayoutDropped(String widget) {
-    return '$widget abgelegt';
-  }
-
-  @override
-  String get dashLayoutSheetSubtitle => 'Änderungen gelten sofort.';
-
-  @override
   String get dashLayoutNotOnDashboard => 'Nicht auf deinem Dashboard';
-
-  @override
-  String get dashLayoutNew => 'Neu';
-
-  @override
-  String get dashLayoutRemovedHint =>
-      'Entfernt · Einstellungen bleiben erhalten';
 
   @override
   String get dashLayoutEmptyTitle => 'Dein Dashboard ist leer';
@@ -2438,24 +2473,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get dashLayoutEmptyBody =>
       'Füge Widgets hinzu, um deine Finanzen auf einen Blick zu sehen.';
-
-  @override
-  String get dashLayoutHeroRow => 'Steht oben als Kopfzeile';
-
-  @override
-  String dashLayoutMoveUpWidget(String widget) {
-    return '„$widget“ nach oben';
-  }
-
-  @override
-  String dashLayoutMoveDownWidget(String widget) {
-    return '„$widget“ nach unten';
-  }
-
-  @override
-  String dashLayoutRemoveWidget(String widget) {
-    return '„$widget“ entfernen';
-  }
 
   @override
   String get dashLayoutDescnetWorth => 'Summe deiner Konten über 12 Monate';
@@ -2487,28 +2504,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dashLayoutDescrecentTransactions => 'Deine neuesten Buchungen';
-
-  @override
-  String get dashLayoutOrderReplaced =>
-      'Deine frühere Reihenfolge wurde ersetzt';
-
-  @override
-  String get dashLayoutDragRow => 'Ziehen, um die Zeile zu verschieben';
-
-  @override
-  String dashLayoutRowPickedUp(int row) {
-    return 'Zeile $row aufgenommen';
-  }
-
-  @override
-  String dashLayoutRowDropped(int row) {
-    return 'Zeile $row abgelegt';
-  }
-
-  @override
-  String dashLayoutRowMovedTo(int position, int count) {
-    return 'Zeile auf Position $position von $count verschoben';
-  }
 
   @override
   String get exportTitle => 'Export & Sicherung';

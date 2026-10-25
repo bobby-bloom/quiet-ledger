@@ -1,6 +1,9 @@
-import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
+import 'package:personal_finance/core/board/board_state.dart';
+import 'package:personal_finance/features/dashboard/domain/dashboard_legacy.dart';
+
+export 'package:personal_finance/core/board/board_state.dart'
+    show BoardEntry, BoardState, BoardView;
 
 /// Widgets available on the dashboard (PLAN.md §2.2). Their `name` is
 /// the id stored in layouts.
@@ -16,220 +19,58 @@ enum DashboardWidgetType {
   recentTransactions,
 }
 
-/// The two arrangements the dashboard keeps, independent of each other:
-/// the phone's one ordered list ([compact], < 600) and the rows of every
-/// wider window ([expanded], folded to the columns that fit). Both sync.
-enum DashboardView { compact, expanded }
+/// The dashboard's two views: the phone's list and the wider rows.
+typedef DashboardView = BoardView;
 
-/// One widget's selection in a view: whether it shows and its options
-/// (forecast account, row limit). A removed widget keeps both.
-@immutable
-class WidgetEntry {
-  const WidgetEntry({this.visible = true, this.options = const {}});
+/// What a dashboard view has saved (a [BoardState] of [dashboardBoard]).
+typedef DashboardViewState = BoardState;
 
-  final bool visible;
-  final Map<String, Object?> options;
+/// One widget's selection in a view.
+typedef WidgetEntry = BoardEntry;
 
-  WidgetEntry copyWith({bool? visible, Map<String, Object?>? options}) =>
-      WidgetEntry(
-        visible: visible ?? this.visible,
-        options: options ?? this.options,
-      );
+/// Nothing saved for a dashboard view: Auto, the defaults.
+const emptyDashboard = BoardState(dashboardBoard);
 
-  @override
-  bool operator ==(Object other) =>
-      other is WidgetEntry &&
-      other.visible == visible &&
-      const MapEquality<Object?, Object?>().equals(other.options, options);
+/// The dashboard as a board (docs/BOARD.md): its widgets by type name, six
+/// on phones by default and all on wider screens. Its keys predate other
+/// boards (`expanded.v2`, `compact.v2`) and the 0.1 rows (`expanded`,
+/// `compact`) are read while no v2 row exists.
+const dashboardBoard = BoardDefinition(
+  id: 'dashboard',
+  cards: _cards,
+  compactDefaults: _phoneDefaults,
+  defaultRows: defaultRows,
+  keyPrefix: '',
+  legacyKey: _legacyKey,
+  migrateLegacy: migrateLegacyLayout,
+);
 
-  @override
-  int get hashCode => Object.hash(
-    visible,
-    Object.hashAllUnordered(
-      options.entries.map((e) => Object.hash(e.key, e.value)),
-    ),
-  );
-}
-
-/// What a view has saved: Auto or Custom, the selection ([items], keyed by
-/// type name) and the custom arrangement — [rows] on expanded, [order] on
-/// compact. [rows] and [order] are null until saved and outlive a switch
-/// back to Auto.
-///
-/// [items] holds an entry for every type the app knew at the last save, so
-/// a type without one is new (docs/DASHBOARD.md, "New widgets").
-@immutable
-class DashboardViewState {
-  const DashboardViewState({
-    this.mode = LayoutMode.auto,
-    this.items = const {},
-    this.rows,
-    this.order,
-  });
-
-  /// A view nothing was saved for.
-  static const empty = DashboardViewState();
-
-  final LayoutMode mode;
-  final Map<String, WidgetEntry> items;
-  final List<BoardRow>? rows;
-  final List<String>? order;
-
-  DashboardViewState copyWith({
-    LayoutMode? mode,
-    Map<String, WidgetEntry>? items,
-    List<BoardRow>? rows,
-    List<String>? order,
-  }) => DashboardViewState(
-    mode: mode ?? this.mode,
-    items: items ?? this.items,
-    rows: rows ?? this.rows,
-    order: order ?? this.order,
-  );
-
-  /// Options of [type] (empty when none are set).
-  Map<String, Object?> optionsOf(DashboardWidgetType type) =>
-      items[type.name]?.options ?? const {};
-
-  /// Whether [type] shows in [view]: as selected, or — for a type without an
-  /// entry — when it is a default of [view] and the view is on Auto (or
-  /// nothing was saved yet). On Custom a new type waits in Add widget.
-  bool shows(DashboardView view, DashboardWidgetType type) {
-    final entry = items[type.name];
-    if (entry != null) return entry.visible;
-    final isDefault = defaultTypes(view).contains(type);
-    return isDefault && (items.isEmpty || mode == LayoutMode.auto);
-  }
-
-  /// Whether [type] shipped after the last save and does not show: Add
-  /// widget marks it "New".
-  bool isNew(DashboardView view, DashboardWidgetType type) =>
-      items.isNotEmpty && !items.containsKey(type.name) && !shows(view, type);
-
-  /// The types that show in [view], in enum order. Ids of types this build
-  /// does not know never show; they keep their entries and slots.
-  List<DashboardWidgetType> shown(DashboardView view) => [
-    for (final t in DashboardWidgetType.values)
-      if (shows(view, t)) t,
-  ];
-
-  /// This state with an entry for every known type, as it shows now in
-  /// [view]: what a save writes, so "removed" and "new" stay apart.
-  ///
-  /// Entries of types this build does not know (a newer build's) stay as
-  /// they are, so syncing with an older build loses nothing.
-  DashboardViewState normalized(DashboardView view) => copyWith(
-    items: {
-      ...items,
-      for (final t in DashboardWidgetType.values)
-        t.name: (items[t.name] ?? const WidgetEntry()).copyWith(
-          visible: shows(view, t),
-        ),
-    },
-  );
-
-  /// This state with the mode and the arrangement of [before] (rows or
-  /// order, null included): what an Undo of a layout change writes, leaving
-  /// selection and options as they are now.
-  DashboardViewState withArrangementOf(DashboardViewState before) =>
-      DashboardViewState(
-        mode: before.mode,
-        items: items,
-        rows: before.rows,
-        order: before.order,
-      );
-
-  /// This state with every known type shown or hidden as in [before], the
-  /// options as they are now.
-  DashboardViewState withVisibilityOf(
-    DashboardView view,
-    DashboardViewState before,
-  ) {
-    final base = normalized(view).items;
-    return copyWith(
-      items: {
-        ...base,
-        for (final t in DashboardWidgetType.values)
-          t.name: base[t.name]!.copyWith(visible: before.shows(view, t)),
-      },
-    );
-  }
-
-  /// [type] shown or hidden in [view], its options kept.
-  DashboardViewState withVisible(
-    DashboardView view,
-    DashboardWidgetType type, {
-    required bool visible,
-  }) {
-    final base = normalized(view).items;
-    return copyWith(
-      items: {
-        ...base,
-        type.name: base[type.name]!.copyWith(visible: visible),
-      },
-    );
-  }
-
-  /// [type]'s options replaced in [view].
-  DashboardViewState withOptions(
-    DashboardView view,
-    DashboardWidgetType type,
-    Map<String, Object?> options,
-  ) {
-    final base = normalized(view).items;
-    return copyWith(
-      items: {
-        ...base,
-        type.name: base[type.name]!.copyWith(options: options),
-      },
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is DashboardViewState &&
-      other.mode == mode &&
-      const MapEquality<Object?, Object?>().equals(other.items, items) &&
-      const ListEquality<Object?>().equals(other.rows, rows) &&
-      const ListEquality<Object?>().equals(other.order, order);
-
-  @override
-  int get hashCode => Object.hash(
-    mode,
-    Object.hashAllUnordered(
-      items.entries.map((e) => Object.hash(e.key, e.value)),
-    ),
-    rows == null ? null : Object.hashAll(rows!),
-    order == null ? null : Object.hashAll(order!),
-  );
-
-  @override
-  String toString() =>
-      'DashboardViewState($mode, ${items.length} items, $rows, $order)';
-}
-
-const _phoneDefaults = [
-  DashboardWidgetType.netWorth,
-  DashboardWidgetType.monthSummary,
-  DashboardWidgetType.budgets,
-  DashboardWidgetType.upcomingBills,
-  DashboardWidgetType.forecast,
-  DashboardWidgetType.recentTransactions,
+const _cards = [
+  'netWorth',
+  'monthSummary',
+  'budgets',
+  'upcomingBills',
+  'forecast',
+  'accounts',
+  'goals',
+  'topCategories',
+  'recentTransactions',
 ];
 
-/// The widgets a view shows until the person changes it: six on phones,
-/// all on wider screens.
-List<DashboardWidgetType> defaultTypes(DashboardView view) => switch (view) {
-  DashboardView.compact => _phoneDefaults,
-  DashboardView.expanded => DashboardWidgetType.values,
-};
+const _phoneDefaults = [
+  'netWorth',
+  'monthSummary',
+  'budgets',
+  'upcomingBills',
+  'forecast',
+  'recentTransactions',
+];
 
-/// The phone's default order: the defaults, then the others (hidden until
-/// added, so an added one goes to the end).
-List<String> defaultPhoneOrder() => [
-  for (final t in _phoneDefaults) t.name,
-  for (final t in DashboardWidgetType.values)
-    if (!_phoneDefaults.contains(t)) t.name,
+String _legacyKey(BoardView view) => view.name;
+
+/// The widget types that show in [view] of [state], in the board's order.
+List<DashboardWidgetType> shownWidgets(BoardState state, BoardView view) => [
+  for (final id in state.shown(view)) DashboardWidgetType.values.byName(id),
 ];
 
 /// The default rows for a window where [fits] equal columns fit. Two

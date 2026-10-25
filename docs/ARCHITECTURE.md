@@ -5,8 +5,9 @@ design draft ("Quiet Ledger") is mirrored in `docs/design/` (one `.dc.html`
 per screen, `Foundations.dc.html` holds the tokens). `docs/BACKUP.md`
 describes backups, restore and the data-safety rules below;
 `docs/BUDGETS.md` describes how budget lines are calculated;
-`docs/DASHBOARD.md` describes the dashboard's views, rows, arrange mode
-and layout storage.
+`docs/BOARD.md` describes boards of cards — views, rows, arrange mode,
+storage — and how to put one on a screen; `docs/DASHBOARD.md` what is the
+dashboard's own.
 
 ## Layout
 
@@ -16,6 +17,8 @@ lib/
     theme/        tokens.dart (design tokens), app_theme.dart, finance_colors.dart, theme_ext.dart
     app_icon/     app icon in the accent colour: rendering/ICO, AppIconSync (window, Dock,
                   favicon, launcher preset, notification tint)
+    ui/board/     boards of cards (docs/BOARD.md): CardBoard, arrange mode, layout menu,
+                  order sheet, actions
     ui/           AmountText, SectionCard, ProgressBar, StatusBadge, EmptyState, AsyncView,
                   IconTile, confirmDialog, formatters (money/date providers), breakpoints, AppIcons,
                   pickers.dart (showCategoryPicker/MultiPicker, showAccountPicker/MultiPicker,
@@ -27,6 +30,7 @@ lib/
                   path), db_providers.dart, db_files.dart (quarantine, pre-migration
                   copy), connection/
     attachments/  attachment_files.dart (receipt files, relative names), receipt_store.dart
+    board/        rows, fitting, moves, BoardDefinition / BoardState, storage (docs/BOARD.md)
     sync/         hlc.dart
     settings/     setting_def.dart, app_settings.dart (catalogue), settings_controller.dart
     ledger/       txn_draft.dart, ledger_repository.dart, lookups.dart

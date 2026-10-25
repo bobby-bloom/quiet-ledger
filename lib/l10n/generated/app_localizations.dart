@@ -1459,6 +1459,300 @@ abstract class AppLocalizations {
   /// **'Not encrypted: anyone who has the file can read it.'**
   String get backupSavedUnencrypted;
 
+  /// No description provided for @boardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get boardLabel;
+
+  /// No description provided for @boardAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get boardAuto;
+
+  /// No description provided for @boardCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get boardCustom;
+
+  /// No description provided for @boardFitsUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits up to {count} columns. Your layout shows in full on wider screens.'**
+  String boardFitsUpTo(int count);
+
+  /// No description provided for @boardFitsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits one column. Your layout shows in full on wider screens.'**
+  String get boardFitsOne;
+
+  /// No description provided for @boardSplitFits.
+  ///
+  /// In en, this message translates to:
+  /// **'This window fits up to {count} columns'**
+  String boardSplitFits(int count);
+
+  /// No description provided for @boardArrangeNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Widen the window to two columns to arrange'**
+  String get boardArrangeNeeds;
+
+  /// No description provided for @boardArrangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to move'**
+  String get boardArrangeHint;
+
+  /// No description provided for @boardReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get boardReset;
+
+  /// No description provided for @boardRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}'**
+  String boardRow(int row);
+
+  /// No description provided for @boardRowOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} of {count}'**
+  String boardRowOf(int row, int count);
+
+  /// No description provided for @boardRowMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} options'**
+  String boardRowMenu(int row);
+
+  /// No description provided for @boardNewRow.
+  ///
+  /// In en, this message translates to:
+  /// **'New row'**
+  String get boardNewRow;
+
+  /// No description provided for @boardRowTooWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a wider window'**
+  String get boardRowTooWide;
+
+  /// No description provided for @boardRowSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Row layout'**
+  String get boardRowSplit;
+
+  /// No description provided for @boardAddRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add row'**
+  String get boardAddRow;
+
+  /// No description provided for @boardSplitOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One column'**
+  String get boardSplitOne;
+
+  /// No description provided for @boardSplitHalves.
+  ///
+  /// In en, this message translates to:
+  /// **'Two equal columns'**
+  String get boardSplitHalves;
+
+  /// No description provided for @boardSplitWideNarrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide and narrow'**
+  String get boardSplitWideNarrow;
+
+  /// No description provided for @boardSplitNarrowWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow and wide'**
+  String get boardSplitNarrowWide;
+
+  /// No description provided for @boardSplitThirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Three columns'**
+  String get boardSplitThirds;
+
+  /// No description provided for @boardMoveRowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move row up'**
+  String get boardMoveRowUp;
+
+  /// No description provided for @boardMoveRowDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move row down'**
+  String get boardMoveRowDown;
+
+  /// No description provided for @boardRemoveRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove row'**
+  String get boardRemoveRow;
+
+  /// No description provided for @boardMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}”'**
+  String boardMove(String widget);
+
+  /// No description provided for @boardMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get boardMoveUp;
+
+  /// No description provided for @boardMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get boardMoveDown;
+
+  /// No description provided for @boardMoveLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'One column left'**
+  String get boardMoveLeft;
+
+  /// No description provided for @boardMoveRight.
+  ///
+  /// In en, this message translates to:
+  /// **'One column right'**
+  String get boardMoveRight;
+
+  /// No description provided for @boardRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} removed'**
+  String boardRemoved(String widget);
+
+  /// No description provided for @boardFlattened.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout set to {count} columns'**
+  String boardFlattened(int count);
+
+  /// No description provided for @boardReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout replaced'**
+  String get boardReplaced;
+
+  /// No description provided for @boardDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes discarded'**
+  String get boardDiscarded;
+
+  /// No description provided for @boardMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget}: row {row}, column {column}, position {position} of {count}'**
+  String boardMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  );
+
+  /// No description provided for @boardMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} moved to position {position} of {count}'**
+  String boardMovedTo(String widget, int position, int count);
+
+  /// No description provided for @boardPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} picked up'**
+  String boardPickedUp(String widget);
+
+  /// No description provided for @boardDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'{widget} dropped'**
+  String boardDropped(String widget);
+
+  /// No description provided for @boardSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply right away.'**
+  String get boardSheetSubtitle;
+
+  /// No description provided for @boardNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get boardNew;
+
+  /// No description provided for @boardRemovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed · its settings are kept'**
+  String get boardRemovedHint;
+
+  /// No description provided for @boardMoveUpCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}” up'**
+  String boardMoveUpCard(String widget);
+
+  /// No description provided for @boardMoveDownCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{widget}” down'**
+  String boardMoveDownCard(String widget);
+
+  /// No description provided for @boardRemoveCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove “{widget}”'**
+  String boardRemoveCard(String widget);
+
+  /// No description provided for @boardOrderReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Your earlier order was replaced'**
+  String get boardOrderReplaced;
+
+  /// No description provided for @boardDragRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to move the row'**
+  String get boardDragRow;
+
+  /// No description provided for @boardRowPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} picked up'**
+  String boardRowPickedUp(int row);
+
+  /// No description provided for @boardRowDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} dropped'**
+  String boardRowDropped(int row);
+
+  /// No description provided for @boardRowMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Row moved to position {position} of {count}'**
+  String boardRowMovedTo(int position, int count);
+
   /// No description provided for @budgetsTitle.
   ///
   /// In en, this message translates to:
@@ -3481,24 +3775,6 @@ abstract class AppLocalizations {
   /// **'Dashboard layout · Custom'**
   String get dashLayoutMenuCustom;
 
-  /// No description provided for @dashLayoutLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Layout'**
-  String get dashLayoutLabel;
-
-  /// No description provided for @dashLayoutAuto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto'**
-  String get dashLayoutAuto;
-
-  /// No description provided for @dashLayoutCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get dashLayoutCustom;
-
   /// No description provided for @dashLayoutAutoHint.
   ///
   /// In en, this message translates to:
@@ -3510,24 +3786,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your arrangement, shared by your wider screens'**
   String get dashLayoutCustomHint;
-
-  /// No description provided for @dashLayoutFitsUpTo.
-  ///
-  /// In en, this message translates to:
-  /// **'This window fits up to {count} columns. Your layout shows in full on wider screens.'**
-  String dashLayoutFitsUpTo(int count);
-
-  /// No description provided for @dashLayoutFitsOne.
-  ///
-  /// In en, this message translates to:
-  /// **'This window fits one column. Your layout shows in full on wider screens.'**
-  String get dashLayoutFitsOne;
-
-  /// No description provided for @dashLayoutSplitFits.
-  ///
-  /// In en, this message translates to:
-  /// **'This window fits up to {count} columns'**
-  String dashLayoutSplitFits(int count);
 
   /// No description provided for @dashLayoutPhoneAutoHint.
   ///
@@ -3546,12 +3804,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Arrange widgets…'**
   String get dashLayoutArrange;
-
-  /// No description provided for @dashLayoutArrangeNeeds.
-  ///
-  /// In en, this message translates to:
-  /// **'Widen the window to two columns to arrange'**
-  String get dashLayoutArrangeNeeds;
 
   /// No description provided for @dashLayoutEditMenu.
   ///
@@ -3583,138 +3835,6 @@ abstract class AppLocalizations {
   /// **'Arrange widgets'**
   String get dashLayoutArrangeTitle;
 
-  /// No description provided for @dashLayoutArrangeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to move'**
-  String get dashLayoutArrangeHint;
-
-  /// No description provided for @dashLayoutReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get dashLayoutReset;
-
-  /// No description provided for @dashLayoutRow.
-  ///
-  /// In en, this message translates to:
-  /// **'Row {row}'**
-  String dashLayoutRow(int row);
-
-  /// No description provided for @dashLayoutRowOf.
-  ///
-  /// In en, this message translates to:
-  /// **'Row {row} of {count}'**
-  String dashLayoutRowOf(int row, int count);
-
-  /// No description provided for @dashLayoutRowMenu.
-  ///
-  /// In en, this message translates to:
-  /// **'Row {row} options'**
-  String dashLayoutRowMenu(int row);
-
-  /// No description provided for @dashLayoutNewRow.
-  ///
-  /// In en, this message translates to:
-  /// **'New row'**
-  String get dashLayoutNewRow;
-
-  /// No description provided for @dashLayoutRowTooWide.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs a wider window'**
-  String get dashLayoutRowTooWide;
-
-  /// No description provided for @dashLayoutRowSplit.
-  ///
-  /// In en, this message translates to:
-  /// **'Row layout'**
-  String get dashLayoutRowSplit;
-
-  /// No description provided for @dashLayoutAddRow.
-  ///
-  /// In en, this message translates to:
-  /// **'Add row'**
-  String get dashLayoutAddRow;
-
-  /// No description provided for @dashLayoutSplitOne.
-  ///
-  /// In en, this message translates to:
-  /// **'One column'**
-  String get dashLayoutSplitOne;
-
-  /// No description provided for @dashLayoutSplitHalves.
-  ///
-  /// In en, this message translates to:
-  /// **'Two equal columns'**
-  String get dashLayoutSplitHalves;
-
-  /// No description provided for @dashLayoutSplitWideNarrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Wide and narrow'**
-  String get dashLayoutSplitWideNarrow;
-
-  /// No description provided for @dashLayoutSplitNarrowWide.
-  ///
-  /// In en, this message translates to:
-  /// **'Narrow and wide'**
-  String get dashLayoutSplitNarrowWide;
-
-  /// No description provided for @dashLayoutSplitThirds.
-  ///
-  /// In en, this message translates to:
-  /// **'Three columns'**
-  String get dashLayoutSplitThirds;
-
-  /// No description provided for @dashLayoutMoveRowUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Move row up'**
-  String get dashLayoutMoveRowUp;
-
-  /// No description provided for @dashLayoutMoveRowDown.
-  ///
-  /// In en, this message translates to:
-  /// **'Move row down'**
-  String get dashLayoutMoveRowDown;
-
-  /// No description provided for @dashLayoutRemoveRow.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove row'**
-  String get dashLayoutRemoveRow;
-
-  /// No description provided for @dashLayoutMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Move “{widget}”'**
-  String dashLayoutMove(String widget);
-
-  /// No description provided for @dashLayoutMoveUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Up'**
-  String get dashLayoutMoveUp;
-
-  /// No description provided for @dashLayoutMoveDown.
-  ///
-  /// In en, this message translates to:
-  /// **'Down'**
-  String get dashLayoutMoveDown;
-
-  /// No description provided for @dashLayoutMoveLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'One column left'**
-  String get dashLayoutMoveLeft;
-
-  /// No description provided for @dashLayoutMoveRight.
-  ///
-  /// In en, this message translates to:
-  /// **'One column right'**
-  String get dashLayoutMoveRight;
-
   /// No description provided for @dashLayoutRemoveFromDashboard.
   ///
   /// In en, this message translates to:
@@ -3727,89 +3847,17 @@ abstract class AppLocalizations {
   /// **'Drag a widget here'**
   String get dashLayoutEmptyColumn;
 
-  /// No description provided for @dashLayoutRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'{widget} removed'**
-  String dashLayoutRemoved(String widget);
-
-  /// No description provided for @dashLayoutFlattened.
-  ///
-  /// In en, this message translates to:
-  /// **'Layout set to {count} columns'**
-  String dashLayoutFlattened(int count);
-
-  /// No description provided for @dashLayoutReplaced.
-  ///
-  /// In en, this message translates to:
-  /// **'Layout replaced'**
-  String get dashLayoutReplaced;
-
-  /// No description provided for @dashLayoutDiscarded.
-  ///
-  /// In en, this message translates to:
-  /// **'Changes discarded'**
-  String get dashLayoutDiscarded;
-
   /// No description provided for @dashLayoutResetDone.
   ///
   /// In en, this message translates to:
   /// **'Dashboard reset to default'**
   String get dashLayoutResetDone;
 
-  /// No description provided for @dashLayoutMoved.
-  ///
-  /// In en, this message translates to:
-  /// **'{widget}: row {row}, column {column}, position {position} of {count}'**
-  String dashLayoutMoved(
-    String widget,
-    int row,
-    int column,
-    int position,
-    int count,
-  );
-
-  /// No description provided for @dashLayoutMovedTo.
-  ///
-  /// In en, this message translates to:
-  /// **'{widget} moved to position {position} of {count}'**
-  String dashLayoutMovedTo(String widget, int position, int count);
-
-  /// No description provided for @dashLayoutPickedUp.
-  ///
-  /// In en, this message translates to:
-  /// **'{widget} picked up'**
-  String dashLayoutPickedUp(String widget);
-
-  /// No description provided for @dashLayoutDropped.
-  ///
-  /// In en, this message translates to:
-  /// **'{widget} dropped'**
-  String dashLayoutDropped(String widget);
-
-  /// No description provided for @dashLayoutSheetSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Changes apply right away.'**
-  String get dashLayoutSheetSubtitle;
-
   /// No description provided for @dashLayoutNotOnDashboard.
   ///
   /// In en, this message translates to:
   /// **'Not on your dashboard'**
   String get dashLayoutNotOnDashboard;
-
-  /// No description provided for @dashLayoutNew.
-  ///
-  /// In en, this message translates to:
-  /// **'New'**
-  String get dashLayoutNew;
-
-  /// No description provided for @dashLayoutRemovedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Removed · its settings are kept'**
-  String get dashLayoutRemovedHint;
 
   /// No description provided for @dashLayoutEmptyTitle.
   ///
@@ -3822,30 +3870,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add widgets to see your money at a glance.'**
   String get dashLayoutEmptyBody;
-
-  /// No description provided for @dashLayoutHeroRow.
-  ///
-  /// In en, this message translates to:
-  /// **'Shown at the top'**
-  String get dashLayoutHeroRow;
-
-  /// No description provided for @dashLayoutMoveUpWidget.
-  ///
-  /// In en, this message translates to:
-  /// **'Move “{widget}” up'**
-  String dashLayoutMoveUpWidget(String widget);
-
-  /// No description provided for @dashLayoutMoveDownWidget.
-  ///
-  /// In en, this message translates to:
-  /// **'Move “{widget}” down'**
-  String dashLayoutMoveDownWidget(String widget);
-
-  /// No description provided for @dashLayoutRemoveWidget.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove “{widget}”'**
-  String dashLayoutRemoveWidget(String widget);
 
   /// No description provided for @dashLayoutDescnetWorth.
   ///
@@ -3900,36 +3924,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your latest entries'**
   String get dashLayoutDescrecentTransactions;
-
-  /// No description provided for @dashLayoutOrderReplaced.
-  ///
-  /// In en, this message translates to:
-  /// **'Your earlier order was replaced'**
-  String get dashLayoutOrderReplaced;
-
-  /// No description provided for @dashLayoutDragRow.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to move the row'**
-  String get dashLayoutDragRow;
-
-  /// No description provided for @dashLayoutRowPickedUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Row {row} picked up'**
-  String dashLayoutRowPickedUp(int row);
-
-  /// No description provided for @dashLayoutRowDropped.
-  ///
-  /// In en, this message translates to:
-  /// **'Row {row} dropped'**
-  String dashLayoutRowDropped(int row);
-
-  /// No description provided for @dashLayoutRowMovedTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Row moved to position {position} of {count}'**
-  String dashLayoutRowMovedTo(int position, int count);
 
   /// No description provided for @exportTitle.
   ///
