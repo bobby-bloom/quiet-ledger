@@ -320,7 +320,10 @@ class GoalCard extends ConsumerWidget {
       ),
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.md,
+        vertical: Space.cardGap / 2,
+      ),
       child: Semantics(
         label: [
           g.name,

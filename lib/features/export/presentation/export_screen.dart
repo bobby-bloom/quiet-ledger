@@ -252,13 +252,16 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 txnCard,
-                const SizedBox(height: Space.md),
+                const SizedBox(height: Space.cardGap),
                 backup,
-                if (auto != null) ...[const SizedBox(height: Space.md), auto],
+                if (auto != null) ...[
+                  const SizedBox(height: Space.cardGap),
+                  auto,
+                ],
               ],
             ),
           ),
-          const SizedBox(width: Space.xl),
+          const SizedBox(width: Space.cardGap),
           Expanded(flex: 6, child: preview),
         ],
       );
@@ -272,11 +275,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         children: [
           banner,
           txnCard,
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.cardGap),
           preview,
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.cardGap),
           backup,
-          if (auto != null) ...[const SizedBox(height: Space.md), auto],
+          if (auto != null) ...[const SizedBox(height: Space.cardGap), auto],
         ],
       );
     }

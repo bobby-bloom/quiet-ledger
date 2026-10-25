@@ -72,7 +72,7 @@ class _BatchList extends ConsumerWidget {
                 96,
               ),
               itemCount: batches.length,
-              separatorBuilder: (_, _) => const SizedBox(height: Space.xs),
+              separatorBuilder: (_, _) => const SizedBox(height: Space.cardGap),
               itemBuilder: (context, i) => _BatchCard(info: batches[i]),
             ),
     );
@@ -313,6 +313,7 @@ class _ProfileTile extends ConsumerWidget {
     final cfg = ImportProfileRepository.configOf(profile);
     final sheets = cfg.sheets.map((s) => s.sheetName).toSet().join(', ');
     return Card(
+      margin: const EdgeInsets.only(bottom: Space.cardGap),
       child: ListTile(
         leading: const Icon(Icons.bookmark_outline),
         title: Text(profile.name),

@@ -98,8 +98,8 @@ A wide layout is a list of rows. A row has a split (column weights:
 `1`, `1:1`, `2:1`, `1:2`, `1:1:1`) and one list of card ids per column;
 cards stack in their column, and a row is as tall as its tallest column.
 
-- A column needs at least **320 dp**, with 20 dp gaps: three columns from
-  1000 dp of content, two from 660 dp. Content width is the board's own
+- A column needs at least **320 dp**, with 10 dp gaps: three columns from
+  980 dp of content, two from 650 dp. Content width is the board's own
   constraint, after the sidebar and gutters.
 - A saved row wider than the window shows with the columns that fit, the
   rest appended to the last one. Nothing saved changes; the menu says "This

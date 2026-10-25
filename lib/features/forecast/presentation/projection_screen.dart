@@ -70,7 +70,7 @@ class ProjectionScreen extends ConsumerWidget {
                 padding: EdgeInsets.fromLTRB(
                   gutter,
                   Space.xs,
-                  sideHidden ? gutter : Space.sm,
+                  sideHidden ? gutter : Space.cardGap / 2,
                   32,
                 ),
                 children: main,
@@ -80,7 +80,12 @@ class ProjectionScreen extends ConsumerWidget {
               SizedBox(
                 width: 380,
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(Space.sm, Space.xs, gutter, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    Space.cardGap / 2,
+                    Space.xs,
+                    gutter,
+                    32,
+                  ),
                   children: side,
                 ),
               ),
@@ -91,7 +96,7 @@ class ProjectionScreen extends ConsumerWidget {
         padding: EdgeInsets.fromLTRB(gutter, Space.xs, gutter, 96),
         children: [
           ...main,
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.cardGap),
           ...side,
         ],
       );

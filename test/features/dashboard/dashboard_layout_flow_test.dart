@@ -486,7 +486,7 @@ void main() {
         await gesture.moveBy(const Offset(0, 40));
         await tester.pump(const Duration(milliseconds: 50));
 
-        tester.view.physicalSize = const Size(700, 1100);
+        tester.view.physicalSize = const Size(680, 1100);
         await settle(tester);
         await gesture.up();
         await settle(tester);
@@ -553,7 +553,7 @@ void main() {
       try {
         final repo = await pumpAt(tester, wide);
         await enterArrange(tester);
-        tester.view.physicalSize = const Size(700, 1100);
+        tester.view.physicalSize = const Size(680, 1100);
         await settle(tester);
         await tester.runAsync(
           () => repo.save(

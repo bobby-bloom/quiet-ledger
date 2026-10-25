@@ -115,7 +115,7 @@ abstract final class ChartPalette {
 }
 
 /// Spacing scale (px). Phone gutter 16, list inset 20, card padding 16,
-/// desktop gutter 24–32. Touch targets ≥ 44.
+/// card gap 10, desktop gutter 24. Touch targets ≥ 44.
 abstract final class Space {
   static const xxs = 4.0;
   static const xs = 8.0;
@@ -129,6 +129,10 @@ abstract final class Space {
   static const phoneGutter = 16.0;
   static const listInset = 20.0;
   static const cardPadding = 16.0;
+
+  /// Between neighbouring cards, stacked or side by side, on every screen
+  /// (the boards' `boardGap` too).
+  static const cardGap = 10.0;
   static const desktopGutter = 24.0;
   static const minTouch = 44.0;
 }

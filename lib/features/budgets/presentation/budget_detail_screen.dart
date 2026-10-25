@@ -540,7 +540,7 @@ class _OptionsCard extends ConsumerWidget {
     final locale = ref.watch(formatLocaleProvider);
     final dates = ref.watch(dateFormatsProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.cardGap, Space.md, 0),
       child: Card(
         child: Column(
           children: [
@@ -734,7 +734,7 @@ class _HistoryCard extends ConsumerWidget {
       if (h.spentMinor > max) max = h.spentMinor;
     }
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.cardGap, Space.md, 0),
       child: SectionCard(
         title: l.budgetsHistory,
         child: Column(
@@ -826,7 +826,7 @@ class _WindowsCard extends ConsumerWidget {
         .value;
     if (list == null || list.length < 2) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.cardGap, Space.md, 0),
       child: SectionCard(
         title: l.budgetsWindowsInPeriod,
         child: Column(

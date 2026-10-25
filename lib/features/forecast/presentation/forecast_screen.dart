@@ -207,12 +207,12 @@ class _Board extends ConsumerWidget {
     final side = <Widget>[
       if (scenariosOn) ...[
         _ScenarioToggles(batch: batch, accountId: accountId),
-        const SizedBox(height: Space.md),
+        const SizedBox(height: Space.cardGap),
       ],
       WhatIfCard(accounts: accounts, initialAccountId: accountId),
-      const SizedBox(height: Space.md),
+      const SizedBox(height: Space.cardGap),
       _Warnings(result: result, accounts: accounts),
-      const SizedBox(height: Space.md),
+      const SizedBox(height: Space.cardGap),
       _BigEvents(result: result, accountId: accountId),
     ];
 
@@ -227,7 +227,7 @@ class _Board extends ConsumerWidget {
               padding: EdgeInsets.fromLTRB(
                 gutter,
                 Space.xs,
-                sideHidden ? gutter : Space.sm,
+                sideHidden ? gutter : Space.cardGap / 2,
                 Space.xl,
               ),
               children: main,
@@ -238,7 +238,7 @@ class _Board extends ConsumerWidget {
               width: 380,
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
-                  Space.sm,
+                  Space.cardGap / 2,
                   Space.xs,
                   gutter,
                   Space.xl,
@@ -253,7 +253,7 @@ class _Board extends ConsumerWidget {
       padding: EdgeInsets.fromLTRB(gutter, Space.xs, gutter, 96),
       children: [
         ...main,
-        const SizedBox(height: Space.md),
+        const SizedBox(height: Space.cardGap),
         ...side,
       ],
     );

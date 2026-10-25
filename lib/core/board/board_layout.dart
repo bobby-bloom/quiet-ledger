@@ -12,8 +12,9 @@ import 'package:meta/meta.dart';
 /// "over" chip and the name needs about this much.
 const double minBoardColumnWidth = 320;
 
-/// The space between cards, columns and rows on wide screens.
-const double boardGap = 20;
+/// The space between cards, columns and rows on wide screens: the app's
+/// `Space.cardGap` (core/ stays free of the theme).
+const double boardGap = 10;
 
 /// A row template: one weight per column, left to right — `[2, 1]` is a
 /// wide column and a narrow one. Kept as weights rather than a template

@@ -217,9 +217,11 @@ class _GoalEditorState extends ConsumerState<GoalEditor> {
               ),
             if (progress != null) GoalCard(progress: progress),
             Padding(
-              padding: const EdgeInsets.fromLTRB(
+              // Under the GoalCard, whose own padding makes up the rest of
+              // the card gap.
+              padding: EdgeInsets.fromLTRB(
                 Space.md,
-                Space.sm,
+                progress != null ? Space.cardGap / 2 : Space.sm,
                 Space.md,
                 0,
               ),

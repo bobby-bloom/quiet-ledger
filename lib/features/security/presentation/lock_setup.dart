@@ -218,7 +218,7 @@ class _LockSetupPageState extends ConsumerState<LockSetupPage> {
                 l.securityMethodPin,
                 l.securityPinLength(minPinLength, maxPinLength),
               ),
-              const SizedBox(height: Space.xs),
+              const SizedBox(height: Space.cardGap),
               option(
                 SecretKind.password,
                 Icons.password,
@@ -229,7 +229,7 @@ class _LockSetupPageState extends ConsumerState<LockSetupPage> {
           ),
         ),
         if (bioAvailable && !widget.change) ...[
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.cardGap),
           Card(
             child: SwitchListTile(
               value: _biometrics,

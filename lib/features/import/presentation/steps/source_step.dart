@@ -213,6 +213,7 @@ class _SourceTile extends ConsumerWidget {
           '${l.importFileSheets(wb.sheets.length)} · ${l.importRows(rows)}';
     }
     return Card(
+      margin: const EdgeInsets.only(bottom: Space.cardGap),
       color: error != null ? colors.errorContainer : null,
       child: Column(
         children: [

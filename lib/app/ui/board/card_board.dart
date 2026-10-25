@@ -55,7 +55,7 @@ class CardBoard extends ConsumerStatefulWidget {
     required this.builder,
     super.key,
     this.empty,
-    this.compactGap = 10,
+    this.compactGap = Space.cardGap,
   });
 
   final BoardDefinition def;

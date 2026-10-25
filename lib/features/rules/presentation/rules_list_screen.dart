@@ -98,6 +98,7 @@ class _RulesListScreenState extends ConsumerState<RulesListScreen> {
                   final r = list[i];
                   return Card(
                     key: ValueKey(r.id),
+                    margin: const EdgeInsets.only(bottom: Space.cardGap),
                     child: ListTile(
                       leading: ReorderableDragStartListener(
                         index: i,

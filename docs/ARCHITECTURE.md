@@ -107,7 +107,8 @@ phone UI.
 `context.finance` (income/expense/transfer/warning colours) — never hex
 literals in feature code. Spacing from `Space`, radii from `Radii`,
 durations and curves from `Motion` (`Motion.isReduced` for reduced motion). Cards:
-`SectionCard` / `Card` (level 0, hairline border). Expense amounts stay
+`SectionCard` / `Card` (level 0, hairline border), `Space.cardGap`
+(10 px) apart, stacked or side by side, on every screen. Expense amounts stay
 onSurface with "−"; income uses `finance.income` with "+"; transfers use
 `finance.transfer` and no sign (AmountText does this). Budget bars: on
 track → primary, ≥ threshold → warningFill, over → error, always with a

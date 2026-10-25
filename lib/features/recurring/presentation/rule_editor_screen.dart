@@ -361,7 +361,7 @@ class _RuleEditorState extends ConsumerState<RuleEditor> {
         : CategoryKind.expense;
 
     Widget section(String title, List<Widget> children) => Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+      padding: const EdgeInsets.fromLTRB(Space.md, Space.cardGap, Space.md, 0),
       child: SectionCard(
         title: title,
         padding: const EdgeInsets.fromLTRB(Space.md, 4, Space.md, Space.md),

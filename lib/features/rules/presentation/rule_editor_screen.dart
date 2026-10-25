@@ -515,7 +515,7 @@ class _ConditionCardState extends ConsumerState<_ConditionCard> {
         );
     }
     return Card(
-      margin: const EdgeInsets.only(bottom: Space.xs),
+      margin: const EdgeInsets.only(bottom: Space.cardGap),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           Space.md,

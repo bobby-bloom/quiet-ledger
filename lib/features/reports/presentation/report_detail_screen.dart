@@ -109,7 +109,7 @@ class ReportDetailScreen extends ConsumerWidget {
                       child: chartCard(data),
                     ),
                   ),
-                  const SizedBox(width: Space.lg),
+                  const SizedBox(width: Space.cardGap),
                   Expanded(
                     flex: data.table.columns.length >= 5 ? 1 : 2,
                     child: SingleChildScrollView(
@@ -130,7 +130,7 @@ class ReportDetailScreen extends ConsumerWidget {
           filters,
           const SizedBox(height: Space.md),
           chartCard(data),
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.cardGap),
           tableCard(data),
         ],
       );

@@ -264,7 +264,12 @@ class _ScenarioEditorScreenState extends ConsumerState<ScenarioEditorScreen> {
             children: [
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(gutter, Space.md, Space.sm, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    gutter,
+                    Space.md,
+                    Space.cardGap / 2,
+                    32,
+                  ),
                   children: [
                     ...details,
                     const SizedBox(height: Space.md),
@@ -275,7 +280,12 @@ class _ScenarioEditorScreenState extends ConsumerState<ScenarioEditorScreen> {
               SizedBox(
                 width: 380,
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(Space.sm, Space.md, gutter, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    Space.cardGap / 2,
+                    Space.md,
+                    gutter,
+                    32,
+                  ),
                   children: [preview],
                 ),
               ),
@@ -287,7 +297,7 @@ class _ScenarioEditorScreenState extends ConsumerState<ScenarioEditorScreen> {
               ...details,
               const SizedBox(height: Space.md),
               changes,
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.cardGap),
               preview,
             ],
           );

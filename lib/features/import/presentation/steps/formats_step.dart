@@ -213,7 +213,7 @@ class _FormatCard extends ConsumerWidget {
       );
     }
     return Padding(
-      padding: const EdgeInsets.only(bottom: Space.sm),
+      padding: const EdgeInsets.only(bottom: Space.cardGap),
       child: SectionCard(title: title, child: body),
     );
   }

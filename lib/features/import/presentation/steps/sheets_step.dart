@@ -23,11 +23,10 @@ class SheetsStep extends ConsumerWidget {
       intro: l.importSheetsIntro,
       children: [
         for (final (wb, sheet, cfg) in s.allSheets)
-          _SheetCard(
+          Padding(
             key: ValueKey(cfg.key),
-            workbook: wb,
-            sheet: sheet,
-            config: cfg,
+            padding: const EdgeInsets.only(bottom: Space.cardGap),
+            child: _SheetCard(workbook: wb, sheet: sheet, config: cfg),
           ),
       ],
     );
@@ -39,7 +38,6 @@ class _SheetCard extends ConsumerWidget {
     required this.workbook,
     required this.sheet,
     required this.config,
-    super.key,
   });
 
   final RawWorkbook workbook;

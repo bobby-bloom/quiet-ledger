@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/core/board/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
 
@@ -9,11 +10,15 @@ List<String> all = [for (final t in DashboardWidgetType.values) t.name];
 
 void main() {
   group('fittingColumns', () {
-    test('320 dp columns with 20 dp gaps', () {
-      expect(fittingColumns(659), 1);
-      expect(fittingColumns(660), 2);
-      expect(fittingColumns(999), 2);
-      expect(fittingColumns(1000), 3);
+    test('the gap is the app-wide card gap', () {
+      expect(boardGap, Space.cardGap);
+    });
+
+    test('320 dp columns with 10 dp gaps', () {
+      expect(fittingColumns(649), 1);
+      expect(fittingColumns(650), 2);
+      expect(fittingColumns(979), 2);
+      expect(fittingColumns(980), 3);
       expect(fittingColumns(100), 1);
     });
   });
@@ -153,7 +158,7 @@ void main() {
 
   group('columnWidths', () {
     test('share by weight with gaps', () {
-      expect(columnWidths(RowSplit.thirds, 1040), [
+      expect(columnWidths(RowSplit.thirds, 1020), [
         moreOrLessEquals(333.33, epsilon: 0.01),
         moreOrLessEquals(333.33, epsilon: 0.01),
         moreOrLessEquals(333.33, epsilon: 0.01),
@@ -161,7 +166,7 @@ void main() {
     });
 
     test('2:1 leans towards equal rather than going under 320 dp', () {
-      final widths = columnWidths(RowSplit.wideNarrow, 700);
+      final widths = columnWidths(RowSplit.wideNarrow, 690);
       expect(widths.last, 320);
       expect(widths.first, 360);
     });

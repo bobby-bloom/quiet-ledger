@@ -496,7 +496,7 @@ class _StartStep extends StatelessWidget {
     Widget option(_StartChoice c, IconData icon, String title, String text) {
       final selected = c == choice;
       return Padding(
-        padding: const EdgeInsets.only(bottom: Space.sm),
+        padding: const EdgeInsets.only(bottom: Space.cardGap),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(Radii.lg),
@@ -582,7 +582,7 @@ class _AccountsStep extends StatelessWidget {
         for (final (i, a) in accounts.indexed)
           Padding(
             key: ObjectKey(a),
-            padding: const EdgeInsets.only(bottom: Space.md),
+            padding: const EdgeInsets.only(bottom: Space.cardGap),
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(Space.cardPadding),

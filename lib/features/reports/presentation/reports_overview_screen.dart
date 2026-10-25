@@ -31,8 +31,8 @@ class ReportsOverviewScreen extends ConsumerWidget {
             padding: EdgeInsets.fromLTRB(gutter, Space.md, gutter, Space.xxl),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
-              mainAxisSpacing: Space.md,
-              crossAxisSpacing: Space.md,
+              mainAxisSpacing: Space.cardGap,
+              crossAxisSpacing: Space.cardGap,
               mainAxisExtent: 236,
             ),
             itemCount: ReportType.values.length,

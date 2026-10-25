@@ -233,7 +233,10 @@ class _DueTile extends ConsumerWidget {
     final dates = ref.watch(dateFormatsProvider);
     final overdue = u.isOverdue;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, 4, Space.md, 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.md,
+        vertical: Space.cardGap / 2,
+      ),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(

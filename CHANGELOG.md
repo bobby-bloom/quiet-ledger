@@ -87,6 +87,11 @@ a dated release section.
 
 ### Changed
 
+- Cards are 10 px apart everywhere (`Space.cardGap`): the wide dashboard
+  and arranging it (was 20), Forecast, the projection, Reports, account
+  details, reconciling, budget and goal details, recurring items and their
+  editor, scenarios, rules, export, import, onboarding, app lock setup and
+  Settings › Navigation (were 0 to 24).
 - Wide windows: the long-term projection's assumptions panel can be hidden
   from the app bar, like the forecast's side panel. Plan's budgets,
   recurring items and goals and the bills calendar's day list open in a

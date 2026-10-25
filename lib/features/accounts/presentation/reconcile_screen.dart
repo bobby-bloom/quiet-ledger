@@ -288,12 +288,12 @@ class _ReconcileScreenState extends ConsumerState<ReconcileScreen> {
                 child: Column(
                   children: [
                     input,
-                    const SizedBox(height: Space.md),
+                    const SizedBox(height: Space.cardGap),
                     summary,
                   ],
                 ),
               ),
-              const SizedBox(width: Space.md),
+              const SizedBox(width: Space.cardGap),
               Expanded(child: pendingCard),
             ],
           )
@@ -301,9 +301,9 @@ class _ReconcileScreenState extends ConsumerState<ReconcileScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               input,
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.cardGap),
               summary,
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.cardGap),
               pendingCard,
             ],
           );

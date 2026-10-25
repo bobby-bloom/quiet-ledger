@@ -385,7 +385,7 @@ class _AccountDetailBodyState extends ConsumerState<AccountDetailBody> {
             ],
           ),
         ),
-        const SizedBox(height: Space.md),
+        const SizedBox(height: Space.cardGap),
 
         // ------------------------------------------- recent transactions
         SectionCard(
@@ -419,7 +419,7 @@ class _AccountDetailBodyState extends ConsumerState<AccountDetailBody> {
                   ),
           ),
         ),
-        const SizedBox(height: Space.md),
+        const SizedBox(height: Space.cardGap),
 
         // ------------------------------------------------------ details
         SectionCard(

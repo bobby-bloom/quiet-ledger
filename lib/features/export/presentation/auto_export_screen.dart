@@ -337,7 +337,7 @@ class _AutoExportScreenState extends ConsumerState<AutoExportScreen> {
               ),
             ),
             if (hasFolder) ...[
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.cardGap),
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 640),

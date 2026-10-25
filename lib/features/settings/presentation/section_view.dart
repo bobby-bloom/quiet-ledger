@@ -196,7 +196,8 @@ class _SettingsSectionViewState extends ConsumerState<SettingsSectionView> {
             action: action(0),
             children: navigationTabRows(_wrap),
           ),
-          const SizedBox(height: Space.xs),
+          // The cards' own margins make up the rest of the card gap.
+          const SizedBox(height: Space.cardGap - 2 * Space.xxs),
           SettingsGroupCard(
             title: l.settingsUiModulesTitle,
             children: [
