@@ -99,6 +99,13 @@ first row's to the row below); "Add row" sits under the last row.
   column index, clamped); Down at the top of the row below. The same moves
   are screen-reader actions; each move is announced. Dropping into the gap
   between rows makes a new one-column row.
+- Drag a whole row, its widgets with it, by its toolbar (the grip and
+  "Row n"; the columns stay for dragging widgets). It moves up and down
+  only; while it is lifted the board keeps its layout — the row dims in
+  place and a line marks the gap it would land in (before the first row
+  whose middle lies below the pointer). Let go next to itself, it stays.
+  The row menu's Move row up / down are the same moves without a drag, and
+  screen-reader actions on the row. One drag at a time: a widget or a row.
 - There is no auto-scroll: the arranged board is short; the Move menu is the
   way when it is taller than the window.
 - Removing and adding inside the session are part of it: Cancel undoes them.
