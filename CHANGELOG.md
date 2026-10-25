@@ -128,6 +128,8 @@ a dated release section.
 
 ### Fixed
 
+- Plan › Recurring: the amounts in the list of rules are as large as in
+  the due items and transaction rows instead of tiny.
 - Arranging the dashboard: dragging a widget into an empty column no
   longer makes the row flicker.
 - Dashboard card titles sit where they did before folding came, instead

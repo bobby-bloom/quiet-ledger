@@ -495,7 +495,11 @@ class RuleTile extends ConsumerWidget {
       ),
       title: Text(plan.name, overflow: TextOverflow.ellipsis),
       subtitle: Text(sub, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: AmountText(amount, type: plan.type),
+      trailing: AmountText(
+        amount,
+        type: plan.type,
+        style: context.text.titleSmall,
+      ),
       onTap: onTap,
     );
   }
