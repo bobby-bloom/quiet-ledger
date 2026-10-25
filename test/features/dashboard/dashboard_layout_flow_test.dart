@@ -12,6 +12,7 @@ import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
 import 'package:personal_finance/features/dashboard/presentation/board/arrange_board.dart';
 import 'package:personal_finance/features/dashboard/presentation/board/arrange_card.dart';
+import 'package:personal_finance/features/dashboard/presentation/board/row_band.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
@@ -497,6 +498,44 @@ void main() {
           ),
         );
         expect(tester.takeException(), isNull);
+      } finally {
+        await teardown(tester);
+      }
+    });
+
+    testWidgets('a drag into an empty column keeps the row still', (
+      tester,
+    ) async {
+      try {
+        await pumpAt(tester, const Size(1440, 1400));
+        await enterArrange(tester);
+        await tester.tap(find.text('Add row'));
+        await settle(tester);
+        await tester.tap(find.byTooltip('Row layout').last);
+        await settle(tester);
+        await tester.tap(find.byTooltip('One column').last);
+        await settle(tester);
+
+        final band = find.byType(RowBand).last;
+        final start = tester.getCenter(arrangeCard('Accounts'));
+        final gesture = await tester.startGesture(start);
+        await gesture.moveBy(const Offset(0, 20));
+        await tester.pump(const Duration(milliseconds: 16));
+        final heights = <double>{};
+        for (var f = 0; f < 30; f++) {
+          // Low in the row, where a shrinking row would lose the pointer.
+          final rect = tester.getRect(band);
+          await gesture.moveTo(Offset(rect.center.dx, rect.top + 108));
+          await tester.pump(const Duration(milliseconds: 16));
+          if (f > 15) heights.add(tester.getRect(band).height);
+        }
+        expect(heights, hasLength(1));
+        await gesture.up();
+        await settle(tester);
+        expect(
+          tester.getRect(arrangeCard('Accounts')).top,
+          greaterThan(tester.getRect(band).top),
+        );
       } finally {
         await teardown(tester);
       }

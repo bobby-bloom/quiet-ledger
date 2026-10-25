@@ -203,4 +203,22 @@ void main() {
       await teardown(tester);
     }
   });
+
+  for (final size in [const Size(1440, 1000), const Size(390, 844)]) {
+    testWidgets('card titles sit 26 dp below the card edge, as before '
+        '(${size.width.toInt()} wide)', (tester) async {
+      await tester.runAsync(seed);
+      try {
+        await pumpAt(tester, size);
+        final title = find.text('Budgets');
+        final card = find.ancestor(of: title, matching: find.byType(Card));
+        expect(
+          tester.getCenter(title).dy - tester.getTopLeft(card).dy,
+          moreOrLessEquals(26, epsilon: 0.5),
+        );
+      } finally {
+        await teardown(tester);
+      }
+    });
+  }
 }

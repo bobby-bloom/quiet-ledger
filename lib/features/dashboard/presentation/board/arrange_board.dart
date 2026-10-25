@@ -348,10 +348,14 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     }
 
     final children = <Widget>[];
-    Widget slot(ArrangeTarget target, EdgeInsets padding) => _GrowIn(
+    Widget slot(
+      ArrangeTarget target,
+      EdgeInsets padding, {
+      bool inPlaceOfLabel = false,
+    }) => _GrowIn(
       key: ValueKey(target),
       isOpen: target == _target,
-      startsOpen: _isLiftedInPlace && target == _target,
+      startsOpen: (inPlaceOfLabel || _isLiftedInPlace) && target == _target,
       onClosed: () => _closed(target),
       child: Padding(
         padding: padding,
@@ -378,11 +382,13 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       );
     }
     if (others.isEmpty) {
-      // An empty column shows the slot in place of "Drag a widget here".
+      // An empty column shows the slot in place of "Drag a widget here", at
+      // its full height at once: growing from nothing would shrink the row
+      // under the pointer, which then leaves it, and the row flickers.
       final open = indexOf(_target);
       children.add(
         open != null
-            ? slot(_target!, EdgeInsets.zero)
+            ? slot(_target!, EdgeInsets.zero, inPlaceOfLabel: true)
             : DropSlot(
                 kind: DropSlotKind.emptyColumn,
                 label: _l.dashLayoutEmptyColumn,

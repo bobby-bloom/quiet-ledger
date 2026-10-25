@@ -232,8 +232,11 @@ class _DashCardState extends ConsumerState<DashCard>
       ],
     );
 
+    // The header is 48 dp (its buttons' touch targets), 4 dp more than the
+    // 44 dp header before folding came: 2 dp less on top keeps the title
+    // where it always was, centred 26 dp below the card's edge.
     final content = Padding(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.xxs, Space.xs, 12),
+      padding: const EdgeInsets.fromLTRB(Space.md, 2, Space.xs, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

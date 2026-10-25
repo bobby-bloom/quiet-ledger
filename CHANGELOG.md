@@ -121,6 +121,10 @@ a dated release section.
 
 ### Fixed
 
+- Arranging the dashboard: dragging a widget into an empty column no
+  longer makes the row flicker.
+- Dashboard card titles sit where they did before folding came, instead
+  of 2 px lower.
 - Privacy mode now also hides the amounts in the dashboard's budget rows
   ("of €…", "€… over") and goals ("saved / target"), the running balance
   under a transaction, and the amounts screen readers read out for
