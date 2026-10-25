@@ -133,7 +133,7 @@ abstract final class Space {
   /// Between neighbouring cards, stacked or side by side, on every screen
   /// (the boards' `boardGap` too).
   static const cardGap = 10.0;
-  static const desktopGutter = 24.0;
+  static const desktopGutter = 16.0;
   static const minTouch = 44.0;
 }
 
