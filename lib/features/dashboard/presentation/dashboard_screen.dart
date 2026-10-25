@@ -359,7 +359,7 @@ class _WideHeader extends ConsumerWidget {
     final privacy = ref.watch(privacyModeProvider);
     return Padding(
       // Same height and margins as the other screens' PageAppBar: the
-      // title and the last icon's circle on the content's 24 px margins.
+      // title and the last icon's circle on the content's 16 px margins.
       padding: const EdgeInsets.fromLTRB(
         Space.desktopGutter,
         Space.xxs,

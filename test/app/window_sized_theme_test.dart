@@ -5,7 +5,7 @@ import 'package:personal_finance/app/theme/app_theme.dart';
 void main() {
   // The last action's tap target ends 4 px outside the page margin, so the
   // IconButton's circle sits on the margin.
-  for (final (width, margin) in const [(400.0, 16.0), (1280.0, 24.0)]) {
+  for (final (width, margin) in const [(400.0, 16.0), (1280.0, 16.0)]) {
     testWidgets('app bar actions end on the margin at ${width.toInt()} px', (
       tester,
     ) async {
