@@ -602,10 +602,7 @@ class _WideHeader extends ConsumerWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                l.navHome,
-                style: context.text.headlineSmall?.copyWith(fontSize: 26),
-              ),
+              Text(l.navHome, style: context.text.titleLarge),
               const SizedBox(width: 12),
               const _PeriodButton(large: true),
             ],

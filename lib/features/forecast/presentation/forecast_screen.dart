@@ -60,8 +60,8 @@ class ForecastScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.forecastTitle, style: context.text.titleLarge),
+      appBar: PageAppBar(
+        title: l.forecastTitle,
         actions: [
           if (accounts.isNotEmpty)
             _AccountSelector(accounts: accounts, selectedId: accountId),

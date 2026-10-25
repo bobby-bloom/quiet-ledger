@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/shell/adaptive_shell.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 
@@ -91,8 +92,8 @@ class MoreScreen extends ConsumerWidget {
     ];
     final privacy = ref.watch(privacyModeProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.navMore, style: context.text.titleLarge),
+      appBar: PageAppBar(
+        title: l.navMore,
         actions: [
           IconButton(
             tooltip: l.privacyToggle,

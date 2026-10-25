@@ -19,7 +19,7 @@ class ReportsOverviewScreen extends ConsumerWidget {
     final size = WindowSize.of(context);
     final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.reportsTitle)),
+      appBar: PageAppBar(title: context.l10n.reportsTitle),
       body: LayoutBuilder(
         builder: (context, box) {
           final columns = box.maxWidth >= 1100
