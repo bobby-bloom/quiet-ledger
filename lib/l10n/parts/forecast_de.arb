@@ -69,6 +69,8 @@
   "forecastTransferFrom": "Von {account}",
   "forecastVariableNote": "Enthält erwartete variable Ausgaben: {method}.",
   "forecastLoading": "Prognose wird berechnet …",
+  "forecastProjLoading": "Projektion wird berechnet …",
+  "forecastProjRecalculating": "Wird neu berechnet …",
   "forecastProjYears": "Jahre",
   "forecastProjYearsValue": "{years, plural, =1{1 Jahr} other{{years} Jahre}}",
   "forecastProjSource": "Sparbetrag aus",
