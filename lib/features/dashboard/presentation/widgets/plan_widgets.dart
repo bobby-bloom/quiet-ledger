@@ -6,15 +6,18 @@ import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/tables.dart';
+import 'package:personal_finance/core/ledger/lookups.dart';
 import 'package:personal_finance/core/money/money.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
 import 'package:personal_finance/features/budgets/domain/budget_math.dart';
+import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_period.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/goals/data/goals_providers.dart';
 import 'package:personal_finance/features/recurring/data/recurring_providers.dart';
+import 'package:personal_finance/features/transactions/presentation/txn_labels.dart';
 import 'package:personal_finance/features/transactions/transactions.dart';
 
 /// Budget progress for the dashboard period: the lines most at risk first.
@@ -30,36 +33,27 @@ class BudgetsWidget extends ConsumerWidget {
     final range = ref.watch(dashboardPeriodProvider);
     final board = ref.watch(budgetBoardProvider(range));
     final fmt = ref.watch(moneyFormatterProvider);
+    // Privacy mode: amounts inside composed labels show as a mask.
+    final hidden = ref.watch(privacyModeProvider);
+    String money(int minor, {bool cents = true}) =>
+        hidden ? '•••' : fmt.format(Money(minor), cents: cents);
+    final lines =
+        (board.value?.lines ?? const <BudgetLine>[])
+            .where((x) => x.isRoot && x.budgetId != null)
+            .toList()
+          ..sort((a, b) => b.ratio.compareTo(a.ratio));
     return DashCard(
+      type: DashboardWidgetType.budgets,
       title: l.dashBudgets,
       actionLabel: l.dashAllBudgets,
       onAction: () => context.go('/plan?tab=budgets'),
       options: options,
+      peek: board.hasValue ? _BudgetsPeek(lines: lines) : null,
       child: board.when(
         loading: () => const SizedBox(height: 96),
         error: (e, _) => Text(l.commonError('$e')),
         data: (summary) {
-          final lines =
-              summary.lines
-                  .where((x) => x.isRoot && x.budgetId != null)
-                  .toList()
-                ..sort((a, b) => b.ratio.compareTo(a.ratio));
-          if (lines.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(l.dashNoBudgets, style: context.text.bodySmall),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go('/plan?tab=budgets'),
-                    child: Text(l.dashSetUpBudgets),
-                  ),
-                ],
-              ),
-            );
-          }
+          if (lines.isEmpty) return const SizedBox.shrink();
           return Column(
             children: [
               for (final line in lines.take(limit))
@@ -68,12 +62,9 @@ class BudgetsWidget extends ConsumerWidget {
                   tick:
                       line.window?.progressAt(DateTime.now()) ??
                       summary.period.progressAt(DateTime.now()),
-                  fmtAvailable: fmt.format(
-                    Money(line.availableMinor),
-                    cents: false,
-                  ),
-                  fmtOver: fmt.format(Money(line.overMinor)),
-                  fmtPlanned: fmt.format(Money(line.plannedMinor)),
+                  fmtAvailable: money(line.availableMinor, cents: false),
+                  fmtOver: money(line.overMinor),
+                  fmtPlanned: money(line.plannedMinor),
                   onTap: () => context.push(
                     '/plan/budgets/${line.categoryId}?period=${_iso(summary.period.start)}',
                   ),
@@ -87,6 +78,62 @@ class BudgetsWidget extends ConsumerWidget {
 
   static String _iso(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+/// "1 over · 2 near limit · 4 budgets" as badges, or the empty state.
+class _BudgetsPeek extends StatelessWidget {
+  const _BudgetsPeek({required this.lines});
+
+  final List<BudgetLine> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cs = context.colors;
+    final fin = context.finance;
+    if (lines.isEmpty) {
+      return Row(
+        children: [
+          Expanded(child: Text(l.dashNoBudgets, style: context.text.bodySmall)),
+          TextButton(
+            onPressed: () => context.go('/plan?tab=budgets'),
+            child: Text(l.dashSetUpBudgets),
+          ),
+        ],
+      );
+    }
+    final over = lines.where((x) => x.state == BudgetState.over).length;
+    final near = lines.where((x) => x.state == BudgetState.warning).length;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        if (over > 0)
+          StatusBadge(
+            l.dashCardBudgetsOver(over),
+            background: cs.errorContainer,
+            foreground: cs.onErrorContainer,
+          ),
+        if (near > 0)
+          StatusBadge(
+            l.dashCardBudgetsNear(near),
+            background: fin.warningContainer,
+            foreground: fin.onWarningContainer,
+          ),
+        if (over == 0 && near == 0)
+          StatusBadge(
+            l.dashCardBudgetsOnTrack,
+            background: cs.primaryContainer,
+            foreground: cs.onPrimaryContainer,
+          ),
+        StatusBadge(
+          l.dashCardBudgetsCount(lines.length),
+          background: cs.surfaceContainerHigh,
+          foreground: cs.onSurfaceVariant,
+        ),
+      ],
+    );
+  }
 }
 
 class _BudgetRow extends StatelessWidget {
@@ -209,26 +256,29 @@ class UpcomingBillsWidget extends ConsumerWidget {
     final upcoming = ref.watch(upcomingOccurrencesProvider(days));
     final dates = ref.watch(dateFormatsProvider);
     final cs = context.colors;
+    final open = (upcoming.value ?? const [])
+        .where((o) => !o.isPosted)
+        .toList();
     return DashCard(
+      type: DashboardWidgetType.upcomingBills,
       title: l.dashUpcoming,
       subtitle: l.dashNextDays(days),
       actionLabel: l.dashCalendar,
       onAction: () => context.push('/plan/calendar'),
       options: options,
+      peek: !upcoming.hasValue
+          ? null
+          : open.isEmpty
+          ? Text(l.dashNoUpcoming(days), style: context.text.bodySmall)
+          : PeekText(
+              '${l.dashCardUpcomingNext(open.first.name, dates.dayHeader(open.first.date))}'
+              ' · ${l.dashCardUpcomingDue(open.length, days)}',
+            ),
       child: upcoming.when(
         loading: () => const SizedBox(height: 96),
         error: (e, _) => Text(l.commonError('$e')),
-        data: (items) {
-          final open = items.where((o) => !o.isPosted).toList();
-          if (open.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                l.dashNoUpcoming(days),
-                style: context.text.bodySmall,
-              ),
-            );
-          }
+        data: (_) {
+          if (open.isEmpty) return const SizedBox.shrink();
           return Column(
             children: [
               for (final (i, o) in open.take(limit).indexed)
@@ -339,22 +389,35 @@ class GoalsWidget extends ConsumerWidget {
     final l = context.l10n;
     final goals = ref.watch(goalsProgressProvider);
     final fmt = ref.watch(moneyFormatterProvider);
+    // Privacy mode: amounts inside composed labels show as a mask.
+    final hidden = ref.watch(privacyModeProvider);
+    String money(int minor, {bool cents = true}) =>
+        hidden ? '•••' : fmt.format(Money(minor), cents: cents);
     final dates = ref.watch(dateFormatsProvider);
+    final all = goals.value ?? const [];
+    // The goal closest to its target (not yet reached), else the first.
+    final open = all.where((g) => g.fraction < 1).toList()
+      ..sort((a, b) => b.fraction.compareTo(a.fraction));
+    final nearest = open.isNotEmpty ? open.first : all.firstOrNull;
     return DashCard(
+      type: DashboardWidgetType.goals,
       title: l.dashGoals,
       actionLabel: l.dashViewAll,
       onAction: () => context.go('/plan?tab=goals'),
       options: options,
+      peek: !goals.hasValue
+          ? null
+          : nearest == null
+          ? Text(l.dashNoGoals, style: context.text.bodySmall)
+          : PeekText(
+              '${l.dashCardGoalsCount(all.length)} · ${nearest.name} '
+              '${(nearest.fraction * 100).clamp(0, 999).round()}%',
+            ),
       child: goals.when(
         loading: () => const SizedBox(height: 96),
         error: (e, _) => Text(l.commonError('$e')),
         data: (list) {
-          if (list.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(l.dashNoGoals, style: context.text.bodySmall),
-            );
-          }
+          if (list.isEmpty) return const SizedBox.shrink();
           return Column(
             children: [
               for (final g in list.take(limit))
@@ -392,7 +455,7 @@ class GoalsWidget extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           [
-                            '${fmt.format(Money(g.savedMinor), cents: false)} / ${fmt.format(Money(g.targetMinor), cents: false)}',
+                            '${money(g.savedMinor, cents: false)} / ${money(g.targetMinor, cents: false)}',
                             if (g.projection.projectedDate != null)
                               dates.monthYear(g.projection.projectedDate!),
                           ].join(' · '),
@@ -428,19 +491,35 @@ class RecentTransactionsWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final recent = ref.watch(recentTransactionsProvider(limit));
+    final latest = recent.value?.firstOrNull;
+    final latestTitle = latest == null
+        ? null
+        : TxnLabels.title(
+            l,
+            latest,
+            accounts: ref.watch(accountMapProvider),
+            categories: ref.watch(categoryMapProvider),
+          );
     return DashCard(
+      type: DashboardWidgetType.recentTransactions,
       title: l.dashRecent,
       actionLabel: l.dashViewAll,
       onAction: () => context.go('/transactions'),
       options: options,
+      peek: !recent.hasValue
+          ? null
+          : latest == null
+          ? Text(l.dashWelcomeEmpty, style: context.text.bodySmall)
+          : PeekText(
+              '${l.dashCardLatest(latestTitle!)} · ${PeekText.slot()} · '
+              '${ref.watch(dateFormatsProvider).dayHeader(latest.date)}',
+              amounts: [latest.amountMinor],
+            ),
       child: recent.when(
         loading: () => const SizedBox(height: 120),
         error: (e, _) => Text(l.commonError('$e')),
         data: (items) => items.isEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(l.dashWelcomeEmpty, style: context.text.bodySmall),
-              )
+            ? const SizedBox.shrink()
             : Column(
                 children: [
                   for (final (i, item) in items.indexed)

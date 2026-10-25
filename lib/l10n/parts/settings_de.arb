@@ -30,7 +30,6 @@
   "setCsvEncoding": "CSV-Zeichenkodierung",
   "setCustomAccent": "Eigene Akzentfarbe",
   "setDashboardPeriod": "Zeitraum im Dashboard",
-  "setDashboardWidgets": "Dashboard-Widgets",
   "setDateFormat": "Datumsformat",
   "setDefaultAccount": "Standardkonto",
   "setDefaultCategorySet": "Standardkategorien",

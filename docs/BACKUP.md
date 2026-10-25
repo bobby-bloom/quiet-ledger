@@ -53,8 +53,9 @@ key, the app-lock credential and the backup keys (secure storage). Settings
 that describe the device (`SettingDef.deviceLocal`, collected in
 `deviceLocalSettingKeys`: backup schedule, retention, folder and its name,
 last backup times and errors, password check, storage location, tombstone
-purge) keep their current value on restore, so restoring another device's
-backup cannot shrink retention and prune this device's backups. They are
+purge, which dashboard widgets are folded) keep their current value on
+restore, so restoring another device's backup cannot shrink retention and
+prune this device's backups. They are
 never synced either: `SyncWriter` stores them without a `change_log`
 entry and `SyncEngine` neither sends nor applies them, so one device's
 successful backup can never hide another device's failing one.

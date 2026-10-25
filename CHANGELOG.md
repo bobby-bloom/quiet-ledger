@@ -13,6 +13,20 @@ a dated release section.
 
 ### Added
 
+- Dashboard layout: wide windows show the widgets in rows of columns
+  without the gaps of the old grid. The new dashboard layout menu picks
+  Auto (the app's arrangement), one to three columns or your own layout,
+  and "Arrange widgets…" lets you drag widgets, move them with a menu,
+  split rows and add rows in place. Phones get an editor sheet with ▲ ▼,
+  Remove and Add. The layouts sync and are backed up; a narrower window
+  shows your layout folded to fit. See `docs/DASHBOARD.md`.
+- Dashboard widgets fold with a chevron and show one summary line while
+  folded; Expand all / Collapse all in the layout menu. Folding is
+  remembered on this device only.
+- Lists on the dashboard (budgets, upcoming, goals, top categories, recent
+  transactions, accounts) offer Rows 3 · 5 · 10 in their menu.
+- Removing a dashboard widget can be undone, and it keeps its settings and
+  its place for when it is added back.
 - An app icon of its own, a tick over a double rule, in your accent
   colour: in the app, on the window, taskbar and Dock while the app runs
   (Linux, Windows, macOS), as the web app's tab icon, and as the tint of
@@ -68,6 +82,8 @@ a dated release section.
 
 ### Changed
 
+- Dashboard widget links ("All budgets", "Calendar", "View all") moved
+  from the card header to the bottom of the card.
 - Scheduled backups are read back and verified before old ones are
   pruned, retried after a failure (after 1, 4 and 12 hours, then daily)
   and checked while the app stays open.
@@ -97,12 +113,18 @@ a dated release section.
 
 ### Removed
 
+- The separate dashboard editor screen, "Make wide" and Settings ›
+  Dashboard widgets; the dashboard layout menu replaces them.
 - The "New transaction" buttons in the Home and Transactions headers on
   wide screens; the sidebar's "Add transaction" button and Ctrl/Cmd+N do
   the same.
 
 ### Fixed
 
+- Privacy mode now also hides the amounts in the dashboard's budget rows
+  ("of €…", "€… over") and goals ("saved / target"), the running balance
+  under a transaction, and the amounts screen readers read out for
+  transactions.
 - The app is called Quiet Ledger everywhere: on the Android and iOS home
   screen, in the macOS menu bar and the released `Quiet Ledger.app`, in
   the Linux and Windows window titles, the Windows task manager and the

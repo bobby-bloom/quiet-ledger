@@ -7,8 +7,6 @@ import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
-import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_grid.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 
@@ -45,6 +43,23 @@ void main() {
       ),
     );
     final today = dateOnly(DateTime.now());
+    // A budget already over (24.80 of 10.00) and a goal, for privacy mode.
+    await w.insert(
+      db.budgets,
+      BudgetsCompanion(
+        categoryId: Value(food),
+        periodStart: Value(DateTime(today.year, today.month)),
+        amountMinor: const Value(1000),
+      ),
+    );
+    await w.insert(
+      db.goals,
+      const GoalsCompanion(
+        name: Value('Emergency fund'),
+        targetMinor: Value(1000000),
+        savedMinor: Value(420000),
+      ),
+    );
     await ledger.create(
       TxnDraft(
         accountId: checking,
@@ -110,21 +125,27 @@ void main() {
       // 1,000.00 opening + 3,420.00 income − 24.80 expense.
       expect(find.textContaining('4,395'), findsWidgets);
       expect(find.text('Income'), findsOneWidget);
-      expect(find.byType(DashboardGrid), findsOneWidget);
-      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
+      expect(find.byTooltip('Dashboard layout'), findsOneWidget);
       expect(tester.takeException(), isNull);
     } finally {
       await teardown(tester);
     }
   });
 
-  testWidgets('desktop dashboard lays widgets out in columns', (tester) async {
+  testWidgets('desktop dashboard shows the default rows in three columns', (
+    tester,
+  ) async {
     await tester.runAsync(seed);
     try {
       await pumpAt(tester, const Size(1440, 1000));
-      final grid = tester.widget<DashboardGrid>(find.byType(DashboardGrid));
-      expect(grid.columns, 3);
-      expect(find.byTooltip('Edit dashboard'), findsOneWidget);
+      // Row 1, 2:1 — net worth wide, the month and the forecast stacked.
+      final netWorth = tester.getRect(find.textContaining('Net worth').first);
+      final month = tester.getRect(find.textContaining('so far').first);
+      final forecast = tester.getRect(find.textContaining('Forecast').first);
+      expect(month.left, greaterThan(netWorth.right));
+      expect(forecast.left, moreOrLessEquals(month.left, epsilon: 1));
+      expect(forecast.top, greaterThan(month.bottom));
+      expect(find.byTooltip('Dashboard layout'), findsOneWidget);
       expect(find.text('Recent transactions'), findsOneWidget);
       expect(find.text('Corner Grocer'), findsWidgets);
       expect(tester.takeException(), isNull);
@@ -133,31 +154,53 @@ void main() {
     }
   });
 
-  test('layout JSON round-trip skips unknown widget types', () async {
-    final db = newTestDb();
-    addTearDown(db.close);
-    final c = testContainer(db);
-    addTearDown(c.dispose);
-    final repo = c.read(dashboardLayoutRepositoryProvider);
-    expect(
-      await repo.watch(DashboardBreakpoint.compact).first,
-      defaultLayouts[DashboardBreakpoint.compact],
-    );
-    await repo.save(DashboardBreakpoint.compact, const [
-      DashboardItem(
-        DashboardWidgetType.goals,
-        size: WidgetSize.wide,
-        options: {'limit': 2},
-      ),
-    ]);
-    final items = await repo.watch(DashboardBreakpoint.compact).first;
-    expect(items.single.type, DashboardWidgetType.goals);
-    expect(items.single.size, WidgetSize.wide);
-    expect(items.single.options['limit'], 2);
-    await repo.reset(DashboardBreakpoint.compact);
-    expect(
-      await repo.watch(DashboardBreakpoint.compact).first,
-      defaultLayouts[DashboardBreakpoint.compact],
-    );
+  testWidgets('privacy mode masks the net worth change and the forecast '
+      'chart label', (tester) async {
+    await tester.runAsync(seed);
+    final handle = tester.ensureSemantics();
+    try {
+      await pumpAt(tester, const Size(1440, 1000));
+      // The amount is an AmountText in the line, never plain text in it.
+      expect(find.textContaining('in 12 months'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'\d in 12 months')), findsNothing);
+      await tester.tap(find.byTooltip('Hide amounts'));
+      await settle(tester);
+      expect(find.bySemanticsLabel(RegExp('Lowest .*€')), findsNothing);
+    } finally {
+      handle.dispose();
+      await teardown(tester);
+    }
+  });
+
+  testWidgets('privacy mode masks budget, goal and transaction amounts in '
+      'text and for screen readers', (tester) async {
+    await tester.runAsync(seed);
+    final handle = tester.ensureSemantics();
+    try {
+      await pumpAt(tester, const Size(1440, 1000));
+      // Shown in plain text while amounts are visible.
+      expect(find.textContaining('of €10'), findsOneWidget);
+      expect(find.textContaining('€14.80 over'), findsOneWidget);
+      expect(find.textContaining('€4,200 / €10,000'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Corner Grocer.*24[.,]80')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byTooltip('Hide amounts'));
+      await settle(tester);
+      expect(find.textContaining('of €10'), findsNothing);
+      expect(find.textContaining('over'), findsWidgets);
+      expect(find.textContaining('€14.80 over'), findsNothing);
+      expect(find.textContaining('••• / •••'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('24[.,]80')), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp('Corner Grocer.*Hidden amount')),
+        findsOneWidget,
+      );
+    } finally {
+      handle.dispose();
+      await teardown(tester);
+    }
   });
 }

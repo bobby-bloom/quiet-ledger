@@ -409,15 +409,19 @@ abstract final class DashboardSettings {
     label: (l) => l.setUpcomingDays,
   );
 
-  static final editLayout = SettingDef.string(
-    key: 'dashboard.editLayout',
+  /// Which dashboard widgets are folded on this device: a JSON map
+  /// `{widgetTypeName: open}`; '' or malformed means all open. Shared by
+  /// the phone and wide views. Toggled from each card's chevron.
+  static final cardExpansion = SettingDef.string(
+    key: 'dashboard.cardExpansion',
     section: SettingSection.dashboard,
     defaultValue: '',
-    label: (l) => l.setDashboardWidgets,
-    editor: const CustomEditor('/home/edit'),
+    label: (l) => l.dashCardExpansionSetting,
+    hidden: true,
+    deviceLocal: true,
   );
 
-  static final all = <SettingDef<Object?>>[period, upcomingDays, editLayout];
+  static final all = <SettingDef<Object?>>[period, upcomingDays, cardExpansion];
 }
 
 abstract final class EntrySettings {

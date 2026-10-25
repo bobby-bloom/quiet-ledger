@@ -1945,6 +1945,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bootErrorTitle => 'The database could not be opened';
 
   @override
+  String dashCardExpand(String widget) {
+    return 'Expand $widget';
+  }
+
+  @override
+  String dashCardCollapse(String widget) {
+    return 'Collapse $widget';
+  }
+
+  @override
+  String get dashCardRows => 'Rows';
+
+  @override
+  String get dashCardExpansionSetting => 'Folded dashboard widgets';
+
+  @override
+  String dashCardBudgetsOver(int count) {
+    return '$count over';
+  }
+
+  @override
+  String dashCardBudgetsNear(int count) {
+    return '$count near limit';
+  }
+
+  @override
+  String get dashCardBudgetsOnTrack => 'All on track';
+
+  @override
+  String dashCardBudgetsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets',
+      one: '1 budget',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardUpcomingNext(String name, String date) {
+    return 'Next: $name · $date';
+  }
+
+  @override
+  String dashCardUpcomingDue(int count, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$count due in $_temp0';
+  }
+
+  @override
+  String dashCardAccountsTotal(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return '$amount across $_temp0';
+  }
+
+  @override
+  String dashCardGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals',
+      one: '1 goal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashCardShareOfSpending(String percent) {
+    return '$percent of spending';
+  }
+
+  @override
+  String dashCardLatest(String name) {
+    return 'Latest: $name';
+  }
+
+  @override
   String get dashWidgetOptions => 'Widget options';
 
   @override
@@ -2061,22 +2149,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashRemove => 'Remove';
 
   @override
-  String get dashMakeWide => 'Make wide';
-
-  @override
-  String get dashMakeNormal => 'Make normal width';
-
-  @override
   String get dashChooseAccount => 'Choose account';
 
   @override
   String get dashResetLayout => 'Reset to default';
-
-  @override
-  String get dashLayoutPhone => 'Phone';
-
-  @override
-  String get dashLayoutWide => 'Tablet & desktop';
 
   @override
   String get dashPrevPeriod => 'Previous period';
@@ -2131,6 +2207,265 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashWTyperecentTransactions => 'Recent transactions';
+
+  @override
+  String get dashLayoutMenu => 'Dashboard layout';
+
+  @override
+  String get dashLayoutMenuCustom => 'Dashboard layout · Custom';
+
+  @override
+  String get dashLayoutLabel => 'Layout';
+
+  @override
+  String get dashLayoutAuto => 'Auto';
+
+  @override
+  String get dashLayoutCustom => 'Custom';
+
+  @override
+  String get dashLayoutAutoHint =>
+      'Quiet Ledger\'s arrangement, adapts to the window';
+
+  @override
+  String get dashLayoutCustomHint =>
+      'Your arrangement, shared by your wider screens';
+
+  @override
+  String dashLayoutFitsUpTo(int count) {
+    return 'This window fits up to $count columns. Your layout shows in full on wider screens.';
+  }
+
+  @override
+  String get dashLayoutFitsOne =>
+      'This window fits one column. Your layout shows in full on wider screens.';
+
+  @override
+  String dashLayoutSplitFits(int count) {
+    return 'This window fits up to $count columns';
+  }
+
+  @override
+  String get dashLayoutPhoneAutoHint => 'Quiet Ledger\'s order';
+
+  @override
+  String get dashLayoutPhoneCustomHint => 'Your order, shared by your phones';
+
+  @override
+  String get dashLayoutArrange => 'Arrange widgets…';
+
+  @override
+  String get dashLayoutArrangeNeeds =>
+      'Widen the window to two columns to arrange';
+
+  @override
+  String get dashLayoutEditMenu => 'Edit dashboard…';
+
+  @override
+  String get dashLayoutAddMenu => 'Add widget…';
+
+  @override
+  String get dashLayoutExpandAll => 'Expand all';
+
+  @override
+  String get dashLayoutCollapseAll => 'Collapse all';
+
+  @override
+  String get dashLayoutArrangeTitle => 'Arrange widgets';
+
+  @override
+  String get dashLayoutArrangeHint => 'Drag to move';
+
+  @override
+  String get dashLayoutReset => 'Reset';
+
+  @override
+  String dashLayoutRow(int row) {
+    return 'Row $row';
+  }
+
+  @override
+  String dashLayoutRowOf(int row, int count) {
+    return 'Row $row of $count';
+  }
+
+  @override
+  String dashLayoutRowMenu(int row) {
+    return 'Row $row options';
+  }
+
+  @override
+  String get dashLayoutNewRow => 'New row';
+
+  @override
+  String get dashLayoutRowTooWide => 'Needs a wider window';
+
+  @override
+  String get dashLayoutRowSplit => 'Row layout';
+
+  @override
+  String get dashLayoutAddRow => 'Add row';
+
+  @override
+  String get dashLayoutSplitOne => 'One column';
+
+  @override
+  String get dashLayoutSplitHalves => 'Two equal columns';
+
+  @override
+  String get dashLayoutSplitWideNarrow => 'Wide and narrow';
+
+  @override
+  String get dashLayoutSplitNarrowWide => 'Narrow and wide';
+
+  @override
+  String get dashLayoutSplitThirds => 'Three columns';
+
+  @override
+  String get dashLayoutMoveRowUp => 'Move row up';
+
+  @override
+  String get dashLayoutMoveRowDown => 'Move row down';
+
+  @override
+  String get dashLayoutRemoveRow => 'Remove row';
+
+  @override
+  String dashLayoutMove(String widget) {
+    return 'Move “$widget”';
+  }
+
+  @override
+  String get dashLayoutMoveUp => 'Up';
+
+  @override
+  String get dashLayoutMoveDown => 'Down';
+
+  @override
+  String get dashLayoutMoveLeft => 'One column left';
+
+  @override
+  String get dashLayoutMoveRight => 'One column right';
+
+  @override
+  String get dashLayoutRemoveFromDashboard => 'Remove from dashboard';
+
+  @override
+  String get dashLayoutEmptyColumn => 'Drag a widget here';
+
+  @override
+  String dashLayoutRemoved(String widget) {
+    return '$widget removed';
+  }
+
+  @override
+  String dashLayoutFlattened(int count) {
+    return 'Layout set to $count columns';
+  }
+
+  @override
+  String get dashLayoutReplaced => 'Layout replaced';
+
+  @override
+  String get dashLayoutDiscarded => 'Changes discarded';
+
+  @override
+  String get dashLayoutResetDone => 'Dashboard reset to default';
+
+  @override
+  String dashLayoutMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  ) {
+    return '$widget: row $row, column $column, position $position of $count';
+  }
+
+  @override
+  String dashLayoutMovedTo(String widget, int position, int count) {
+    return '$widget moved to position $position of $count';
+  }
+
+  @override
+  String dashLayoutPickedUp(String widget) {
+    return '$widget picked up';
+  }
+
+  @override
+  String dashLayoutDropped(String widget) {
+    return '$widget dropped';
+  }
+
+  @override
+  String get dashLayoutSheetSubtitle => 'Changes apply right away.';
+
+  @override
+  String get dashLayoutNotOnDashboard => 'Not on your dashboard';
+
+  @override
+  String get dashLayoutNew => 'New';
+
+  @override
+  String get dashLayoutRemovedHint => 'Removed · its settings are kept';
+
+  @override
+  String get dashLayoutEmptyTitle => 'Your dashboard is empty';
+
+  @override
+  String get dashLayoutEmptyBody =>
+      'Add widgets to see your money at a glance.';
+
+  @override
+  String get dashLayoutHeroRow => 'Shown at the top';
+
+  @override
+  String dashLayoutMoveUpWidget(String widget) {
+    return 'Move “$widget” up';
+  }
+
+  @override
+  String dashLayoutMoveDownWidget(String widget) {
+    return 'Move “$widget” down';
+  }
+
+  @override
+  String dashLayoutRemoveWidget(String widget) {
+    return 'Remove “$widget”';
+  }
+
+  @override
+  String get dashLayoutDescnetWorth =>
+      'Total across your accounts over 12 months';
+
+  @override
+  String get dashLayoutDescmonthSummary =>
+      'Income, expenses and savings rate this month';
+
+  @override
+  String get dashLayoutDescbudgets => 'How each budget is tracking this period';
+
+  @override
+  String get dashLayoutDescupcomingBills => 'Bills and income due soon';
+
+  @override
+  String get dashLayoutDescforecast => 'Projected balance of one account';
+
+  @override
+  String get dashLayoutDescaccounts => 'Balances of your accounts';
+
+  @override
+  String get dashLayoutDescgoals => 'Progress towards your savings goals';
+
+  @override
+  String get dashLayoutDesctopCategories => 'Where your money went this period';
+
+  @override
+  String get dashLayoutDescrecentTransactions => 'Your latest entries';
+
+  @override
+  String get dashLayoutOrderReplaced => 'Your earlier order was replaced';
 
   @override
   String get exportTitle => 'Export & backup';
@@ -5645,9 +5980,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setDashboardPeriod => 'Dashboard period';
-
-  @override
-  String get setDashboardWidgets => 'Dashboard widgets';
 
   @override
   String get setDateFormat => 'Date format';

@@ -76,6 +76,8 @@ class TransactionTile extends ConsumerWidget {
     );
     final fmt = ref.watch(moneyFormatterProvider);
     final dates = ref.watch(dateFormatsProvider);
+    // Privacy mode: no amount in plain text or in what a screen reader reads.
+    final hidden = ref.watch(privacyModeProvider);
 
     final title = TxnLabels.title(
       l,
@@ -104,13 +106,13 @@ class TransactionTile extends ConsumerWidget {
         ? null
         : TxnStatusBadge(item.status);
     final balance = showBalance && item.runningBalance != null
-        ? fmt.minor(item.runningBalance!)
+        ? (hidden ? '•••' : fmt.minor(item.runningBalance!))
         : null;
 
     final semantics = [
       title,
       subtitle,
-      fmt.minor(item.amountMinor),
+      if (hidden) l.privacyHiddenAmount else fmt.minor(item.amountMinor),
       dates.medium(item.date),
       if (badge != null) TxnLabels.status(l, item.status),
       if (item.attachmentCount > 0) l.txnHasReceipt,
@@ -617,7 +619,10 @@ class TxnTableRow extends ConsumerWidget {
       selected: highlight,
       label: [
         title,
-        fmt.minor(item.amountMinor),
+        if (ref.watch(privacyModeProvider))
+          l.privacyHiddenAmount
+        else
+          fmt.minor(item.amountMinor),
         dates.medium(item.date),
       ].join(', '),
       child: Material(
