@@ -429,8 +429,8 @@ void main() {
 
     // A changed assumption keeps the old result, marked as recomputing.
     runner.gate = Completer<void>();
-    await tester.scrollUntilVisible(find.text('Show real values'), 300);
-    await tester.tap(find.text('Show real values'));
+    await tester.scrollUntilVisible(find.text('Plan'), 300);
+    await tester.tap(find.text('Plan'));
     for (var i = 0; i < 3; i++) {
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       await tester.pump(const Duration(milliseconds: 300));
@@ -444,6 +444,23 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Recalculating…'), findsNothing);
     expect(find.byType(LinearProgressIndicator), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('real values switch without a new projection', (tester) async {
+    final runner = _GatedRunner();
+    await pumpScreen(tester, const ProjectionScreen(), runner: runner);
+    expect(find.text('Nominal'), findsOneWidget);
+    final runs = runner.runs;
+
+    await tester.scrollUntilVisible(find.text('Show real values'), 300);
+    await tester.tap(find.text('Show real values'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(runner.runs, runs);
+    expect(find.text('Recalculating…'), findsNothing);
+    await tester.scrollUntilVisible(find.text('Real'), -300);
+    expect(find.text('Real'), findsOneWidget);
     await unmount(tester);
   });
 
@@ -506,9 +523,11 @@ class _GatedRunner extends ForecastRunner {
   _GatedRunner() : super.inline();
 
   Completer<void>? gate;
+  int runs = 0;
 
   @override
   Future<ProjectionBatch> projection(ProjectionRequest r) async {
+    runs++;
     await gate?.future;
     return await super.projection(r);
   }

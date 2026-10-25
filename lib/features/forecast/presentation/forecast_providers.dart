@@ -329,11 +329,12 @@ final projectionAssumptionsProvider = Provider<ProjectionAssumptions>((ref) {
     years: s.get(ForecastSettings.projectionYears),
     inflationBp: s.get(ForecastSettings.inflationBp),
     defaultReturnBp: s.get(ForecastSettings.defaultReturnBp),
-    realValues: s.get(ForecastSettings.realValues),
     source: ref.watch(projectionSourceProvider),
   );
 });
 
+/// The projection in nominal values; the screen switches to real values
+/// with [ProjectionBatch.withReal], without a new projection.
 final projectionProvider = FutureProvider<ProjectionBatch>((ref) async {
   final input = await ref.watch(forecastInputProvider.future);
   return await ref

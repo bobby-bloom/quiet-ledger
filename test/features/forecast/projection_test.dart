@@ -104,12 +104,34 @@ void main() {
     expect(p.last.nominalMinor, 1000000);
     expect(p.last.realMinor, 980215);
     expect(p.real, isFalse);
-    final real = project(
-      only([account('chk', balance: 1000000)]),
-      a.copyWith(realValues: true),
-    );
+    final real = p.withReal(true);
     expect(real.real, isTrue);
     expect(real.values.last, 980215);
+  });
+
+  test('net-worth milestones are found for real and nominal values', () {
+    // Returns keep pace with inflation: only the nominal value grows.
+    final p = project(
+      only([
+        account(
+          'etf',
+          balance: 950000,
+          type: AccountType.investment,
+          returnBp: 600,
+        ),
+      ]),
+      noInflation.copyWith(inflationBp: 600),
+    );
+    expect(p.milestones, same(p.nominalMilestones));
+    expect(
+      [for (final m in p.nominalMilestones) (m.amountMinor, m.date)],
+      [(1000000, addMonthsClamped(today, 11))],
+    );
+    expect(p.realMilestones, isEmpty);
+    final real = p.withReal(true);
+    expect(real.milestones, isEmpty);
+    expect(real.values, [for (final pt in p.points) pt.realMinor]);
+    expect(real.withReal(false).milestones, p.nominalMilestones);
   });
 
   test('savings from history: trailing mean, indexed to inflation', () {

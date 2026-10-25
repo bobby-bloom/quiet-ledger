@@ -27,7 +27,9 @@ import 'package:personal_finance/features/forecast/domain/variable_spending.dart
 //   historic savings) grow with inflation; transfers and one-off entries
 //   stay nominal.
 // * Real values divide by the inflation index (inflation / 12 compounded
-//   monthly).
+//   monthly). Every point carries both, and net-worth milestones are found
+//   for both, so switching between real and nominal values
+//   ([NetWorthProjection.withReal]) needs no new projection.
 
 enum SavingsSource { history, plan }
 
@@ -37,7 +39,6 @@ class ProjectionAssumptions {
     this.years = 20,
     this.inflationBp = 200,
     this.defaultReturnBp = 0,
-    this.realValues = false,
     this.source = SavingsSource.history,
     this.accountReturnBp = const {},
     this.assetReturnBp,
@@ -49,7 +50,6 @@ class ProjectionAssumptions {
   /// Return of asset accounts without their own expected return (checking
   /// and cash accounts default to 0 instead).
   final int defaultReturnBp;
-  final bool realValues;
   final SavingsSource source;
 
   /// Scenario overrides per account.
@@ -64,7 +64,6 @@ class ProjectionAssumptions {
     int? years,
     int? inflationBp,
     int? defaultReturnBp,
-    bool? realValues,
     SavingsSource? source,
     Map<String, int>? accountReturnBp,
     int? assetReturnBp,
@@ -72,7 +71,6 @@ class ProjectionAssumptions {
     years: years ?? this.years,
     inflationBp: inflationBp ?? this.inflationBp,
     defaultReturnBp: defaultReturnBp ?? this.defaultReturnBp,
-    realValues: realValues ?? this.realValues,
     source: source ?? this.source,
     accountReturnBp: accountReturnBp ?? this.accountReturnBp,
     assetReturnBp: assetReturnBp ?? this.assetReturnBp,
@@ -95,7 +93,6 @@ class ProjectionAssumptions {
       other.years == years &&
       other.inflationBp == inflationBp &&
       other.defaultReturnBp == defaultReturnBp &&
-      other.realValues == realValues &&
       other.source == source &&
       other.assetReturnBp == assetReturnBp &&
       _mapEq(other.accountReturnBp, accountReturnBp);
@@ -105,7 +102,6 @@ class ProjectionAssumptions {
     years,
     inflationBp,
     defaultReturnBp,
-    realValues,
     source,
     assetReturnBp,
     accountReturnBp.length,
@@ -252,17 +248,23 @@ const netWorthMilestones = <int>[
 class NetWorthProjection {
   const NetWorthProjection({
     required this.points,
-    required this.milestones,
-    required this.real,
+    required this.nominalMilestones,
+    required this.realMilestones,
     required this.monthlySavingsMinor,
     required this.source,
+    this.real = false,
   });
 
   /// Point 0 = today, then one per month.
   final List<ProjectionPoint> points;
-  final List<Milestone> milestones;
 
-  /// Whether milestones (and [values]) use real values.
+  /// Milestones with net-worth levels crossed by the nominal values.
+  final List<Milestone> nominalMilestones;
+
+  /// Milestones with net-worth levels crossed by the real values.
+  final List<Milestone> realMilestones;
+
+  /// Whether [milestones] and [values] use real values.
   final bool real;
 
   /// Savings per month in the first month (history: the trailing mean;
@@ -270,7 +272,21 @@ class NetWorthProjection {
   final int monthlySavingsMinor;
   final SavingsSource source;
 
+  List<Milestone> get milestones => real ? realMilestones : nominalMilestones;
+
   List<int> get values => [for (final p in points) p.value(real: real)];
+
+  /// The same projection shown in real ([real] true) or nominal values.
+  NetWorthProjection withReal(bool real) => real == this.real
+      ? this
+      : NetWorthProjection(
+          points: points,
+          nominalMilestones: nominalMilestones,
+          realMilestones: realMilestones,
+          monthlySavingsMinor: monthlySavingsMinor,
+          source: source,
+          real: real,
+        );
 
   /// Points at the end of every year (plus today).
   List<ProjectionPoint> get yearly => [
@@ -365,7 +381,6 @@ NetWorthProjection projectNetWorth(
     goals: goals,
     balances: balances,
     start: points.first,
-    real: assumptions.realValues,
   );
 
   for (var m = 0; m < months; m++) {
@@ -424,8 +439,8 @@ NetWorthProjection projectNetWorth(
 
   return NetWorthProjection(
     points: points,
-    milestones: tracker.milestones,
-    real: assumptions.realValues,
+    nominalMilestones: tracker.nominal,
+    realMilestones: tracker.real,
     monthlySavingsMinor: firstSavings,
     source: assumptions.source,
   );
@@ -463,13 +478,13 @@ class _MilestoneTracker {
     required this.goals,
     required this.balances,
     required ProjectionPoint start,
-    required this.real,
   }) {
-    final v0 = start.value(real: real);
-    pendingLevels = [
+    List<int> above(int v0) => [
       for (final l in netWorthMilestones)
         if (l > v0) l,
     ];
+    pendingNominal = above(start.nominalMinor);
+    pendingReal = above(start.realMinor);
     debts = {
       for (final a in accounts)
         if (a.type.isLiability && a.balanceMinor < 0) a.id,
@@ -486,24 +501,35 @@ class _MilestoneTracker {
   final List<ForecastAccount> accounts;
   final List<GoalInput> goals;
   final Map<String, int> balances;
-  final bool real;
-  final milestones = <Milestone>[];
-  late List<int> pendingLevels;
+  final nominal = <Milestone>[];
+  final real = <Milestone>[];
+  late List<int> pendingNominal;
+  late List<int> pendingReal;
   late Set<String> debts;
   late int debtCount;
   late List<GoalInput> pendingGoals;
 
-  void check(ProjectionPoint p) {
-    final v = p.value(real: real);
-    while (pendingLevels.isNotEmpty && v >= pendingLevels.first) {
-      milestones.add(
+  void _levels(List<Milestone> into, List<int> pending, int v, DateTime d) {
+    while (pending.isNotEmpty && v >= pending.first) {
+      into.add(
         Milestone(
           kind: MilestoneKind.netWorth,
-          date: p.date,
-          amountMinor: pendingLevels.removeAt(0),
+          date: d,
+          amountMinor: pending.removeAt(0),
         ),
       );
     }
+  }
+
+  /// Adds a milestone that does not depend on real or nominal values.
+  void _add(Milestone m) {
+    nominal.add(m);
+    real.add(m);
+  }
+
+  void check(ProjectionPoint p) {
+    _levels(nominal, pendingNominal, p.nominalMinor, p.date);
+    _levels(real, pendingReal, p.realMinor, p.date);
     if (debts.isNotEmpty) {
       final paid = [
         for (final id in debts)
@@ -512,7 +538,7 @@ class _MilestoneTracker {
       for (final id in paid) {
         debts.remove(id);
         if (debtCount > 1) {
-          milestones.add(
+          _add(
             Milestone(
               kind: MilestoneKind.liabilityPaidOff,
               date: p.date,
@@ -523,12 +549,12 @@ class _MilestoneTracker {
         }
       }
       if (debts.isEmpty) {
-        milestones.add(Milestone(kind: MilestoneKind.debtFree, date: p.date));
+        _add(Milestone(kind: MilestoneKind.debtFree, date: p.date));
       }
     }
     pendingGoals.removeWhere((g) {
       if (balances[g.bucketId]! < g.targetMinor) return false;
-      milestones.add(
+      _add(
         Milestone(
           kind: MilestoneKind.goalReached,
           date: p.date,

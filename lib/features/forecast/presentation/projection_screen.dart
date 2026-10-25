@@ -45,6 +45,9 @@ class ProjectionScreen extends ConsumerWidget {
       );
     }
     final batch = ref.watch(projectionProvider);
+    final real = ref.watch(
+      settingsProvider.select((s) => s.get(ForecastSettings.realValues)),
+    );
     final size = WindowSize.of(context);
     final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
     final sideHidden = ref.watch(
@@ -55,7 +58,8 @@ class ProjectionScreen extends ConsumerWidget {
     // A changed assumption recomputes in the background; the previous
     // result stays visible but dimmed until the new one arrives.
     final busy = batch.isLoading && batch.hasValue;
-    Widget content(ProjectionBatch b) {
+    Widget content(ProjectionBatch nominal) {
+      final b = nominal.withReal(real);
       final main = <Widget>[
         _Stale(
           busy: busy,

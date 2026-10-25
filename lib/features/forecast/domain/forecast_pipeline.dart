@@ -124,6 +124,11 @@ class ProjectionBatch {
 
   final NetWorthProjection baseline;
   final Map<String, NetWorthProjection> scenarios;
+
+  ProjectionBatch withReal(bool real) => ProjectionBatch(
+    baseline.withReal(real),
+    {for (final e in scenarios.entries) e.key: e.value.withReal(real)},
+  );
 }
 
 /// Net-worth projection for the baseline and each scenario. With savings

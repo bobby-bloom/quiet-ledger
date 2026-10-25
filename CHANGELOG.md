@@ -91,6 +91,9 @@ a dated release section.
   loads, and while a changed assumption recomputes it dims the old result,
   shows "Recalculating…" over the chart and a progress bar under the app
   bar.
+- "Show real values" on the long-term projection switches at once: the
+  projection already holds both real and nominal values and milestones, so
+  it is no longer recomputed.
 - Cards are 10 px apart everywhere (`Space.cardGap`): the wide dashboard
   and arranging it (was 20), Forecast, the projection, Reports, account
   details, reconciling, budget and goal details, recurring items and their
