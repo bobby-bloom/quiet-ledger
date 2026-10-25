@@ -13,6 +13,8 @@ a dated release section.
 
 ### Added
 
+- Arranging the dashboard: whole rows can be dragged by their toolbar,
+  with their widgets; a line shows where the row will land.
 - Dashboard layout: wide windows show the widgets in rows of columns
   without the gaps of the old grid. The new dashboard layout menu picks
   Auto (the app's arrangement), one to three columns or your own layout,

@@ -809,5 +809,125 @@ void main() {
         await teardown(tester);
       }
     });
+
+    group('row drag', () {
+      Finder rowHandle(int row) => find.descendant(
+        of: find.byType(RowBand).at(row),
+        matching: find.text('ROW ${row + 1}'),
+      );
+
+      Future<TestGesture> lift(WidgetTester tester, int row) async {
+        final gesture = await tester.startGesture(
+          tester.getCenter(rowHandle(row)),
+        );
+        await gesture.moveBy(const Offset(0, 20));
+        await tester.pump(const Duration(milliseconds: 16));
+        return gesture;
+      }
+
+      testWidgets('dragging a row by its toolbar moves it with its widgets, '
+          'and nothing shifts while it is lifted', (tester) async {
+        try {
+          final repo = await pumpAt(tester, const Size(1440, 1400));
+          await enterArrange(tester);
+          final bands = [
+            for (var i = 0; i < 3; i++)
+              tester.getRect(find.byType(RowBand).at(i)),
+          ];
+          final gesture = await lift(tester, 2);
+          await gesture.moveTo(Offset(bands[0].center.dx, bands[0].top + 10));
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.byKey(const ValueKey('row drop line')), findsOneWidget);
+          for (var i = 0; i < 3; i++) {
+            expect(tester.getRect(find.byType(RowBand).at(i)), bands[i]);
+          }
+          await gesture.up();
+          await settle(tester);
+          expect(find.byKey(const ValueKey('row drop line')), findsNothing);
+          // Recent transactions' row is first now, Net worth's second.
+          expect(
+            tester.getRect(arrangeCard('Recent transactions')).top,
+            lessThan(tester.getRect(arrangeCard('Net worth')).top),
+          );
+          await tester.tap(find.text('Done'));
+          await settle(tester);
+          final rows = (await saved(
+            tester,
+            repo,
+            DashboardView.expanded,
+          )).rows!;
+          expect(rows.first.cardIds.first, 'recentTransactions');
+          expect(rows[1].cardIds.first, 'netWorth');
+        } finally {
+          await teardown(tester);
+        }
+      });
+
+      testWidgets('a row let go next to itself stays', (tester) async {
+        try {
+          await pumpAt(tester, const Size(1440, 1400));
+          await enterArrange(tester);
+          final before = tester.getRect(arrangeCard('Budget progress'));
+          final gesture = await lift(tester, 1);
+          expect(find.byKey(const ValueKey('row drop line')), findsNothing);
+          await gesture.up();
+          await settle(tester);
+          expect(tester.getRect(arrangeCard('Budget progress')), before);
+          expect(find.textContaining('Drag to move'), findsOneWidget);
+        } finally {
+          await teardown(tester);
+        }
+      });
+
+      testWidgets('one drag at a time: a lifted row lifts no widget', (
+        tester,
+      ) async {
+        try {
+          await pumpAt(tester, const Size(1440, 1400));
+          await enterArrange(tester);
+          final accounts = tester.getRect(arrangeCard('Accounts'));
+          final row = await lift(tester, 0);
+          final card = await tester.startGesture(accounts.center, pointer: 7);
+          await card.moveBy(const Offset(-300, 0));
+          await tester.pump(const Duration(milliseconds: 50));
+          await card.up();
+          await row.up();
+          await settle(tester);
+          expect(tester.getRect(arrangeCard('Accounts')), accounts);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await teardown(tester);
+        }
+      });
+
+      testWidgets('a screen reader moves a row with its actions', (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        try {
+          await pumpAt(tester, const Size(1440, 1400));
+          await enterArrange(tester);
+          final node = tester.getSemantics(find.byType(RowBand).at(1));
+          final up = node
+              .getSemanticsData()
+              .customSemanticsActionIds!
+              .map(CustomSemanticsAction.getAction)
+              .firstWhere((a) => a!.label == 'Move row up')!;
+          tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(
+            node.id,
+            SemanticsAction.customAction,
+            CustomSemanticsAction.getIdentifier(up),
+          );
+          await settle(tester);
+          expect(
+            tester.getRect(arrangeCard('Budget progress')).top,
+            lessThan(tester.getRect(arrangeCard('Net worth')).top),
+          );
+        } finally {
+          handle.dispose();
+          await teardown(tester);
+        }
+      });
+    });
   });
 }

@@ -3907,6 +3907,30 @@ abstract class AppLocalizations {
   /// **'Your earlier order was replaced'**
   String get dashLayoutOrderReplaced;
 
+  /// No description provided for @dashLayoutDragRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to move the row'**
+  String get dashLayoutDragRow;
+
+  /// No description provided for @dashLayoutRowPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} picked up'**
+  String dashLayoutRowPickedUp(int row);
+
+  /// No description provided for @dashLayoutRowDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} dropped'**
+  String dashLayoutRowDropped(int row);
+
+  /// No description provided for @dashLayoutRowMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Row moved to position {position} of {count}'**
+  String dashLayoutRowMovedTo(int position, int count);
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

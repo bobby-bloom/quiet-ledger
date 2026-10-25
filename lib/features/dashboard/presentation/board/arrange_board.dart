@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show FlutterView, lerpDouble;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
@@ -114,6 +115,17 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
   String? _settling;
   Offset? _settleFrom;
 
+  /// The row being dragged by its toolbar, and the gap it would land in
+  /// (0 = above the first row). The board keeps its layout meanwhile: the
+  /// row dims in place and a line marks the gap, so nothing moves under the
+  /// pointer.
+  int? _draggingRow;
+  int? _rowTarget;
+  final _bandKeys = <int, GlobalKey>{};
+
+  /// The board's width, for the lifted row.
+  double _width = 0;
+
   /// The words, read with the dependencies: a board that goes mid-drag
   /// still announces the drop from dispose.
   late AppLocalizations _l;
@@ -153,6 +165,16 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
       _pointer = null;
       _announce(_l.dashLayoutDropped(widget.title(dragging)));
     }
+    // The rows changed under a lifted row (an undo, a paused session
+    // coming back): the drag ends where it is, nothing moved.
+    final row = _draggingRow;
+    if (row != null &&
+        !const ListEquality<BoardRow>().equals(widget.rows, oldWidget.rows)) {
+      _draggingRow = null;
+      _rowTarget = null;
+      _pointer = null;
+      _announce(_l.dashLayoutRowDropped(row + 1));
+    }
   }
 
   @override
@@ -161,6 +183,9 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     // stays where it was.
     if (_dragging case final dragging?) {
       _announce(_l.dashLayoutDropped(widget.title(dragging)));
+    }
+    if (_draggingRow case final row?) {
+      _announce(_l.dashLayoutRowDropped(row + 1));
     }
     for (final node in [..._focusNodes.values, ..._rowFocusNodes]) {
       node.dispose();
@@ -173,6 +198,15 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     final rows = widget.rows;
     _shownSlots = {..._closing, ?_target};
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _width = constraints.maxWidth;
+        return _rowsAndGaps(rows);
+      },
+    );
+  }
+
+  Widget _rowsAndGaps(List<BoardRow> rows) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -197,15 +231,45 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     );
   }
 
-  Widget _gap(NewRowTarget target) => _NewRowGap(
-    target: target,
-    current: _target,
-    isClosing: _closing.contains(target),
-    onClosed: () => _closed(target),
-    isDragging: _dragging != null,
-    height: widget.gap,
-    label: _l.dashLayoutNewRow,
-  );
+  Widget _gap(NewRowTarget target) {
+    final gap = _NewRowGap(
+      target: target,
+      current: _target,
+      isClosing: _closing.contains(target),
+      onClosed: () => _closed(target),
+      isDragging: _dragging != null,
+      height: widget.gap,
+      label: _l.dashLayoutNewRow,
+    );
+    if (_draggingRow == null || _rowTarget != target.at || !_rowMoves) {
+      return gap;
+    }
+    // Where the lifted row would land: a line in the gap, as tall as the
+    // gap already is.
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        gap,
+        IgnorePointer(
+          child: Container(
+            key: const ValueKey('row drop line'),
+            height: 4,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(Radii.full),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Whether the lifted row would move where it would land now.
+  bool get _rowMoves {
+    final from = _draggingRow;
+    final to = _rowTarget;
+    return from != null && to != null && to != from && to != from + 1;
+  }
 
   /// [row] as a dashed band of its shown columns and one drop area: the
   /// pointer picks the column under it and the place between its widgets —
@@ -222,44 +286,54 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
           return _targetIn(band, index, pointer);
         },
         child: FocusTraversalGroup(
-          child: RowBand(
-            index: index,
-            count: widget.rows.length,
-            row: row,
-            fits: widget.fits,
-            menuFocusNode: _rowFocusNode(index),
-            onSplit: (split) {
-              _resplit = index;
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _resplit = null,
-              );
-              _editRows(changeSplit(widget.rows, index, split));
-            },
-            onMoveUp: index > 0
-                ? () => _editRows(moveRow(widget.rows, index), focus: index - 1)
-                : null,
-            onMoveDown: index < widget.rows.length - 1
-                ? () => _editRows(
-                    moveRow(widget.rows, index, down: true),
-                    focus: index + 1,
-                  )
-                : null,
-            onRemove: widget.rows.length > 1
-                ? () => _editRows(
-                    removeRow(widget.rows, index),
-                    focus: index == 0 ? 0 : index - 1,
-                  )
-                : null,
-            child: FocusTraversalGroup(
-              child: _BandColumns(
-                split: shownSplit(row, widget.fits),
-                rowSplit: row.split,
-                glides: _resplit == index,
-                gap: widget.gap,
-                children: [
-                  for (final (column, ids) in columns.indexed)
-                    _column(index, column, ids),
-                ],
+          child: AnimatedOpacity(
+            key: _bandKeys.putIfAbsent(
+              index,
+              () => GlobalKey(debugLabel: 'row $index'),
+            ),
+            opacity: _draggingRow == index ? 0.4 : 1,
+            duration: _isMotionReduced ? Duration.zero : Motion.quick,
+            child: RowBand(
+              index: index,
+              count: widget.rows.length,
+              row: row,
+              fits: widget.fits,
+              menuFocusNode: _rowFocusNode(index),
+              dragHandle: (handle) => _rowHandle(index, row, handle),
+              onSplit: (split) {
+                _resplit = index;
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _resplit = null,
+                );
+                _editRows(changeSplit(widget.rows, index, split));
+              },
+              onMoveUp: index > 0
+                  ? () =>
+                        _editRows(moveRow(widget.rows, index), focus: index - 1)
+                  : null,
+              onMoveDown: index < widget.rows.length - 1
+                  ? () => _editRows(
+                      moveRow(widget.rows, index, down: true),
+                      focus: index + 1,
+                    )
+                  : null,
+              onRemove: widget.rows.length > 1
+                  ? () => _editRows(
+                      removeRow(widget.rows, index),
+                      focus: index == 0 ? 0 : index - 1,
+                    )
+                  : null,
+              child: FocusTraversalGroup(
+                child: _BandColumns(
+                  split: shownSplit(row, widget.fits),
+                  rowSplit: row.split,
+                  glides: _resplit == index,
+                  gap: widget.gap,
+                  children: [
+                    for (final (column, ids) in columns.indexed)
+                      _column(index, column, ids),
+                  ],
+                ),
               ),
             ),
           ),
@@ -473,8 +547,117 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     return index;
   }
 
-  /// One drag at a time, asked also the moment a drag would start.
-  bool _canLift() => mounted && _dragging == null;
+  /// One drag at a time — a widget or a row —, asked also the moment a
+  /// drag would start.
+  bool _canLift() => mounted && _dragging == null && _draggingRow == null;
+
+  /// [handle] (the toolbar's grip and label) as what drags the row at
+  /// [index]: lifted, the row follows the pointer as its toolbar with the
+  /// names of its widgets.
+  Widget _rowHandle(int index, BoardRow row, Widget handle) {
+    final theme = Theme.of(context);
+    final titles = [
+      for (final ids in shownColumns(row, widget.present, widget.fits))
+        for (final id in ids) widget.title(id),
+    ];
+    return Draggable<int>(
+      data: index,
+      maxSimultaneousDrags: _canLift() ? 1 : 0,
+      // A row spans the board: it only moves up and down.
+      axis: Axis.vertical,
+      // Lifted from where it lies: the copy lines up with the band's start,
+      // the pointer where it took hold of the toolbar.
+      dragAnchorStrategy: (draggable, context, position) {
+        final band =
+            _bandKeys[index]?.currentContext?.findRenderObject() as RenderBox?;
+        if (band == null || !band.hasSize) {
+          return childDragAnchorStrategy(draggable, context, position);
+        }
+        final local = band.globalToLocal(position);
+        return Offset(local.dx, local.dy.clamp(0, arrangeCardHeight));
+      },
+      onDragStarted: () => _startRowDrag(index),
+      onDragUpdate: (details) => _rowDragMoved(details.globalPosition),
+      onDragEnd: (_) => _endRowDrag(index),
+      feedback: Theme(
+        data: theme,
+        child: _LiftedRow(
+          width: _width,
+          label: _l.dashLayoutRow(index + 1),
+          split: row.split,
+          titles: titles,
+          isMotionReduced: _isMotionReduced,
+        ),
+      ),
+      child: handle,
+    );
+  }
+
+  void _startRowDrag(int index) {
+    final board = context.findRenderObject();
+    _boardOrigin = board is RenderBox && board.attached
+        ? board.localToGlobal(Offset.zero)
+        : null;
+    _isLayoutChanged = false;
+    setState(() {
+      _draggingRow = index;
+      _rowTarget = null;
+      _settling = null;
+    });
+    _announce(_l.dashLayoutRowPickedUp(index + 1));
+    _watchLayout();
+  }
+
+  void _rowDragMoved(Offset pointer) {
+    if (_draggingRow == null) return;
+    _pointer = pointer;
+    _retargetRow();
+  }
+
+  /// The gap a lifted row lands in: before the first band whose middle lies
+  /// below the pointer — only where the board shows.
+  void _retargetRow() {
+    final pointer = _pointer;
+    final board = context.findRenderObject();
+    if (!mounted || _draggingRow == null || pointer == null) return;
+    int? target;
+    if (board is RenderBox && board.hasSize && _isShownAt(pointer, board)) {
+      target = 0;
+      for (var i = 0; i < widget.rows.length; i++) {
+        final box =
+            _bandKeys[i]?.currentContext?.findRenderObject() as RenderBox?;
+        if (box == null || !box.hasSize) continue;
+        final middle = box.localToGlobal(box.size.center(Offset.zero)).dy;
+        if (pointer.dy > middle) target = i + 1;
+      }
+    }
+    if (target != _rowTarget) setState(() => _rowTarget = target);
+  }
+
+  /// The lifted row at [from] is let go: it moves to the gap shown, or
+  /// stays where it was.
+  void _endRowDrag(int from) {
+    if (!mounted || _draggingRow != from) return;
+    final to = _rowTarget;
+    final moves = _rowMoves;
+    setState(() {
+      _draggingRow = null;
+      _rowTarget = null;
+      _pointer = null;
+    });
+    if (!moves || to == null) {
+      _announce(_l.dashLayoutRowDropped(from + 1));
+      return;
+    }
+    final rows = moveRowTo(widget.rows, from, to);
+    final at = to > from ? to - 1 : to;
+    widget.onChanged(rows);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (at < _rowFocusNodes.length) _rowFocusNodes[at].requestFocus();
+      _announce(_l.dashLayoutRowMovedTo(at + 1, rows.length));
+    });
+  }
 
   bool _isShown(String id) =>
       widget.present.contains(id) &&
@@ -528,12 +711,20 @@ class _ArrangeBoardState extends State<ArrangeBoard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _isWatching = false;
       final board = mounted ? context.findRenderObject() : null;
-      if (_dragging == null || board is! RenderBox || !board.attached) return;
+      if ((_dragging == null && _draggingRow == null) ||
+          board is! RenderBox ||
+          !board.attached) {
+        return;
+      }
       final origin = board.localToGlobal(Offset.zero);
       if (origin != _boardOrigin || _isLayoutChanged) {
         _boardOrigin = origin;
         _isLayoutChanged = false;
-        _retarget();
+        if (_draggingRow != null) {
+          _retargetRow();
+        } else {
+          _retarget();
+        }
       }
       _watchLayout();
     });
@@ -1059,4 +1250,83 @@ class _DottedLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DottedLinePainter old) => old.color != color;
+}
+
+/// A row being dragged: its toolbar — grip, "Row n", its split — and the
+/// names of its widgets, as wide as the board, lifted with a shadow.
+class _LiftedRow extends StatelessWidget {
+  const _LiftedRow({
+    required this.width,
+    required this.label,
+    required this.split,
+    required this.titles,
+    required this.isMotionReduced,
+  });
+
+  final double width;
+  final String label;
+  final RowSplit split;
+  final List<String> titles;
+  final bool isMotionReduced;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    // The same lift as a dragged widget's.
+    final lifted = Material(
+      color: colors.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(Radii.md),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Radii.md),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 32,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          width: width,
+          height: arrangeCardHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.xs),
+            child: Row(
+              spacing: Space.xs,
+              children: [
+                Icon(Icons.drag_indicator, color: colors.onSurfaceVariant),
+                Text(
+                  label.toUpperCase(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                SplitDiagram(weights: split.weights),
+                Expanded(
+                  child: Text(
+                    titles.join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (isMotionReduced) return lifted;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 1, end: 1.02),
+      duration: Motion.quick,
+      curve: Motion.curve,
+      builder: (context, scale, child) =>
+          Transform.scale(scale: scale, child: child),
+      child: lifted,
+    );
+  }
 }

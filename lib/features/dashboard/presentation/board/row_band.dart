@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/features/dashboard/domain/arrange.dart';
 import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
@@ -6,8 +7,8 @@ import 'package:personal_finance/features/dashboard/presentation/board/drop_slot
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// A row in arrange mode: a dashed band around its columns ([child]) with a
-/// slim toolbar — the small "Row n" label, the [SplitPicker] and ⋮ for the
-/// [RowMenu]. A row saved wider than the window fits says so ("Needs a
+/// slim toolbar — a grip and the small "Row n" label, the handle that drags
+/// the whole row ([dragHandle]), the [SplitPicker] and ⋮ for the [RowMenu]. A row saved wider than the window fits says so ("Needs a
 /// wider window") and its split button shows the saved split dimmed.
 class RowBand extends StatelessWidget {
   const RowBand({
@@ -22,7 +23,10 @@ class RowBand extends StatelessWidget {
     required this.menuFocusNode,
     required this.child,
     super.key,
+    this.dragHandle = _noHandle,
   });
+
+  static Widget _noHandle(Widget handle) => handle;
 
   /// The row's place among the working rows, from 0, and how many there are.
   final int index;
@@ -47,6 +51,10 @@ class RowBand extends StatelessWidget {
 
   final Widget child;
 
+  /// Makes the toolbar's grip and label drag the row (the board's
+  /// draggable); the columns stay where widgets are dragged.
+  final Widget Function(Widget handle) dragHandle;
+
   /// Inside the band, between its dashed outline and the columns.
   static const double padding = Space.xs;
 
@@ -66,6 +74,11 @@ class RowBand extends StatelessWidget {
       explicitChildNodes: true,
       label:
           '${l.dashLayoutRowOf(index + 1, count)}, ${splitName(l, row.split)}',
+      // The same moves as the row menu, for a screen reader.
+      customSemanticsActions: {
+        CustomSemanticsAction(label: l.dashLayoutMoveRowUp): ?onMoveUp,
+        CustomSemanticsAction(label: l.dashLayoutMoveRowDown): ?onMoveDown,
+      },
       child: DashedOutline(
         color: theme.colorScheme.outline,
         child: Padding(
@@ -81,32 +94,51 @@ class RowBand extends StatelessWidget {
                   spacing: Space.xxs,
                   children: [
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          start: Space.xxs,
-                        ),
-                        child: Wrap(
-                          spacing: Space.xs,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            // The band's label says it in full.
-                            ExcludeSemantics(
-                              child: Text(
-                                l.dashLayoutRow(index + 1).toUpperCase(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: muted,
-                                  letterSpacing: 0.8,
+                      child: dragHandle(
+                        MouseRegion(
+                          cursor: SystemMouseCursors.grab,
+                          child: Row(
+                            spacing: Space.xxs,
+                            children: [
+                              ExcludeSemantics(
+                                child: Tooltip(
+                                  message: l.dashLayoutDragRow,
+                                  child: Icon(
+                                    Icons.drag_indicator,
+                                    size: 20,
+                                    color: muted,
+                                  ),
                                 ),
                               ),
-                            ),
-                            if (isTooWide)
-                              Text(
-                                l.dashLayoutRowTooWide,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: muted,
+                              Expanded(
+                                child: Wrap(
+                                  spacing: Space.xs,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    // The band's label says it in full.
+                                    ExcludeSemantics(
+                                      child: Text(
+                                        l
+                                            .dashLayoutRow(index + 1)
+                                            .toUpperCase(),
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color: muted,
+                                              letterSpacing: 0.8,
+                                            ),
+                                      ),
+                                    ),
+                                    if (isTooWide)
+                                      Text(
+                                        l.dashLayoutRowTooWide,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(color: muted),
+                                      ),
+                                  ],
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

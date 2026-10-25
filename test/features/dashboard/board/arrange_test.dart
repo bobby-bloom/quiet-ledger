@@ -216,4 +216,20 @@ void main() {
       ]);
     });
   });
+
+  test('moveRowTo: gaps counted before the row is taken out', () {
+    final three = [
+      for (final id in ['a', 'b', 'c']) singleColumnRow([id]),
+    ];
+    List<String> ids(List<BoardRow> rows) => [
+      for (final r in rows) r.cardIds.single,
+    ];
+    expect(ids(moveRowTo(three, 2, 0)), ['c', 'a', 'b']);
+    expect(ids(moveRowTo(three, 0, 3)), ['b', 'c', 'a']);
+    expect(ids(moveRowTo(three, 0, 2)), ['b', 'a', 'c']);
+    // Next to itself, or out of range: as they are.
+    expect(identical(moveRowTo(three, 1, 1), three), isTrue);
+    expect(identical(moveRowTo(three, 1, 2), three), isTrue);
+    expect(identical(moveRowTo(three, 5, 0), three), isTrue);
+  });
 }

@@ -70,5 +70,9 @@
   "dashLayoutDescgoals": "Fortschritt deiner Sparziele",
   "dashLayoutDesctopCategories": "Wofür dein Geld in diesem Zeitraum ging",
   "dashLayoutDescrecentTransactions": "Deine neuesten Buchungen",
-  "dashLayoutOrderReplaced": "Deine frühere Reihenfolge wurde ersetzt"
+  "dashLayoutOrderReplaced": "Deine frühere Reihenfolge wurde ersetzt",
+  "dashLayoutDragRow": "Ziehen, um die Zeile zu verschieben",
+  "dashLayoutRowPickedUp": "Zeile {row} aufgenommen",
+  "dashLayoutRowDropped": "Zeile {row} abgelegt",
+  "dashLayoutRowMovedTo": "Zeile auf Position {position} von {count} verschoben"
 }
