@@ -11,6 +11,8 @@ a dated release section.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-25
+
 ### Added
 
 - The dashboard's backup reminder (never backed up, last backup too old,

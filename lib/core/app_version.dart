@@ -2,11 +2,11 @@
 // change the version with `dart run tool/version.dart bump <part>`.
 
 /// Semantic version `MAJOR.MINOR.PATCH`.
-const appVersionName = '0.1.0';
+const appVersionName = '0.2.0';
 
 /// Monotonic build number (Android versionCode, iOS CFBundleVersion).
-const appBuildNumber = 1;
+const appBuildNumber = 2;
 
 /// `MAJOR.MINOR.PATCH+BUILD`, shown under Settings › About and written into
 /// export bundles.
-const appVersion = '0.1.0+1';
+const appVersion = '0.2.0+2';
