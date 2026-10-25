@@ -411,6 +411,8 @@ class _RuleEditorState extends ConsumerState<RuleEditor> {
                 onPressed: _saving ? null : _save,
                 child: Text(l.commonSave),
               ),
+              const SizedBox(width: Space.xs),
+              ClosePanelButton(onPressed: widget.onDone),
             ],
           ),
         ),

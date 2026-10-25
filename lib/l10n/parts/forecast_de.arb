@@ -24,8 +24,6 @@
   "forecastChartScenario": "Mit {name}: tiefster Stand {amount} am {date}.",
   "forecastScenarios": "Szenarien",
   "forecastEditScenarios": "Szenarien bearbeiten",
-  "forecastHideSidePanel": "Seitenleiste ausblenden",
-  "forecastShowSidePanel": "Seitenleiste einblenden",
   "forecastNoScenarios": "Noch keine Szenarien. Probiere eine Gehaltserhöhung, eine große Anschaffung oder eine vorzeitige Kredittilgung aus.",
   "forecastAddScenario": "Szenario hinzufügen",
   "forecastBalances": "Kontostände",

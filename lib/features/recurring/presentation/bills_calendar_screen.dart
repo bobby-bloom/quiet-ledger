@@ -35,14 +35,20 @@ class BillsCalendarScreen extends ConsumerStatefulWidget {
 
 class _BillsCalendarScreenState extends ConsumerState<BillsCalendarScreen> {
   late DateTime _focused = ref.read(planTodayProvider);
-  late DateTime _selected = _focused;
+
+  /// The day whose items are listed. Phones always list one (today until
+  /// another is tapped); wider windows show the day panel only once a day
+  /// is tapped, and its × closes it again.
+  DateTime? _selected;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final wide = !WindowSize.of(context).isCompact;
     final locale = ref.watch(formatLocaleProvider);
     final firstDay = ref.watch(firstDayOfWeekProvider);
     final today = ref.watch(planTodayProvider);
+    final day = _selected ?? (wide ? null : today);
     final from = DateTime(_focused.year, _focused.month, 1 - 7);
     final to = DateTime(_focused.year, _focused.month + 1, 7);
     final data = ref.watch(calendarOccurrencesProvider((from, to)));
@@ -73,7 +79,7 @@ class _BillsCalendarScreenState extends ConsumerState<BillsCalendarScreen> {
       startingDayOfWeek: _startingDay(firstDay),
       availableCalendarFormats: const {CalendarFormat.month: ''},
       availableGestures: AvailableGestures.horizontalSwipe,
-      selectedDayPredicate: (d) => isSameDay(d, _selected),
+      selectedDayPredicate: (d) => isSameDay(d, day),
       eventLoader: (d) => byDay[_local(d)] ?? const [],
       onDaySelected: (selected, focused) => setState(() {
         _selected = _local(selected);
@@ -140,12 +146,19 @@ class _BillsCalendarScreenState extends ConsumerState<BillsCalendarScreen> {
       ),
     );
 
-    final dayItems = byDay[_selected] ?? const <UpcomingOccurrence>[];
+    final dayItems = byDay[day] ?? const <UpcomingOccurrence>[];
     final dates = ref.watch(dateFormatsProvider);
     final dayList = ListView(
       padding: const EdgeInsets.only(bottom: 96),
       children: [
-        PlanSectionHeader(dates.dayHeader(_selected)),
+        PlanSectionHeader(
+          dates.dayHeader(day ?? today),
+          trailing: wide
+              ? ClosePanelButton(
+                  onPressed: () => setState(() => _selected = null),
+                )
+              : null,
+        ),
         if (dayItems.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -211,22 +224,24 @@ class _BillsCalendarScreenState extends ConsumerState<BillsCalendarScreen> {
       ),
     );
 
-    final wide = !WindowSize.of(context).isCompact;
     return Scaffold(
       appBar: AppBar(
         title: Text(l.planBillsCalendar),
         actions: [
-          if (!isSameDay(_focused, today) || !isSameDay(_selected, today))
+          if (!isSameDay(_focused, today) ||
+              (day != null && !isSameDay(day, today)))
             TextButton(
               onPressed: () => setState(() {
                 _focused = today;
-                _selected = today;
+                if (_selected != null) _selected = today;
               }),
               child: Text(l.planToday),
             ),
         ],
       ),
-      body: wide
+      body: wide && day == null
+          ? SingleChildScrollView(child: Column(children: [calendar, summary]))
+          : wide
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

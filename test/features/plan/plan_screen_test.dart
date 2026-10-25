@@ -135,6 +135,91 @@ void main() {
     await dispose(tester);
   });
 
+  testWidgets('desktop opens a side panel per entry, closed with its ×', (
+    tester,
+  ) async {
+    await seed(tester);
+    await tester.runAsync(() async {
+      final f = PlanFixture(db);
+      final food = await f.category('Groceries');
+      await BudgetsRepository(
+        db,
+        f.writer,
+      ).setAmount(food, DateTime(2026, 10), 40000);
+    });
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(const PlanScreen(initialTab: 'recurring')));
+    await settle(tester);
+    // Nothing opened: just the list, no panel.
+    expect(find.text('Edit recurring item'), findsNothing);
+    expect(find.byTooltip('Close'), findsNothing);
+    // The plan itself, below the item waiting for confirmation.
+    await tester.tap(find.text('Rent').last);
+    await settle(tester);
+    expect(find.text('Edit recurring item'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+    expect(find.text('Edit recurring item'), findsNothing);
+    expect(find.text('Rent'), findsWidgets);
+
+    await tester.tap(find.widgetWithText(Tab, 'Goals'));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await settle(tester);
+    expect(find.text('Edit goal'), findsNothing);
+    await tester.tap(find.text('Holiday'));
+    await settle(tester);
+    expect(find.text('Edit goal'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+    expect(find.text('Edit goal'), findsNothing);
+
+    await tester.tap(find.widgetWithText(Tab, 'Budgets'));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await settle(tester);
+    expect(find.byTooltip('Close'), findsNothing);
+    await tester.tap(find.text('Groceries').first);
+    await settle(tester);
+    expect(find.byTooltip('Close'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+    expect(find.byTooltip('Close'), findsNothing);
+    await dispose(tester);
+  });
+
+  testWidgets('desktop bills calendar opens the day panel on a tap', (
+    tester,
+  ) async {
+    await seed(tester);
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(const BillsCalendarScreen()));
+    await settle(tester);
+    expect(find.text('Nothing due on this day.'), findsNothing);
+    expect(find.byTooltip('Close'), findsNothing);
+    await tester.tap(find.text('15'));
+    await settle(tester);
+    expect(find.text('Nothing due on this day.'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await settle(tester);
+    expect(find.text('Nothing due on this day.'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+
+    // Phones always list a day, today to start with.
+    tester.view.physicalSize = const Size(400, 900);
+    await tester.pumpWidget(app(const BillsCalendarScreen()));
+    await settle(tester);
+    expect(find.text('Nothing due on this day.'), findsOneWidget);
+    expect(find.byTooltip('Close'), findsNothing);
+    await dispose(tester);
+  });
+
   testWidgets('rule editor, goal editor and calendar render in German', (
     tester,
   ) async {

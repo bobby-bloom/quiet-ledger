@@ -125,7 +125,7 @@ class _GoalsTabState extends ConsumerState<GoalsTab> {
       listWidth: 440,
       list: list,
       detail: _selected == null
-          ? EmptyState(icon: Icons.flag_outlined, message: l.goalsSelectHint)
+          ? null
           : GoalEditor(
               key: ValueKey(_selected),
               goalId: _selected,

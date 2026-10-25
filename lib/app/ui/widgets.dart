@@ -2,6 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/breakpoints.dart';
+import 'package:personal_finance/core/settings/setting_def.dart';
+import 'package:personal_finance/core/settings/settings_controller.dart';
+
+/// App bar of a top-level screen (Plan, Forecast, Accounts, ...): the title
+/// in titleLarge, starting on the page margin. On wider windows that is the
+/// 24 px margin the actions end on (see `WindowSizedTheme`); on a phone the
+/// design's 20 px. Behind a back button the title keeps the usual spacing.
+class PageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const PageAppBar({required this.title, super.key, this.actions, this.bottom});
+
+  final String title;
+  final List<Widget>? actions;
+  final PreferredSizeWidget? bottom;
+
+  /// Where the title starts; screens with their own header use it too.
+  static double titleInset(BuildContext context) =>
+      WindowSize.of(context).isCompact ? Space.listInset : Space.desktopGutter;
+
+  @override
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
+
+  @override
+  Widget build(BuildContext context) {
+    final back = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
+    return AppBar(
+      titleSpacing: back ? null : titleInset(context),
+      title: Text(title, style: context.text.titleLarge),
+      actions: actions,
+      bottom: bottom,
+    );
+  }
+}
+
+/// App bar button of a wide layout that hides or shows the screen's side
+/// panel; [setting] holds whether it is hidden.
+class SidePanelButton extends ConsumerWidget {
+  const SidePanelButton({required this.setting, super.key});
+
+  final SettingDef<bool> setting;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final hidden = ref.watch(settingsProvider.select((s) => s.get(setting)));
+    return IconButton(
+      tooltip: hidden ? l.commonShowSidePanel : l.commonHideSidePanel,
+      isSelected: !hidden,
+      icon: const Icon(Icons.view_sidebar_outlined),
+      selectedIcon: const Icon(Icons.view_sidebar),
+      onPressed: () =>
+          ref.read(settingsProvider.notifier).set(setting, !hidden),
+    );
+  }
+}
 
 /// White (light) card with a hairline border and a title row, as used on the
 /// dashboard: `Budgets ............ All budgets >`.

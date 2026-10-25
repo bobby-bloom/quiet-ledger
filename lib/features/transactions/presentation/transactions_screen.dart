@@ -9,6 +9,7 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/pickers.dart';
+import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
@@ -273,13 +274,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   _SavedFilterChips(
                     activeId: state.savedFilterId,
                     padding: EdgeInsets.symmetric(
-                      horizontal: wide ? Space.xxl : Space.md,
+                      horizontal: wide ? Space.desktopGutter : Space.md,
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(
-                      left: wide ? Space.xxl - Space.md : 0,
-                      right: wide ? Space.xl : 0,
+                      left: wide ? Space.desktopGutter : 0,
+                      right: wide ? Space.desktopGutter : 0,
                     ),
                     child: TxnFilterBar(
                       filter: filter,
@@ -298,9 +299,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     filter: filter,
                     wide: wide,
                     padding: EdgeInsets.fromLTRB(
-                      wide ? Space.xxl + 4 : Space.lg,
+                      wide ? Space.desktopGutter + 4 : Space.lg,
                       4,
-                      wide ? Space.xl : Space.lg,
+                      wide ? Space.desktopGutter : Space.lg,
                       6,
                     ),
                   ),
@@ -317,9 +318,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     child: wide
                         ? Padding(
                             padding: const EdgeInsets.fromLTRB(
-                              Space.xxl - Space.xs,
+                              Space.desktopGutter,
                               0,
-                              Space.xl,
+                              Space.desktopGutter,
                               Space.md,
                             ),
                             child: Card(
@@ -448,11 +449,18 @@ class _Header extends ConsumerWidget {
       ),
     ];
     if (!wide) {
+      final gutter = WindowSize.of(context).isCompact
+          ? Space.phoneGutter
+          : Space.desktopGutter;
       return SizedBox(
-        height: 56,
+        height: kToolbarHeight,
         child: Padding(
-          // The last icon's circle ends on the 16 px page margin.
-          padding: const EdgeInsets.only(left: Space.lg, right: Space.sm),
+          // As PageAppBar: the title on the page margin, the last icon's
+          // circle on the margin the app bars' actions end on.
+          padding: EdgeInsets.only(
+            left: PageAppBar.titleInset(context),
+            right: gutter - Space.xxs,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -470,22 +478,19 @@ class _Header extends ConsumerWidget {
         ),
       );
     }
-    return Padding(
-      // The last icon's circle ends on the list's 24 px right margin.
-      padding: const EdgeInsets.fromLTRB(
-        Space.xxl,
-        Space.lg,
-        Space.xl - Space.xxs,
-        8,
+    // Same height, title and margins as the other screens' PageAppBar: the
+    // title and the last icon's circle on the list's 24 px margins.
+    return Container(
+      height: kToolbarHeight,
+      padding: const EdgeInsets.only(
+        left: Space.desktopGutter,
+        right: Space.desktopGutter - Space.xxs,
       ),
       child: Row(
         children: [
           Semantics(
             header: true,
-            child: Text(
-              l.navTransactions,
-              style: context.text.headlineSmall?.copyWith(fontSize: 26),
-            ),
+            child: Text(l.navTransactions, style: context.text.titleLarge),
           ),
           const Spacer(),
           ConstrainedBox(

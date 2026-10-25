@@ -38,6 +38,8 @@
   "commonRetry": "Erneut versuchen",
   "commonEmpty": "Noch nichts vorhanden",
   "commonError": "Etwas ist schiefgelaufen: {message}",
+  "commonHideSidePanel": "Seitenleiste ausblenden",
+  "commonShowSidePanel": "Seitenleiste einblenden",
   "commonDeleteConfirm": "„{name}“ löschen?",
   "commonComingSoon": "Dieser Bereich ist noch nicht verfügbar.",
   "typeExpense": "Ausgabe",

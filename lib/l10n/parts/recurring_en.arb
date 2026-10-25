@@ -3,7 +3,6 @@
   "recurringNew": "New recurring item",
   "recurringEdit": "Edit recurring item",
   "recurringEmpty": "No recurring items yet. Add rent, salary or subscriptions to see them coming.",
-  "recurringSelectHint": "Select a recurring item to edit it.",
   "recurringNext30Days": "Next 30 days",
   "recurringBills": "{count, plural, =0{No bills} =1{1 bill} other{{count} bills}}",
   "@recurringBills": {

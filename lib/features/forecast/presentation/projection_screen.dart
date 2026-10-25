@@ -47,6 +47,11 @@ class ProjectionScreen extends ConsumerWidget {
     final batch = ref.watch(projectionProvider);
     final size = WindowSize.of(context);
     final gutter = size.isCompact ? Space.phoneGutter : Space.desktopGutter;
+    final sideHidden = ref.watch(
+      settingsProvider.select(
+        (s) => s.get(ForecastSettings.projectionSidePanelHidden),
+      ),
+    );
     Widget content(ProjectionBatch b) {
       final main = <Widget>[
         _Headline(projection: b.baseline),
@@ -62,17 +67,23 @@ class ProjectionScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: ListView(
-                padding: EdgeInsets.fromLTRB(gutter, Space.xs, Space.sm, 32),
+                padding: EdgeInsets.fromLTRB(
+                  gutter,
+                  Space.xs,
+                  sideHidden ? gutter : Space.sm,
+                  32,
+                ),
                 children: main,
               ),
             ),
-            SizedBox(
-              width: 380,
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(Space.sm, Space.xs, gutter, 32),
-                children: side,
+            if (!sideHidden)
+              SizedBox(
+                width: 380,
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(Space.sm, Space.xs, gutter, 32),
+                  children: side,
+                ),
               ),
-            ),
           ],
         );
       }
@@ -87,7 +98,15 @@ class ProjectionScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.forecastProjection)),
+      appBar: AppBar(
+        title: Text(l.forecastProjection),
+        actions: [
+          if (size.isExpanded)
+            SidePanelButton(
+              setting: ForecastSettings.projectionSidePanelHidden,
+            ),
+        ],
+      ),
       body: batch.hasValue
           ? content(batch.value!)
           : AsyncView(value: batch, data: content),

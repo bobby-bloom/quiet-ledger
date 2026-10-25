@@ -1058,6 +1058,18 @@ abstract final class ForecastSettings {
     module: AppModule.forecast.name,
   );
 
+  /// Wide layouts: the long-term projection's assumptions panel is
+  /// collapsed. Toggled from the projection.
+  static final projectionSidePanelHidden = SettingDef.boolean(
+    key: 'forecast.projectionSidePanelHidden',
+    section: SettingSection.forecast,
+    defaultValue: false,
+    label: (l) => l.setProjectionSidePanelHidden,
+    hidden: true,
+    deviceLocal: true,
+    module: AppModule.forecast.name,
+  );
+
   static final all = <SettingDef<Object?>>[
     horizonMonths,
     variableMethod,
@@ -1070,6 +1082,7 @@ abstract final class ForecastSettings {
     realValues,
     combineScenarios,
     sidePanelHidden,
+    projectionSidePanelHidden,
   ];
 }
 

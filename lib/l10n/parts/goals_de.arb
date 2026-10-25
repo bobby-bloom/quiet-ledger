@@ -8,7 +8,6 @@
   "goalsArchived": "Archiviert ({count})",
   "goalsShow": "Anzeigen",
   "goalsHide": "Ausblenden",
-  "goalsSelectHint": "Wähle ein Ziel, um Details zu sehen.",
   "goalsReached": "Ziel erreicht",
   "goalsRequiredPerPeriod": "Benötigt {amount} pro Zeitraum bis {date}",
   "goalsProjected": "Bei diesem Tempo: {date}",
