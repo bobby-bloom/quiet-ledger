@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +6,6 @@ import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/app_icons.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/core/db/database.dart';
-import 'package:personal_finance/features/transactions/domain/calc_input.dart';
 import 'package:personal_finance/features/transactions/domain/calculator.dart';
 import 'package:personal_finance/features/transactions/presentation/txn_labels.dart';
 
@@ -44,135 +41,106 @@ class TxnTypeSwitch extends StatelessWidget {
     return Semantics(
       label: l.txnFilterType,
       container: true,
+      // The segments are clipped to the inside of the outline, so the
+      // selected fill never paints over the border.
       child: Container(
         height: 44,
         decoration: BoxDecoration(
           border: Border.all(color: cs.outline),
           borderRadius: BorderRadius.circular(22),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Row(
-          children: [
-            for (var i = 0; i < types.length; i++)
-              Expanded(
-                child: Semantics(
-                  inMutuallyExclusiveGroup: true,
-                  checked: types[i] == value,
-                  button: true,
-                  child: Material(
-                    color: types[i] == value
-                        ? colorsFor(types[i]).$1
-                        : Colors.transparent,
-                    child: InkWell(
-                      onTap: () => onChanged(types[i]),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: i == 0
-                                ? BorderSide.none
-                                : BorderSide(color: cs.outline),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(21),
+          child: Row(
+            children: [
+              for (var i = 0; i < types.length; i++)
+                Expanded(
+                  child: Semantics(
+                    inMutuallyExclusiveGroup: true,
+                    checked: types[i] == value,
+                    button: true,
+                    child: Material(
+                      color: types[i] == value
+                          ? colorsFor(types[i]).$1
+                          : Colors.transparent,
+                      child: InkWell(
+                        onTap: () => onChanged(types[i]),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: i == 0
+                                  ? BorderSide.none
+                                  : BorderSide(color: cs.outline),
+                            ),
                           ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (types[i] == value) ...[
-                              Icon(
-                                iconFor(types[i]),
-                                size: 18,
-                                color: colorsFor(types[i]).$2,
-                              ),
-                              const SizedBox(width: 6),
-                            ],
-                            Flexible(
-                              child: Text(
-                                TxnLabels.type(l, types[i]),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.text.bodyMedium?.copyWith(
-                                  fontWeight: types[i] == value
-                                      ? FontWeight.w700
-                                      : FontWeight.w600,
-                                  color: types[i] == value
-                                      ? colorsFor(types[i]).$2
-                                      : cs.onSurface,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (types[i] == value) ...[
+                                Icon(
+                                  iconFor(types[i]),
+                                  size: 18,
+                                  color: colorsFor(types[i]).$2,
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              Flexible(
+                                child: Text(
+                                  TxnLabels.type(l, types[i]),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.text.bodyMedium?.copyWith(
+                                    fontWeight: types[i] == value
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                    color: types[i] == value
+                                        ? colorsFor(types[i]).$2
+                                        : cs.onSurface,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// The big amount readout above the keypad. Shows the expression as typed
-/// and, when it contains an operator, the live result. Focusable so that a
-/// physical keyboard can type into it (digits, `+-*/()`, `.`/`,`,
-/// Backspace, Enter/`=` to calculate).
-class AmountDisplay extends ConsumerWidget {
-  const AmountDisplay({
-    required this.expression,
+/// The big centred amount field, coloured by [type]. Uses the platform
+/// keyboard; it takes a calculation ("20+4.80"), shows the result
+/// underneath, and Enter replaces the calculation by it ([onSubmitted]).
+class AmountField extends ConsumerWidget {
+  const AmountField({
+    required this.controller,
     required this.type,
     required this.decimalSeparator,
-    required this.focusNode,
-    required this.onKey,
+    required this.label,
+    required this.onChanged,
+    required this.onSubmitted,
     super.key,
     this.error,
     this.autofocus = false,
   });
 
-  final String expression;
+  final TextEditingController controller;
   final TxnType type;
   final String decimalSeparator;
-  final FocusNode focusNode;
-  final ValueChanged<String> onKey;
+
+  /// Accessible name ("Amount", "Amount *" when required).
+  final String label;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onSubmitted;
   final String? error;
   final bool autofocus;
-
-  KeyEventResult _handle(FocusNode node, KeyEvent e) {
-    if (e is! KeyDownEvent && e is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
-    final keys = HardwareKeyboard.instance;
-    if (keys.isControlPressed || keys.isMetaPressed || keys.isAltPressed) {
-      return KeyEventResult.ignored;
-    }
-    final k = e.logicalKey;
-    if (k == LogicalKeyboardKey.backspace) {
-      onKey(CalcKey.backspace);
-      return KeyEventResult.handled;
-    }
-    if (k == LogicalKeyboardKey.delete) {
-      onKey(CalcKey.clear);
-      return KeyEventResult.handled;
-    }
-    if (k == LogicalKeyboardKey.enter || k == LogicalKeyboardKey.numpadEnter) {
-      if (!AmountCalculator.hasOperator(expression)) {
-        return KeyEventResult.ignored;
-      }
-      onKey(CalcKey.equals);
-      return KeyEventResult.handled;
-    }
-    if (k == LogicalKeyboardKey.numpadDecimal) {
-      onKey(CalcKey.separator);
-      return KeyEventResult.handled;
-    }
-    final ch = e.character;
-    if (ch == null) return KeyEventResult.ignored;
-    final key = CalcInput.keyForCharacter(ch);
-    if (key == null) return KeyEventResult.ignored;
-    onKey(key);
-    return KeyEventResult.handled;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -180,11 +148,14 @@ class AmountDisplay extends ConsumerWidget {
     final fin = context.finance;
     final l = context.l10n;
     final fmt = ref.watch(moneyFormatterProvider);
-    final color = switch (type) {
-      TxnType.expense => fin.expense,
-      TxnType.income => fin.income,
-      TxnType.transfer => fin.transfer,
-    };
+    final expression = controller.text;
+    final color = expression.isEmpty
+        ? cs.onSurfaceVariant
+        : switch (type) {
+            TxnType.expense => fin.expense,
+            TxnType.income => fin.income,
+            TxnType.transfer => fin.transfer,
+          };
     final hasOp = AmountCalculator.hasOperator(expression);
     final preview = hasOp
         ? AmountCalculator.evaluate(
@@ -193,208 +164,87 @@ class AmountDisplay extends ConsumerWidget {
             lenient: true,
           )
         : null;
-    final text = expression.isEmpty ? '0' : expression;
     final big = hasOp ? 34.0 : 50.0;
-    return Focus(
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onKeyEvent: _handle,
-      child: Builder(
-        builder: (context) {
-          final focused = Focus.of(context).hasFocus;
-          return Semantics(
-            label: l.fieldAmount,
-            value: preview?.minor != null
-                ? fmt.minor(preview!.minor!)
-                : expression,
-            textField: true,
-            child: GestureDetector(
-              onTap: focusNode.requestFocus,
-              child: SizedBox(
-                height: 76,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        children: [
-                          Text(
-                            '€',
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              color: expression.isEmpty
-                                  ? cs.onSurfaceVariant
-                                  : color,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: big,
-                              height: 56 / 50,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -1.2,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                              color: expression.isEmpty
-                                  ? cs.onSurfaceVariant
-                                  : color,
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            height: big * 0.8,
-                            margin: const EdgeInsets.only(left: 3),
-                            color: focused ? cs.primary : Colors.transparent,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (error != null)
-                      Text(
-                        error!,
-                        style: context.text.labelMedium?.copyWith(
-                          color: cs.error,
-                        ),
-                      )
-                    else if (preview != null)
-                      Text(
-                        preview.isOk
-                            ? l.txnAmountPreview(
-                                fmt.minor(preview.minor!.abs()),
-                              )
-                            : l.txnErrAmountInvalid,
-                        style: context.text.bodyMedium?.copyWith(
-                          color: preview.isOk ? cs.onSurfaceVariant : cs.error,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+    final style = TextStyle(
+      fontSize: big,
+      height: 56 / 50,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -1.2,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      color: color,
     );
-  }
-}
-
-/// 4×4 calculator keypad (digits, decimal separator, backspace and
-/// `÷ × − +`). Long-press on backspace clears.
-class CalculatorKeypad extends StatelessWidget {
-  const CalculatorKeypad({
-    required this.onKey,
-    required this.decimalSeparator,
-    super.key,
-    this.keyHeight = 48,
-  });
-
-  final ValueChanged<String> onKey;
-  final String decimalSeparator;
-  final double keyHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final cs = context.colors;
-    Widget key(
-      String label,
-      String value, {
-      String? semantics,
-      bool tinted = false,
-      IconData? icon,
-      VoidCallback? onLongPress,
-    }) {
-      return Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(3),
-          child: Semantics(
-            button: true,
-            label: semantics ?? label,
-            excludeSemantics: true,
-            child: Material(
-              color: tinted
-                  ? cs.surfaceContainerHigh
-                  : cs.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(Radii.md),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(Radii.md),
-                onTap: () {
-                  unawaited(HapticFeedback.selectionClick());
-                  onKey(value);
-                },
-                onLongPress: onLongPress,
-                child: SizedBox(
-                  height: keyHeight,
-                  child: Center(
-                    child: icon != null
-                        ? Icon(icon, color: cs.onSurface)
-                        : Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: tinted
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget row(List<Widget> keys) => Row(children: keys);
-    return Semantics(
-      label: l.txnKeypad,
-      container: true,
+    const none = InputBorder.none;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Space.xs),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          row([
-            key('1', '1'),
-            key('2', '2'),
-            key('3', '3'),
-            key('÷', CalcKey.divide, semantics: l.txnDivide, tinted: true),
-          ]),
-          row([
-            key('4', '4'),
-            key('5', '5'),
-            key('6', '6'),
-            key('×', CalcKey.times, semantics: l.txnTimes, tinted: true),
-          ]),
-          row([
-            key('7', '7'),
-            key('8', '8'),
-            key('9', '9'),
-            key('−', CalcKey.minus, semantics: l.txnMinus, tinted: true),
-          ]),
-          row([
-            key(
-              decimalSeparator,
-              CalcKey.separator,
-              semantics: l.txnDecimalSeparator,
-              tinted: true,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ExcludeSemantics(
+                child: Text(
+                  '€',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              // Sized to its text so the amount stays centred with the €.
+              Flexible(
+                child: IntrinsicWidth(
+                  child: Semantics(
+                    label: label,
+                    child: TextField(
+                      controller: controller,
+                      autofocus: autofocus,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[0-9.,+\-−×÷*/() ]'),
+                        ),
+                      ],
+                      style: style,
+                      cursorColor: cs.primary,
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        filled: false,
+                        hintText: '0',
+                        hintStyle: style.copyWith(color: cs.onSurfaceVariant),
+                        border: none,
+                        enabledBorder: none,
+                        focusedBorder: none,
+                        errorBorder: none,
+                        focusedErrorBorder: none,
+                        disabledBorder: none,
+                      ),
+                      onChanged: onChanged,
+                      onSubmitted: (_) => onSubmitted(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (error != null)
+            Text(
+              error!,
+              style: context.text.labelMedium?.copyWith(color: cs.error),
+            )
+          else if (preview != null)
+            Text(
+              preview.isOk
+                  ? l.txnAmountPreview(fmt.minor(preview.minor!.abs()))
+                  : l.txnErrAmountInvalid,
+              style: context.text.bodyMedium?.copyWith(
+                color: preview.isOk ? cs.onSurfaceVariant : cs.error,
+              ),
             ),
-            key('0', '0'),
-            key(
-              '',
-              CalcKey.backspace,
-              semantics: l.txnDeleteDigit,
-              tinted: true,
-              icon: Icons.backspace_outlined,
-              onLongPress: () => onKey(CalcKey.clear),
-            ),
-            key('+', CalcKey.plus, semantics: l.txnPlus, tinted: true),
-          ]),
         ],
       ),
     );

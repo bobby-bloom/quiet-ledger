@@ -5984,9 +5984,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setBudgetMode => 'Budgetmodus';
 
   @override
-  String get setCalculatorKeypad => 'Rechner-Tastatur';
-
-  @override
   String get setCombineScenarios => 'Alle Szenarien kombiniert zeigen';
 
   @override
@@ -7380,27 +7377,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get txnChooseCategory => 'Kategorie wählen';
-
-  @override
-  String get txnKeypad => 'Betragstastatur';
-
-  @override
-  String get txnDecimalSeparator => 'Dezimaltrennzeichen';
-
-  @override
-  String get txnDeleteDigit => 'Ziffer löschen';
-
-  @override
-  String get txnPlus => 'Plus';
-
-  @override
-  String get txnMinus => 'Minus';
-
-  @override
-  String get txnTimes => 'Mal';
-
-  @override
-  String get txnDivide => 'Geteilt durch';
 
   @override
   String txnAmountPreview(String amount) {

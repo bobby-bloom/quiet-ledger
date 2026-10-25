@@ -377,10 +377,7 @@ String pageSummary(
       s.get(NavigationSettings.tabs).length,
     ),
     SettingSection.dashboard => choice(DashboardSettings.period),
-    SettingSection.entry =>
-      s.get(EntrySettings.calculatorKeypad)
-          ? l.setCalculatorKeypad
-          : choice(EntrySettings.defaultType),
+    SettingSection.entry => choice(EntrySettings.defaultType),
     SettingSection.transactions =>
       '${l.setGrouping}: ${choice(TransactionSettings.grouping)}',
     SettingSection.categories => choice(CategorySettings.defaultSet),

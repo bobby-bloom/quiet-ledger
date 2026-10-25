@@ -9534,12 +9534,6 @@ abstract class AppLocalizations {
   /// **'Budget mode'**
   String get setBudgetMode;
 
-  /// No description provided for @setCalculatorKeypad.
-  ///
-  /// In en, this message translates to:
-  /// **'Calculator keypad'**
-  String get setCalculatorKeypad;
-
   /// No description provided for @setCombineScenarios.
   ///
   /// In en, this message translates to:
@@ -11963,48 +11957,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose category'**
   String get txnChooseCategory;
-
-  /// No description provided for @txnKeypad.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount keypad'**
-  String get txnKeypad;
-
-  /// No description provided for @txnDecimalSeparator.
-  ///
-  /// In en, this message translates to:
-  /// **'Decimal separator'**
-  String get txnDecimalSeparator;
-
-  /// No description provided for @txnDeleteDigit.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete digit'**
-  String get txnDeleteDigit;
-
-  /// No description provided for @txnPlus.
-  ///
-  /// In en, this message translates to:
-  /// **'Plus'**
-  String get txnPlus;
-
-  /// No description provided for @txnMinus.
-  ///
-  /// In en, this message translates to:
-  /// **'Minus'**
-  String get txnMinus;
-
-  /// No description provided for @txnTimes.
-  ///
-  /// In en, this message translates to:
-  /// **'Times'**
-  String get txnTimes;
-
-  /// No description provided for @txnDivide.
-  ///
-  /// In en, this message translates to:
-  /// **'Divided by'**
-  String get txnDivide;
 
   /// No description provided for @txnAmountPreview.
   ///

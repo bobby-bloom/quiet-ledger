@@ -487,14 +487,6 @@ abstract final class EntrySettings {
     },
   );
 
-  static final calculatorKeypad = SettingDef.boolean(
-    key: 'entry.calculatorKeypad',
-    section: SettingSection.entry,
-    defaultValue: true,
-    label: (l) => l.setCalculatorKeypad,
-    keywords: const ['rechner'],
-  );
-
   static final recentCategories = SettingDef.integer(
     key: 'entry.recentCategories',
     section: SettingSection.entry,
@@ -525,7 +517,6 @@ abstract final class EntrySettings {
     defaultAccountId,
     defaultType,
     defaultDate,
-    calculatorKeypad,
     recentCategories,
     payeeSuggestions,
     confirmDelete,

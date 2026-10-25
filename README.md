@@ -29,7 +29,7 @@ no telemetry, no cloud dependency.
 ## Features
 
 ### Record
-- **Quick add** in a few seconds: amount keypad with a built-in calculator
+- **Quick add** in a few seconds: the amount field takes a calculation
   (`12.50+3.20`), recent categories first, `Ctrl/Cmd+N` on desktop.
 - Expenses, income and **transfers** (two linked legs, kept out of
   income/expense reports).

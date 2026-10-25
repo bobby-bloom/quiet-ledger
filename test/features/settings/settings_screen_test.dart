@@ -105,10 +105,10 @@ void main() {
     expect(find.text('Lock on start'), findsNothing); // hidden: lock is off
     await tester.enterText(
       find.byKey(const ValueKey('settings-search')),
-      'calculator',
+      'payee suggestions',
     );
     await settle(tester);
-    await tester.tap(find.byKey(const ValueKey('hit-entry.calculatorKeypad')));
+    await tester.tap(find.byKey(const ValueKey('hit-entry.payeeSuggestions')));
     await settle(tester);
     expect(find.text('Quick-add field order'), findsOneWidget);
     await tearDownApp(tester, db);

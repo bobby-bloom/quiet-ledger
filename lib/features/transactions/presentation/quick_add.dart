@@ -128,7 +128,6 @@ class QuickAddSheet extends ConsumerStatefulWidget {
 }
 
 class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
-  final _amountFocus = FocusNode(debugLabel: 'amount');
   final _payee = TextEditingController();
   final _note = TextEditingController();
   final _templateName = TextEditingController();
@@ -159,7 +158,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   var _showMore = false;
   Map<String, String> _errors = {};
   var _saving = false;
-  var _textFocused = false;
   String? _lastLookedUpPayee;
 
   bool get _isEdit => widget.editId != null && !widget.templateMode;
@@ -175,7 +173,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   @override
   void initState() {
     super.initState();
-    FocusManager.instance.addListener(_onFocusChange);
     _templateName.text = widget.template?.name ?? '';
     final s = ref.read(settingsProvider);
     if (widget.editId != null && !widget.templateMode) {
@@ -263,8 +260,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
 
   @override
   void dispose() {
-    FocusManager.instance.removeListener(_onFocusChange);
-    _amountFocus.dispose();
     _payee.dispose();
     _note.dispose();
     _templateName.dispose();
@@ -275,14 +270,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       l.dispose();
     }
     super.dispose();
-  }
-
-  void _onFocusChange() {
-    final ctx = FocusManager.instance.primaryFocus?.context;
-    final text =
-        ctx != null &&
-        ctx.findAncestorWidgetOfExactType<EditableText>() != null;
-    if (text != _textFocused && mounted) setState(() => _textFocused = text);
   }
 
   // ------------------------------------------------------------ helpers ---
@@ -314,10 +301,14 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
     return accounts.firstWhereOrNull((a) => !a.archived && a.id != from)?.id;
   }
 
-  void _key(String key) {
+  /// Replaces a calculation in the amount field ("20+4.80") by its result.
+  void _calculate() {
+    if (!AmountCalculator.hasOperator(_expr)) return;
+    final r = AmountCalculator.evaluate(_expr, decimalSeparator: _sep);
+    if (!r.isOk) return;
     setState(() {
-      _expr = CalcInput.apply(_expr, key, decimalSeparator: _sep);
-      _errors.remove('amount');
+      _expr = CalcInput.fromMinor(r.minor!.abs(), decimalSeparator: _sep);
+      _amountText.text = _expr;
     });
   }
 
@@ -786,17 +777,22 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(4, compact ? 0 : Space.xs, 4, 0),
+          padding: EdgeInsets.fromLTRB(
+            Space.sm,
+            compact ? 0 : Space.xs,
+            Space.md,
+            0,
+          ),
           child: SizedBox(
             height: 48,
             child: Row(
+              spacing: Space.xs,
               children: [
                 IconButton(
                   tooltip: l.commonClose,
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
-                const SizedBox(width: 4),
                 Expanded(
                   child: Semantics(
                     header: true,
@@ -862,7 +858,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
     final dates = ref.watch(dateFormatsProvider);
     final categories = ref.watch(categoryMapProvider);
     final accountMap = ref.watch(accountMapProvider);
-    final calculator = settings.get(EntrySettings.calculatorKeypad);
     final tagsOn = settings.moduleEnabled(AppModule.tags);
     final cfOn = settings.moduleEnabled(AppModule.customFields);
     final attachOn =
@@ -996,47 +991,21 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       final f = order[i];
       switch (f) {
         case QuickAddField.amount:
-          if (calculator) {
-            children.add(
-              AmountDisplay(
-                expression: _expr,
-                type: _type,
-                decimalSeparator: sep,
-                focusNode: _amountFocus,
-                autofocus: !_isTemplate && !compact,
-                error: _errors['amount'],
-                onKey: _key,
-              ),
-            );
-          } else {
-            gap();
-            children.add(
-              TextField(
-                controller: _amountText,
-                autofocus: !_isTemplate,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'[0-9.,+\-−×÷*/() ]'),
-                  ),
-                ],
-                textAlign: TextAlign.end,
-                style: context.text.headlineMedium,
-                decoration: InputDecoration(
-                  labelText: req(QuickAddField.amount, l.fieldAmount),
-                  suffixText: '€',
-                  errorText: _errors['amount'],
-                ),
-                onChanged: (v) => setState(() {
-                  _expr = v;
-                  _errors.remove('amount');
-                }),
-              ),
-            );
-            gap();
-          }
+          children.add(
+            AmountField(
+              controller: _amountText,
+              type: _type,
+              decimalSeparator: sep,
+              label: req(QuickAddField.amount, l.fieldAmount),
+              autofocus: !_isTemplate,
+              error: _errors['amount'],
+              onChanged: (v) => setState(() {
+                _expr = v;
+                _errors.remove('amount');
+              }),
+              onSubmitted: _calculate,
+            ),
+          );
         case QuickAddField.category:
           if (_type == TxnType.transfer) break;
           if (_splitMode) {
@@ -1227,7 +1196,6 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       );
     }
 
-    final showKeypad = calculator && !(compact && _textFocused);
     final saveLabel = _isTemplate
         ? l.txnSaveTemplate
         : _isEdit
@@ -1254,22 +1222,11 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(
-            Space.md - 3,
-            0,
-            Space.md - 3,
-            Space.md,
-          ),
+          padding: const EdgeInsets.fromLTRB(Space.md, 0, Space.md, Space.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (showKeypad)
-                CalculatorKeypad(
-                  onKey: _key,
-                  decimalSeparator: sep,
-                  keyHeight: compact ? 48 : 44,
-                ),
               if (hasErrors)
                 Padding(
                   padding: const EdgeInsets.only(top: Space.xs),
@@ -1280,32 +1237,29 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                   ),
                 ),
               const SizedBox(height: Space.xs),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: SizedBox(
-                  height: 52,
-                  child: FilledButton.icon(
-                    onPressed: _saving ? null : _save,
-                    icon: _saving
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: cs.onPrimary,
-                            ),
-                          )
-                        : const Icon(Icons.check),
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(saveLabel),
-                        if (!compact) ...[
-                          const SizedBox(width: Space.xs),
-                          _Kbd('${TxnLabels.modifier(l)} ↵'),
-                        ],
+              SizedBox(
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: cs.onPrimary,
+                          ),
+                        )
+                      : const Icon(Icons.check),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(saveLabel),
+                      if (!compact) ...[
+                        const SizedBox(width: Space.xs),
+                        _Kbd('${TxnLabels.modifier(l)} ↵'),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),

@@ -286,13 +286,6 @@
   "txnToAccount": "To",
   "txnChooseAccount": "Choose account",
   "txnChooseCategory": "Choose category",
-  "txnKeypad": "Amount keypad",
-  "txnDecimalSeparator": "Decimal separator",
-  "txnDeleteDigit": "Delete digit",
-  "txnPlus": "Plus",
-  "txnMinus": "Minus",
-  "txnTimes": "Times",
-  "txnDivide": "Divided by",
   "txnAmountPreview": "= {amount}",
   "@txnAmountPreview": {
     "placeholders": {

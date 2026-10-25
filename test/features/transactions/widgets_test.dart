@@ -163,23 +163,14 @@ void main() {
       await settle(tester);
 
       expect(find.text('New transaction'), findsOneWidget);
-      // Calculator: 20 + 4.80 = 24.80
-      for (final k in ['2', '0']) {
-        await tester.tap(find.bySemanticsLabel(k).last);
-        await tester.pump();
-      }
-      await tester.tap(find.bySemanticsLabel('Plus'));
+      // The amount field calculates: 20 + 4.80 = 24.80
+      final amount = find.byType(TextField).first;
+      await tester.enterText(amount, '20+4.8');
       await tester.pump();
-      for (final k in ['4']) {
-        await tester.tap(find.bySemanticsLabel(k).last);
-        await tester.pump();
-      }
-      await tester.tap(find.bySemanticsLabel('Decimal separator'));
-      await tester.pump();
-      await tester.tap(find.bySemanticsLabel('8').last);
-      await tester.pump();
-      expect(find.text('20+4.8'), findsOneWidget);
       expect(find.text('= €24.80'), findsOneWidget);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect(find.text('24.80'), findsOneWidget);
 
       await tester.tap(find.text('Groceries'));
       await tester.pump();
@@ -295,12 +286,8 @@ void main() {
       await tester.tap(find.text('Edit transaction'));
       await settle(tester);
       expect(find.text('24.80'), findsOneWidget);
-      // 24.80 → 24.8 → 24.
-      for (var i = 0; i < 3; i++) {
-        await tester.tap(find.bySemanticsLabel('Delete digit'));
-        await tester.pump();
-      }
-      expect(find.text('24'), findsOneWidget);
+      await tester.enterText(find.widgetWithText(TextField, '24.80'), '24');
+      await tester.pump();
       await tester.tap(find.text('Save changes'));
       await settle(tester);
       expect(find.text('Changes saved'), findsOneWidget);
