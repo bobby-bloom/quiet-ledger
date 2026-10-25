@@ -250,6 +250,29 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('board keeps its result while a new horizon computes', (
+    tester,
+  ) async {
+    final runner = _GatedRunner();
+    await pumpScreen(tester, const ForecastScreen(), runner: runner);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+
+    runner.gate = Completer<void>();
+    await tester.tap(find.byTooltip('6 months'));
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('Lowest point'), findsOneWidget);
+
+    runner.gate!.complete();
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    await unmount(tester);
+  });
+
   testWidgets('custom horizon via dialog, up to 120 months', (tester) async {
     await pumpScreen(tester, const ForecastScreen());
     Future<void> settle() async {
@@ -518,12 +541,18 @@ void main() {
   });
 }
 
-/// Holds projections back until [gate] completes.
+/// Holds forecasts back until [gate] completes.
 class _GatedRunner extends ForecastRunner {
   _GatedRunner() : super.inline();
 
   Completer<void>? gate;
   int runs = 0;
+
+  @override
+  Future<CashflowBatch> cashflow(CashflowRequest r) async {
+    await gate?.future;
+    return await super.cashflow(r);
+  }
 
   @override
   Future<ProjectionBatch> projection(ProjectionRequest r) async {

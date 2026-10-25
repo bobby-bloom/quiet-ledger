@@ -157,7 +157,10 @@ class ReportDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: body,
+      body: BusyBody(
+        busy: data != null && watchReportBusy(ref, type),
+        child: body,
+      ),
     );
   }
 }

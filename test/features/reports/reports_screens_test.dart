@@ -107,6 +107,36 @@ void main() {
     await tearDownApp(tester);
   });
 
+  testWidgets('detail keeps its content while a new period loads', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await seed(tester);
+    await tester.pumpWidget(
+      testApp(
+        const ReportDetailScreen(type: ReportType.spending),
+        db: db,
+        overrides: [clock],
+      ),
+    );
+    await settle(tester);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+
+    // The query runs outside the fake clock, so one frame shows the reload.
+    await tester.tap(find.byTooltip('Previous period'));
+    await tester.pump();
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('Data'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await settle(tester);
+    expect(find.text('February 2026'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    await tearDownApp(tester);
+  });
+
   testWidgets('income vs expense detail on a phone, in German', (tester) async {
     tester.view.physicalSize = const Size(400, 1600);
     tester.view.devicePixelRatio = 1;

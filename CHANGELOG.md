@@ -91,6 +91,10 @@ a dated release section.
   loads, and while a changed assumption recomputes it dims the old result,
   shows "Recalculating…" over the chart and a progress bar under the app
   bar.
+- Screens that recompute keep showing their previous result with a thin
+  progress bar under the app bar: Forecast (e.g. a new horizon), the
+  long-term projection and report details. Changing a report's period or
+  filters no longer replaces the report with a spinner.
 - "Show real values" on the long-term projection switches at once: the
   projection already holds both real and nominal values and milestones, so
   it is no longer recomputed.

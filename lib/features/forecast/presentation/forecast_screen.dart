@@ -73,10 +73,13 @@ class ForecastScreen extends ConsumerWidget {
       ),
       // Keep showing the previous result while a new one is computed.
       body: board.hasValue
-          ? _Board(
-              batch: board.value!,
-              accountId: accountId,
-              accounts: accounts,
+          ? BusyBody(
+              busy: board.isLoading,
+              child: _Board(
+                batch: board.value!,
+                accountId: accountId,
+                accounts: accounts,
+              ),
             )
           : AsyncView(
               value: board,

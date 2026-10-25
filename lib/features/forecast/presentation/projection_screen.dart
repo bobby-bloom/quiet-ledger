@@ -133,19 +133,7 @@ class ProjectionScreen extends ConsumerWidget {
         ],
       ),
       body: batch.hasValue
-          ? Stack(
-              children: [
-                content(batch.value!),
-                // The chart may be scrolled out of view on phones.
-                if (busy)
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: LinearProgressIndicator(minHeight: 2),
-                  ),
-              ],
-            )
+          ? BusyBody(busy: busy, child: content(batch.value!))
           : AsyncView(
               value: batch,
               loading: ForecastLoading(message: l.forecastProjLoading),

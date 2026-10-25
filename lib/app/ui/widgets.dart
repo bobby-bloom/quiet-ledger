@@ -326,6 +326,40 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Screen body that stays visible while it is recomputed: with [busy] a thin
+/// progress bar runs along the top edge, under the app bar. Use it whenever
+/// a screen keeps showing its previous result until the new one arrives.
+class BusyBody extends StatelessWidget {
+  const BusyBody({required this.busy, required this.child, super.key});
+
+  final bool busy;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        if (busy)
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: LinearProgressIndicator(minHeight: 2),
+          ),
+      ],
+    );
+  }
+}
+
+extension KeepPreviousValue<T> on AsyncValue<T> {
+  /// While a provider recomputes, Riverpod keeps its previous value, but
+  /// `when` and `whenData` treat it as loading. This shows that value as
+  /// data instead; mark the screen with [BusyBody].
+  AsyncValue<T> get keepingPrevious =>
+      isLoading && hasValue ? AsyncData(requireValue) : this;
+}
+
 /// Renders an [AsyncValue] with default loading and error states.
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({

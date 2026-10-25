@@ -20,7 +20,7 @@ lib/
     ui/board/     boards of cards (docs/BOARD.md): CardBoard, arrange mode, layout menu,
                   order sheet, actions
     ui/           AmountText, SectionCard, ProgressBar, StatusBadge, EmptyState, AsyncView,
-                  IconTile, confirmDialog, formatters (money/date providers), breakpoints, AppIcons,
+                  BusyBody, IconTile, confirmDialog, formatters (money/date providers), breakpoints, AppIcons,
                   pickers.dart (showCategoryPicker/MultiPicker, showAccountPicker/MultiPicker,
                   showAdaptiveSheet, MoneyField), app_mark.dart (the icon's mark), AppLogo
   core/
@@ -87,6 +87,14 @@ label to `lib/l10n/parts/settings_{en,de}.arb`.
 classes by hand (`@immutable`, `copyWith`, `==`). The only code generator is
 Drift; do **not** run `build_runner` from a feature agent — the schema is
 owned centrally. If you need a schema change, stop and report it.
+
+**Recomputing.** A screen whose result is recomputed (a filter, an
+assumption or the horizon changed) keeps showing the previous result and
+wraps its body in `BusyBody(busy: ...)`, which runs a thin progress bar
+under the app bar. Riverpod keeps the previous value while reloading
+(`isLoading && hasValue`), but `when`/`whenData`/`AsyncView` show a spinner
+instead, so map with `value.keepingPrevious` first. A spinner (with a
+message for slow work, e.g. `ForecastLoading`) is only for the first load.
 
 **Routing.** go_router with a `StatefulShellRoute` (branches: home,
 transactions, plan, forecast, accounts, reports, more). Each feature exports

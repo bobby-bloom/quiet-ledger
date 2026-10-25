@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/db/tables.dart';
 import 'package:personal_finance/core/ledger/lookups.dart';
@@ -83,6 +85,20 @@ AsyncValue<ReportContent> watchReportContent(
   ReportType.comparison => _comparison(context, ref),
 };
 
+/// Whether [type]'s data is being recomputed; [watchReportContent] keeps
+/// the previous content meanwhile.
+bool watchReportBusy(WidgetRef ref, ReportType type) {
+  final ProviderListenable<AsyncValue<Object?>> source = switch (type) {
+    ReportType.spending => spendingReportProvider,
+    ReportType.incomeExpense => incomeExpenseReportProvider,
+    ReportType.netWorth => netWorthReportProvider,
+    ReportType.categoryTrend => categoryTrendReportProvider,
+    ReportType.topPayees => topPayeesReportProvider,
+    ReportType.comparison => comparisonReportProvider,
+  };
+  return ref.watch(source).isLoading;
+}
+
 // ------------------------------------------------------------ helpers ---
 
 const _maxSlices = 6;
@@ -151,7 +167,7 @@ AsyncValue<ReportContent> _spending(BuildContext context, WidgetRef ref) {
   final title = reportTitle(context, t, kind: s.kind);
   final drill = s.drillParentId;
 
-  return ref.watch(spendingReportProvider).whenData((rows) {
+  return ref.watch(spendingReportProvider).keepingPrevious.whenData((rows) {
     final positive = rows.where((r) => r.amountMinor > 0).toList();
     final positiveTotal = positive.fold(0, (a, r) => a + r.amountMinor);
     final total = rows.fold(0, (a, r) => a + r.amountMinor);
@@ -397,7 +413,9 @@ AsyncValue<ReportContent> _incomeExpense(BuildContext context, WidgetRef ref) {
   final l = context.l10n;
   final fin = context.finance;
 
-  return ref.watch(incomeExpenseReportProvider).whenData((rows) {
+  return ref.watch(incomeExpenseReportProvider).keepingPrevious.whenData((
+    rows,
+  ) {
     final income = rows.fold(0, (a, r) => a + r.incomeMinor);
     final expense = rows.fold(0, (a, r) => a + r.expenseMinor);
     final total = PeriodTotals(
@@ -527,7 +545,7 @@ AsyncValue<ReportContent> _netWorth(BuildContext context, WidgetRef ref) {
   final fmt = ReportFormat.of(context, ref);
   final l = context.l10n;
 
-  return ref.watch(netWorthReportProvider).whenData((points) {
+  return ref.watch(netWorthReportProvider).keepingPrevious.whenData((points) {
     final values = [for (final p in points) p.netWorthMinor];
     final labels = [
       for (final p in points) fmt.dates.monthShort(p.range.start),
@@ -628,7 +646,9 @@ AsyncValue<ReportContent> _trend(BuildContext context, WidgetRef ref) {
 
   final children = ref.watch(categoryChildrenProvider);
 
-  return ref.watch(categoryTrendReportProvider).whenData((report) {
+  return ref.watch(categoryTrendReportProvider).keepingPrevious.whenData((
+    report,
+  ) {
     final buckets = report.buckets;
     final labels = [
       for (final b in buckets) fmt.bucket(b, s.interval, short: true),
@@ -728,7 +748,7 @@ AsyncValue<ReportContent> _payees(BuildContext context, WidgetRef ref) {
   final fmt = ReportFormat.of(context, ref);
   final l = context.l10n;
 
-  return ref.watch(topPayeesReportProvider).whenData((rows) {
+  return ref.watch(topPayeesReportProvider).keepingPrevious.whenData((rows) {
     String link(PayeeStat p) => transactionsLocation(
       range: s.range,
       filter: s.filter,
@@ -809,7 +829,7 @@ AsyncValue<ReportContent> _comparison(BuildContext context, WidgetRef ref) {
 
   final children = ref.watch(categoryChildrenProvider);
 
-  return ref.watch(comparisonReportProvider).whenData((r) {
+  return ref.watch(comparisonReportProvider).keepingPrevious.whenData((r) {
     final total = r.total;
     String name(ComparisonRow x) => fmt.categoryName(x.name);
     String link(ComparisonRow x) => transactionsLocation(
