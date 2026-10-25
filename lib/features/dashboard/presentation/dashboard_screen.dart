@@ -79,9 +79,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             )),
                 ),
                 SliverPadding(
+                  // As Forecast's list below its app bar.
                   padding: EdgeInsets.fromLTRB(
                     gutter,
-                    size.isCompact ? 0 : Space.md,
+                    size.isCompact ? 0 : Space.xs,
                     gutter,
                     0,
                   ),
