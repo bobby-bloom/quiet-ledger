@@ -181,6 +181,7 @@ class BudgetDetailView extends ConsumerWidget {
     required this.period,
     super.key,
     this.embedded = false,
+    this.onClose,
   });
 
   final String categoryId;
@@ -188,6 +189,9 @@ class BudgetDetailView extends ConsumerWidget {
 
   /// True inside the list-detail pane (shows a title row).
   final bool embedded;
+
+  /// Closes the list-detail pane (an × in the title row).
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -260,6 +264,7 @@ class BudgetDetailView extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (onClose != null) ClosePanelButton(onPressed: onClose!),
               ],
             ),
           ),

@@ -123,8 +123,6 @@
   },
   "forecastScenarios": "Scenarios",
   "forecastEditScenarios": "Edit scenarios",
-  "forecastHideSidePanel": "Hide side panel",
-  "forecastShowSidePanel": "Show side panel",
   "forecastNoScenarios": "No scenarios yet. Try a raise, a big purchase or paying off a loan early.",
   "forecastAddScenario": "Add scenario",
   "forecastBalances": "Balances",

@@ -15,7 +15,6 @@
   },
   "goalsShow": "Show",
   "goalsHide": "Hide",
-  "goalsSelectHint": "Select a goal to see its details.",
   "goalsReached": "Goal reached",
   "goalsRequiredPerPeriod": "Needs {amount} per period until {date}",
   "@goalsRequiredPerPeriod": {

@@ -402,6 +402,25 @@ void main() {
     expect(find.text('Milestones'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Assumptions'), 300);
     expect(find.text('Assumptions'), findsOneWidget);
+    // Phones stack everything in one column and have no toggle.
+    expect(find.byTooltip('Hide side panel'), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('desktop projection collapses its side panel', (tester) async {
+    await pumpScreen(
+      tester,
+      const ProjectionScreen(),
+      size: const Size(1280, 900),
+    );
+    expect(find.text('Assumptions'), findsOneWidget);
+    await tester.tap(find.byTooltip('Hide side panel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Assumptions'), findsNothing);
+    expect(find.text('Milestones'), findsOneWidget);
+    await tester.tap(find.byTooltip('Show side panel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Assumptions'), findsOneWidget);
     await unmount(tester);
   });
 

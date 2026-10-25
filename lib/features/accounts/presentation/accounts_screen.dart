@@ -80,8 +80,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     );
 
     final appBar = _reordering
-        ? AppBar(
-            title: Text(l.accountsReorder),
+        ? PageAppBar(
+            title: l.accountsReorder,
             actions: [
               TextButton(
                 onPressed: () => setState(() => _reordering = false),
@@ -89,8 +89,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               ),
             ],
           )
-        : AppBar(
-            title: Text(l.accountsTitle, style: context.text.titleLarge),
+        : PageAppBar(
+            title: l.accountsTitle,
             actions: [
               // With the detail pane, reconcile lives in the pane.
               if (!listDetail)

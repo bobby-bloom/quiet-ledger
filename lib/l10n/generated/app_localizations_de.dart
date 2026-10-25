@@ -1276,9 +1276,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get budgetsSelectHint => 'Wähle ein Budget, um Details zu sehen.';
-
-  @override
   String get budgetsCategoryMissing => 'Diese Kategorie existiert nicht mehr.';
 
   @override
@@ -2108,6 +2105,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get commonEmpty => 'Noch nichts vorhanden';
+
+  @override
+  String get commonHideSidePanel => 'Seitenleiste ausblenden';
+
+  @override
+  String get commonShowSidePanel => 'Seitenleiste einblenden';
 
   @override
   String commonError(String message) {
@@ -3003,12 +3006,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get forecastEditScenarios => 'Szenarien bearbeiten';
 
   @override
-  String get forecastHideSidePanel => 'Seitenleiste ausblenden';
-
-  @override
-  String get forecastShowSidePanel => 'Seitenleiste einblenden';
-
-  @override
   String get forecastNoScenarios =>
       'Noch keine Szenarien. Probiere eine Gehaltserhöhung, eine große Anschaffung oder eine vorzeitige Kredittilgung aus.';
 
@@ -3318,9 +3315,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goalsHide => 'Ausblenden';
-
-  @override
-  String get goalsSelectHint => 'Wähle ein Ziel, um Details zu sehen.';
 
   @override
   String get goalsReached => 'Ziel erreicht';
@@ -4560,10 +4554,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get recurringEmpty =>
       'Noch keine wiederkehrenden Buchungen. Füge Miete, Gehalt oder Abos hinzu, um sie kommen zu sehen.';
-
-  @override
-  String get recurringSelectHint =>
-      'Wähle eine wiederkehrende Buchung zum Bearbeiten.';
 
   @override
   String get recurringNext30Days => 'Nächste 30 Tage';
@@ -6015,6 +6005,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setForecastSidePanelHidden => 'Prognose-Seitenleiste ausblenden';
+
+  @override
+  String get setProjectionSidePanelHidden =>
+      'Projektions-Seitenleiste ausblenden';
 
   @override
   String get setCsvDateFormat => 'CSV-Datumsformat';

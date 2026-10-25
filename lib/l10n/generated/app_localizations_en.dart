@@ -1257,9 +1257,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get budgetsSelectHint => 'Select a budget to see its details.';
-
-  @override
   String get budgetsCategoryMissing => 'This category no longer exists.';
 
   @override
@@ -2087,6 +2084,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonEmpty => 'Nothing here yet';
+
+  @override
+  String get commonHideSidePanel => 'Hide side panel';
+
+  @override
+  String get commonShowSidePanel => 'Show side panel';
 
   @override
   String commonError(String message) {
@@ -2976,12 +2979,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forecastEditScenarios => 'Edit scenarios';
 
   @override
-  String get forecastHideSidePanel => 'Hide side panel';
-
-  @override
-  String get forecastShowSidePanel => 'Show side panel';
-
-  @override
   String get forecastNoScenarios =>
       'No scenarios yet. Try a raise, a big purchase or paying off a loan early.';
 
@@ -3291,9 +3288,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsHide => 'Hide';
-
-  @override
-  String get goalsSelectHint => 'Select a goal to see its details.';
 
   @override
   String get goalsReached => 'Goal reached';
@@ -4529,9 +4523,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recurringEmpty =>
       'No recurring items yet. Add rent, salary or subscriptions to see them coming.';
-
-  @override
-  String get recurringSelectHint => 'Select a recurring item to edit it.';
 
   @override
   String get recurringNext30Days => 'Next 30 days';
@@ -5976,6 +5967,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setForecastSidePanelHidden => 'Hide the forecast side panel';
+
+  @override
+  String get setProjectionSidePanelHidden => 'Hide the projection side panel';
 
   @override
   String get setCsvDateFormat => 'CSV date format';

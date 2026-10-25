@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
+import 'package:personal_finance/app/theme/tokens.dart';
+import 'package:personal_finance/app/ui/breakpoints.dart';
+import 'package:personal_finance/app/ui/widgets.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/budgets/data/budget_providers.dart';
@@ -83,6 +86,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen>
       if (settings.moduleEnabled(AppModule.goals)) PlanTab.goals,
     ];
     _sync(tabs);
+    final compact = WindowSize.of(context).isCompact;
     final controller = _controller!;
     final active = _tabs[controller.index];
     String label(PlanTab t) => switch (t) {
@@ -91,8 +95,8 @@ class _PlanScreenState extends ConsumerState<PlanScreen>
       PlanTab.goals => l.planTabGoals,
     };
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.navPlan),
+      appBar: PageAppBar(
+        title: l.navPlan,
         actions: [
           if (active == PlanTab.budgets)
             IconButton(
@@ -123,6 +127,16 @@ class _PlanScreenState extends ConsumerState<PlanScreen>
             ? null
             : TabBar(
                 controller: controller,
+                // On wider windows the tabs sit under the title instead of
+                // spreading across the page; the first label starts where
+                // the title does.
+                isScrollable: !compact,
+                tabAlignment: compact ? null : TabAlignment.start,
+                padding: compact
+                    ? null
+                    : const EdgeInsets.symmetric(
+                        horizontal: Space.desktopGutter - Space.md,
+                      ),
                 tabs: [for (final t in tabs) Tab(text: label(t))],
               ),
       ),

@@ -189,7 +189,6 @@
       }
     }
   },
-  "budgetsSelectHint": "Select a budget to see its details.",
   "budgetsCategoryMissing": "This category no longer exists.",
   "budgetsTransactionsInPeriod": "Transactions in this period",
   "budgetsNoTransactions": "No transactions in this period.",
