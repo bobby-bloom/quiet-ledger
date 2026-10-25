@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart' hide Table, isNotNull, isNull;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/core/db/sync_writer.dart';
 import 'package:personal_finance/core/ledger/ledger_repository.dart';
 import 'package:personal_finance/core/ledger/txn_draft.dart';
+import 'package:personal_finance/features/forecast/domain/forecast_pipeline.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_screen.dart';
 import 'package:personal_finance/features/forecast/presentation/projection_screen.dart';
@@ -102,20 +105,24 @@ void main() {
 
   tearDown(() => db.close());
 
-  final overrides = [
-    forecastRunnerProvider.overrideWithValue(const ForecastRunner.inline()),
+  List<Override> overridesWith(ForecastRunner runner) => [
+    forecastRunnerProvider.overrideWithValue(runner),
     forecastTodayProvider.overrideWithValue(today),
   ];
+  final overrides = overridesWith(const ForecastRunner.inline());
 
   Future<void> pumpScreen(
     WidgetTester tester,
     Widget screen, {
     Size size = const Size(400, 900),
+    ForecastRunner runner = const ForecastRunner.inline(),
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(testApp(screen, db: db, overrides: overrides));
+    await tester.pumpWidget(
+      testApp(screen, db: db, overrides: overridesWith(runner)),
+    );
     for (var i = 0; i < 10; i++) {
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       await tester.pump(const Duration(milliseconds: 300));
@@ -407,6 +414,39 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('projection shows progress while it computes', (tester) async {
+    final runner = _GatedRunner()..gate = Completer<void>();
+    await pumpScreen(tester, const ProjectionScreen(), runner: runner);
+    expect(find.text('Calculating projection…'), findsOneWidget);
+    expect(find.text('Milestones'), findsNothing);
+
+    runner.gate!.complete();
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Milestones'), findsOneWidget);
+    expect(find.text('Recalculating…'), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+
+    // A changed assumption keeps the old result, marked as recomputing.
+    runner.gate = Completer<void>();
+    await tester.scrollUntilVisible(find.text('Show real values'), 300);
+    await tester.tap(find.text('Show real values'));
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(find.text('Recalculating…'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('Milestones'), findsOneWidget);
+
+    runner.gate!.complete();
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Recalculating…'), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    await unmount(tester);
+  });
+
   testWidgets('desktop projection collapses its side panel', (tester) async {
     await pumpScreen(
       tester,
@@ -459,4 +499,17 @@ void main() {
     expect(find.text('Tiefster Stand'), findsOneWidget);
     await unmount(tester);
   });
+}
+
+/// Holds projections back until [gate] completes.
+class _GatedRunner extends ForecastRunner {
+  _GatedRunner() : super.inline();
+
+  Completer<void>? gate;
+
+  @override
+  Future<ProjectionBatch> projection(ProjectionRequest r) async {
+    await gate?.future;
+    return await super.projection(r);
+  }
 }

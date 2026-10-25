@@ -52,13 +52,29 @@ class ProjectionScreen extends ConsumerWidget {
         (s) => s.get(ForecastSettings.projectionSidePanelHidden),
       ),
     );
+    // A changed assumption recomputes in the background; the previous
+    // result stays visible but dimmed until the new one arrives.
+    final busy = batch.isLoading && batch.hasValue;
     Widget content(ProjectionBatch b) {
       final main = <Widget>[
-        _Headline(projection: b.baseline),
+        _Stale(
+          busy: busy,
+          child: _Headline(projection: b.baseline),
+        ),
         const SizedBox(height: Space.sm),
-        _ProjectionChart(batch: b, height: size.isExpanded ? 320 : 220),
+        _Stale(
+          busy: busy,
+          spinner: true,
+          child: _ProjectionChart(
+            batch: b,
+            height: size.isExpanded ? 320 : 220,
+          ),
+        ),
         const SizedBox(height: Space.md),
-        _Milestones(projection: b.baseline),
+        _Stale(
+          busy: busy,
+          child: _Milestones(projection: b.baseline),
+        ),
       ];
       const side = <Widget>[_Assumptions()];
       if (size.isExpanded) {
@@ -113,8 +129,68 @@ class ProjectionScreen extends ConsumerWidget {
         ],
       ),
       body: batch.hasValue
-          ? content(batch.value!)
-          : AsyncView(value: batch, data: content),
+          ? Stack(
+              children: [
+                content(batch.value!),
+                // The chart may be scrolled out of view on phones.
+                if (busy)
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(minHeight: 2),
+                  ),
+              ],
+            )
+          : AsyncView(
+              value: batch,
+              loading: ForecastLoading(message: l.forecastProjLoading),
+              data: content,
+            ),
+    );
+  }
+}
+
+/// Dims [child] while the projection recomputes, optionally with a spinner
+/// on top.
+class _Stale extends StatelessWidget {
+  const _Stale({required this.busy, required this.child, this.spinner = false});
+
+  final bool busy;
+  final bool spinner;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dimmed = AnimatedOpacity(
+      opacity: busy ? 0.35 : 1,
+      duration: const Duration(milliseconds: 150),
+      child: child,
+    );
+    if (!spinner) return dimmed;
+    return Stack(
+      children: [
+        dimmed,
+        if (busy)
+          Positioned.fill(
+            child: Center(
+              child: Semantics(
+                liveRegion: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator.adaptive(),
+                    const SizedBox(height: Space.sm),
+                    Text(
+                      context.l10n.forecastProjRecalculating,
+                      style: context.text.labelLarge,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

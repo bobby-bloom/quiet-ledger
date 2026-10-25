@@ -2252,6 +2252,8 @@
   "forecastTransferFrom": "From {account}",
   "forecastVariableNote": "Includes expected variable spending: {method}.",
   "forecastLoading": "Calculating forecast…",
+  "forecastProjLoading": "Calculating projection…",
+  "forecastProjRecalculating": "Recalculating…",
   "forecastProjYears": "Years",
   "forecastProjYearsValue": "{years, plural, =1{1 year} other{{years} years}}",
   "@forecastProjYearsValue": {

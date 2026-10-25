@@ -87,6 +87,10 @@ a dated release section.
 
 ### Changed
 
+- The long-term projection says "Calculating projection…" while it first
+  loads, and while a changed assumption recomputes it dims the old result,
+  shows "Recalculating…" over the chart and a progress bar under the app
+  bar.
 - Cards are 10 px apart everywhere (`Space.cardGap`): the wide dashboard
   and arranging it (was 20), Forecast, the projection, Reports, account
   details, reconciling, budget and goal details, recurring items and their

@@ -80,16 +80,7 @@ class ForecastScreen extends ConsumerWidget {
             )
           : AsyncView(
               value: board,
-              loading: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator.adaptive(),
-                    const SizedBox(height: Space.sm),
-                    Text(l.forecastLoading),
-                  ],
-                ),
-              ),
+              loading: ForecastLoading(message: l.forecastLoading),
               data: (b) =>
                   _Board(batch: b, accountId: accountId, accounts: accounts),
             ),

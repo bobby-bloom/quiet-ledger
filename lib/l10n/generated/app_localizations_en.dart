@@ -3149,6 +3149,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forecastLoading => 'Calculating forecast…';
 
   @override
+  String get forecastProjLoading => 'Calculating projection…';
+
+  @override
+  String get forecastProjRecalculating => 'Recalculating…';
+
+  @override
   String get forecastProjYears => 'Years';
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
+import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
 import 'package:personal_finance/app/ui/widgets.dart';
@@ -40,6 +41,27 @@ class ModuleOffView extends StatelessWidget {
         message: message,
         actionLabel: context.l10n.forecastOpenSettings,
         onAction: () => context.push('/more/settings'),
+      ),
+    );
+  }
+}
+
+/// Centred spinner with a message while a forecast is first computed.
+class ForecastLoading extends StatelessWidget {
+  const ForecastLoading({required this.message, super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator.adaptive(),
+          const SizedBox(height: Space.sm),
+          Text(message),
+        ],
       ),
     );
   }

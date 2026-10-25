@@ -4983,6 +4983,18 @@ abstract class AppLocalizations {
   /// **'Calculating forecast…'**
   String get forecastLoading;
 
+  /// No description provided for @forecastProjLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating projection…'**
+  String get forecastProjLoading;
+
+  /// No description provided for @forecastProjRecalculating.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculating…'**
+  String get forecastProjRecalculating;
+
   /// No description provided for @forecastProjYears.
   ///
   /// In en, this message translates to:

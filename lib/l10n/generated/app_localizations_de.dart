@@ -3176,6 +3176,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get forecastLoading => 'Prognose wird berechnet …';
 
   @override
+  String get forecastProjLoading => 'Projektion wird berechnet …';
+
+  @override
+  String get forecastProjRecalculating => 'Wird neu berechnet …';
+
+  @override
   String get forecastProjYears => 'Jahre';
 
   @override
