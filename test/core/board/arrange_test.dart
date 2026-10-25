@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:personal_finance/features/dashboard/domain/arrange.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
+import 'package:personal_finance/core/board/arrange.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 
 BoardRow row(List<int> split, List<List<String>> columns) =>
     BoardRow(split: RowSplit(split), columns: columns);

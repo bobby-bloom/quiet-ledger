@@ -6,15 +6,16 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_finance/app/ui/board/arrange_board.dart';
+import 'package:personal_finance/app/ui/board/arrange_card.dart';
+import 'package:personal_finance/app/ui/board/board_order_sheet.dart';
+import 'package:personal_finance/app/ui/board/row_band.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
+import 'package:personal_finance/core/board/board_storage.dart';
 import 'package:personal_finance/core/db/database.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
 import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/arrange_board.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/arrange_card.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/row_band.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_screen.dart';
-import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
 import 'package:personal_finance/features/forecast/presentation/forecast_providers.dart';
 
 import '../../helpers/test_app.dart';
@@ -191,7 +192,10 @@ void main() {
       expect(state.mode, LayoutMode.custom);
       expect(state.rows![1].columns[1], ['goals', 'upcomingBills']);
       expect(
-        state.shows(DashboardView.expanded, DashboardWidgetType.topCategories),
+        state.shows(
+          DashboardView.expanded,
+          DashboardWidgetType.topCategories.name,
+        ),
         isFalse,
       );
       // Its slot stays for when it comes back.
@@ -285,9 +289,11 @@ void main() {
         final s = await repo.read(DashboardView.expanded);
         await repo.save(
           DashboardView.expanded,
-          s.withOptions(DashboardView.expanded, DashboardWidgetType.forecast, {
-            'accountId': 'acc-1',
-          }),
+          s.withOptions(
+            DashboardView.expanded,
+            DashboardWidgetType.forecast.name,
+            {'accountId': 'acc-1'},
+          ),
         );
       });
       await settle(tester);
@@ -309,14 +315,14 @@ void main() {
       expect(find.text('Mini forecast removed'), findsOneWidget);
       var state = await saved(tester, repo, DashboardView.expanded);
       expect(
-        state.shows(DashboardView.expanded, DashboardWidgetType.forecast),
+        state.shows(DashboardView.expanded, DashboardWidgetType.forecast.name),
         isFalse,
       );
       await tester.tap(find.text('Undo'));
       await settle(tester);
       state = await saved(tester, repo, DashboardView.expanded);
       expect(
-        state.shows(DashboardView.expanded, DashboardWidgetType.forecast),
+        state.shows(DashboardView.expanded, DashboardWidgetType.forecast.name),
         isTrue,
       );
 
@@ -332,10 +338,10 @@ void main() {
       await settle(tester);
       state = await saved(tester, repo, DashboardView.expanded);
       expect(
-        state.shows(DashboardView.expanded, DashboardWidgetType.forecast),
+        state.shows(DashboardView.expanded, DashboardWidgetType.forecast.name),
         isTrue,
       );
-      expect(state.optionsOf(DashboardWidgetType.forecast), {
+      expect(state.optionsOf(DashboardWidgetType.forecast.name), {
         'accountId': 'acc-1',
       });
       // Back under the month summary, where Auto puts it.
@@ -354,7 +360,7 @@ void main() {
       final repo = await pumpAt(tester, const Size(390, 844));
       await tester.tap(find.byTooltip('Dashboard layout'));
       await settle(tester);
-      expect(find.byType(PhoneEditorSheet), findsOneWidget);
+      expect(find.byType(BoardOrderSheet), findsOneWidget);
 
       await tester.tap(find.byTooltip('Move “Month summary” up'));
       await settle(tester);
@@ -378,11 +384,11 @@ void main() {
       await settle(tester);
       state = await saved(tester, repo, DashboardView.compact);
       expect(
-        state.shown(DashboardView.compact),
+        shownWidgets(state, DashboardView.compact),
         containsAll([DashboardWidgetType.goals]),
       );
       expect(
-        state.shows(DashboardView.compact, DashboardWidgetType.forecast),
+        state.shows(DashboardView.compact, DashboardWidgetType.forecast.name),
         isFalse,
       );
 
@@ -425,7 +431,7 @@ void main() {
         await tester.tap(find.text('Done'));
         await settle(tester);
         final state = await saved(tester, repo, DashboardView.expanded);
-        expect(state, DashboardViewState.empty);
+        expect(state, emptyDashboard);
         expect(tester.takeException(), isNull);
       } finally {
         await teardown(tester);
@@ -552,7 +558,7 @@ void main() {
         await tester.runAsync(
           () => repo.save(
             DashboardView.expanded,
-            DashboardViewState.empty.copyWith(mode: LayoutMode.custom),
+            emptyDashboard.copyWith(mode: LayoutMode.custom),
           ),
         );
         await settle(tester);
@@ -627,7 +633,7 @@ void main() {
                   breakpoint: storageKey(DashboardView.expanded),
                   widgets: encodeViewState(
                     DashboardView.expanded,
-                    DashboardViewState.empty,
+                    emptyDashboard,
                   ).replaceFirst('"accounts":{"visible":true},', ''),
                 ),
               ),
@@ -648,7 +654,10 @@ void main() {
         final state = await saved(tester, repo, DashboardView.expanded);
         expect(state.mode, LayoutMode.custom);
         expect(
-          state.shows(DashboardView.expanded, DashboardWidgetType.accounts),
+          state.shows(
+            DashboardView.expanded,
+            DashboardWidgetType.accounts.name,
+          ),
           isTrue,
         );
       } finally {
@@ -671,7 +680,7 @@ void main() {
             DashboardView.expanded,
             (s) => s.withOptions(
               DashboardView.expanded,
-              DashboardWidgetType.forecast,
+              DashboardWidgetType.forecast.name,
               {'accountId': 'acc-2'},
             ),
           ),
@@ -680,7 +689,7 @@ void main() {
         await tester.tap(find.text('Done'));
         await settle(tester);
         final state = await saved(tester, repo, DashboardView.expanded);
-        expect(state.optionsOf(DashboardWidgetType.forecast), {
+        expect(state.optionsOf(DashboardWidgetType.forecast.name), {
           'accountId': 'acc-2',
         });
       } finally {
@@ -750,7 +759,10 @@ void main() {
         await tester.runAsync(
           () => repo.save(
             DashboardView.compact,
-            const DashboardViewState(order: ['recentTransactions', 'netWorth']),
+            const DashboardViewState(
+              dashboardBoard,
+              order: ['recentTransactions', 'netWorth'],
+            ),
           ),
         );
         await settle(tester);
@@ -789,7 +801,7 @@ void main() {
             DashboardView.expanded,
             (s) => s.withOptions(
               DashboardView.expanded,
-              DashboardWidgetType.recentTransactions,
+              DashboardWidgetType.recentTransactions.name,
               {'limit': 10},
             ),
           ),
@@ -799,10 +811,13 @@ void main() {
         await settle(tester);
         final state = await saved(tester, repo, DashboardView.expanded);
         expect(
-          state.shows(DashboardView.expanded, DashboardWidgetType.forecast),
+          state.shows(
+            DashboardView.expanded,
+            DashboardWidgetType.forecast.name,
+          ),
           isTrue,
         );
-        expect(state.optionsOf(DashboardWidgetType.recentTransactions), {
+        expect(state.optionsOf(DashboardWidgetType.recentTransactions.name), {
           'limit': 10,
         });
       } finally {

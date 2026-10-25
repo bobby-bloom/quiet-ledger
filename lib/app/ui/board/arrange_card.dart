@@ -4,11 +4,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
-import 'package:personal_finance/features/dashboard/domain/arrange.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/drop_slot.dart';
+import 'package:personal_finance/app/ui/board/drop_slot.dart';
+import 'package:personal_finance/core/board/arrange.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
-/// A widget in arrange mode: a 52 dp row with a grip, the widget's [icon]
+/// A card in arrange mode: a 52 dp row with a grip, the card's [icon]
 /// and [title], and ⋮ for the [MoveCardMenu]. The whole row is the drag
 /// handle, immediate for mouse and touch — the grip is only the cue; ⋮ is
 /// the one thing on it that taps.
@@ -24,6 +24,7 @@ class ArrangeCard extends StatefulWidget {
     required this.moves,
     required this.onMove,
     required this.onRemove,
+    required this.removeLabel,
     required this.focusNode,
     super.key,
     this.canLift,
@@ -32,20 +33,22 @@ class ArrangeCard extends StatefulWidget {
     this.onDragEnded,
   });
 
-  /// The widget id, the drag's data.
+  /// The card id, the drag's data.
   final String id;
   final IconData icon;
   final String title;
 
-  /// Where the widget is, e.g. "Goals: row 2, column 1, position 1 of 2".
+  /// Where the card is, e.g. "Goals: row 2, column 1, position 1 of 2".
   final String positionLabel;
 
-  /// The moves that apply where the widget is now.
+  /// The moves that apply where the card is now.
   final Set<CardMove> moves;
   final ValueChanged<CardMove> onMove;
 
-  /// Takes the widget off the dashboard (inside the arrange session).
+  /// Takes the card off the board (inside the arrange session), and what
+  /// that is called there, e.g. "Remove from dashboard".
   final VoidCallback onRemove;
+  final String removeLabel;
 
   /// The ⋮ button's focus, owned by the board: focus follows a moved card.
   final FocusNode focusNode;
@@ -102,6 +105,7 @@ class _ArrangeCardState extends State<ArrangeCard> {
         moves: widget.moves,
         onMove: widget.onMove,
         onRemove: widget.onRemove,
+        removeLabel: widget.removeLabel,
         focusNode: widget.focusNode,
       ),
     );
@@ -116,8 +120,7 @@ class _ArrangeCardState extends State<ArrangeCard> {
         ))
           if (widget.moves.contains(move))
             CustomSemanticsAction(label: label): () => widget.onMove(move),
-        CustomSemanticsAction(label: l.dashLayoutRemoveFromDashboard):
-            widget.onRemove,
+        CustomSemanticsAction(label: widget.removeLabel): widget.onRemove,
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -208,14 +211,15 @@ class _GatedDraggable extends Draggable<String> {
 }
 
 /// The ⋮ button of an [ArrangeCard] and its menu: Up, Down, One column
-/// left, One column right and, set apart, Remove from dashboard, titled
-/// `Move "{widget}"`. Moves that cannot apply are disabled.
+/// left, One column right and, set apart, Remove ([removeLabel]), titled
+/// `Move "{card}"`. Moves that cannot apply are disabled.
 class MoveCardMenu extends StatelessWidget {
   const MoveCardMenu({
     required this.title,
     required this.moves,
     required this.onMove,
     required this.onRemove,
+    required this.removeLabel,
     required this.focusNode,
     super.key,
   });
@@ -224,6 +228,7 @@ class MoveCardMenu extends StatelessWidget {
   final Set<CardMove> moves;
   final ValueChanged<CardMove> onMove;
   final VoidCallback onRemove;
+  final String removeLabel;
   final FocusNode focusNode;
 
   @override
@@ -242,7 +247,7 @@ class MoveCardMenu extends StatelessWidget {
               Space.xxs,
             ),
             child: Text(
-              l.dashLayoutMove(title),
+              l.boardMove(title),
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -262,12 +267,12 @@ class MoveCardMenu extends StatelessWidget {
         MenuItemButton(
           leadingIcon: const Icon(Icons.remove_circle_outline),
           onPressed: onRemove,
-          child: Text(l.dashLayoutRemoveFromDashboard),
+          child: Text(removeLabel),
         ),
       ],
       builder: (context, controller, _) => IconButton(
         focusNode: focusNode,
-        tooltip: l.dashLayoutMove(title),
+        tooltip: l.boardMove(title),
         icon: const Icon(Icons.more_vert),
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
@@ -284,17 +289,13 @@ List<(CardMove, IconData, String)> cardMoveItems(
 ) {
   final isRtl = direction == TextDirection.rtl;
   return [
-    (CardMove.up, Icons.arrow_upward, l.dashLayoutMoveUp),
-    (CardMove.down, Icons.arrow_downward, l.dashLayoutMoveDown),
-    (
-      isRtl ? CardMove.end : CardMove.start,
-      Icons.arrow_back,
-      l.dashLayoutMoveLeft,
-    ),
+    (CardMove.up, Icons.arrow_upward, l.boardMoveUp),
+    (CardMove.down, Icons.arrow_downward, l.boardMoveDown),
+    (isRtl ? CardMove.end : CardMove.start, Icons.arrow_back, l.boardMoveLeft),
     (
       isRtl ? CardMove.start : CardMove.end,
       Icons.arrow_forward,
-      l.dashLayoutMoveRight,
+      l.boardMoveRight,
     ),
   ];
 }

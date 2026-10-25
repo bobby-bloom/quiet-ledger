@@ -516,6 +516,204 @@
   "backupFolderMissing": "The backup folder was not found. Connect the drive it is on, or choose the folder again.",
   "backupUnencryptedWarning": "Backups are not encrypted. Anyone who gets a backup file can read all your financial data.",
   "backupSavedUnencrypted": "Not encrypted: anyone who has the file can read it.",
+  "boardLabel": "Layout",
+  "boardAuto": "Auto",
+  "boardCustom": "Custom",
+  "boardFitsUpTo": "This window fits up to {count} columns. Your layout shows in full on wider screens.",
+  "boardFitsOne": "This window fits one column. Your layout shows in full on wider screens.",
+  "boardSplitFits": "This window fits up to {count} columns",
+  "boardArrangeNeeds": "Widen the window to two columns to arrange",
+  "boardArrangeHint": "Drag to move",
+  "boardReset": "Reset",
+  "boardRow": "Row {row}",
+  "boardRowOf": "Row {row} of {count}",
+  "boardRowMenu": "Row {row} options",
+  "boardNewRow": "New row",
+  "boardRowTooWide": "Needs a wider window",
+  "boardRowSplit": "Row layout",
+  "boardAddRow": "Add row",
+  "boardSplitOne": "One column",
+  "boardSplitHalves": "Two equal columns",
+  "boardSplitWideNarrow": "Wide and narrow",
+  "boardSplitNarrowWide": "Narrow and wide",
+  "boardSplitThirds": "Three columns",
+  "boardMoveRowUp": "Move row up",
+  "boardMoveRowDown": "Move row down",
+  "boardRemoveRow": "Remove row",
+  "boardMove": "Move “{widget}”",
+  "boardMoveUp": "Up",
+  "boardMoveDown": "Down",
+  "boardMoveLeft": "One column left",
+  "boardMoveRight": "One column right",
+  "boardRemoved": "{widget} removed",
+  "boardFlattened": "Layout set to {count} columns",
+  "boardReplaced": "Layout replaced",
+  "boardDiscarded": "Changes discarded",
+  "boardMoved": "{widget}: row {row}, column {column}, position {position} of {count}",
+  "boardMovedTo": "{widget} moved to position {position} of {count}",
+  "boardPickedUp": "{widget} picked up",
+  "boardDropped": "{widget} dropped",
+  "boardSheetSubtitle": "Changes apply right away.",
+  "boardNew": "New",
+  "boardRemovedHint": "Removed · its settings are kept",
+  "boardMoveUpCard": "Move “{widget}” up",
+  "boardMoveDownCard": "Move “{widget}” down",
+  "boardRemoveCard": "Remove “{widget}”",
+  "@boardFitsUpTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardSplitFits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardRow": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardRowOf": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardRowMenu": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardMove": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardRemoved": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardFlattened": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardMoved": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      },
+      "row": {
+        "type": "int"
+      },
+      "column": {
+        "type": "int"
+      },
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardMovedTo": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@boardPickedUp": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardDropped": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardMoveUpCard": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardMoveDownCard": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "@boardRemoveCard": {
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "boardOrderReplaced": "Your earlier order was replaced",
+  "boardDragRow": "Drag to move the row",
+  "boardRowPickedUp": "Row {row} picked up",
+  "@boardRowPickedUp": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "boardRowDropped": "Row {row} dropped",
+  "@boardRowDropped": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "boardRowMovedTo": "Row moved to position {position} of {count}",
+  "@boardRowMovedTo": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "budgetsTitle": "Budgets",
   "budgetsBudgeted": "Budgeted",
   "budgetsSpent": "Spent",
@@ -1542,66 +1740,22 @@
   },
   "dashLayoutMenu": "Dashboard layout",
   "dashLayoutMenuCustom": "Dashboard layout · Custom",
-  "dashLayoutLabel": "Layout",
-  "dashLayoutAuto": "Auto",
-  "dashLayoutCustom": "Custom",
   "dashLayoutAutoHint": "Quiet Ledger's arrangement, adapts to the window",
   "dashLayoutCustomHint": "Your arrangement, shared by your wider screens",
-  "dashLayoutFitsUpTo": "This window fits up to {count} columns. Your layout shows in full on wider screens.",
-  "dashLayoutFitsOne": "This window fits one column. Your layout shows in full on wider screens.",
-  "dashLayoutSplitFits": "This window fits up to {count} columns",
   "dashLayoutPhoneAutoHint": "Quiet Ledger's order",
   "dashLayoutPhoneCustomHint": "Your order, shared by your phones",
   "dashLayoutArrange": "Arrange widgets…",
-  "dashLayoutArrangeNeeds": "Widen the window to two columns to arrange",
   "dashLayoutEditMenu": "Edit dashboard…",
   "dashLayoutAddMenu": "Add widget…",
   "dashLayoutExpandAll": "Expand all",
   "dashLayoutCollapseAll": "Collapse all",
   "dashLayoutArrangeTitle": "Arrange widgets",
-  "dashLayoutArrangeHint": "Drag to move",
-  "dashLayoutReset": "Reset",
-  "dashLayoutRow": "Row {row}",
-  "dashLayoutRowOf": "Row {row} of {count}",
-  "dashLayoutRowMenu": "Row {row} options",
-  "dashLayoutNewRow": "New row",
-  "dashLayoutRowTooWide": "Needs a wider window",
-  "dashLayoutRowSplit": "Row layout",
-  "dashLayoutAddRow": "Add row",
-  "dashLayoutSplitOne": "One column",
-  "dashLayoutSplitHalves": "Two equal columns",
-  "dashLayoutSplitWideNarrow": "Wide and narrow",
-  "dashLayoutSplitNarrowWide": "Narrow and wide",
-  "dashLayoutSplitThirds": "Three columns",
-  "dashLayoutMoveRowUp": "Move row up",
-  "dashLayoutMoveRowDown": "Move row down",
-  "dashLayoutRemoveRow": "Remove row",
-  "dashLayoutMove": "Move “{widget}”",
-  "dashLayoutMoveUp": "Up",
-  "dashLayoutMoveDown": "Down",
-  "dashLayoutMoveLeft": "One column left",
-  "dashLayoutMoveRight": "One column right",
   "dashLayoutRemoveFromDashboard": "Remove from dashboard",
   "dashLayoutEmptyColumn": "Drag a widget here",
-  "dashLayoutRemoved": "{widget} removed",
-  "dashLayoutFlattened": "Layout set to {count} columns",
-  "dashLayoutReplaced": "Layout replaced",
-  "dashLayoutDiscarded": "Changes discarded",
   "dashLayoutResetDone": "Dashboard reset to default",
-  "dashLayoutMoved": "{widget}: row {row}, column {column}, position {position} of {count}",
-  "dashLayoutMovedTo": "{widget} moved to position {position} of {count}",
-  "dashLayoutPickedUp": "{widget} picked up",
-  "dashLayoutDropped": "{widget} dropped",
-  "dashLayoutSheetSubtitle": "Changes apply right away.",
   "dashLayoutNotOnDashboard": "Not on your dashboard",
-  "dashLayoutNew": "New",
-  "dashLayoutRemovedHint": "Removed · its settings are kept",
   "dashLayoutEmptyTitle": "Your dashboard is empty",
   "dashLayoutEmptyBody": "Add widgets to see your money at a glance.",
-  "dashLayoutHeroRow": "Shown at the top",
-  "dashLayoutMoveUpWidget": "Move “{widget}” up",
-  "dashLayoutMoveDownWidget": "Move “{widget}” down",
-  "dashLayoutRemoveWidget": "Remove “{widget}”",
   "dashLayoutDescnetWorth": "Total across your accounts over 12 months",
   "dashLayoutDescmonthSummary": "Income, expenses and savings rate this month",
   "dashLayoutDescbudgets": "How each budget is tracking this period",
@@ -1611,161 +1765,6 @@
   "dashLayoutDescgoals": "Progress towards your savings goals",
   "dashLayoutDesctopCategories": "Where your money went this period",
   "dashLayoutDescrecentTransactions": "Your latest entries",
-  "@dashLayoutFitsUpTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutSplitFits": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutRow": {
-    "placeholders": {
-      "row": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutRowOf": {
-    "placeholders": {
-      "row": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutRowMenu": {
-    "placeholders": {
-      "row": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutMove": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutRemoved": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutFlattened": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutMoved": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      },
-      "row": {
-        "type": "int"
-      },
-      "column": {
-        "type": "int"
-      },
-      "position": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutMovedTo": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      },
-      "position": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@dashLayoutPickedUp": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutDropped": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutMoveUpWidget": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutMoveDownWidget": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "@dashLayoutRemoveWidget": {
-    "placeholders": {
-      "widget": {
-        "type": "String"
-      }
-    }
-  },
-  "dashLayoutOrderReplaced": "Your earlier order was replaced",
-  "dashLayoutDragRow": "Drag to move the row",
-  "dashLayoutRowPickedUp": "Row {row} picked up",
-  "@dashLayoutRowPickedUp": {
-    "placeholders": {
-      "row": {
-        "type": "int"
-      }
-    }
-  },
-  "dashLayoutRowDropped": "Row {row} dropped",
-  "@dashLayoutRowDropped": {
-    "placeholders": {
-      "row": {
-        "type": "int"
-      }
-    }
-  },
-  "dashLayoutRowMovedTo": "Row moved to position {position} of {count}",
-  "@dashLayoutRowMovedTo": {
-    "placeholders": {
-      "position": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "exportTitle": "Export & backup",
   "exportTxnTitle": "Transactions as CSV",
   "exportTxnDesc": "Export transactions of a period and selected accounts, e.g. for Excel.",

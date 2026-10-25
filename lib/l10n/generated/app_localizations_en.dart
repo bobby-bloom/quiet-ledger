@@ -871,6 +871,193 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not encrypted: anyone who has the file can read it.';
 
   @override
+  String get boardLabel => 'Layout';
+
+  @override
+  String get boardAuto => 'Auto';
+
+  @override
+  String get boardCustom => 'Custom';
+
+  @override
+  String boardFitsUpTo(int count) {
+    return 'This window fits up to $count columns. Your layout shows in full on wider screens.';
+  }
+
+  @override
+  String get boardFitsOne =>
+      'This window fits one column. Your layout shows in full on wider screens.';
+
+  @override
+  String boardSplitFits(int count) {
+    return 'This window fits up to $count columns';
+  }
+
+  @override
+  String get boardArrangeNeeds => 'Widen the window to two columns to arrange';
+
+  @override
+  String get boardArrangeHint => 'Drag to move';
+
+  @override
+  String get boardReset => 'Reset';
+
+  @override
+  String boardRow(int row) {
+    return 'Row $row';
+  }
+
+  @override
+  String boardRowOf(int row, int count) {
+    return 'Row $row of $count';
+  }
+
+  @override
+  String boardRowMenu(int row) {
+    return 'Row $row options';
+  }
+
+  @override
+  String get boardNewRow => 'New row';
+
+  @override
+  String get boardRowTooWide => 'Needs a wider window';
+
+  @override
+  String get boardRowSplit => 'Row layout';
+
+  @override
+  String get boardAddRow => 'Add row';
+
+  @override
+  String get boardSplitOne => 'One column';
+
+  @override
+  String get boardSplitHalves => 'Two equal columns';
+
+  @override
+  String get boardSplitWideNarrow => 'Wide and narrow';
+
+  @override
+  String get boardSplitNarrowWide => 'Narrow and wide';
+
+  @override
+  String get boardSplitThirds => 'Three columns';
+
+  @override
+  String get boardMoveRowUp => 'Move row up';
+
+  @override
+  String get boardMoveRowDown => 'Move row down';
+
+  @override
+  String get boardRemoveRow => 'Remove row';
+
+  @override
+  String boardMove(String widget) {
+    return 'Move “$widget”';
+  }
+
+  @override
+  String get boardMoveUp => 'Up';
+
+  @override
+  String get boardMoveDown => 'Down';
+
+  @override
+  String get boardMoveLeft => 'One column left';
+
+  @override
+  String get boardMoveRight => 'One column right';
+
+  @override
+  String boardRemoved(String widget) {
+    return '$widget removed';
+  }
+
+  @override
+  String boardFlattened(int count) {
+    return 'Layout set to $count columns';
+  }
+
+  @override
+  String get boardReplaced => 'Layout replaced';
+
+  @override
+  String get boardDiscarded => 'Changes discarded';
+
+  @override
+  String boardMoved(
+    String widget,
+    int row,
+    int column,
+    int position,
+    int count,
+  ) {
+    return '$widget: row $row, column $column, position $position of $count';
+  }
+
+  @override
+  String boardMovedTo(String widget, int position, int count) {
+    return '$widget moved to position $position of $count';
+  }
+
+  @override
+  String boardPickedUp(String widget) {
+    return '$widget picked up';
+  }
+
+  @override
+  String boardDropped(String widget) {
+    return '$widget dropped';
+  }
+
+  @override
+  String get boardSheetSubtitle => 'Changes apply right away.';
+
+  @override
+  String get boardNew => 'New';
+
+  @override
+  String get boardRemovedHint => 'Removed · its settings are kept';
+
+  @override
+  String boardMoveUpCard(String widget) {
+    return 'Move “$widget” up';
+  }
+
+  @override
+  String boardMoveDownCard(String widget) {
+    return 'Move “$widget” down';
+  }
+
+  @override
+  String boardRemoveCard(String widget) {
+    return 'Remove “$widget”';
+  }
+
+  @override
+  String get boardOrderReplaced => 'Your earlier order was replaced';
+
+  @override
+  String get boardDragRow => 'Drag to move the row';
+
+  @override
+  String boardRowPickedUp(int row) {
+    return 'Row $row picked up';
+  }
+
+  @override
+  String boardRowDropped(int row) {
+    return 'Row $row dropped';
+  }
+
+  @override
+  String boardRowMovedTo(int position, int count) {
+    return 'Row moved to position $position of $count';
+  }
+
+  @override
   String get budgetsTitle => 'Budgets';
 
   @override
@@ -2218,35 +2405,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashLayoutMenuCustom => 'Dashboard layout · Custom';
 
   @override
-  String get dashLayoutLabel => 'Layout';
-
-  @override
-  String get dashLayoutAuto => 'Auto';
-
-  @override
-  String get dashLayoutCustom => 'Custom';
-
-  @override
   String get dashLayoutAutoHint =>
       'Quiet Ledger\'s arrangement, adapts to the window';
 
   @override
   String get dashLayoutCustomHint =>
       'Your arrangement, shared by your wider screens';
-
-  @override
-  String dashLayoutFitsUpTo(int count) {
-    return 'This window fits up to $count columns. Your layout shows in full on wider screens.';
-  }
-
-  @override
-  String get dashLayoutFitsOne =>
-      'This window fits one column. Your layout shows in full on wider screens.';
-
-  @override
-  String dashLayoutSplitFits(int count) {
-    return 'This window fits up to $count columns';
-  }
 
   @override
   String get dashLayoutPhoneAutoHint => 'Quiet Ledger\'s order';
@@ -2256,10 +2420,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashLayoutArrange => 'Arrange widgets…';
-
-  @override
-  String get dashLayoutArrangeNeeds =>
-      'Widen the window to two columns to arrange';
 
   @override
   String get dashLayoutEditMenu => 'Edit dashboard…';
@@ -2277,141 +2437,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashLayoutArrangeTitle => 'Arrange widgets';
 
   @override
-  String get dashLayoutArrangeHint => 'Drag to move';
-
-  @override
-  String get dashLayoutReset => 'Reset';
-
-  @override
-  String dashLayoutRow(int row) {
-    return 'Row $row';
-  }
-
-  @override
-  String dashLayoutRowOf(int row, int count) {
-    return 'Row $row of $count';
-  }
-
-  @override
-  String dashLayoutRowMenu(int row) {
-    return 'Row $row options';
-  }
-
-  @override
-  String get dashLayoutNewRow => 'New row';
-
-  @override
-  String get dashLayoutRowTooWide => 'Needs a wider window';
-
-  @override
-  String get dashLayoutRowSplit => 'Row layout';
-
-  @override
-  String get dashLayoutAddRow => 'Add row';
-
-  @override
-  String get dashLayoutSplitOne => 'One column';
-
-  @override
-  String get dashLayoutSplitHalves => 'Two equal columns';
-
-  @override
-  String get dashLayoutSplitWideNarrow => 'Wide and narrow';
-
-  @override
-  String get dashLayoutSplitNarrowWide => 'Narrow and wide';
-
-  @override
-  String get dashLayoutSplitThirds => 'Three columns';
-
-  @override
-  String get dashLayoutMoveRowUp => 'Move row up';
-
-  @override
-  String get dashLayoutMoveRowDown => 'Move row down';
-
-  @override
-  String get dashLayoutRemoveRow => 'Remove row';
-
-  @override
-  String dashLayoutMove(String widget) {
-    return 'Move “$widget”';
-  }
-
-  @override
-  String get dashLayoutMoveUp => 'Up';
-
-  @override
-  String get dashLayoutMoveDown => 'Down';
-
-  @override
-  String get dashLayoutMoveLeft => 'One column left';
-
-  @override
-  String get dashLayoutMoveRight => 'One column right';
-
-  @override
   String get dashLayoutRemoveFromDashboard => 'Remove from dashboard';
 
   @override
   String get dashLayoutEmptyColumn => 'Drag a widget here';
 
   @override
-  String dashLayoutRemoved(String widget) {
-    return '$widget removed';
-  }
-
-  @override
-  String dashLayoutFlattened(int count) {
-    return 'Layout set to $count columns';
-  }
-
-  @override
-  String get dashLayoutReplaced => 'Layout replaced';
-
-  @override
-  String get dashLayoutDiscarded => 'Changes discarded';
-
-  @override
   String get dashLayoutResetDone => 'Dashboard reset to default';
 
   @override
-  String dashLayoutMoved(
-    String widget,
-    int row,
-    int column,
-    int position,
-    int count,
-  ) {
-    return '$widget: row $row, column $column, position $position of $count';
-  }
-
-  @override
-  String dashLayoutMovedTo(String widget, int position, int count) {
-    return '$widget moved to position $position of $count';
-  }
-
-  @override
-  String dashLayoutPickedUp(String widget) {
-    return '$widget picked up';
-  }
-
-  @override
-  String dashLayoutDropped(String widget) {
-    return '$widget dropped';
-  }
-
-  @override
-  String get dashLayoutSheetSubtitle => 'Changes apply right away.';
-
-  @override
   String get dashLayoutNotOnDashboard => 'Not on your dashboard';
-
-  @override
-  String get dashLayoutNew => 'New';
-
-  @override
-  String get dashLayoutRemovedHint => 'Removed · its settings are kept';
 
   @override
   String get dashLayoutEmptyTitle => 'Your dashboard is empty';
@@ -2419,24 +2454,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dashLayoutEmptyBody =>
       'Add widgets to see your money at a glance.';
-
-  @override
-  String get dashLayoutHeroRow => 'Shown at the top';
-
-  @override
-  String dashLayoutMoveUpWidget(String widget) {
-    return 'Move “$widget” up';
-  }
-
-  @override
-  String dashLayoutMoveDownWidget(String widget) {
-    return 'Move “$widget” down';
-  }
-
-  @override
-  String dashLayoutRemoveWidget(String widget) {
-    return 'Remove “$widget”';
-  }
 
   @override
   String get dashLayoutDescnetWorth =>
@@ -2466,27 +2483,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashLayoutDescrecentTransactions => 'Your latest entries';
-
-  @override
-  String get dashLayoutOrderReplaced => 'Your earlier order was replaced';
-
-  @override
-  String get dashLayoutDragRow => 'Drag to move the row';
-
-  @override
-  String dashLayoutRowPickedUp(int row) {
-    return 'Row $row picked up';
-  }
-
-  @override
-  String dashLayoutRowDropped(int row) {
-    return 'Row $row dropped';
-  }
-
-  @override
-  String dashLayoutRowMovedTo(int position, int count) {
-    return 'Row moved to position $position of $count';
-  }
 
   @override
   String get exportTitle => 'Export & backup';

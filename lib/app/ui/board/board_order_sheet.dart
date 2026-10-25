@@ -6,42 +6,55 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
-import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
-import 'package:personal_finance/features/dashboard/presentation/card_expansion.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_menu.dart';
-import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
+import 'package:personal_finance/app/ui/board/board_actions.dart';
+import 'package:personal_finance/app/ui/board/board_labels.dart';
+import 'package:personal_finance/app/ui/board/board_menu.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
+import 'package:personal_finance/core/board/board_state.dart';
+import 'package:personal_finance/core/board/board_storage.dart';
 
-/// Opens the phone's dashboard editor (docs/DASHBOARD.md, Phone): the
-/// Layout choice Auto · Custom, one row per widget with a grip, ▲ ▼ and
-/// Remove, the widgets not on the dashboard with Add, and Done. Every
-/// change applies at once and the board behind follows; Auto is the way
-/// back. It is also the non-drag way to reorder (▲ ▼).
-Future<void> showPhoneEditor(BuildContext context) =>
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (_) => const PhoneEditorSheet(),
-    );
+/// Opens the one-column order of the board [def] (docs/BOARD.md, Phone):
+/// the Layout choice Auto · Custom, one row per card with a grip, ▲ ▼ and
+/// Remove, the cards not on the board with Add, and Done. Every change
+/// applies at once and the board behind follows; Auto is the way back. It
+/// is also the non-drag way to reorder (▲ ▼). [extras] adds the screen's
+/// own controls under the Layout choice, for the cards shown.
+Future<void> showBoardOrderSheet(
+  BuildContext context, {
+  required BoardDefinition def,
+  required BoardLabels labels,
+  Widget Function(List<String> shown)? extras,
+}) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  showDragHandle: true,
+  builder: (_) => BoardOrderSheet(def: def, labels: labels, extras: extras),
+);
 
-class PhoneEditorSheet extends ConsumerStatefulWidget {
-  const PhoneEditorSheet({super.key});
+class BoardOrderSheet extends ConsumerStatefulWidget {
+  const BoardOrderSheet({
+    required this.def,
+    required this.labels,
+    super.key,
+    this.extras,
+  });
+
+  final BoardDefinition def;
+  final BoardLabels labels;
+  final Widget Function(List<String> shown)? extras;
 
   @override
-  ConsumerState<PhoneEditorSheet> createState() => _PhoneEditorSheetState();
+  ConsumerState<BoardOrderSheet> createState() => _BoardOrderSheetState();
 }
 
-class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
-  static const _view = DashboardView.compact;
+class _BoardOrderSheetState extends ConsumerState<BoardOrderSheet> {
+  static const _view = BoardView.compact;
 
   /// The arrows of each row: focus stays on the pressed one, or moves to
   /// the other one when the widget reaches an end.
-  final _up = <DashboardWidgetType, FocusNode>{};
-  final _down = <DashboardWidgetType, FocusNode>{};
+  final _up = <String, FocusNode>{};
+  final _down = <String, FocusNode>{};
 
   @override
   void dispose() {
@@ -55,37 +68,37 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
   /// closes: the sheet covers the board's toasts, so it offers its own.
   List<String>? _replaced;
 
-  Future<void> _change(
-    DashboardViewState Function(DashboardViewState current) change,
-  ) => ref.read(dashboardLayoutRepositoryProvider).update(_view, change);
+  Future<void> _change(BoardState Function(BoardState current) change) =>
+      ref.read(boardRepositoryProvider).update(widget.def, _view, change);
 
-  /// Moves [type] to [position] among the widgets shown and saves the order
-  /// — from Auto, the default order with the move becomes the custom one,
-  /// and a custom order saved before can come back with Undo. Hidden
-  /// widgets keep their place.
-  Future<void> _move(DashboardWidgetType type, int position) async {
+  /// Moves [id] to [position] among the cards shown and saves the order —
+  /// from Auto, the default order with the move becomes the custom one, and
+  /// a custom order saved before can come back with Undo. Hidden cards keep
+  /// their place.
+  Future<void> _move(String id, int position) async {
     final l = context.l10n;
     final view = View.of(context);
     final direction = Directionality.of(context);
     List<String>? replaced;
     var count = 0;
     var to = -1;
-    final (_, after) = await ref.read(dashboardLayoutRepositoryProvider).update(
+    final (_, after) = await ref.read(boardRepositoryProvider).update(
+      widget.def,
       _view,
       (s) {
-        final shown = [for (final t in phoneOrder(s)) t.name];
-        final from = shown.indexOf(type.name);
+        final shown = shownOrder(s);
+        final from = shown.indexOf(id);
         to = position.clamp(0, shown.length - 1);
         count = shown.length;
         if (from < 0 || from == to) return s;
         if (s.mode == LayoutMode.auto && s.order != null) replaced = s.order;
-        // Normalized first: a type that shows on Auto without an entry
+        // Normalized first: a card that shows on Auto without an entry
         // stays shown on Custom.
         return s
             .normalized(_view)
             .copyWith(
               mode: LayoutMode.custom,
-              order: moveInOrder(placedPhoneOrder(s), shown, type.name, to),
+              order: moveInOrder(placedOrder(s), shown, id, to),
             );
       },
     );
@@ -98,7 +111,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
     unawaited(
       SemanticsService.sendAnnouncement(
         view,
-        l.dashLayoutMovedTo(widgetTypeLabel(l, type), to + 1, count),
+        l.boardMovedTo(widget.labels.cardName(id), to + 1, count),
         direction,
       ),
     );
@@ -107,13 +120,14 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final labels = widget.labels;
     final state =
-        ref.watch(dashboardViewProvider(_view)).value ??
-        DashboardViewState.empty;
-    final shown = phoneOrder(state);
+        ref.watch(boardStateProvider((widget.def, _view))).value ??
+        BoardState(widget.def);
+    final shown = shownOrder(state);
     final hidden = [
-      for (final t in DashboardWidgetType.values)
-        if (!state.shows(_view, t)) t,
+      for (final id in widget.def.cards)
+        if (!state.shows(_view, id)) id,
     ];
     final roomy = MediaQuery.textScalerOf(context).scale(1) < 1.5;
 
@@ -131,16 +145,17 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: Space.xxs,
                 children: [
-                  Text(l.dashEditTitle, style: context.text.titleLarge),
+                  Text(labels.orderTitle, style: context.text.titleLarge),
                   Text(
-                    l.dashLayoutSheetSubtitle,
+                    l.boardSheetSubtitle,
                     style: context.text.bodyMedium?.copyWith(
                       color: context.colors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: Space.sm),
-                  _PhoneLayoutChoice(
+                  _OrderLayoutChoice(
                     state: state,
+                    labels: labels,
                     onMode: (mode) => unawaited(
                       _change(
                         (s) =>
@@ -156,7 +171,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                       children: [
                         Expanded(
                           child: Text(
-                            l.dashLayoutOrderReplaced,
+                            l.boardOrderReplaced,
                             style: context.text.bodySmall,
                           ),
                         ),
@@ -178,7 +193,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                         ),
                       ],
                     ),
-                  _FoldAll(types: shown),
+                  ?widget.extras?.call(shown),
                 ],
               ),
             ),
@@ -188,11 +203,11 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
             onReorderItem: (from, to) => unawaited(_move(shown[from], to)),
             itemBuilder: (context, i) {
               final t = shown[i];
-              final name = widgetName(ref, l, t, state);
+              final name = labels.cardName(t);
               final arrows = [
                 IconButton(
                   focusNode: _up.putIfAbsent(t, FocusNode.new),
-                  tooltip: l.dashLayoutMoveUpWidget(name),
+                  tooltip: l.boardMoveUpCard(name),
                   icon: const Icon(Icons.arrow_upward),
                   onPressed: i == 0
                       ? null
@@ -203,7 +218,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                 ),
                 IconButton(
                   focusNode: _down.putIfAbsent(t, FocusNode.new),
-                  tooltip: l.dashLayoutMoveDownWidget(name),
+                  tooltip: l.boardMoveDownCard(name),
                   icon: const Icon(Icons.arrow_downward),
                   onPressed: i == shown.length - 1
                       ? null
@@ -215,7 +230,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                         },
                 ),
                 IconButton(
-                  tooltip: l.dashLayoutRemoveWidget(name),
+                  tooltip: l.boardRemoveCard(name),
                   icon: const Icon(Icons.remove_circle_outline),
                   onPressed: () => unawaited(
                     _change((s) => s.withVisible(_view, t, visible: false)),
@@ -240,7 +255,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                         ),
                       ),
                       Icon(
-                        widgetIcon(t),
+                        labels.cardIcon(t),
                         color: context.colors.onSurfaceVariant,
                       ),
                       const SizedBox(width: Space.sm),
@@ -282,7 +297,7 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
                   Space.xxs,
                 ),
                 child: Text(
-                  l.dashLayoutNotOnDashboard,
+                  labels.notOnBoard,
                   style: context.text.labelLarge?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
@@ -293,17 +308,18 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
             children: [
               for (final t in hidden)
                 ListTile(
-                  leading: Icon(widgetIcon(t)),
+                  leading: Icon(labels.cardIcon(t)),
                   title: Row(
                     spacing: Space.xs,
                     children: [
-                      Flexible(child: Text(widgetTypeLabel(l, t))),
+                      Flexible(child: Text(labels.cardTitle(t))),
                       if (state.isNew(_view, t)) const NewBadge(),
                     ],
                   ),
-                  subtitle: Text(widgetDescription(l, t)),
+                  subtitle: Text(labels.cardDescription(t)),
                   trailing: TextButton.icon(
-                    onPressed: () => unawaited(addWidget(ref, _view, t)),
+                    onPressed: () =>
+                        unawaited(addCard(ref, widget.def, _view, t)),
                     icon: const Icon(Icons.add),
                     label: Text(l.commonAdd),
                   ),
@@ -328,12 +344,17 @@ class _PhoneEditorSheetState extends ConsumerState<PhoneEditorSheet> {
   }
 }
 
-/// Auto · Custom for the phone order (Custom only while one is saved) and
-/// the line saying whose order shows.
-class _PhoneLayoutChoice extends StatelessWidget {
-  const _PhoneLayoutChoice({required this.state, required this.onMode});
+/// Auto · Custom for the one-column order (Custom only while one is
+/// saved) and the line saying whose order shows.
+class _OrderLayoutChoice extends StatelessWidget {
+  const _OrderLayoutChoice({
+    required this.state,
+    required this.labels,
+    required this.onMode,
+  });
 
-  final DashboardViewState state;
+  final BoardState state;
+  final BoardLabels labels;
   final ValueChanged<LayoutMode> onMode;
 
   @override
@@ -345,19 +366,16 @@ class _PhoneLayoutChoice extends StatelessWidget {
       spacing: Space.xxs,
       children: [
         ExcludeSemantics(
-          child: Text(l.dashLayoutLabel, style: context.text.labelLarge),
+          child: Text(l.boardLabel, style: context.text.labelLarge),
         ),
         SegmentedButton<LayoutMode>(
           showSelectedIcon: false,
           segments: [
-            ButtonSegment(
-              value: LayoutMode.auto,
-              label: Text(l.dashLayoutAuto),
-            ),
+            ButtonSegment(value: LayoutMode.auto, label: Text(l.boardAuto)),
             if (state.order != null)
               ButtonSegment(
                 value: LayoutMode.custom,
-                label: Text(l.dashLayoutCustom),
+                label: Text(l.boardCustom),
               ),
           ],
           selected: {mode},
@@ -365,50 +383,11 @@ class _PhoneLayoutChoice extends StatelessWidget {
         ),
         Text(
           mode == LayoutMode.custom
-              ? l.dashLayoutPhoneCustomHint
-              : l.dashLayoutPhoneAutoHint,
+              ? labels.orderCustomHint
+              : labels.orderAutoHint,
           style: context.text.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Expand all and Collapse all for the phone's cards that fold (all but
-/// Net worth, the hero); each disabled when it would change nothing.
-class _FoldAll extends ConsumerWidget {
-  const _FoldAll({required this.types});
-
-  final List<DashboardWidgetType> types;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final expansion = ref.watch(cardExpansionProvider);
-    final foldable = [
-      for (final t in types)
-        if (t != DashboardWidgetType.netWorth) t,
-    ];
-    void setAll(bool open) =>
-        ref.read(cardExpansionProvider.notifier).setAll(foldable, open);
-    return Wrap(
-      spacing: Space.xs,
-      children: [
-        TextButton.icon(
-          onPressed: expansion.wouldChange(foldable, true)
-              ? () => setAll(true)
-              : null,
-          icon: const Icon(Icons.unfold_more),
-          label: Text(l.dashLayoutExpandAll),
-        ),
-        TextButton.icon(
-          onPressed: expansion.wouldChange(foldable, false)
-              ? () => setAll(false)
-              : null,
-          icon: const Icon(Icons.unfold_less),
-          label: Text(l.dashLayoutCollapseAll),
         ),
       ],
     );

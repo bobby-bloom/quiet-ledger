@@ -2,29 +2,29 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
-/// The height of a widget in arrange mode, and so of every slot standing in
+/// The height of a card in arrange mode, and so of every slot standing in
 /// for one: a 48 dp ⋮ button with a little air.
 const double arrangeCardHeight = 52;
 
 /// The name of [split]: the split picker's tooltips and screen-reader names.
 String splitName(AppLocalizations l, RowSplit split) => switch (split.weights) {
-  [1] => l.dashLayoutSplitOne,
-  [1, 1] => l.dashLayoutSplitHalves,
-  [2, 1] => l.dashLayoutSplitWideNarrow,
-  [1, 2] => l.dashLayoutSplitNarrowWide,
-  [1, 1, 1] => l.dashLayoutSplitThirds,
+  [1] => l.boardSplitOne,
+  [1, 1] => l.boardSplitHalves,
+  [2, 1] => l.boardSplitWideNarrow,
+  [1, 2] => l.boardSplitNarrowWide,
+  [1, 1, 1] => l.boardSplitThirds,
   final w => w.join(':'),
 };
 
 /// The three faces of a drop target in arrange mode.
 enum DropSlotKind {
-  /// Where the dragged widget would land: a dashed, tinted slot.
+  /// Where the dragged card would land: a dashed, tinted slot.
   insertion,
 
-  /// A column without widgets: a dashed outline, "Drag a widget here".
+  /// A column without cards: a dashed outline, "Drag a card here".
   emptyColumn,
 
   /// The gap between two rows, hovered: a full-width slot previewing a row
@@ -32,7 +32,7 @@ enum DropSlotKind {
   newRow,
 }
 
-/// A widget-sized placeholder in arrange mode. Not focusable: the result of
+/// A card-sized placeholder in arrange mode. Not focusable: the result of
 /// a drop is announced instead.
 class DropSlot extends StatelessWidget {
   const DropSlot({required this.kind, super.key, this.label});

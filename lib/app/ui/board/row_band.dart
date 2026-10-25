@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
-import 'package:personal_finance/features/dashboard/domain/arrange.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/drop_slot.dart';
+import 'package:personal_finance/app/ui/board/drop_slot.dart';
+import 'package:personal_finance/core/board/arrange.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 import 'package:personal_finance/l10n/generated/app_localizations.dart';
 
 /// A row in arrange mode: a dashed band around its columns ([child]) with a
@@ -52,7 +52,7 @@ class RowBand extends StatelessWidget {
   final Widget child;
 
   /// Makes the toolbar's grip and label drag the row (the board's
-  /// draggable); the columns stay where widgets are dragged.
+  /// draggable); the columns stay where cards are dragged.
   final Widget Function(Widget handle) dragHandle;
 
   /// Inside the band, between its dashed outline and the columns.
@@ -72,12 +72,11 @@ class RowBand extends StatelessWidget {
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      label:
-          '${l.dashLayoutRowOf(index + 1, count)}, ${splitName(l, row.split)}',
+      label: '${l.boardRowOf(index + 1, count)}, ${splitName(l, row.split)}',
       // The same moves as the row menu, for a screen reader.
       customSemanticsActions: {
-        CustomSemanticsAction(label: l.dashLayoutMoveRowUp): ?onMoveUp,
-        CustomSemanticsAction(label: l.dashLayoutMoveRowDown): ?onMoveDown,
+        CustomSemanticsAction(label: l.boardMoveRowUp): ?onMoveUp,
+        CustomSemanticsAction(label: l.boardMoveRowDown): ?onMoveDown,
       },
       child: DashedOutline(
         color: theme.colorScheme.outline,
@@ -102,7 +101,7 @@ class RowBand extends StatelessWidget {
                             children: [
                               ExcludeSemantics(
                                 child: Tooltip(
-                                  message: l.dashLayoutDragRow,
+                                  message: l.boardDragRow,
                                   child: Icon(
                                     Icons.drag_indicator,
                                     size: 20,
@@ -118,9 +117,7 @@ class RowBand extends StatelessWidget {
                                     // The band's label says it in full.
                                     ExcludeSemantics(
                                       child: Text(
-                                        l
-                                            .dashLayoutRow(index + 1)
-                                            .toUpperCase(),
+                                        l.boardRow(index + 1).toUpperCase(),
                                         style: theme.textTheme.labelSmall
                                             ?.copyWith(
                                               color: muted,
@@ -130,7 +127,7 @@ class RowBand extends StatelessWidget {
                                     ),
                                     if (isTooWide)
                                       Text(
-                                        l.dashLayoutRowTooWide,
+                                        l.boardRowTooWide,
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(color: muted),
                                       ),
@@ -192,23 +189,23 @@ class RowMenu extends StatelessWidget {
         MenuItemButton(
           leadingIcon: const Icon(Icons.arrow_upward),
           onPressed: onMoveUp,
-          child: Text(l.dashLayoutMoveRowUp),
+          child: Text(l.boardMoveRowUp),
         ),
         MenuItemButton(
           leadingIcon: const Icon(Icons.arrow_downward),
           onPressed: onMoveDown,
-          child: Text(l.dashLayoutMoveRowDown),
+          child: Text(l.boardMoveRowDown),
         ),
         const Divider(),
         MenuItemButton(
           leadingIcon: const Icon(Icons.remove),
           onPressed: onRemove,
-          child: Text(l.dashLayoutRemoveRow),
+          child: Text(l.boardRemoveRow),
         ),
       ],
       builder: (context, controller, _) => IconButton(
         focusNode: focusNode,
-        tooltip: l.dashLayoutRowMenu(index + 1),
+        tooltip: l.boardRowMenu(index + 1),
         icon: const Icon(Icons.more_vert, size: 20),
         style: IconButton.styleFrom(
           minimumSize: const Size.square(RowBand.toolbarHeight),
@@ -268,11 +265,11 @@ class _SplitPickerState extends State<SplitPicker> {
       }),
       menuChildren: [_grid(context)],
       builder: (context, controller, _) => Tooltip(
-        message: l.dashLayoutRowSplit,
+        message: l.boardRowSplit,
         excludeFromSemantics: true,
         child: MergeSemantics(
           child: Semantics(
-            label: l.dashLayoutRowSplit,
+            label: l.boardRowSplit,
             value: splitName(l, widget.split),
             child: OutlinedButton(
               onPressed: () =>
@@ -320,7 +317,7 @@ class _SplitPickerState extends State<SplitPicker> {
       isCurrent: split == widget.split,
       fitHint: splitFits(split, widget.fits)
           ? null
-          : l.dashLayoutSplitFits(widget.fits),
+          : l.boardSplitFits(widget.fits),
       focusNode: split == focused ? _openFocus : null,
       onPressed: () {
         _menu.close();
@@ -331,7 +328,7 @@ class _SplitPickerState extends State<SplitPicker> {
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      label: l.dashLayoutRowSplit,
+      label: l.boardRowSplit,
       child: SizedBox(
         width: 252,
         child: Padding(
@@ -344,7 +341,7 @@ class _SplitPickerState extends State<SplitPicker> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: Space.xxs),
                   child: Text(
-                    l.dashLayoutRowSplit,
+                    l.boardRowSplit,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -383,7 +380,7 @@ class _SplitPickerState extends State<SplitPicker> {
                       ),
                       Expanded(
                         child: Text(
-                          l.dashLayoutSplitFits(widget.fits),
+                          l.boardSplitFits(widget.fits),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

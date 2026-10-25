@@ -1,25 +1,25 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:personal_finance/app/theme/theme_ext.dart';
 import 'package:personal_finance/app/theme/tokens.dart';
 import 'package:personal_finance/app/ui/amount_text.dart';
+import 'package:personal_finance/app/ui/board/board_actions.dart';
+import 'package:personal_finance/app/ui/board/board_labels.dart';
+import 'package:personal_finance/app/ui/board/board_menu.dart';
+import 'package:personal_finance/app/ui/board/board_order_sheet.dart';
+import 'package:personal_finance/app/ui/board/card_board.dart';
 import 'package:personal_finance/app/ui/breakpoints.dart';
 import 'package:personal_finance/app/ui/formatters.dart';
+import 'package:personal_finance/core/board/board_layout.dart';
 import 'package:personal_finance/core/calendar/budget_period.dart';
 import 'package:personal_finance/core/settings/app_settings.dart';
 import 'package:personal_finance/core/settings/settings_controller.dart';
 import 'package:personal_finance/features/dashboard/data/dashboard_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/board_layout.dart';
-import 'package:personal_finance/features/dashboard/domain/dashboard_view.dart';
-import 'package:personal_finance/features/dashboard/presentation/board/arrange_board.dart';
-import 'package:personal_finance/features/dashboard/presentation/dashboard_layout_actions.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_menu.dart';
 import 'package:personal_finance/features/dashboard/presentation/dashboard_period.dart';
-import 'package:personal_finance/features/dashboard/presentation/phone_editor_sheet.dart';
 import 'package:personal_finance/features/dashboard/presentation/widget_registry.dart';
 import 'package:personal_finance/features/dashboard/presentation/widgets/dash_card.dart';
 import 'package:personal_finance/features/export/presentation/backup_health_banner.dart';
@@ -35,122 +35,49 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  /// The layout button: focus comes back to it when arrange mode ends.
-  final _layoutButton = FocusNode(debugLabel: 'dashboard layout');
-
-  /// Whether an arrange session waits for a window wide enough (paused).
-  var _isPaused = false;
-
-  @override
-  void dispose() {
-    _layoutButton.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = WindowSize.of(context);
-    final view = size.isCompact
-        ? DashboardView.compact
-        : DashboardView.expanded;
-    final saved =
-        ref.watch(dashboardViewProvider(view)).value ??
-        DashboardViewState.empty;
-    final session = ref.watch(arrangeSessionProvider);
-    ref.listen(arrangeSessionProvider, (previous, next) {
-      if (previous != null && next == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _layoutButton.requestFocus();
-        });
-      }
-    });
-    // A paused session whose saved layout changed meanwhile (a Layout pick,
-    // an undo, another device) would resume on a stale base: it goes.
-    ref.listen(dashboardViewProvider(DashboardView.expanded), (_, next) {
-      final s = ref.read(arrangeSessionProvider);
-      final value = next.value;
-      if (s != null && _isPaused && value != null && value != s.before) {
-        ref.read(arrangeSessionProvider.notifier).end();
-      }
-    });
     final gutter = size.isCompact ? Space.phoneGutter : Space.xxl;
+    final view = size.isCompact ? BoardView.compact : BoardView.expanded;
+    final labels = dashboardLabels(
+      context,
+      ref,
+      ref.watch(dashboardViewProvider(view)).value ?? emptyDashboard,
+    );
 
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth - 2 * gutter;
-            final Widget header;
-            final Widget board;
-            if (view == DashboardView.compact) {
-              _isPaused = session != null;
-              header = _PhoneHeader(
-                saved: saved,
-                layoutButtonFocus: _layoutButton,
-              );
-              final order = phoneOrder(saved);
-              board = order.isEmpty
-                  ? const _EmptyDashboard(view: DashboardView.compact)
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 10,
-                      children: [
-                        for (final t in order)
-                          KeyedSubtree(
-                            key: ValueKey(t),
-                            child: _card(context, view, saved, null, t),
-                          ),
-                      ],
-                    );
-            } else {
-              final layout = wideLayout(saved, fittingColumns(width));
-              final arranging = session != null && layout.canArrange;
-              _isPaused = session != null && !layout.canArrange;
-              final l = context.l10n;
-              String title(String id) => widgetName(
-                ref,
-                l,
-                DashboardWidgetType.values.byName(id),
-                session?.working ?? saved,
-              );
-              IconData icon(String id) =>
-                  widgetIcon(DashboardWidgetType.values.byName(id));
-              header = arranging
-                  ? _ArrangeBar(session: session, fits: layout.fits)
-                  : _WideHeader(
-                      saved: saved,
-                      layout: layout,
-                      layoutButtonFocus: _layoutButton,
-                    );
-              board = arranging
-                  ? ArrangeBoard(
-                      rows: session.rows,
-                      present: presentIds(
-                        session.working,
-                        DashboardView.expanded,
-                      ).toSet(),
-                      fits: layout.fits,
-                      title: title,
-                      icon: icon,
-                      onChanged: ref
-                          .read(arrangeSessionProvider.notifier)
-                          .update,
-                      onRemove: ref
-                          .read(arrangeSessionProvider.notifier)
-                          .remove,
-                    )
-                  : layout.rows.isEmpty
-                  ? const _EmptyDashboard(view: DashboardView.expanded)
-                  : _WideBoard(
-                      layout: layout,
-                      width: width,
-                      card: (t) => _card(context, view, saved, layout, t),
-                    );
-            }
-            return CustomScrollView(
+          builder: (context, constraints) => CardBoard(
+            def: dashboardBoard,
+            labels: labels,
+            width: constraints.maxWidth - 2 * gutter,
+            card: (context, id, scene) => _card(
+              context,
+              labels,
+              scene,
+              DashboardWidgetType.values.byName(id),
+            ),
+            empty: (context, scene) =>
+                _EmptyDashboard(view: scene.view, labels: labels),
+            builder: (context, scene, arrangeBar, board) => CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(child: header),
+                SliverToBoxAdapter(
+                  child:
+                      arrangeBar ??
+                      (scene.view == BoardView.compact
+                          ? _PhoneHeader(
+                              saved: scene.saved,
+                              layoutButtonFocus: scene.layoutButtonFocus,
+                            )
+                          : _WideHeader(
+                              saved: scene.saved,
+                              layout: scene.layout!,
+                              layoutButtonFocus: scene.layoutButtonFocus,
+                            )),
+                ),
                 SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: gutter),
                   sliver: const SliverToBoxAdapter(child: BackupHealthBanner()),
@@ -160,8 +87,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   sliver: SliverToBoxAdapter(child: board),
                 ),
               ],
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
@@ -172,122 +99,66 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   /// fit two columns, Edit dashboard… on phones.
   Widget _card(
     BuildContext context,
-    DashboardView view,
-    DashboardViewState saved,
-    BoardLayout? layout,
+    BoardLabels labels,
+    BoardScene scene,
     DashboardWidgetType type,
   ) {
     final l = context.l10n;
-    final item = DashboardItem(type, options: saved.optionsOf(type));
+    final view = scene.view;
+    final saved = scene.saved;
+    final layout = scene.layout;
+    final item = DashboardItem(type, options: saved.optionsOf(type.name));
     final options = [
       ...widgetOptions(context, ref, item, (updated) {
-        unawaited(setWidgetOptions(ref, view, type, updated.options));
+        unawaited(
+          setCardOptions(ref, dashboardBoard, view, type.name, updated.options),
+        );
       }),
       DashOption(
         l.dashRemove,
         Icons.remove_circle_outline,
-        () => unawaited(removeWidget(context, ref, view, type)),
+        () => unawaited(
+          removeCard(context, ref, dashboardBoard, labels, view, type.name),
+        ),
       ),
       if (layout != null && layout.canArrange)
         DashOption(
           l.dashLayoutArrange,
           Icons.drag_indicator,
           () => ref
-              .read(arrangeSessionProvider.notifier)
+              .read(arrangeSessionProvider(dashboardBoard).notifier)
               .enter(saved, layout.placed),
         )
-      else if (view == DashboardView.compact)
+      else if (view == BoardView.compact)
         DashOption(
           l.dashLayoutEditMenu,
           Icons.dashboard_customize_outlined,
-          () => unawaited(showPhoneEditor(context)),
+          () => unawaited(
+            showBoardOrderSheet(context, def: dashboardBoard, labels: labels),
+          ),
         ),
     ];
     return buildDashboardWidget(
       context,
       item,
-      compact: view == DashboardView.compact,
+      compact: view == BoardView.compact,
       options: options,
-    );
-  }
-}
-
-/// The wide board: [layout]'s rows top to bottom, each split into columns
-/// as wide as its weights make them in [width], widgets stacked in each
-/// column. A widget keeps its state wherever it moves.
-class _WideBoard extends StatefulWidget {
-  const _WideBoard({
-    required this.layout,
-    required this.width,
-    required this.card,
-  });
-
-  final BoardLayout layout;
-  final double width;
-  final Widget Function(DashboardWidgetType type) card;
-
-  @override
-  State<_WideBoard> createState() => _WideBoardState();
-}
-
-class _WideBoardState extends State<_WideBoard> {
-  final _keys = <String, GlobalKey>{};
-
-  @override
-  Widget build(BuildContext context) {
-    final shown = widget.layout.order.toSet();
-    _keys.removeWhere((id, _) => !shown.contains(id));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: boardGap,
-      children: [
-        for (final row in widget.layout.rows)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: boardGap,
-            children: [
-              for (final (c, width) in columnWidths(
-                row.split,
-                widget.width,
-              ).indexed)
-                SizedBox(
-                  width: width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: boardGap,
-                    children: [
-                      for (final id in row.columns[c])
-                        KeyedSubtree(
-                          key: _keys.putIfAbsent(
-                            id,
-                            () => GlobalKey(debugLabel: id),
-                          ),
-                          child: widget.card(
-                            DashboardWidgetType.values.byName(id),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-      ],
     );
   }
 }
 
 /// No widget shows: Add widget, or Reset to default (with Undo).
 class _EmptyDashboard extends ConsumerWidget {
-  const _EmptyDashboard({required this.view});
+  const _EmptyDashboard({required this.view, required this.labels});
 
-  final DashboardView view;
+  final BoardView view;
+  final BoardLabels labels;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final state =
-        ref.watch(dashboardViewProvider(view)).value ??
-        DashboardViewState.empty;
+        ref.watch(dashboardViewProvider(view)).value ?? emptyDashboard;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.xxxl),
       child: Column(
@@ -313,139 +184,27 @@ class _EmptyDashboard extends ConsumerWidget {
             children: [
               FilledButton.tonalIcon(
                 onPressed: () => unawaited(
-                  showAddWidget(
+                  showAddCards(
                     context,
+                    labels: labels,
                     view: view,
                     state: state,
-                    onAdd: (t) => unawaited(addWidget(ref, view, t)),
+                    onAdd: (id) =>
+                        unawaited(addCard(ref, dashboardBoard, view, id)),
                   ),
                 ),
                 icon: const Icon(Icons.add),
                 label: Text(l.dashAddWidget),
               ),
               TextButton(
-                onPressed: () => unawaited(resetToDefault(context, ref, view)),
+                onPressed: () => unawaited(
+                  resetToDefault(context, ref, dashboardBoard, labels, view),
+                ),
                 child: Text(l.dashResetLayout),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// The bar in place of the header while arranging: "Arrange widgets · Drag
-/// to move", Add widget, Reset (the default rows inside the session;
-/// disabled while they show), Cancel and Done.
-class _ArrangeBar extends ConsumerWidget {
-  const _ArrangeBar({required this.session, required this.fits});
-
-  final ArrangeSession session;
-  final int fits;
-
-  /// The bar's width, at 1× text, from which the hint and the labels of
-  /// Add widget and Reset show.
-  static const double _roomyWidth = 900;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final notifier = ref.read(arrangeSessionProvider.notifier);
-    final present = presentIds(session.working, DashboardView.expanded);
-    final defaults = wideLayout(
-      session.working.copyWith(mode: LayoutMode.auto),
-      fits,
-    ).placed;
-    final isDefault = listEquals(
-      visibleRows(session.rows, present),
-      visibleRows(defaults, present),
-    );
-    void addWidget() => unawaited(
-      showAddWidget(
-        context,
-        view: DashboardView.expanded,
-        state: session.working,
-        onAdd: (t) => notifier.add(t, fits),
-      ),
-    );
-    final onReset = isDefault ? null : () => notifier.reset(fits);
-    return Container(
-      color: context.colors.surfaceContainerHigh,
-      padding: const EdgeInsets.fromLTRB(32, 14, 28, 14),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Below this width at the text scale the hint goes and Add widget
-          // and Reset keep only their icons; whatever still does not fit
-          // wraps onto a second line rather than overflow.
-          final roomy =
-              constraints.maxWidth >=
-              MediaQuery.textScalerOf(context).scale(_roomyWidth);
-          return Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.xs,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            alignment: WrapAlignment.spaceBetween,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-                child: Text.rich(
-                  TextSpan(
-                    text: l.dashLayoutArrangeTitle,
-                    style: context.text.titleLarge,
-                    children: [
-                      if (roomy)
-                        TextSpan(
-                          text: '  ${l.dashLayoutArrangeHint}',
-                          style: context.text.bodyMedium?.copyWith(
-                            color: context.colors.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              Wrap(
-                spacing: Space.xs,
-                runSpacing: Space.xs,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  if (roomy) ...[
-                    TextButton.icon(
-                      onPressed: addWidget,
-                      icon: const Icon(Icons.add),
-                      label: Text(l.dashAddWidget),
-                    ),
-                    TextButton.icon(
-                      onPressed: onReset,
-                      icon: const Icon(Icons.restart_alt),
-                      label: Text(l.dashLayoutReset),
-                    ),
-                  ] else ...[
-                    IconButton(
-                      tooltip: l.dashAddWidget,
-                      onPressed: addWidget,
-                      icon: const Icon(Icons.add),
-                    ),
-                    IconButton(
-                      tooltip: l.dashLayoutReset,
-                      onPressed: onReset,
-                      icon: const Icon(Icons.restart_alt),
-                    ),
-                  ],
-                  OutlinedButton(
-                    onPressed: () => cancelArrange(context, ref),
-                    child: Text(l.commonCancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => unawaited(finishArrange(context, ref)),
-                    child: Text(l.commonDone),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
       ),
     );
   }
@@ -525,7 +284,7 @@ class _PeriodButton extends ConsumerWidget {
 class _PhoneHeader extends ConsumerWidget {
   const _PhoneHeader({required this.saved, required this.layoutButtonFocus});
 
-  final DashboardViewState saved;
+  final BoardState saved;
   final FocusNode layoutButtonFocus;
 
   @override
@@ -563,7 +322,7 @@ class _PhoneHeader extends ConsumerWidget {
               onPressed: () => context.push('/reports'),
             ),
             DashboardLayoutButton(
-              view: DashboardView.compact,
+              view: BoardView.compact,
               saved: saved,
               layout: null,
               focusNode: layoutButtonFocus,
@@ -582,7 +341,7 @@ class _WideHeader extends ConsumerWidget {
     required this.layoutButtonFocus,
   });
 
-  final DashboardViewState saved;
+  final BoardState saved;
   final BoardLayout layout;
   final FocusNode layoutButtonFocus;
 
@@ -648,7 +407,7 @@ class _WideHeader extends ConsumerWidget {
                     ref.read(privacyModeProvider.notifier).toggle(),
               ),
               DashboardLayoutButton(
-                view: DashboardView.expanded,
+                view: BoardView.expanded,
                 saved: saved,
                 layout: layout,
                 focusNode: layoutButtonFocus,
